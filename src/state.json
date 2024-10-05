@@ -1,0 +1,71 @@
+{
+   "defaultRules": [
+      {
+         "name": "おみくじ",
+         "modes": "none",
+         "modeSelect": [
+            "none"
+         ],
+         "switch": 1,
+         "matchExact": [
+            "🥠"
+         ],
+         "matchStartsWith": [
+            "おみくじ",
+            "御神籤",
+            "omikuji"
+         ],
+         "matchIncludes": [
+            "【おみくじ】"
+         ]
+      }
+   ],
+   "rules": [
+      {
+         "name": "おみくじ",
+         "modes": "none",
+         "modeSelect": [
+            "none"
+         ],
+         "switch": 1,
+         "matchExact": [
+            "🥠"
+         ],
+         "matchStartsWith": [
+            "おみくじ",
+            "御神籤",
+            "omikuji"
+         ],
+         "matchIncludes": [
+            "【おみくじ】"
+         ]
+      }
+   ],
+   "botMessage": {
+      "omikuji": [
+         {
+            "weight": 18,
+            "threshold": {
+               "type": "none",
+               "value": 1000,
+               "loop": true,
+               "comparison": -1
+            },
+            "message": [
+               {
+                  "botKey": 0,
+                  "iconKey": "joy02",
+                  "delaySeconds": 1,
+                  "content": "<<user>>さんの運勢は【大吉】<<random1>>"
+               }
+            ],
+            "party": [
+               {
+                  "delaySeconds": 1,
+                  "content": "!レベルアップ"
+               }
+            ]
+         }
+      ]
+   }
+}
