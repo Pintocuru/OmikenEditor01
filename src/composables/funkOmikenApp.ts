@@ -35,13 +35,15 @@ export function useDeleteItem(state: DefaultState) {
   };
 
   const confirmDelete = () => {
-    const { type, index } = deleteTarget.value;
-    if (type === 'rule') {
-      state.rules.splice(index, 1);
-    } else if (type === 'omikuji') {
-      state.botMessage.omikuji.splice(index, 1);
-    } else if (type === 'random') {
-      state.botMessage.random.splice(index, 1);
+    if (deleteTarget.value) { 
+      const { type, index } = deleteTarget.value;
+      if (type === 'rule') {
+        state.rules.splice(index, 1);
+      } else if (type === 'omikuji') {
+        state.botMessage.omikuji.splice(index, 1);
+      } else if (type === 'random') {
+        state.botMessage.random.splice(index, 1);
+      }
     }
     closeDeleteDialog();
   };

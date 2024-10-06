@@ -77,7 +77,8 @@ watch(() => props.selectedOmikuji, (newValue) => {
 }, { immediate: true, deep: true });
 
 watch(omikuji, (newValue) => {
-  if (newValue) {
+  // 変更があった場合のみ emit を実行
+  if (newValue && JSON.stringify(newValue) !== JSON.stringify(props.selectedOmikuji)) {
     emit('update:omikuji', newValue);
   }
 }, { deep: true });

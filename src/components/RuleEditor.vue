@@ -48,7 +48,8 @@ watch(() => props.selectedRule, (newValue) => {
 }, { immediate: true, deep: true });
 
 watch(rule, (newValue) => {
-  if (newValue) {
+  // 変更があった場合のみ emit を実行
+  if (newValue && JSON.stringify(newValue) !== JSON.stringify(props.selectedRule)) {
     emit('update:rule', newValue);
   }
 }, { deep: true });

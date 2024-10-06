@@ -82,7 +82,8 @@ const removeRandomItem = (index: number) => {
 };
 
 watch(randomItems, (newValue) => {
-  if (newValue) {
+  // 変更があった場合のみ emit を実行
+  if (newValue && JSON.stringify(newValue) !== JSON.stringify(props.selectedRandomItems)) {
     emit('update:randomItems', newValue);
   }
 }, { deep: true });
