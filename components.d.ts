@@ -7,6 +7,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    DeleteConfirmDialog: typeof import('./src/components/DeleteConfirmDialog.vue')['default']
     NavigationList: typeof import('./src/components/NavigationList.vue')['default']
     NaviListSection: typeof import('./src/components/Navi-ListSection.vue')['default']
     OmikujiEditor: typeof import('./src/components/OmikujiEditor.vue')['default']

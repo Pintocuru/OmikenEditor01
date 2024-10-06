@@ -1,64 +1,55 @@
 <!-- src/components/RuleEditor.vue -->
 <template>
-  <v-list>
-    <v-list-item>
+  <v-card v-if="rule">
+    <v-card-title>ルールエディタ</v-card-title>
+    <v-card-text>
       <v-row>
         <v-col cols="12" sm="9">
-          <v-text-field v-model="localRule.name" label="おみくじ名" @input="updateRule"></v-text-field>
+          <v-text-field v-model="rule.name" label="おみくじ名"></v-text-field>
         </v-col>
         <v-col cols="12" sm="3">
-          <v-autocomplete v-model="localRule.modes" label="モード" :items="localRule.modeSelect"
-            @input="updateRule"></v-autocomplete>
+          <v-select v-model="rule.modes" label="モード" :items="rule.modeSelect"></v-select>
         </v-col>
         <v-col cols="12">
-          <v-slider v-model="localRule.switch" :max="4" :ticks="{
-            0: '無効', 1: '誰でも', 2: 'メンバー', 3: 'モデレーター', 4: '管理者',
-          }" show-ticks="always" step="1" tick-size="4" @input="updateRule"></v-slider>
+          <v-slider v-model="rule.switch" :max="4" :ticks="{ 0: '無効', 1: '誰でも', 2: 'メンバー', 3: 'モデレーター', 4: '管理者' }"
+            show-ticks="always" step="1" tick-size="4"></v-slider>
         </v-col>
         <v-col cols="12">
-          <v-combobox v-model="localRule.matchExact" label="完全一致" clearable chips multiple
-            @input="updateRule"></v-combobox>
+          <v-combobox v-model="rule.matchExact" label="完全一致" clearable chips multiple></v-combobox>
         </v-col>
         <v-col cols="12">
-          <v-combobox v-model="localRule.matchStartsWith" label="前方一致" clearable chips multiple
-            @input="updateRule"></v-combobox>
+          <v-combobox v-model="rule.matchStartsWith" label="前方一致" clearable chips multiple></v-combobox>
         </v-col>
         <v-col cols="12">
-          <v-combobox v-model="localRule.matchIncludes" label="部分一致" clearable chips multiple
-            @input="updateRule"></v-combobox>
+          <v-combobox v-model="rule.matchIncludes" label="部分一致" clearable chips multiple></v-combobox>
         </v-col>
       </v-row>
-    </v-list-item>
-  </v-list>
+    </v-card-text>
+  </v-card>
+  <v-alert v-else type="warning">ルールが選択されていません。</v-alert>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, defineProps } from 'vue';
+import { ref, watch } from 'vue';
 import type { omikujiRule } from '../types';
-import { SelectedItem } from '@/AppTypes';
 
-// propsの定義
 const props = defineProps<{
-  rule: omikujiRule;
-  selectedItem: SelectedItem | null;
-  state: { rules: omikujiRule[] };
+  selectedRule: omikujiRule | null;
 }>();
 
-// emitの定義
 const emit = defineEmits<{
   (e: 'update:rule', value: omikujiRule): void;
 }>();
 
-// localRuleの初期化
-const localRule = ref<omikujiRule>({ ...props.rule });
+const rule = ref<omikujiRule | null>(null);
 
-// 親コンポーネントからのrule変更を監視
-watch(() => props.rule, (newValue) => {
-  localRule.value = { ...newValue };
+watch(() => props.selectedRule, (newValue) => {
+  rule.value = newValue ? JSON.parse(JSON.stringify(newValue)) : null;
+}, { immediate: true, deep: true });
+
+watch(rule, (newValue) => {
+  if (newValue) {
+    emit('update:rule', newValue);
+  }
 }, { deep: true });
-
-// ルールの更新関数
-const updateRule = () => {
-  emit('update:rule', { ...localRule.value });
-};
 </script>

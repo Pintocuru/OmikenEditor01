@@ -1,9 +1,9 @@
 <!-- src/components/RandomEditor.vue -->
 <template>
-  <v-card>
+  <v-card v-if="randomItems">
     <v-card-title>ランダムメッセージエディタ</v-card-title>
     <v-card-text>
-      <v-select v-model="selectedKey" :items="Object.keys(random)" label="ランダムメッセージキー" @change="onKeyChange"></v-select>
+      <v-select v-model="selectedTag" :items="tags" label="タグ" @change="onTagChange"></v-select>
 
       <v-btn @click="addRandomItem" color="primary" small class="mb-2">新しい項目を追加</v-btn>
 
@@ -27,60 +27,63 @@
       </v-list>
     </v-card-text>
   </v-card>
+  <v-alert v-else type="warning">ランダムアイテムが選択されていません。</v-alert>
 </template>
 
-<script lang="ts">
-import { defineComponent, PropType, ref, computed } from 'vue';
-import { RandomItem } from '../types';
+<script setup lang="ts">
+import { ref, computed, watch } from 'vue';
+import type { RandomItem } from '../types';
 
-export default defineComponent({
-  name: 'RandomEditor',
-  props: {
-    // randomはRandomItemの配列であるべき
-    random: {
-      type: Array as PropType<RandomItem[]>, // 配列で型指定
-      required: true
-    }
-  },
-  setup(props) {
-    // 最初のキーを取得
-    const selectedKey = ref<string>(props.random.length > 0 ? props.random[0].tag : '');
+const props = defineProps<{
+  selectedRandomItems: RandomItem[] | null;
+}>();
 
-    // 現在選択されているアイテムを取得
-    const currentItems = computed(() => {
-      // selectedKeyに基づいてcurrentItemsを取得するロジックを追加
-      return props.random.filter(item => item.tag === selectedKey.value);
-    });
+const emit = defineEmits<{
+  (e: 'update:randomItems', value: RandomItem[]): void;
+}>();
 
-    // 新しいキーが選択されたときの処理
-    const onKeyChange = (newKey: string) => {
-      // selectedKeyを更新
-      selectedKey.value = newKey;
-    };
+const randomItems = ref<RandomItem[] | null>(null);
+const selectedTag = ref<string>('');
 
-    // ランダムアイテムを追加する関数
-    const addRandomItem = () => {
-      // 新しいRandomItemを追加
-      props.random.push({
-        weight: 1,
-        group: 1,
-        content: '',
-        tag: selectedKey.value // tagも新しいアイテムに追加
-      });
-    };
-
-    // ランダムアイテムを削除する関数
-    const removeRandomItem = (index: number) => {
-      props.random.splice(index, 1); // 指定されたインデックスのアイテムを削除
-    };
-
-    return {
-      selectedKey,
-      currentItems,
-      onKeyChange,
-      addRandomItem,
-      removeRandomItem
-    };
+watch(() => props.selectedRandomItems, (newValue) => {
+  randomItems.value = newValue ? JSON.parse(JSON.stringify(newValue)) : null;
+  if (randomItems.value && randomItems.value.length > 0) {
+    selectedTag.value = randomItems.value[0].tag;
   }
+}, { immediate: true, deep: true });
+
+const tags = computed(() => {
+  return [...new Set(randomItems.value?.map(item => item.tag) || [])];
 });
+
+const currentItems = computed(() => {
+  return randomItems.value?.filter(item => item.tag === selectedTag.value) || [];
+});
+
+const onTagChange = (newTag: string) => {
+  selectedTag.value = newTag;
+};
+
+const addRandomItem = () => {
+  if (!randomItems.value) return;
+  randomItems.value.push({
+    tag: selectedTag.value,
+    weight: 1,
+    group: 1,
+    content: ''
+  });
+  emit('update:randomItems', randomItems.value);
+};
+
+const removeRandomItem = (index: number) => {
+  if (!randomItems.value) return;
+  randomItems.value = randomItems.value.filter((_, i) => i !== index);
+  emit('update:randomItems', randomItems.value);
+};
+
+watch(randomItems, (newValue) => {
+  if (newValue) {
+    emit('update:randomItems', newValue);
+  }
+}, { deep: true });
 </script>
