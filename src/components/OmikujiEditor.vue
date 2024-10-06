@@ -4,37 +4,33 @@
     <v-list-item>
       <v-row>
         <v-col cols="12">
-          <v-text-field v-model.number="omikuji.weight" label="出現比" type="number"></v-text-field>
+          <v-text-field v-model.number="localOmikuji.weight" label="出現比" type="number"></v-text-field>
         </v-col>
       </v-row>
       <v-row>
         <v-col cols="12">
-          <v-text-field v-model.number="omikuji.threshold.type" label="種類"></v-text-field>
+          <v-select v-model="localOmikuji.threshold.type" :items="thresholdTypes" label="種類"></v-select>
         </v-col>
       </v-row>
-      <v-row :v-show="omikuji.threshold.type !=='none'">
+      <v-row v-show="localOmikuji.threshold.type !== 'none'">
         <v-col cols="4">
-          <v-text-field v-model.number="omikuji.threshold.value" label="閾値" type="number"></v-text-field>
+          <v-text-field v-model.number="localOmikuji.threshold.value" label="閾値" type="number"></v-text-field>
         </v-col>
         <v-col cols="4">
-          <v-select v-model="omikuji.threshold.comparison" :items="[
-            { text: '以下', value: -1 },
-            { text: '等しい', value: 0 },
-            { text: '以上', value: 1 }
-          ]" label="比較方法"></v-select>
+          <v-select v-model="localOmikuji.threshold.comparison" :items="comparisonItems" label="比較方法"></v-select>
         </v-col>
         <v-col cols="4">
-          <v-switch v-model="omikuji.threshold.loop" label="ループ"></v-switch>
+          <v-switch v-model="localOmikuji.threshold.loop" label="ループ"></v-switch>
         </v-col>
       </v-row>
 
       <v-expansion-panels>
-        <v-expansion-panel v-for="(type, index) in ['message', 'party', 'toast', 'speech']" :key="index">
-          <template v-slot:title>{{ capitalize(type) }}メッセージ</template>
+        <v-expansion-panel v-for="(type, index) in messageTypes" :key="index">
+          <v-expansion-panel-title>{{ capitalize(type) }}メッセージ</v-expansion-panel-title>
           <v-expansion-panel-text>
-            <v-btn @click="addPost(type as MessageType)" color="primary" small class="mb-2">追加</v-btn>
+            <v-btn @click="addPost(type)" color="primary" small class="mb-2">追加</v-btn>
             <v-list>
-              <v-list-item v-for="(post, postIndex) in omikuji[type as MessageType]" :key="postIndex">
+              <v-list-item v-for="(post, postIndex) in localOmikuji[type]" :key="postIndex">
                 <v-row>
                   <template v-if="type === 'message' || type === 'toast'">
                     <v-col cols="12" sm="6" md="3">
@@ -51,7 +47,7 @@
                     <v-textarea v-model="post.content" label="内容"></v-textarea>
                   </v-col>
                   <v-col cols="12">
-                    <v-btn @click="removePost(type as MessageType, postIndex)" color="error" small>削除</v-btn>
+                    <v-btn @click="removePost(type, postIndex)" color="error" small>削除</v-btn>
                   </v-col>
                 </v-row>
               </v-list-item>
@@ -59,25 +55,41 @@
           </v-expansion-panel-text>
         </v-expansion-panel>
       </v-expansion-panels>
-
     </v-list-item>
   </v-list>
 </template>
 
 <script setup lang="ts">
-import { PropType } from 'vue';
+import { PropType, ref, watch } from 'vue';
 import type {  OmikujiMessage, Post } from '../types';
 
 // 追加：メッセージタイプの型を定義
 type MessageType = 'message' | 'party' | 'toast' | 'speech';
+const messageTypes: MessageType[] = ['message', 'party', 'toast', 'speech'];
+
 
 // コンポーネントのプロパティ定義
-const props = defineProps({
-  omikuji: {
-    type: Object as PropType<OmikujiMessage>,
-    required: true
-  }
-});
+const props = defineProps<{
+  omikuji: OmikujiMessage
+}>();
+
+const emit = defineEmits<{
+  (e: 'update:omikuji', value: OmikujiMessage): void
+}>();
+
+const localOmikuji = ref<OmikujiMessage>({ ...props.omikuji });
+
+const thresholdTypes = ['none', 'tc', 'lc', 'price', 'custom'];
+const comparisonItems = [
+  { text: '以下', value: -1 },
+  { text: '等しい', value: 0 },
+  { text: '以上', value: 1 }
+];
+
+//
+watch(localOmikuji, (newValue) => {
+  emit('update:omikuji', newValue);
+}, { deep: true });
 
 // 新しい投稿を追加する関数
 const addPost = (type: MessageType) => {
@@ -94,7 +106,7 @@ const addPost = (type: MessageType) => {
 
 // 指定された投稿を削除する関数
 const removePost = (type: MessageType, index: number) => {
-  (props.omikuji[type] as Post[])?.splice(index, 1);
+  (localOmikuji.value[type] as Post[])?.splice(index, 1);
 };
 
 // 文字列の先頭を大文字にする関数

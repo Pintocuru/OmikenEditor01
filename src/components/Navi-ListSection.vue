@@ -1,23 +1,22 @@
 <!-- src/components/Navi-ListSection.vue -->
 <template>
   <div>
-    <!-- タイトルを表示 -->
+    <!-- タイトル -->
     <v-list-item-title>{{ title }}</v-list-item-title>
-    <!-- アイテムリストをループして表示 -->
+    <!-- アイテムリスト -->
     <v-list-item v-for="(item, index) in items" :key="itemKey + '-' + index"
       :class="{ 'v-list-item--active': isSelected(itemKey, index) }" @click="$emit('select-item', itemKey, index)">
-      <!-- 各アイテムのタイトルを表示 -->
+      <!-- 各アイテムのタイトル -->
       <v-list-item-title>{{ getItemTitle(item, index) }}</v-list-item-title>
       <v-list-item-action>
-        <!-- 削除アイコンボタン -->
+        <!-- 削除ボタン -->
         <v-btn icon @click.stop="$emit('open-delete-dialog', itemKey, index)">
           <v-icon>mdi-delete</v-icon>
         </v-btn>
       </v-list-item-action>
     </v-list-item>
-
     <!-- 追加ボタン -->
-    <v-list-item @click="$emit('add-item', itemKey)">
+    <v-list-item @click="$emit('add-item')">
       <v-list-item-title>
         <v-icon>mdi-plus</v-icon> {{ addButtonText }}
       </v-list-item-title>
@@ -41,7 +40,7 @@ export default defineComponent({
       required: true
     },
     itemKey: {
-      type: String,
+      type: String as PropType<ItemType>,
       required: true
     },
     addButtonText: {
@@ -62,15 +61,14 @@ export default defineComponent({
 
     // アイテムのタイトルを取得
     const getItemTitle = (item: any, index: number): string => {
-      console.log(props.itemKey);
       if (props.itemKey === 'random') {
         return `${item.tag} (${item.count} items)`;
       } else if (props.itemKey === 'rule') {
-        return item.name || 'Unnamed Rule ' + (index + 1);
+        return item.name || `ルール ${index + 1}`;
       } else if (props.itemKey === 'omikuji') {
-        return 'おみくじ ' + (index + 1);
+        return `おみくじ ${index + 1}`;
       } else {
-        return item.name || 'Unnamed Item ' + (index + 1);
+        return item.name || `アイテム ${index + 1}`;
       }
     };
 

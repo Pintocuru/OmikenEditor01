@@ -1,3 +1,4 @@
+<!-- src/components/RandomEditor.vue -->
 <template>
   <v-card>
     <v-card-title>ランダムメッセージエディタ</v-card-title>
