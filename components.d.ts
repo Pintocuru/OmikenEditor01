@@ -7,10 +7,16 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    AppHeader: typeof import('./src/components/AppHeader.vue')['default']
+    AppList: typeof import('./src/components/AppList.vue')['default']
+    AppMain: typeof import('./src/components/AppMain.vue')['default']
+    AppNavigation: typeof import('./src/components/AppNavigation.vue')['default']
     DeleteConfirmDialog: typeof import('./src/components/DeleteConfirmDialog.vue')['default']
+    EditorDialog: typeof import('./src/components/EditorDialog.vue')['default']
     NavigationList: typeof import('./src/components/NavigationList.vue')['default']
     NaviListSection: typeof import('./src/components/Navi-ListSection.vue')['default']
     OmikujiEditor: typeof import('./src/components/OmikujiEditor.vue')['default']
+    OmikujiList: typeof import('./src/components/OmikujiList.vue')['default']
     RandomEditor: typeof import('./src/components/RandomEditor.vue')['default']
     RuleEditor: typeof import('./src/components/RuleEditor.vue')['default']
     'コピー': typeof import('./src/components/NavigationList - コピー.vue')['default']

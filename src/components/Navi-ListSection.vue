@@ -4,14 +4,23 @@
     <v-list-subheader class="white--text">
       {{ title }}
     </v-list-subheader>
-    <v-list-item v-for="(item, index) in items" :key="`${itemKey}-${index}`" :active="isSelected(itemKey, index)"
-      @click="$emit('select-item', itemKey, index)">
+    <v-list-item
+      v-for="(item, index) in items"
+      :key="`${itemKey}-${index}`"
+      :active="isSelected(itemKey, index)"
+      @click="$emit('select-item', itemKey, index)"
+    >
       <v-list-item-title :class="`${color}--text`">
         {{ getItemTitle(item, index, itemKey) }}
       </v-list-item-title>
       <template v-slot:append>
-        <v-btn icon variant="text" density="comfortable" size="small"
-          @click.stop="$emit('open-delete-dialog', itemKey, index)">
+        <v-btn
+          icon
+          variant="text"
+          density="comfortable"
+          size="small"
+          @click.stop="$emit('open-delete-dialog', itemKey, index)"
+        >
           <v-icon>mdi-delete</v-icon>
         </v-btn>
       </template>
@@ -28,7 +37,9 @@
 </template>
 
 <script setup lang="ts">
-import { funkOmikenNavi } from "../composables/funkOmikenNavi.js";
+// コンポーザブル
+import { useNavigation } from "../composables/funkOmikenUI.js";
+// 型指定
 import type { ItemType, SelectedItem } from "../AppTypes";
 
 const props = defineProps<{
@@ -45,8 +56,9 @@ const emit = defineEmits<{
   (e: "add-item"): void;
 }>();
 
-const { isSelected, getItemTitle } = funkOmikenNavi(
+const { isSelected, getItemTitle } = useNavigation(
   {} as any,
-  props.selectedItem
+  props.selectedItem,
+  emit
 );
 </script>

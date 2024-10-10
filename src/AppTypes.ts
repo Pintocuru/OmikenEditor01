@@ -1,6 +1,10 @@
+import type { omikujiRule, OmikujiMessage, Placeholder } from './types';
+
 export type SelectedItem ={
   type: ItemType;
-  index: number;
+  item: ItemContent;
+  index?: number;
 } | null;
 
-export type ItemType = 'rule' | 'omikuji' | 'random';
+export type ItemType = 'rules' | 'omikuji' | 'placeholder';
+export type ItemContent = omikujiRule | OmikujiMessage | Placeholder;

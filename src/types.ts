@@ -1,11 +1,11 @@
+// types.ts:型指定
+
 // DefaultStateインターフェース: 全体の設定を管理する
 export interface DefaultState {
   defaultRules: omikujiRule[];  // プリセットルール
   rules: omikujiRule[];  // おみくじのルールを管理
-  botMessage: {
-    omikuji: OmikujiMessage[];  // おみくじ関連のメッセージ
-    random: RandomItem[];  // 
-  };
+  omikuji: OmikujiMessage[];  // おみくじ関連のメッセージ
+  placeholder: Placeholder[];  // プレースホルダー
 }
 
 // おみくじルールの型定義
@@ -21,12 +21,33 @@ export interface omikujiRule {
 
 // おみくじメッセージの型定義
 export interface OmikujiMessage {
+  name: string;  // 結果名
   weight: number;  // メッセージの重み付け
-  threshold: {
-    type: 'none' | 'tc' | 'lc' | 'price' | 'custom'; // 何の値を見るか
-    value: number;  // 閾値の値
-    loop: boolean;  // ループ処理するか
-    comparison: -1 | 0 | 1;  // 比較方法（例: -1 は以下、1 は以上、0 は等しい）
+  threshold: { // フィルタリング基準
+    // none:基準なし time:時間指定(0-23時) lc:配信枠のコメント番号 no:配信枠の個人コメント数
+    // tc:総数の個人コメント数 hour:投稿してからの時間(interval*1000*60*60)
+    // minute: 投稿してからの分(interval*1000*60) second: 投稿してからの秒(interval*1000)
+    // day: 投稿してからの日数(interval*1000*60*60*24) price:ギフト金額 custom:その他(script参照)
+    type:
+    | 'none' // none:基準なし
+    | 'time' // time:時間指定(0-23時)
+    | 'lc' // lc:配信枠のコメント番号
+    | 'no' // no:配信枠の個人コメント数
+    | 'tc' // tc:総数の個人コメント数
+    | 'second' // second: 投稿してからの秒(interval*1000)
+    | 'minute' // minute: 投稿してからの分(interval*1000*60)
+    | 'hour' // hour:投稿してからの時間(interval*1000*60*60)
+    | 'day' // day: 投稿してからの日数(interval*1000*60*60*24)
+    | 'price' // price:ギフト金額
+    | 'custom'; // custom:その他(script参照)
+    value: number;  // 基準となる値（必須）
+    valueMax: number;  // 基準となる最大値（オプション）
+    comparison: // 比較方法
+    | 'min' // min:以下
+    | 'equal' // equal:等しい
+    | 'max' // max:以上
+    | 'loop' // loop:ループ
+    | 'range'; // range:範囲
   };
   message?: Post[];  // 通常メッセージ（省略可）
   party?: Post[];  // パーティーメッセージ（省略可）
@@ -42,9 +63,9 @@ export interface Post {
   content: string;  // メッセージ内容
 }
 
-// ランダムメッセージ項目の型定義
-export interface RandomItem {
-  tag: string; // タグ
+// プレースホルダー項目の型定義
+export interface Placeholder {
+  name: string; // プレースホルダー名
   weight: number;  // ランダム選択時の重み付け
   group: number;  // グループ番号
   content: string;  // メッセージ内容

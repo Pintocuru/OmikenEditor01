@@ -32,32 +32,32 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
-import type { RandomItem } from '../types';
+import type { Placeholder } from '../types';
 
 const props = defineProps<{
-  selectedRandomItems: RandomItem[] | null;
+  selectedRandomItems: Placeholder[] | null;
 }>();
 
 const emit = defineEmits<{
-  (e: 'update:randomItems', value: RandomItem[]): void;
+  (e: 'update:randomItems', value: Placeholder[]): void;
 }>();
 
-const randomItems = ref<RandomItem[] | null>(null);
+const randomItems = ref<Placeholder[] | null>(null);
 const selectedTag = ref<string>('');
 
 watch(() => props.selectedRandomItems, (newValue) => {
   randomItems.value = newValue ? JSON.parse(JSON.stringify(newValue)) : null;
   if (randomItems.value && randomItems.value.length > 0) {
-    selectedTag.value = randomItems.value[0].tag;
+    selectedTag.value = randomItems.value[0].name;
   }
 }, { immediate: true, deep: true });
 
 const tags = computed(() => {
-  return [...new Set(randomItems.value?.map(item => item.tag) || [])];
+  return [...new Set(randomItems.value?.map(item => item.name) || [])];
 });
 
 const currentItems = computed(() => {
-  return randomItems.value?.filter(item => item.tag === selectedTag.value) || [];
+  return randomItems.value?.filter(item => item.name === selectedTag.value) || [];
 });
 
 const onTagChange = (newTag: string) => {
@@ -67,7 +67,7 @@ const onTagChange = (newTag: string) => {
 const addRandomItem = () => {
   if (!randomItems.value) return;
   randomItems.value.push({
-    tag: selectedTag.value,
+    name: selectedTag.value,
     weight: 1,
     group: 1,
     content: ''
