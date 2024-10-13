@@ -3,105 +3,116 @@
   <v-app :theme="dark">
     <AppHeader
       v-model:dark="dark"
-      v-model:selectgridcols="selectgridcols"
-      @toggle-theme="toggleTheme"
+      v-model:selectcols="selectcols"
+      @update:dark="dark = $event"
+      @update:selectcols="selectcols = $event"
+    />
+    <AppNavigation
+      v-model:selectCategory="selectCategory"
+      :STATE="STATE"
+      @update:category="selectCategory = $event"
     />
     <v-main>
       <v-container>
-        <v-row>
-          <v-col cols="3">
-            <AppNavigation
-              :state="state"
-              :selected-item="selectedItem"
-              @select-item="handleSelectItem"
-              @select-section="handleSelectSection"
-              @update:state="updateState($event)"
-              @save-data="handleSaveData"
-              @open-list="hogedaiSelect"
-              @open-editor="openEditorDialog"
-            />
-          </v-col>
-          <v-col cols="9">
-            <AppMain
-              v-model:state="state"
-              :dai="hogeselectedItem"
-              :type="selectedItem?.type ?? null"
-              :selectgridcols="selectgridcols"
-              @open-editor="openEditorDialog"
-            />
-          </v-col>
-        </v-row>
+        <AppMain
+          v-model:STATE="STATE"
+          :selectCategory="selectCategory"
+          :selectgridcols="selectcols"
+          @update:STATE="STATE = $event"
+          @open-editor="openEditorDialog"
+        />
       </v-container>
     </v-main>
 
     <EditorDialog
-      v-if="showEditorDialog"
-      :show="showEditorDialog"
-      :type="selectedItem?.type ?? null"
-      :selected-item="selectedItem?.item ?? null"
-      @update="updateItem"
+      v-model:show="showEditorDialog"
+      :STATE="STATE"
+      :selectedItem="editorDialogItem"
       @update:show="showEditorDialog = $event"
+      @update:STATE="updateState"
     />
   </v-app>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import AppHeader from "./components/AppHeader.vue";
 import AppNavigation from "./components/AppNavigation.vue";
 import AppMain from "./components/AppMain.vue";
 import EditorDialog from "./components/EditorDialog.vue";
-import { useAppCore } from "./composables/funkOmikenCore.js";
-import { useDataFetcher, useDataSaver } from "./composables/funkOmikenJSON.js";
-import type { ItemContent, ItemType } from "./AppTypes";
-import type { DefaultState } from "./types";
+import { useFunkOmikenCore } from "./composables/funkOmikenCore";
+import { useDataFetcher } from "./composables/funkOmikenJSON";
+import { useFunkOmikenUI } from "./composables/funkOmikenUI";
+import { CharaStyles, DefaultState } from "./types";
+
+// アプリケーションの状態
+const STATE = ref<DefaultState>({
+  defaultRules: [],
+  rules: [],
+  omikuji: [],
+  placeholder: [],
+});
+
+// キャラクターデータ
+const CHARA = {
+  reimu: {
+    name: "ゆっくり霊夢",
+    frameId: "",
+    color: {
+      "--lcv-name-color": "#FFC107",
+      "--lcv-text-color": "#ECEFF1",
+      "--lcv-background-color": "#FF4081",
+    },
+    image: {
+      Default: "reimu/default.png", // 存在しない場合のフォロー
+      fun01: "reimu/fun01.png", // 通常
+      fun02: "reimu/fun02.png", // 通常:身振り付き
+      fun03: "reimu/fun03.png", // 通常:ワンポイント
+      joy01: "reimu/joy01.png", // 嬉しい:にっこり
+      joy02: "reimu/joy02.png", // 嬉しい:わぁ
+      joy03: "reimu/joy03.png", // 嬉しい:目がキラキラ
+      joy04: "reimu/joy04.png", // 嬉しい:喜び爆発
+      relax01: "reimu/relax01.png", // 落ち着き:目がなごみ
+      relax02: "reimu/relax02.png", // 落ち着き:顔が緩む
+      relax03: "reimu/relax03.png", // 落ち着き:キョトン
+      love01: "reimu/love01.png", // 好き:目がハート
+      love02: "reimu/love02.png", // 好き:あなたに惚気
+      love03: "reimu/love03.png", // 好き:目がお金
+      shy01: "reimu/shy01.png", // 恥ずかしい:照れ笑い
+      shy02: "reimu/shy02.png", // 恥ずかしい:赤面
+      surprise01: "reimu/surprise01.png", // 驚き:すごい
+      surprise02: "reimu/surprise02.png", // 驚き:目が点
+      surprise03: "reimu/surprise03.png", // 驚き:悲鳴
+      panic01: "reimu/panic01.png", // 怖い:焦り
+      panic02: "reimu/panic02.png", // 怖い:ガクブル
+      panic03: "reimu/panic03.png", // 怖い:目を回す
+      anger01: "reimu/anger01.png", // 怒り:叱る
+      anger02: "reimu/anger02.png", // 怒り:喧嘩腰
+      anger03: "reimu/anger03.png", // 怒り:嫉妬
+      contempt01: "reimu/contempt01.png", // 呆れ:頭が頭痛
+      contempt02: "reimu/contempt02.png", // 呆れ:ジト目
+      sad01: "reimu/sad01.png", // 悲しい:残念
+      sad02: "reimu/sad02.png", // 悲しい:(泣)
+      sorry01: "reimu/sorry01.png", // 謝罪:失礼しました
+      sorry02: "reimu/sorry02.png", // 謝罪:ごめーん!
+    },
+  },
+};
+
+// コンポーザブルの使用
+const { selectCategory, updateState } = useFunkOmikenCore(STATE);
 
 const { fetchData } = useDataFetcher();
-const { saveData } = useDataSaver();
-const { state, selectedItem, selectItem, addItem, updateItem, deleteItem } =
-  useAppCore();
+const {
+  dark,
+  selectcols,
+  showEditorDialog,
+  editorDialogItem,
+  openEditorDialog,
+} = useFunkOmikenUI(STATE);
 
-const props = defineProps<{
-  type: ItemType;
-  selectgridcols: number;
-}>();
-
-// gridcolsとselectgridcolsの定義
-const dark = ref("dark");
-const selectgridcols = ref<number>(1);
-
-const toggleTheme = () => {
-  dark.value = dark.value === "dark" ? "light" : "dark";
-};
-
-const hogeselectedItem = ref<ItemType>("rules");
-const hogedaiSelect = (type: ItemType) => {
-  hogeselectedItem.value = type;
-};
-
-const showEditorDialog = ref(false);
-
-const handleSelectItem = (type: ItemType, item: ItemContent) => {
-  selectItem(type, item);
-};
-
-const openEditorDialog = (type: ItemType, item: ItemContent) => {
-  selectedItem.value = { type, item };
-  showEditorDialog.value = true;
-};
-
-const handleSaveData = () => {
-  saveData(state.value);
-};
-
-const updateState = (newState: DefaultState) => {
-  state.value = newState;
-};
-
-const handleSelectSection = (type: ItemType) => {
-  const items = state.value[type];
-  selectedItem.value = { type, item: items[0] };
-};
-
-fetchData(state.value);
+// コンポーネントのマウント時にデータを取得
+onMounted(async () => {
+  await fetchData(STATE.value);
+});
 </script>

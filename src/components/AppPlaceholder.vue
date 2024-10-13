@@ -1,4 +1,4 @@
-<!-- src/components/AppList.vue -->
+<!-- src/components/AppPlaceholder.vue -->
 <template>
   <v-card>
     <v-layout>
@@ -18,6 +18,7 @@
             <draggable
               v-model="listItems"
               :item-key="(item: any, index: any) => index"
+              @change="emitChange"
               tag="div"
               class="d-flex flex-wrap"
             >
@@ -62,22 +63,19 @@ import type {
   omikujiRule,
   Placeholder,
 } from "@/types";
-import { useFunkOmikenEdit } from "@/composables/funkOmikenEdit";
 
 const props = defineProps<{
   state: DefaultState;
-  category: ItemType;
+  type: ItemType;
   selectgridcols: number;
+  dai: ItemType;
 }>();
 
 const emit = defineEmits<{
   (e: "update:state", state: DefaultState): void;
+  (e: "update:selectgridcols", selectgridcols: number): void;
   (e: "open-editor", type: ItemType, item: ItemContent): void;
 }>();
-
-
-const { addItem,updateItem } = useFunkOmikenEdit(props.state);
-
 
 const listItems = computed({
   get: () => props.state[props.type] || [],
@@ -87,6 +85,9 @@ const listItems = computed({
   },
 });
 
+const emitChange = () => {
+  emit("update:selectgridcols", props.selectgridcols);
+};
 
 type GridCol = {
   cols: number;
@@ -94,12 +95,13 @@ type GridCol = {
   md: number;
   lg: number;
   height: number;
+  icon: string;
 };
 
 const gridcols: Record<number, GridCol> = {
-  0: { cols: 12, sm: 12, md: 12, lg: 6, height: 50, },
-  1: { cols: 12, sm: 6, md: 4, lg: 3, height: 100,},
-  2: { cols: 4, sm: 3, md: 2, lg: 1, height: 100, },
+  0: { cols: 12, sm: 12, md: 12, lg: 6, height: 50, icon: "mdi-view-list" },
+  1: { cols: 12, sm: 6, md: 4, lg: 3, height: 100, icon: "mdi-view-grid" },
+  2: { cols: 4, sm: 3, md: 2, lg: 1, height: 100, icon: "mdi-view-module" },
 };
 
 

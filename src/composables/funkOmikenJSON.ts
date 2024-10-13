@@ -22,10 +22,9 @@ export function useDataFetcher() {
    matchStartsWith: [],
    matchIncludes: []
   }
-  // 必要に応じて他のデフォルトルールを追加
  ];
 
- const fetchData = async (state: DefaultState) => {
+ const fetchData = async (STATE: DefaultState) => {
   try {
    loading.value = true;
    const response = await fetch('/src/state.json');
@@ -42,7 +41,7 @@ export function useDataFetcher() {
     placeholder: Array.isArray(data.placeholder) ? validateRandomItems(data.placeholder) : []
    };
 
-   Object.assign(state, validatedData);
+   Object.assign(STATE, validatedData);
   } catch (error) {
    console.error('Error fetching data:', error);
   } finally {
@@ -138,7 +137,7 @@ export function useDataSaver() {
  const saveStatus = ref('');
  const showSnackbar = ref(false);
 
- const saveData = async (state: DefaultState) => {
+ const saveData = async (STATE: DefaultState) => {
   try {
    saveStatus.value = 'Saving...';
    const response = await fetch('/src/state.json', {
@@ -146,7 +145,7 @@ export function useDataSaver() {
     headers: {
      'Content-Type': 'application/json',
     },
-    body: JSON.stringify(state)
+    body: JSON.stringify(STATE)
    });
    if (!response.ok) {
     throw new Error('Network response was not ok');

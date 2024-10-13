@@ -1,3 +1,4 @@
+// src/main.js
 import { createApp } from 'vue'
 import { createVuetify } from 'vuetify'
 import 'vuetify/styles'

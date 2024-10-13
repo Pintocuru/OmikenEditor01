@@ -13,7 +13,7 @@ export interface omikujiRule {
   name: string;  // ルール名（例: "おみくじ"）
   modes: string;  // モード
   modeSelect: string[]; // モードセレクト
-  switch: 0 | 1 | 2 | 3 |4;  // ルールの有効/無効 0:OFF/1:だれでも/2:メンバー以上/3:モデレーター/4:管理者
+  switch: 0 | 1 | 2 | 3 | 4;  // ルールの有効/無効 0:OFF/1:だれでも/2:メンバー以上/3:モデレーター/4:管理者
   matchExact?: string[];  // 完全一致するキーワードの配列（省略可）
   matchStartsWith?: string[];  // 特定のフレーズで始まるキーワード（省略可）
   matchIncludes?: string[];  // 部分一致するキーワード（省略可）
@@ -28,18 +28,7 @@ export interface OmikujiMessage {
     // tc:総数の個人コメント数 hour:投稿してからの時間(interval*1000*60*60)
     // minute: 投稿してからの分(interval*1000*60) second: 投稿してからの秒(interval*1000)
     // day: 投稿してからの日数(interval*1000*60*60*24) price:ギフト金額 custom:その他(script参照)
-    type:
-    | 'none' // none:基準なし
-    | 'time' // time:時間指定(0-23時)
-    | 'lc' // lc:配信枠のコメント番号
-    | 'no' // no:配信枠の個人コメント数
-    | 'tc' // tc:総数の個人コメント数
-    | 'second' // second: 投稿してからの秒(interval*1000)
-    | 'minute' // minute: 投稿してからの分(interval*1000*60)
-    | 'hour' // hour:投稿してからの時間(interval*1000*60*60)
-    | 'day' // day: 投稿してからの日数(interval*1000*60*60*24)
-    | 'price' // price:ギフト金額
-    | 'custom'; // custom:その他(script参照)
+    type: OmikujiThresholdType;
     value: number;  // 基準となる値（必須）
     valueMax: number;  // 基準となる最大値（オプション）
     comparison: // 比較方法
@@ -54,6 +43,19 @@ export interface OmikujiMessage {
   toast?: Post[];  // トースト通知メッセージ（省略可）
   speech?: Post[];  // スピーチ用メッセージ（省略可）
 }
+export type OmikujiThresholdType =
+  | 'none' // none:基準なし
+  | 'time' // time:時間指定(0-23時)
+  | 'lc' // lc:配信枠のコメント番号
+  | 'no' // no:配信枠の個人コメント数
+  | 'tc' // tc:総数の個人コメント数
+  | 'second' // second: 投稿してからの秒(interval*1000)
+  | 'minute' // minute: 投稿してからの分(interval*1000*60)
+  | 'hour' // hour:投稿してからの時間(interval*1000*60*60)
+  | 'day' // day: 投稿してからの日数(interval*1000*60*60*24)
+  | 'price' // price:ギフト金額
+  | 'custom'; // custom:その他(script参照)
+
 
 // メッセージの投稿情報を管理する型
 export interface Post {
@@ -75,20 +77,33 @@ export interface Placeholder {
 
 // キャラクターJSONの型定義
 export interface CharaStyles {
-  character: {
-    [key: string]: {
-      id: string; // ?キー名(必要だろうか?)
-      name: string; // キャラクターの名前
-      frameId?: string; // わんコメの枠を指定
+  [key: string]: {
+    name: string; // キャラクターの名前
+    frameId?: string; // わんコメの枠を指定
+    color: {
       "--lcv-name-color": string; // 名前の色
       "--lcv-text-color": string; // コメントの色
       "--lcv-background-color": string; // 背景色
-    };
-  }
-  characterImage: {
-    [key: string]: {
+    },
+    image: {
       Default: string; // defaultは必須
       [key: string]: string; // 追加のキーに対応
-    };
-  }
+    }
+  };
+}
+
+// キャラクターJSON（編集時）
+export interface CharaStyleEdit {
+  id: string; // キー名（編集時に変更可能）
+  name: string; // キャラクターの名前
+  frameId?: string; // わんコメの枠を指定
+  color: {
+    "--lcv-name-color": string; // 名前の色
+    "--lcv-text-color": string; // コメントの色
+    "--lcv-background-color": string; // 背景色
+  },
+  images: Array<{ // 画像は配列で管理
+    key: string; // 画像のキー名
+    path: string; // 画像のパス
+  }>;
 }

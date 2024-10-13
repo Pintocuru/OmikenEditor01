@@ -2,57 +2,54 @@
 <template>
   <v-app-bar app>
     <v-app-bar-title>Funk Omiken App</v-app-bar-title>
-    <v-btn @click="$emit('toggle-theme')">
+    <v-btn @click="toggleTheme">
       {{ dark === "dark" ? "Light Mode" : "Dark Mode" }}
     </v-btn>
-    <v-radio-group inline v-model="localSelectGridCols">
-      <template v-for="pattern in Object.keys(gridcols)" :key="pattern">
-        <v-radio :value="Number(pattern)" hide-details>
-          <v-icon>{{ gridcols[Number(pattern)].icon }}</v-icon>
-        </v-radio>
-        <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-      </template>
+    <v-radio-group
+      inline
+      v-model="localSelectCols"
+      @change="updateSelectCols"
+    >
+      <v-radio
+        v-for="(col, index) in gridcols"
+        :key="index"
+        :value="index"
+        hide-details
+        class="ma-4"
+      >
+        <v-icon>{{ col.icon }}</v-icon>
+      </v-radio>
     </v-radio-group>
   </v-app-bar>
 </template>
 
 <script setup lang="ts">
 import { ref, watch } from "vue";
+import { defineProps, defineEmits } from "vue";
 
 const props = defineProps<{
   dark: string;
-  selectgridcols: number;
+  selectcols: number;
 }>();
 const emit = defineEmits<{
-  (e: "toggle-theme"): void;
-  (e: "update:selectgridcols", value: number): void; // 更新イベント
+  (e: "update:dark", value: string): void;
+  (e: "update:selectcols", value: number): void;
 }>();
 
-type GridCol = {
-  cols: number;
-  sm: number;
-  md: number;
-  lg: number;
-  height: number;
-  icon: string;
-};
-const gridcols: Record<number, GridCol> = {
-  0: { cols: 12, sm: 12, md: 12, lg: 6, height: 50, icon: "mdi-view-list" },
-  1: { cols: 12, sm: 6, md: 4, lg: 3, height: 100, icon: "mdi-view-grid" },
-  2: { cols: 4, sm: 3, md: 2, lg: 1, height: 100, icon: "mdi-view-module" },
+const toggleTheme = () => {
+  const newTheme = props.dark === "dark" ? "light" : "dark";
+  emit("update:dark", newTheme);
 };
 
-// 親からの変更を監視
-const localSelectGridCols = ref(props.selectgridcols);
-watch(
-  () => props.selectgridcols,
-  (newValue: any) => {
-    localSelectGridCols.value = newValue;
-  }
-);
-
-// localSelectGridColsが変更されたときにemit
-watch(localSelectGridCols, (newValue: any) => {
-  emit("update:selectgridcols", newValue);
-});
+const localSelectCols = ref(props.selectcols);
+const gridcols = [
+  { icon: "mdi-view-list" },
+  { icon: "mdi-view-grid" },
+  { icon: "mdi-view-module" },
+];
+const updateSelectCols = (event: { target: { value: number } }) => {
+  const value = Number(event.target.value);
+  localSelectCols.value = value;
+  emit("update:selectcols", value);
+};
 </script>

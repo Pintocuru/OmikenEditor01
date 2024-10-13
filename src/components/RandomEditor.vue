@@ -11,7 +11,11 @@
         <v-list-item v-for="(item, index) in currentItems" :key="index">
           <v-row>
             <v-col cols="12" sm="6" md="4">
-              <v-text-field v-model.number="item.weight" label="重み" type="number"></v-text-field>
+              <v-text-field 
+              v-model.number="item.weight" 
+              label="重み" 
+              type="number" 
+              />
             </v-col>
             <v-col cols="12" sm="6" md="4">
               <v-text-field v-model.number="item.group" label="グループ" type="number"></v-text-field>
@@ -32,14 +36,15 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
-import type { Placeholder } from '../types';
+import type { omikujiRule, Placeholder } from '../types';
+import { ItemType } from '@/AppTypes';
 
 const props = defineProps<{
-  selectedRandomItems: Placeholder[] | null;
+  selectedRandomItems: Placeholder | null;
 }>();
 
 const emit = defineEmits<{
-  (e: 'update:randomItems', value: Placeholder[]): void;
+  (e: 'update:item', type: ItemType, value: omikujiRule): void;
 }>();
 
 const randomItems = ref<Placeholder[] | null>(null);
@@ -72,19 +77,22 @@ const addRandomItem = () => {
     group: 1,
     content: ''
   });
-  emit('update:randomItems', randomItems.value);
+   emit('update:item', 'placeholder', newValue);
 };
 
 const removeRandomItem = (index: number) => {
   if (!randomItems.value) return;
   randomItems.value = randomItems.value.filter((_, i) => i !== index);
-  emit('update:randomItems', randomItems.value);
+   emit('update:item', 'placeholder', newValue);
 };
 
+watch(() => props.selectedRandomItems, (newValue) => {
+  randomItems.value = newValue ? JSON.parse(JSON.stringify(newValue)) : null;
+}, { immediate: true, deep: true });
+
 watch(randomItems, (newValue) => {
-  // 変更があった場合のみ emit を実行
   if (newValue && JSON.stringify(newValue) !== JSON.stringify(props.selectedRandomItems)) {
-    emit('update:randomItems', newValue);
+    emit('update:item', 'placeholder', newValue);
   }
 }, { deep: true });
 </script>

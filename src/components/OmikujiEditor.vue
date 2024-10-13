@@ -1,143 +1,165 @@
 <!-- src/components/OmikujiEditor.vue -->
 <template>
-  <v-card v-if="omikuji">
-    <v-card-title>おみくじエディタ</v-card-title>
+  <v-container v-if="editingItem">
     <v-card-text>
-      <v-form @submit.prevent="handleSaveOmikuji">
+      <v-form @submit.prevent="editingItem">
         <!-- おみくじの基本情報 -->
         <v-row>
-          <v-col cols="12" sm="6">
-            <v-text-field v-model="omikuji.name" label="結果名"></v-text-field>
+          <v-col cols="12">
+            <v-text-field v-model="editingItem.name" label="結果名">
+              <v-tooltip activator="parent" location="bottom">おみくじの結果の名称（ラベル）を入力してください。<br />
+                例: 「大吉」「中吉」「小吉」など。</v-tooltip>
+            </v-text-field>
           </v-col>
-          <v-col cols="12" sm="6">
-            <v-text-field v-model.number="omikuji.weight" label="出現比" type="number"></v-text-field>
+        </v-row>
+        <v-row>
+          <v-col cols="3" sm="2">
+            <v-text-field v-model.number="editingItem.weight" label="出現比" type="number" min="0" max="100">
+              <v-tooltip activator="parent" location="bottom">ランダムに偏りをつける</v-tooltip>
+            </v-text-field>
+          </v-col>
+          <v-col align-self="center">
+            <v-progress-linear :model-value="sumWeightValues(editingItem.weight)" buffer-value="10" color="primary"
+              height="35" striped>出現割合：{{
+                sumWeightValues(editingItem.weight)
+              }}
+              %</v-progress-linear>
           </v-col>
         </v-row>
 
         <!-- フィルタリング基準の設定 -->
-        <v-row>
-          <v-col cols="12" sm="6">
-            <v-select v-model="omikuji.threshold.type" :items="thresholdTypes" item-title="text" item-value="value"
-              label="フィルタリング基準"></v-select>
-          </v-col>
-        </v-row>
+        <v-card>
+          <v-toolbar color="primary" density="compact">
+            <v-toolbar-title>フィルタリング設定</v-toolbar-title>
+          </v-toolbar>
+          <v-tooltip location="bottom">
+            <template v-slot:activator="{ props }">
+              <v-select v-bind="props" v-model="editingItem.threshold.type" :items="thresholdTypes" item-title="text"
+                item-value="value" label="フィルタリング基準"></v-select>
+            </template>
+            <span>適用外の場合は抽選の対象にならない基準を設定します。</span>
+          </v-tooltip>
 
-        <v-row v-if="omikuji.threshold.type !== 'none'">
-          <v-col cols="12" sm="4">
-            <v-text-field v-model.number="omikuji.threshold.value" label="基準値" type="number"></v-text-field>
-          </v-col>
-          <v-col cols="12" sm="4">
-            <v-select v-model="omikuji.threshold.comparison" :items="comparisonItems" item-title="text" item-value="value"
-              label="比較方法"></v-select>
-          </v-col>
-        </v-row>
+          <v-row v-if="editingItem.threshold.type !== 'none'" class="auto">
+            <v-col cols="12" sm="4">
+              <v-select v-model="editingItem.threshold.comparison" :items="comparisonItems" item-title="text"
+                item-value="value" label="比較方法"></v-select>
+            </v-col>
+            <v-col cols="12" sm="4">
+              <v-text-field v-model.number="editingItem.threshold.value" label="基準値" type="number"
+                min="0"></v-text-field>
+            </v-col>
+            <v-col cols="12" sm="4" v-if="editingItem.threshold.comparison === 'range'">
+              <v-text-field v-model.number="editingItem.threshold.valueMax" label="基準値(最大)"
+                type="number"></v-text-field>
+            </v-col>
+          </v-row>
+        </v-card>
 
         <!-- メッセージタイプごとの設定 -->
-        <v-expansion-panels>
-          <v-expansion-panel v-for="type in messageTypes" :key="type">
-            <v-expansion-panel-title>{{ type }}メッセージ</v-expansion-panel-title>
-            <v-expansion-panel-text>
-              <v-btn @click="addPost(type)" color="primary" small class="mb-2">追加</v-btn>
-              <v-list>
-                <v-list-item v-for="(post, index) in omikuji[type]" :key="index">
-                  <v-row>
-                    <v-col v-if="['message', 'toast'].includes(type)" cols="6" sm="4">
-                      <v-text-field v-model.number="post.botKey" label="ボットキー" type="number"></v-text-field>
-                    </v-col>
-                    <v-col v-if="['message', 'toast'].includes(type)" cols="6" sm="4">
-                      <v-text-field v-model="post.iconKey" label="アイコンキー"></v-text-field>
-                    </v-col>
-                    <v-col cols="12" sm="4">
-                      <v-text-field v-model.number="post.delaySeconds" label="遅延時間(秒)" type="number"></v-text-field>
-                    </v-col>
-                    <v-col cols="12">
-                      <v-text-field v-model="post.content" label="内容"></v-text-field>
-                    </v-col>
-                    <v-col cols="12">
-                      <v-btn @click="removePost(type, index)" color="error" small>削除</v-btn>
-                    </v-col>
-                  </v-row>
-                </v-list-item>
-              </v-list>
-            </v-expansion-panel-text>
-          </v-expansion-panel>
-        </v-expansion-panels>
+        <v-card>
+          <v-toolbar color="primary" density="compact">
+            <v-toolbar-title>メッセージ設定</v-toolbar-title>
+          </v-toolbar>
+          <v-tabs v-model="activeTab">
+            <v-tab v-for="type in messageTypes" :key="type" :value="type">
+              {{ type }}メッセージ
+            </v-tab>
+          </v-tabs>
+          <v-card-text>
+            <v-window v-model="activeTab">
+              <v-window-item v-for="type in messageTypes" :key="type" :value="type">
+                <v-btn @click="addPost(editingItem, type)" color="primary" small class="mb-2">追加</v-btn>
+                <v-list>
+                  <v-list-item v-for="(post, index) in sortedPosts(type)" :key="index">
+                    <v-row>
+                      <v-col cols="6" sm="2" v-if="['message', 'toast'].includes(type)">
+                        <v-text-field v-model.number="post.botKey" label="ボットキー" type="number"></v-text-field>
+                      </v-col>
+                      <v-col cols="6" sm="2" v-if="['message', 'toast'].includes(type)">
+                        <v-text-field v-model="post.iconKey" label="アイコンキー"></v-text-field>
+                      </v-col>
+                      <v-col cols="2" sm="2">
+                        <v-text-field v-model.number="post.delaySeconds" label="遅延時間(秒)" type="number"></v-text-field>
+                      </v-col>
+                      <v-col cols="10" sm="6">
+                        <v-text-field v-model="post.content" label="内容" rows="3"></v-text-field>
+                      </v-col>
+                      <v-col cols="12">
+                        <v-btn @click="removePost(editingItem, type, index)" color="error" small>削除</v-btn>
+                      </v-col>
+                    </v-row>
+                  </v-list-item>
+                </v-list>
+              </v-window-item>
+            </v-window>
+          </v-card-text>
+        </v-card>
       </v-form>
     </v-card-text>
-  </v-card>
+  </v-container>
   <v-alert v-else type="warning">おみくじが選択されていません。</v-alert>
 </template>
 
 <script setup lang="ts">
 import { inject, Ref, ref, watch } from "vue";
 import type { DefaultState, OmikujiMessage } from "../types";
-import { ItemType } from "@/AppTypes";
-import { useOmikujiEditor } from "../composables/funkOmikenEdit.js";
+import { ItemType, SelectedItem } from "@/AppTypes";
+import {
+  useEditOmikuji,
+  useFunkOmikenEdit,
+  useItemEditor,
+} from "../composables/funkOmikenEdit.js";
 
-// omikujiStateの型定義
-interface OmikujiState {
-  state: DefaultState;
-  omikujiList: Ref<OmikujiMessage[]>;
-  updateState: (type: ItemType, newData: any) => void;
-  openOmikujiDialog: (omikuji: OmikujiMessage) => void;
-  closeOmikujiDialog: () => void;
-}
-
-// omikujiStateをinjectで取得
-const omikujiState = inject('omikujiState') as OmikujiState | undefined;
-
-if (!omikujiState) {
-  throw new Error('omikujiState not provided');
-}
-
-const { state, updateState, closeOmikujiDialog } = omikujiState;
-
-// コンポーネントのprops定義
+// props/emits
 const props = defineProps<{
-  selectedOmikuji: OmikujiMessage | null;
+  STATE: DefaultState;
+  selectedItem: SelectedItem;
 }>();
 
-// 親コンポーネントへのイベント発信
 const emit = defineEmits<{
-  (e: "update:omikuji", value: OmikujiMessage): void;
+  (e: "update:item", value: OmikujiMessage): void;
 }>();
+// 更新のコンポーザブル
+const { editingItem } = useItemEditor(props, emit);
 
 // useOmikujiEditorコンポーザブルの使用
 const {
-  omikuji,
+  addPost,
   messageTypes,
   thresholdTypes,
   comparisonItems,
-  addPost,
   removePost,
-  saveOmikuji,
-} = useOmikujiEditor(props.selectedOmikuji);
+  sanitizeThresholdSettings,
+  sumWeightValues,
+} = useEditOmikuji(props.STATE);
 
-// selectedOmikujiの変更を監視
+// フィルタリング設定が変更されたときに自動的にバリデーションを実行
 watch(
-  () => props.selectedOmikuji,
-  (newValue) => {
-    omikuji.value = newValue ? JSON.parse(JSON.stringify(newValue)) : null;
-  },
-  { immediate: true, deep: true }
-);
-
-// omikujiの変更を監視し、親コンポーネントに通知
-watch(
-  omikuji,
-  (newValue) => {
-    if (
-      newValue &&
-      JSON.stringify(newValue) !== JSON.stringify(props.selectedOmikuji)
-    ) {
-      emit("update:omikuji", newValue);
+  () => editingItem.value?.threshold,
+  () => {
+    if (editingItem.value && editingItem.value.threshold) {
+      const wasModified = sanitizeThresholdSettings(editingItem);
+      if (wasModified) {
+        // ここでユーザーに通知を表示するなどの処理を行う
+        console.log("Threshold settings were automatically adjusted");
+      }
     }
   },
   { deep: true }
 );
 
-// おみくじを保存するハンドラー関数
-const handleSaveOmikuji = () => {
-  saveOmikuji(updateState, closeOmikujiDialog, state);
+const activeTab = ref("message");
+const sortedPosts = (type: string) => {
+  console.log(editingItem.value[type]);
+  if (!editingItem || !editingItem.value[type]) {
+    return [];
+  }
+
+  const items = Array.isArray(editingItem.value[type])
+    ? editingItem.value[type]
+    : [editingItem.value[type]];
+
+  return items.sort((a, b) => a.delaySeconds - b.delaySeconds);
 };
 </script>

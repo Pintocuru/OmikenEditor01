@@ -1,9 +1,10 @@
+// AppTypes.ts:Omiken用型指定
 import type { omikujiRule, OmikujiMessage, Placeholder } from './types';
 
 export type SelectedItem ={
   type: ItemType;
-  item: ItemContent;
-  index?: number;
+  index: number;
+  item?: ItemContent;
 } | null;
 
 export type ItemType = 'rules' | 'omikuji' | 'placeholder';
