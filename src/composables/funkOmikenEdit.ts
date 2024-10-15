@@ -7,11 +7,11 @@ import type {
   DefaultState,
   OmikujiMessage,
   omikujiRule,
-  Post,
   Placeholder,
   CharaStyles,
+  PostOnecomme,
 } from "../types";
-import type { SelectedItem, ItemType, ItemContent } from "../AppTypes";
+import type { SelectItem, ItemType, ItemContent } from "../AppTypes";
 /*
 
 アイテムの編集機能を担当
@@ -85,8 +85,6 @@ export function useEditOmikuji(
   CHARA: CharaStyles | undefined = {}
 ) {
   // メッセージタイプの配列
-  const messageTypes = ["message", "party", "toast", "speech"] as const;
-  type MessageType = (typeof messageTypes)[number];
 
   // フィルタリング基準の選択肢
   const thresholdTypes = [
@@ -111,15 +109,16 @@ export function useEditOmikuji(
     { text: "範囲", value: "range" },
   ];
 
-  // 新しいメッセージを追加
-  const addPost = (omikuji: OmikujiMessage, type: MessageType) => {
+  // 新しいメッセージを追加 
+  const addPost = (omikuji: OmikujiMessage, ) => {
     // CHARAの最初のキーを取得
     const firstKey = Object.keys(CHARA)[0];
 
-    if (!Array.isArray(omikuji[type])) {
-      omikuji[type] = [];
+    if (!Array.isArray(omikuji.post)) {
+      omikuji.post = [];
     }
-    (omikuji[type] as Post[]).push({
+    (omikuji.post as PostOnecomme[]).push({
+      type: "onecomme",
       botKey: firstKey || "mamono",
       iconKey: "Default",
       delaySeconds: 0,
@@ -130,10 +129,9 @@ export function useEditOmikuji(
   // メッセージを削除
   const removePost = (
     omikuji: OmikujiMessage,
-    type: MessageType,
     index: number
   ) => {
-    (omikuji[type] as Post[])?.splice(index, 1);
+    (omikuji.post as PostOnecomme[])?.splice(index, 1);
   };
 
   function sanitizeThresholdSettings(editingItem: Ref<any>) {
@@ -237,9 +235,14 @@ export function useEditOmikuji(
     return Math.round((num / total) * 100);
   };
 
+
+
+
+
+
+
   return {
     addPost,
-    messageTypes,
     thresholdTypes,
     comparisonItems,
     removePost,
@@ -251,38 +254,39 @@ export function useEditOmikuji(
 export function useItemEditor(
   props: {
     STATE: DefaultState;
-    selectedItem: SelectedItem;
+    selectItem: SelectItem;
   },
   emit: (event: "update:item", value: any) => void
 ) {
   const editingItem = ref<any>(null);
 
-  // 編集対象のアイテムを初期化する関数
   const initializeEditingItem = () => {
-    if (props.selectedItem?.index !== undefined) {
-      const { type, index } = props.selectedItem;
+    if (props.selectItem) {
+      const { type, index, items } = props.selectItem;
       const itemArray = props.STATE[type as keyof DefaultState] as any[];
 
-      // アイテムタイプに応じてバリデーション関数を選択
       const validationFunction = {
         rules: validateRules,
         omikuji: validateOmikuji,
         placeholder: validateRandomItems
       }[type];
 
-      // バリデーション関数が存在する場合、それを適用
       if (validationFunction) {
-        const newItem = validationFunction(itemArray);
-        editingItem.value = newItem[index];
+        if (index >= 0) {
+          // 単一アイテムの編集
+          editingItem.value = validationFunction([itemArray[index]])[0];
+        } else if (items) {
+          // グループ編集
+          editingItem.value = validationFunction(items);
+        }
       }
     } else {
       editingItem.value = null;
     }
   };
 
-  onMounted(initializeEditingItem);
+  watch(() => props.selectItem, initializeEditingItem, { immediate: true });
 
-  // editingItemの変更を監視し、親コンポーネントに通知
   watch(
     editingItem,
     (newValue) => newValue && emit("update:item", newValue),

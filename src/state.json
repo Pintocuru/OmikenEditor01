@@ -32,23 +32,23 @@
   ],
   "omikuji": [
     {
-      "weight": 18,
+      "weight": 5,
       "threshold": {
         "type": "none",
         "value": 1000,
         "loop": true,
         "comparison": -1
       },
-      "message": [
+      "post": [
         {
+          "type": "onecomme",
           "botKey": 0,
           "iconKey": "joy02",
           "delaySeconds": 1,
-          "content": "<<user>>さんの運勢は【大吉】<<random1>>"
-        }
-      ],
-      "party": [
+          "content": "<<user>>さんの運勢は【大吉】<<random>>"
+        },
         {
+          "type": "party",
           "delaySeconds": 1,
           "content": "!レベルアップ"
         }

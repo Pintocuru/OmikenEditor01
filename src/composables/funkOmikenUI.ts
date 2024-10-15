@@ -1,7 +1,7 @@
 // src/composables/funkOmikenUI.ts
 import { ref, computed, Ref } from 'vue';
 import type { DefaultState } from '../types';
-import type { ItemType, ItemContent } from '../AppTypes';
+import type { ItemType, ItemContent, SelectItem } from '../AppTypes';
 /*
 
 UIコンポーネントとインタラクションを担当
@@ -11,19 +11,21 @@ useNavigation: ナビゲーション機能
 
 export function useFunkOmikenUI(STATE: Ref<DefaultState>) {
   const dark = ref('dark');
-  const selectcols = ref<number>(1);
+  const selectCols = ref<number>(1);
   const showEditorDialog = ref(false);
-  const editorDialogItem = ref<{ type: ItemType; index: number } | null>(null);
+  const selectItem = ref<SelectItem | null>(null);
 
-  const openEditorDialog = (type: ItemType, index: number) => {
-    console.log(type, index);
-    editorDialogItem.value = { type, index };
-    showEditorDialog.value = true;
+  const openEditorDialog = (item: SelectItem) => {
+    if (item) {
+      selectItem.value = item;
+      showEditorDialog.value = true;
+    }
   };
+
 
   const closeEditorDialog = () => {
     showEditorDialog.value = false;
-    editorDialogItem.value = null;
+    selectItem.value = null;
   };
 
   // ナビゲーション関連の機能
@@ -77,9 +79,9 @@ export function useFunkOmikenUI(STATE: Ref<DefaultState>) {
 
   return {
     dark,
-    selectcols,
+    selectCols,
     showEditorDialog,
-    editorDialogItem,
+    selectItem,
     openEditorDialog,
     closeEditorDialog,
     sections,

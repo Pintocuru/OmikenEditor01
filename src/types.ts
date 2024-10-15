@@ -38,10 +38,7 @@ export interface OmikujiMessage {
     | 'loop' // loop:ループ
     | 'range'; // range:範囲
   };
-  message?: Post[];  // 通常メッセージ（省略可）
-  party?: Post[];  // パーティーメッセージ（省略可）
-  toast?: Post[];  // トースト通知メッセージ（省略可）
-  speech?: Post[];  // スピーチ用メッセージ（省略可）
+  post: PostOnecomme[]; // 
 }
 export type OmikujiThresholdType =
   | 'none' // none:基準なし
@@ -58,7 +55,12 @@ export type OmikujiThresholdType =
 
 
 // メッセージの投稿情報を管理する型
-export interface Post {
+export interface PostOnecomme {
+  type:
+  | 'onecomme' // わんコメへの投稿
+  | 'party' // WordPartyの投稿
+  | 'toast' // トースト投稿
+  | 'speech'; // わんコメのスピーチ機能
   botKey?: string;  // ボットキー（省略可）
   iconKey?: string;  // アイコンキー（省略可）
   delaySeconds: number;  // メッセージを送信するまでの遅延時間

@@ -5,7 +5,7 @@
       <component
         :is="editorComponent"
         :STATE="STATE"
-        :selectedItem="selectedItem"
+        :selectItem="selectItem"
         @update:item="handleUpdate"
       />
       <v-card-actions>
@@ -21,14 +21,14 @@ import { computed, ref, watch } from "vue";
 import RuleEditor from "./RuleEditor.vue";
 import OmikujiEditor from "./OmikujiEditor.vue";
 import RandomEditor from "./RandomEditor.vue";
-import type { ItemContent, SelectedItem } from "../AppTypes";
+import type { ItemContent, SelectItem } from "../AppTypes";
 import { DefaultState } from "@/types";
 
 // Props and emits
 const props = defineProps<{
   show: boolean;
   STATE: DefaultState;
-  selectedItem: SelectedItem;
+  selectItem: SelectItem;
 }>();
 
 const emit = defineEmits<{
@@ -38,7 +38,8 @@ const emit = defineEmits<{
 
 // Computed property for editor component
 const editorComponent = computed(() => {
-  const type = props.selectedItem?.type;
+  console.log(props.selectItem);
+  const type = props.selectItem?.type;
   const editorMap = {
     rules: RuleEditor,
     omikuji: OmikujiEditor,
@@ -58,8 +59,8 @@ watch(() => props.STATE, (newState) => {
 const updateShow = (value: boolean) => emit("update:show", value);
 
 const handleUpdate = (updatedItem: ItemContent) => {
-  if (props.selectedItem) {
-    const { type, index } = props.selectedItem;
+  if (props.selectItem) {
+    const { type, index } = props.selectItem;
     if (index !== undefined && type in localState.value) {
       (localState.value[type as keyof DefaultState] as ItemContent[])[index] = updatedItem;
     }

@@ -9,7 +9,12 @@
             <v-chip label> {{ filteredItems.length }} items </v-chip>
           </v-app-bar-title>
           <template v-slot:append>
-            <v-btn elevation="2" variant='outlined' @click="addNewItem" prepend-icon="mdi-plus">
+            <v-btn
+              elevation="2"
+              variant="outlined"
+              @click="addNewItem"
+              prepend-icon="mdi-plus"
+            >
               追加
             </v-btn>
           </template>
@@ -22,18 +27,14 @@
         />
 
         <MainItemList
-          v-if="selectCategory !== 'placeholder'"
           :items="filteredItems"
           :select-category="selectCategory"
           :selectCols="selectCols"
-          @update-items="updateItems"
-          @open-editor="openEditor"
-        />
-        <MainPlaceholderList
-          v-else
-          :items="filteredItems"
-          :group-by="filterOptions.placeholderSort"
-          :selectCols="selectCols"
+          :group-by="
+            selectCategory === 'placeholder'
+              ? filterOptions.placeholderSort
+              : undefined
+          "
           @update-items="updateItems"
           @open-editor="openEditor"
         />
@@ -46,9 +47,8 @@
 import { computed, ref, watch } from "vue";
 import MainFilter from "./MainFilter.vue";
 import MainItemList from "./MainItemList.vue";
-import MainPlaceholderList from "./MainPlaceholderList.vue";
 import { useFunkOmikenEdit } from "@/composables/funkOmikenEdit";
-import type { ItemContent, ItemType } from "../AppTypes";
+import type { ItemContent, ItemType, SelectItem } from "../AppTypes";
 import type {
   DefaultState,
   omikujiRule,
@@ -65,7 +65,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: "update:STATE", state: DefaultState): void;
-  (e: "open-editor", type: ItemType, index: number): void;
+  (e: "open-editor", selectItem: SelectItem): void;
 }>();
 
 const { addItem } = useFunkOmikenEdit(ref(props.STATE));
@@ -130,8 +130,8 @@ const addNewItem = (): void => {
   updateFilteredItems(); // フィルタ結果を再描画
 };
 
-const openEditor = (type: ItemType, index: number) => {
-  emit("open-editor", type, index);
+const openEditor = (selectItem: SelectItem) => {
+  emit("open-editor", selectItem);
 };
 
 // フィルターオプションを更新する関数

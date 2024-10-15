@@ -70,12 +70,12 @@
 import { computed, onMounted, ref, watch } from "vue";
 import { useItemEditor } from "@/composables/funkOmikenEdit";
 import type { DefaultState, omikujiRule } from "../types";
-import { ItemType, SelectedItem } from "@/AppTypes";
+import { ItemType, SelectItem } from "@/AppTypes";
 
 // props/emits
 const props = defineProps<{
   STATE: DefaultState;
-  selectedItem: SelectedItem;
+  selectItem: SelectItem;
 }>();
 
 const emit = defineEmits<{

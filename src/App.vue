@@ -3,9 +3,9 @@
   <v-app :theme="dark">
     <AppHeader
       v-model:dark="dark"
-      v-model:selectcols="selectcols"
+      v-model:selectCols="selectCols"
       @update:dark="dark = $event"
-      @update:selectcols="selectcols = $event"
+      @update:selectCols="selectCols = $event"
     />
     <AppNavigation
       v-model:selectCategory="selectCategory"
@@ -17,7 +17,7 @@
         <AppMain
           v-model:STATE="STATE"
           :selectCategory="selectCategory"
-          :selectCols="selectcols"
+          :selectCols="selectCols"
           @update:STATE="STATE = $event"
           @open-editor="openEditorDialog"
         />
@@ -27,7 +27,7 @@
     <EditorDialog
       v-model:show="showEditorDialog"
       :STATE="STATE"
-      :selectedItem="editorDialogItem"
+      :selectItem="selectItem"
       @update:show="showEditorDialog = $event"
       @update:STATE="updateState"
     />
@@ -43,7 +43,7 @@ import EditorDialog from "./components/EditorDialog.vue";
 import { useFunkOmikenCore } from "./composables/funkOmikenCore";
 import { useDataFetcher } from "./composables/funkOmikenJSON";
 import { useFunkOmikenUI } from "./composables/funkOmikenUI";
-import { CharaStyles, DefaultState } from "./types";
+import { DefaultState } from "./types";
 
 // アプリケーションの状態
 const STATE = ref<DefaultState>({
@@ -98,19 +98,14 @@ const CHARA = {
     },
   },
 };
-provide('charaKey', CHARA) // provideで孫コンポーネントに渡す
+provide("charaKey", CHARA); // provideで孫コンポーネントに渡す
 
 // コンポーザブルの使用
 const { selectCategory, updateState } = useFunkOmikenCore(STATE);
 
 const { fetchData } = useDataFetcher();
-const {
-  dark,
-  selectcols,
-  showEditorDialog,
-  editorDialogItem,
-  openEditorDialog,
-} = useFunkOmikenUI(STATE);
+const { dark, selectCols, showEditorDialog, selectItem, openEditorDialog } =
+  useFunkOmikenUI(STATE);
 
 // コンポーネントのマウント時にデータを取得
 onMounted(async () => {

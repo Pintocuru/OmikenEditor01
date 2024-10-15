@@ -40,13 +40,13 @@
 // コンポーザブル
 import { useNavigation } from "../composables/funkOmikenUI.js";
 // 型指定
-import type { ItemType, SelectedItem } from "../AppTypes";
+import type { ItemType, SelectItem } from "../AppTypes";
 
 const props = defineProps<{
   title: string;
   items: any[];
   itemKey: ItemType;
-  selectedItem: SelectedItem | null;
+  selectedItem: SelectItem | null;
   color: string;
 }>();
 

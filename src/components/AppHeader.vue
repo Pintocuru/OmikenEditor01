@@ -25,17 +25,17 @@
 import { ref } from "vue";
 import { defineProps, defineEmits } from "vue";
 
-const props = defineProps<{ dark: string; selectcols: number }>();
+const props = defineProps<{ dark: string; selectCols: number }>();
 const emit = defineEmits<{
   (e: "update:dark", value: string): void;
-  (e: "update:selectcols", value: number): void;
+  (e: "update:selectCols", value: number): void;
 }>();
 
 // テーマ切り替え関数
 const toggleTheme = () => emit("update:dark", props.dark === "dark" ? "light" : "dark");
 
 // グリッドレイアウト設定
-const localSelectCols = ref(props.selectcols);
+const localSelectCols = ref(props.selectCols);
 const gridcols = [
   { icon: "mdi-view-list" },
   { icon: "mdi-view-grid" },
@@ -46,6 +46,6 @@ const gridcols = [
 const updateSelectCols = (event: { target: { value: number } }) => {
   const value = Number(event.target.value);
   localSelectCols.value = value;
-  emit("update:selectcols", value);
+  emit("update:selectCols", value);
 };
 </script>
