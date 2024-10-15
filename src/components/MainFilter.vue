@@ -45,14 +45,13 @@
         <v-select
           v-model="localFilterOptions.placeholderSort"
           :items="[
-            { title: '名前順', value: 'name' },
-            { title: '重み付け（高い順）', value: 'weightDesc' },
-            { title: '重み付け（低い順）', value: 'weightAsc' },
-            { title: 'グループ順', value: 'group' },
-          ]"
-          item-title="title"
-          item-value="value"
-          label="ソート"
+          { title: 'なし', value: 'none' },
+          { title: 'プレースホルダー名', value: 'name' },
+          { title: 'グループ', value: 'group' },
+        ]"
+        item-title="title"
+        item-value="value"
+        label="グループ化"
           @change="emitUpdate"
         />
       </v-col>
@@ -67,7 +66,7 @@ import type { ItemType } from "../AppTypes";
 import { OmikujiThresholdType } from '@/types';
 
 type OmikujiSortOption = 'weightDesc' | 'weightAsc';
-type PlaceholderSortOption = 'name' | 'weightDesc' | 'weightAsc' | 'group';
+type PlaceholderSortOption = 'none' | 'name' | 'group';
 const props = defineProps<{
   selectCategory: ItemType;
   filterOptions: {

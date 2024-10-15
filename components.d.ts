@@ -7,6 +7,11 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    1: typeof import('./src/components/1.vue')['default']
+    2: typeof import('./src/components/2.vue')['default']
+    3: typeof import('./src/components/3.vue')['default']
+    4: typeof import('./src/components/4.vue')['default']
+    5: typeof import('./src/components/5.vue')['default']
     AppHeader: typeof import('./src/components/AppHeader.vue')['default']
     AppList: typeof import('./src/components/AppList.vue')['default']
     AppMain: typeof import('./src/components/AppMain.vue')['default']
@@ -16,6 +21,7 @@ declare module 'vue' {
     EditorDialog: typeof import('./src/components/EditorDialog.vue')['default']
     MainFilter: typeof import('./src/components/MainFilter.vue')['default']
     MainItemList: typeof import('./src/components/MainItemList.vue')['default']
+    MainPlaceholderList: typeof import('./src/components/MainPlaceholderList.vue')['default']
     NavigationList: typeof import('./src/components/NavigationList.vue')['default']
     NaviListSection: typeof import('./src/components/Navi-ListSection.vue')['default']
     OmikujiEditor: typeof import('./src/components/OmikujiEditor.vue')['default']

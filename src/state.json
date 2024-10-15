@@ -60,6 +60,36 @@
       "name": "<<test>>",
       "weight": 1,
       "group": 0,
+      "content": "あなたは茶色です"
+    },
+    {
+      "name": "<<test>>",
+      "weight": 1,
+      "group": 0,
+      "content": "あなたは緑です"
+    },
+    {
+      "name": "<<test>>",
+      "weight": 1,
+      "group": 0,
+      "content": "あなたは青です"
+    },
+    {
+      "name": "<<test>>",
+      "weight": 1,
+      "group": 0,
+      "content": "あなたは赤です"
+    },
+    {
+      "name": "<<test>>",
+      "weight": 1,
+      "group": 1,
+      "content": "あなたは黄色です"
+    },
+    {
+      "name": "<<test2>>",
+      "weight": 1,
+      "group": 1,
       "content": "その気になればこんなものなんて!"
     }
   ]

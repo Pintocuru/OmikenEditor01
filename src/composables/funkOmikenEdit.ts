@@ -1,75 +1,70 @@
 // src/composables/funkOmikenEdit.ts
-import { reactive, ref, computed, Ref, onMounted, watch } from 'vue';
-import type { DefaultState, OmikujiMessage, omikujiRule, Post, Placeholder } from '../types';
-import type { SelectedItem, ItemType, ItemContent } from '../AppTypes';
+import { reactive, ref, computed, Ref, onMounted, watch } from "vue";
+
+import { validateRules, validateOmikuji, validateRandomItems } from "../composables/funkOmikenJSON";
+
+import type {
+  DefaultState,
+  OmikujiMessage,
+  omikujiRule,
+  Post,
+  Placeholder,
+  CharaStyles,
+} from "../types";
+import type { SelectedItem, ItemType, ItemContent } from "../AppTypes";
 /*
 
 アイテムの編集機能を担当
 useOmikujiEditor: おみくじアイテムの編集機能を提供
-useRuleEditor: ルールの編集機能を提供（新規追加）#TODO
-useRandomItemEditor: ランダムアイテムの編集機能を提供（新規追加）#TODO
+useRuleEditor: ルールの編集機能を提供（新規追加）
+useRandomItemEditor: ランダムアイテムの編集機能を提供（新規追加）
 */
-
+// TODO useFunkOmikenEdit　の名前を変えたい
 export function useFunkOmikenEdit(STATE: Ref<DefaultState>) {
   // アイテムを更新
   const updateItem = (type: ItemType, updatedItem: ItemContent) => {
-    const index = STATE.value[type].findIndex(i => i === updatedItem);
+    const index = STATE.value[type].findIndex((i) => i === updatedItem);
     if (index !== -1) {
       STATE.value[type][index] = updatedItem;
     }
   };
-  // アイテムを追加
-  const addItem = (type: ItemType) => {
-    let newItem: ItemContent;
 
-    switch (type) {
-      case 'rules':
-        newItem = {
-          name: `新しいルール ${STATE.value.rules.length + 1}`,
-          modes: '',
-          modeSelect: [],
-          switch: 0,
-          matchExact: [],
-          matchStartsWith: [],
-          matchIncludes: []
-        } as omikujiRule; // `omikujiRule` 型として明示
-        break;
+  // アイテムを追加するための変数群
+  const typeValidators = {
+    rules: validateRules,
+    omikuji: validateOmikuji,
+    placeholder: validateRandomItems,
+  } as const;
+  const typeStateKeys = {
+    rules: "rules",
+    omikuji: "omikuji",
+    placeholder: "placeholder",
+  } as const;
+  // タイプごとの `name` フォーマット関数を用意
+  const generateName = {
+    rules: (count: number) => `新しいルール ${count + 1}`,
+    omikuji: (count: number) => `${getRandomFortune()}`,
+    placeholder: (count: number) => `<<random${count + 1}>>`,
+  } as const;
 
-      case 'omikuji':
-        newItem = {
-          name: '大吉',
-          weight: 1,
-          threshold: { type: 'none', value: 0, valueMax: 0, comparison: 'equal' },
-          message: [],
-          party: [],
-          toast: [],
-          speech: []
-        } as OmikujiMessage; // `OmikujiMessage` 型として明示
-        break;
+  const omikujiFortunes = ["大吉", "中吉", "小吉", "末吉", "吉", "凶", "福沢諭吉"];
+  // ランダムな結果を返す関数
+  const getRandomFortune = () =>
+    omikujiFortunes[Math.floor(Math.random() * omikujiFortunes.length)];
 
-      case 'placeholder':
-        newItem = {
-          name: `新しいタグ ${STATE.value.placeholder.length + 1}`,
-          weight: 1,
-          group: 0,
-          content: ''
-        } as Placeholder; // `Placeholder` 型として明示
-        break;
-    }
-
-    // 正しい配列にアイテムを追加
-    if (type === 'rules') {
-      STATE.value.rules.push(newItem as omikujiRule);
-    } else if (type === 'omikuji') {
-      STATE.value.omikuji.push(newItem as OmikujiMessage);
-    } else if (type === 'placeholder') {
-      STATE.value.placeholder.push(newItem as Placeholder);
-    }
-
-    return newItem;
+  // アイテムを追加する
+    const addItem = (type: ItemType): void => {
+    const validator = typeValidators[type];
+    const stateKey = typeStateKeys[type];
+    // カウントに基づいて `name` を生成
+    const name = generateName[type](STATE.value[stateKey].length);
+    // バリデータで新しいアイテムを生成
+    const newItem = validator({ name })[0];
+    // アイテムを対応する配列に追加
+    (STATE.value[stateKey] as any[]).push(newItem);
   };
 
-
+  
   // アイテムを削除
   const deleteItem = (type: ItemType, index: number) => {
     if (index !== -1 && STATE.value[type][index]) {
@@ -84,9 +79,11 @@ export function useFunkOmikenEdit(STATE: Ref<DefaultState>) {
   };
 }
 
-
 // おみくじエディット用
-export function useEditOmikuji(STATE: DefaultState, ) {
+export function useEditOmikuji(
+  STATE: DefaultState,
+  CHARA: CharaStyles | undefined = {}
+) {
   // メッセージタイプの配列
   const messageTypes = ["message", "party", "toast", "speech"] as const;
   type MessageType = (typeof messageTypes)[number];
@@ -107,33 +104,37 @@ export function useEditOmikuji(STATE: DefaultState, ) {
   ];
   // 比較方法の選択肢
   const comparisonItems = [
-    { text: "以下", value: 'min' },
-    { text: "等しい", value: 'equal' },
-    { text: "以上", value: 'max' },
-    { text: "ループ", value: 'loop' },
-    { text: "範囲", value: 'range' },
+    { text: "以下", value: "min" },
+    { text: "等しい", value: "equal" },
+    { text: "以上", value: "max" },
+    { text: "ループ", value: "loop" },
+    { text: "範囲", value: "range" },
   ];
-
 
   // 新しいメッセージを追加
   const addPost = (omikuji: OmikujiMessage, type: MessageType) => {
+    // CHARAの最初のキーを取得
+    const firstKey = Object.keys(CHARA)[0];
+
     if (!Array.isArray(omikuji[type])) {
       omikuji[type] = [];
     }
     (omikuji[type] as Post[]).push({
-      botKey: 0,
-      iconKey: "",
+      botKey: firstKey || "mamono",
+      iconKey: "Default",
       delaySeconds: 0,
-      content: "",
+      content: "<<user>>さんの運勢は【大吉】",
     });
   };
 
-
   // メッセージを削除
-  const removePost = (omikuji: OmikujiMessage, type: MessageType, index: number) => {
+  const removePost = (
+    omikuji: OmikujiMessage,
+    type: MessageType,
+    index: number
+  ) => {
     (omikuji[type] as Post[])?.splice(index, 1);
   };
-
 
   function sanitizeThresholdSettings(editingItem: Ref<any>) {
     if (!editingItem.value || !editingItem.value.threshold) {
@@ -207,7 +208,12 @@ export function useEditOmikuji(STATE: DefaultState, ) {
       threshold.value !== value ||
       threshold.valueMax !== valueMax
     ) {
-      editingItem.value.threshold = { ...threshold, comparison, value, valueMax };
+      editingItem.value.threshold = {
+        ...threshold,
+        comparison,
+        value,
+        valueMax,
+      };
       console.log(
         "Threshold settings were adjusted:",
         editingItem.value.threshold
@@ -218,25 +224,18 @@ export function useEditOmikuji(STATE: DefaultState, ) {
     return false; // 変更がなかったことを示す
   }
 
-
+  // TODO 計算が100%を超えるバグがある
   // weight の数値を合計したものと、引数に対しての％を返す
   // 後で他でも使えるようにしたいな
   const sumWeightValues = (num: number) => {
     const total = STATE.omikuji.reduce(
-      (sum, obj) => sum + (obj.hasOwnProperty("weight") ? obj.weight : 0),
-      0
-    );
+      (sum, obj) => sum + (obj.hasOwnProperty("weight") ? obj.weight : 0), 0);
 
     // totalが0の場合は0を返す
-    if (total <= 0) {
-      return 0; // または適切なデフォルト値を返す
-    }
+    if (total <= 0) return 0;
 
     return Math.round((num / total) * 100);
   };
-
-
-
 
   return {
     addPost,
@@ -249,51 +248,65 @@ export function useEditOmikuji(STATE: DefaultState, ) {
   };
 }
 
-
-
-
-export function useItemEditor(props: {
-  STATE: DefaultState;
-  selectedItem: SelectedItem;
-}, emit: (event: 'update:item', value: any) => void) {
+export function useItemEditor(
+  props: {
+    STATE: DefaultState;
+    selectedItem: SelectedItem;
+  },
+  emit: (event: "update:item", value: any) => void
+) {
   const editingItem = ref<any>(null);
 
+  // 編集対象のアイテムを初期化する関数
   const initializeEditingItem = () => {
-    console.log('ItemEditor: initializeEditingItem called', props.selectedItem);
-    if (props.selectedItem && props.selectedItem.index !== undefined) {
-      const itemArray = props.STATE[props.selectedItem.type as keyof DefaultState] as any[];
-      editingItem.value = JSON.parse(JSON.stringify(itemArray[props.selectedItem.index]));
-      // threshold プロパティが存在しない場合、デフォルト値を設定
-      if (!editingItem.value.threshold) {
-        editingItem.value.threshold = {
-          type: 'none',
-          comparison: 'min',
-          value: 0,
-          valueMax: 0
-        };
+    if (props.selectedItem?.index !== undefined) {
+      const { type, index } = props.selectedItem;
+      const itemArray = props.STATE[type as keyof DefaultState] as any[];
+
+      // アイテムタイプに応じてバリデーション関数を選択
+      const validationFunction = {
+        rules: validateRules,
+        omikuji: validateOmikuji,
+        placeholder: validateRandomItems
+      }[type];
+
+      // バリデーション関数が存在する場合、それを適用
+      if (validationFunction) {
+        const newItem = validationFunction(itemArray);
+        editingItem.value = newItem[index];
       }
     } else {
       editingItem.value = null;
     }
   };
 
-  onMounted(() => {
-    initializeEditingItem();
-  });
+  onMounted(initializeEditingItem);
 
-  watch(() => props.selectedItem, () => {
-    console.log('ItemEditor: selectedItem changed');
-    initializeEditingItem();
-  }, { deep: true });
+  // editingItemの変更を監視し、親コンポーネントに通知
+  watch(
+    editingItem,
+    (newValue) => newValue && emit("update:item", newValue),
+    { deep: true }
+  );
 
-  watch(editingItem, (newValue) => {
-    console.log('ItemEditor: editingItem changed', newValue);
-    if (newValue) {
-      emit('update:item', newValue);
-    }
-  }, { deep: true });
+  return { editingItem };
+}
+
+
+
+
+// プレースホルダー用
+export function useEditRandom(  STATE: DefaultState,) {
+ 
+  // 新しいメッセージを追加
+  const addRandomItem = (placeholder: Placeholder,) => {
+
+
+  };
+
+
+
 
   return {
-    editingItem
   };
 }

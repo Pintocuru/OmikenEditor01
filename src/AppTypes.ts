@@ -4,6 +4,7 @@ import type { omikujiRule, OmikujiMessage, Placeholder } from './types';
 export type SelectedItem ={
   type: ItemType;
   index: number;
+  name? : string;
   item?: ItemContent;
 } | null;
 

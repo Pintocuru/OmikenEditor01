@@ -1,17 +1,13 @@
 <!-- src/components/EditorDialog.vue -->
 <template>
-  <v-dialog
-    :model-value="show"
-    @update:model-value="updateShow"
-    max-width="700px"
-  >
+  <v-dialog :model-value="show" @update:model-value="updateShow" max-width="800px">
     <v-card>
-        <component
-          :is="getEditorComponent"
-          :STATE="STATE"
-          :selectedItem="selectedItem"
-          @update:item="handleUpdate"
-        />
+      <component
+        :is="editorComponent"
+        :STATE="STATE"
+        :selectedItem="selectedItem"
+        @update:item="handleUpdate"
+      />
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn color="blue darken-1" @click="closeDialog">Close</v-btn>
@@ -26,9 +22,9 @@ import RuleEditor from "./RuleEditor.vue";
 import OmikujiEditor from "./OmikujiEditor.vue";
 import RandomEditor from "./RandomEditor.vue";
 import type { ItemContent, SelectedItem } from "../AppTypes";
-import { DefaultState, omikujiRule } from "@/types";
+import { DefaultState } from "@/types";
 
-// props/emits
+// Props and emits
 const props = defineProps<{
   show: boolean;
   STATE: DefaultState;
@@ -40,68 +36,38 @@ const emit = defineEmits<{
   (e: "update:STATE", STATE: DefaultState): void;
 }>();
 
-const updateShow = (value: boolean) => {
-  emit("update:show", value);
-};
-
-const getEditorComponent = computed(() => {
-  const type = props.selectedItem?.type || "meow";
-  switch (type) {
-    case "rules":
-      return RuleEditor;
-    case "omikuji":
-      return OmikujiEditor;
-    case "placeholder":
-      return RandomEditor;
-    default:
-      return null;
-  }
+// Computed property for editor component
+const editorComponent = computed(() => {
+  const type = props.selectedItem?.type;
+  const editorMap = {
+    rules: RuleEditor,
+    omikuji: OmikujiEditor,
+    placeholder: RandomEditor
+  };
+  return editorMap[type as keyof typeof editorMap] || null;
 });
 
-const localState = ref(JSON.parse(JSON.stringify(props.STATE)));
+// Local state management
+const localState = ref<DefaultState>(JSON.parse(JSON.stringify(props.STATE)));
 
-watch(
-  () => props.STATE,
-  (newState) => {
-    console.log("EditorDialog: props.STATE changed", newState);
-    localState.value = JSON.parse(JSON.stringify(newState));
-  },
-  { deep: true }
-);
+watch(() => props.STATE, (newState) => {
+  localState.value = JSON.parse(JSON.stringify(newState));
+}, { deep: true });
+
+// Event handlers
+const updateShow = (value: boolean) => emit("update:show", value);
 
 const handleUpdate = (updatedItem: ItemContent) => {
-  console.log("EditorDialog: handleUpdate called", updatedItem);
-
   if (props.selectedItem) {
     const { type, index } = props.selectedItem;
-
-    switch (type) {
-      case "rules":
-        if (index !== undefined) {
-          localState.value.rules[index] = updatedItem;
-        }
-        break;
-      case "omikuji":
-        if (index !== undefined) {
-          localState.value.omikuji[index] = updatedItem; // 同様にインデックスを使って更新
-        }
-        break;
-      case "placeholder":
-        if (index !== undefined) {
-          localState.value.placeholder[index] = updatedItem; // 同様にインデックスを使って更新
-        }
-        break;
-      default:
-        console.warn("Unknown type:", type);
+    if (index !== undefined && type in localState.value) {
+      (localState.value[type as keyof DefaultState] as ItemContent[])[index] = updatedItem;
     }
-
-    // 状態を更新
     emit("update:STATE", localState.value);
   }
 };
 
 const closeDialog = () => {
-  console.log("EditorDialog: closeDialog called");
   emit("update:STATE", localState.value);
   emit("update:show", false);
 };

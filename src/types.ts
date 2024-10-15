@@ -59,7 +59,7 @@ export type OmikujiThresholdType =
 
 // メッセージの投稿情報を管理する型
 export interface Post {
-  botKey?: number;  // ボットキー（省略可）
+  botKey?: string;  // ボットキー（省略可）
   iconKey?: string;  // アイコンキー（省略可）
   delaySeconds: number;  // メッセージを送信するまでの遅延時間
   content: string;  // メッセージ内容

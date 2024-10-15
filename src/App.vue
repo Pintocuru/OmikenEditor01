@@ -17,7 +17,7 @@
         <AppMain
           v-model:STATE="STATE"
           :selectCategory="selectCategory"
-          :selectgridcols="selectcols"
+          :selectCols="selectcols"
           @update:STATE="STATE = $event"
           @open-editor="openEditorDialog"
         />
@@ -35,7 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { onMounted, provide, ref } from "vue";
 import AppHeader from "./components/AppHeader.vue";
 import AppNavigation from "./components/AppNavigation.vue";
 import AppMain from "./components/AppMain.vue";
@@ -98,6 +98,7 @@ const CHARA = {
     },
   },
 };
+provide('charaKey', CHARA) // provideで孫コンポーネントに渡す
 
 // コンポーザブルの使用
 const { selectCategory, updateState } = useFunkOmikenCore(STATE);
