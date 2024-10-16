@@ -22,7 +22,7 @@ import RuleEditor from "./RuleEditor.vue";
 import OmikujiEditor from "./OmikujiEditor.vue";
 import RandomEditor from "./RandomEditor.vue";
 import type { ItemContent, SelectItem } from "../AppTypes";
-import { DefaultState } from "@/types";
+import { DefaultState, Placeholder } from "@/types";
 
 // Props and emits
 const props = defineProps<{
@@ -62,11 +62,24 @@ const handleUpdate = (updatedItem: ItemContent) => {
   if (props.selectItem) {
     const { type, index } = props.selectItem;
     if (index !== undefined && type in localState.value) {
-      (localState.value[type as keyof DefaultState] as ItemContent[])[index] = updatedItem;
+      if (Array.isArray(updatedItem)) {
+        // グループ編集の場合
+        const stateArray = localState.value[type as keyof DefaultState] as Placeholder[];
+        updatedItem.forEach((item: Placeholder) => {
+          const stateIndex = stateArray.findIndex((stateItem: Placeholder) => stateItem.id === item.id);
+          if (stateIndex !== -1) {
+            stateArray[stateIndex] = item;
+          }
+        });
+      } else {
+        // 単一アイテムの編集の場合
+        (localState.value[type as keyof DefaultState] as ItemContent[])[index] = updatedItem as Placeholder;
+      }
     }
     emit("update:STATE", localState.value);
   }
 };
+
 
 const closeDialog = () => {
   emit("update:STATE", localState.value);

@@ -38,7 +38,7 @@ export function useDataFetcher() {
         defaultRules: data.defaultRules || DEFAULT_RULES,
         rules: validateRules(data.rules),
         omikuji: validateOmikuji(data.omikuji),
-        placeholder: validateRandomItems(data.placeholder),
+        placeholder: validateRandomItems(data.placeholder, true),
       };
 
       Object.assign(STATE, validatedData);
@@ -101,30 +101,26 @@ export function validateOmikuji(items: any | any[]): OmikujiMessage[] {
       valueMax: typeof item.threshold?.valueMax === 'number' ? Math.abs(item.threshold.valueMax) : 0,
     },
     // メッセージの投稿情報 message:わんコメ party:WordParty toast:トースト speech:わんコメspeech
-    post: validatePosts(item.post),
+    post: Array.isArray(item.post) ?
+      (item.post as PostOnecomme[]).map((post: any): PostOnecomme => ({
+        type: ['onecomme', 'party', 'toast', 'speech'].includes(post.type) ? post.type : 'onecomme',
+        botKey: typeof post.botKey === 'string' ? post.botKey : "mamono",
+        iconKey: typeof post.iconKey === 'string' ? post.iconKey : "Default",
+        delaySeconds: typeof post.delaySeconds === 'number' ? post.delaySeconds : 0,
+        content: typeof post.content === 'string' ? post.content : '<<user>>さんの運勢は【大吉】',
+      }))
+        .sort((a, b) => a.delaySeconds - b.delaySeconds) : []
   }));
 }
-function validatePosts(posts: any[]): PostOnecomme[] {
-  return posts.map(post => ({
-    // 投稿のタイプ
-    type: ['onecomme', 'party', 'toast', 'speech'].includes(post.type) ? post.type : 'onecomme',
-    // キャラクターのキー名
-    botKey: typeof post.botKey === 'string' ? post.botKey : "mamono",
-    // キャラクターのアイコン名
-    iconKey: typeof post.iconKey === 'string' ? post.iconKey : "Default",
-    // メッセージを送信するまでの遅延時間
-    delaySeconds: typeof post.delaySeconds === 'number' ? post.delaySeconds : 0,
-    // メッセージ内容
-    content: typeof post.content === 'string' ? post.content : '<<user>>さんの運勢は【大吉】',
-  }))
-    .sort((a, b) => a.delaySeconds - b.delaySeconds);  // delaySecondsでソート
-}
+
 
 // プレースホルダーのデータチェック
-export function validateRandomItems(items: any | any[]): Placeholder[] {
+export function validateRandomItems(items: any | any[], generateIds: boolean = false): Placeholder[] {
   // 単一のオブジェクトの場合は配列に変換
   const itemsArray = Array.isArray(items) ? items : [items];
-  return itemsArray.map((item: any): Placeholder => ({
+  return itemsArray.map((item: any, index: number): Placeholder => ({
+    // id(エディター用)
+    id: generateIds ? index + 1 : (typeof item.id === 'number' ? item.id : Math.floor(Math.random() * 999999999)),
     // プレースホルダー名
     name: typeof item.name === 'string' ? item.name : '<<random>>',
     // ランダム選択時の重み付け

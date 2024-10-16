@@ -64,7 +64,7 @@ const CHARA = {
       "--lcv-background-color": "#FF4081",
     },
     image: {
-      Default: "reimu/default.png", // 存在しない場合のフォロー
+      Default: "reimu/Default.png", // 存在しない場合のフォロー
       fun01: "reimu/fun01.png", // 通常
       fun02: "reimu/fun02.png", // 通常:身振り付き
       fun03: "reimu/fun03.png", // 通常:ワンポイント
@@ -99,6 +99,8 @@ const CHARA = {
   },
 };
 provide("charaKey", CHARA); // provideで孫コンポーネントに渡す
+const placeholderKey = ref(STATE.value.placeholder);
+provide("placeholderKey", placeholderKey); // provideで孫コンポーネントに渡す
 
 // コンポーザブルの使用
 const { selectCategory, updateState } = useFunkOmikenCore(STATE);
@@ -110,5 +112,6 @@ const { dark, selectCols, showEditorDialog, selectItem, openEditorDialog } =
 // コンポーネントのマウント時にデータを取得
 onMounted(async () => {
   await fetchData(STATE.value);
+  placeholderKey.value = STATE.value.placeholder;
 });
 </script>

@@ -19,9 +19,9 @@ useOmikujiEditor: おみくじアイテムの編集機能を提供
 useRuleEditor: ルールの編集機能を提供（新規追加）
 useRandomItemEditor: ランダムアイテムの編集機能を提供（新規追加）
 */
-// TODO useFunkOmikenEdit　の名前を変えたい
+// TODO useFunkOmikenEdit は不要かも(どこでも使われていない)
 export function useFunkOmikenEdit(STATE: Ref<DefaultState>) {
-  // アイテムを更新
+  // アイテムを更新 // TODO updateItemは使われていないようだ
   const updateItem = (type: ItemType, updatedItem: ItemContent) => {
     const index = STATE.value[type].findIndex((i) => i === updatedItem);
     if (index !== -1) {
@@ -54,6 +54,7 @@ export function useFunkOmikenEdit(STATE: Ref<DefaultState>) {
 
   // アイテムを追加する
     const addItem = (type: ItemType): void => {
+      console.log(type);
     const validator = typeValidators[type];
     const stateKey = typeStateKeys[type];
     // カウントに基づいて `name` を生成
@@ -65,7 +66,7 @@ export function useFunkOmikenEdit(STATE: Ref<DefaultState>) {
   };
 
   
-  // アイテムを削除
+  // アイテムを削除 // TODO deleteItemは使われていないようだ
   const deleteItem = (type: ItemType, index: number) => {
     if (index !== -1 && STATE.value[type][index]) {
       STATE.value[type].splice(index, 1);
@@ -222,24 +223,6 @@ export function useEditOmikuji(
     return false; // 変更がなかったことを示す
   }
 
-  // TODO 計算が100%を超えるバグがある
-  // weight の数値を合計したものと、引数に対しての％を返す
-  // 後で他でも使えるようにしたいな
-  const sumWeightValues = (num: number) => {
-    const total = STATE.omikuji.reduce(
-      (sum, obj) => sum + (obj.hasOwnProperty("weight") ? obj.weight : 0), 0);
-
-    // totalが0の場合は0を返す
-    if (total <= 0) return 0;
-
-    return Math.round((num / total) * 100);
-  };
-
-
-
-
-
-
 
   return {
     addPost,
@@ -247,7 +230,6 @@ export function useEditOmikuji(
     comparisonItems,
     removePost,
     sanitizeThresholdSettings,
-    sumWeightValues,
   };
 }
 
@@ -268,7 +250,7 @@ export function useItemEditor(
       const validationFunction = {
         rules: validateRules,
         omikuji: validateOmikuji,
-        placeholder: validateRandomItems
+        placeholder: (items: any) => validateRandomItems(items, false)
       }[type];
 
       if (validationFunction) {

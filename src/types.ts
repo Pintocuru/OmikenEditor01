@@ -11,16 +11,16 @@ export interface DefaultState {
 // おみくじルールの型定義
 export interface omikujiRule {
   name: string;  // ルール名（例: "おみくじ"）
-  modes: string;  // モード
-  modeSelect: string[]; // モードセレクト
   switch: 0 | 1 | 2 | 3 | 4;  // ルールの有効/無効 0:OFF/1:だれでも/2:メンバー以上/3:モデレーター/4:管理者
   matchExact?: string[];  // 完全一致するキーワードの配列（省略可）
   matchStartsWith?: string[];  // 特定のフレーズで始まるキーワード（省略可）
   matchIncludes?: string[];  // 部分一致するキーワード（省略可）
+  disabledIds?: number[];
 }
 
 // おみくじメッセージの型定義
 export interface OmikujiMessage {
+  id: number; // id
   name: string;  // 結果名
   weight: number;  // メッセージの重み付け
   threshold: { // フィルタリング基準
@@ -69,6 +69,7 @@ export interface PostOnecomme {
 
 // プレースホルダー項目の型定義
 export interface Placeholder {
+  id: number;
   name: string; // プレースホルダー名
   weight: number;  // ランダム選択時の重み付け
   group: number;  // グループ番号

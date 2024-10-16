@@ -18,9 +18,9 @@
             </v-text-field>
           </v-col>
           <v-col cols="9" sm="6">
-            <v-progress-linear :model-value="sumWeightValues(editingItem.weight)" buffer-value="10" color="primary"
+            <v-progress-linear :model-value="weightValues" buffer-value="10" color="primary"
               height="35" striped>出現割合：{{
-                sumWeightValues(editingItem.weight)
+                weightValues
               }}
               %</v-progress-linear>
           </v-col>
@@ -46,7 +46,7 @@
 </template>
 
 <script setup lang="ts">
-import { inject, watch } from 'vue';
+import { computed, inject, watch } from 'vue';
 import type { CharaStyles, DefaultState, OmikujiMessage } from '../types';
 import type { SelectItem } from '@/AppTypes';
 import { useEditOmikuji, useItemEditor } from '../composables/funkOmikenEdit';
@@ -73,8 +73,13 @@ const {
   comparisonItems,
   removePost,
   sanitizeThresholdSettings,
-  sumWeightValues,
 } = useEditOmikuji(props.STATE, CHARA);
+
+const weightValues = computed(() => {
+      const totalWeight = props.STATE.omikuji.reduce((sum, obj) => sum + obj.weight, 0);
+      if (totalWeight <= 0) return 0;
+      return Math.round((editingItem.value.weight / totalWeight) * 100);
+    });
 
 // フィルタリング設定の変更を監視
 watch(

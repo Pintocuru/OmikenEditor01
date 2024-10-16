@@ -42,7 +42,7 @@
       "post": [
         {
           "type": "onecomme",
-          "botKey": 0,
+          "botKey": "reimu",
           "iconKey": "joy02",
           "delaySeconds": 1,
           "content": "<<user>>さんの運勢は【大吉】<<random>>"
@@ -53,35 +53,59 @@
           "content": "!レベルアップ"
         }
       ]
-    }
+    },
+        {
+          "weight": 5,
+          "threshold": {
+            "type": "none",
+            "value": 1000,
+            "loop": true,
+            "comparison": -1
+          },
+          "post": [
+            {
+              "type": "onecomme",
+              "botKey": "reimu",
+              "iconKey": "joy02",
+              "delaySeconds": 1,
+              "content": "<<user>>さんの運勢は【中吉】<<random>>"
+            },
+            {
+              "type": "party",
+              "delaySeconds": 1,
+              "content": "!レベルアップ"
+            }
+          ]
+        }
+
   ],
   "placeholder": [
     {
-      "name": "<<test>>",
+      "name": "<<random>>",
       "weight": 1,
       "group": 0,
       "content": "あなたは茶色です"
     },
     {
-      "name": "<<test>>",
+      "name": "<<random>>",
       "weight": 1,
       "group": 0,
       "content": "あなたは緑です"
     },
     {
-      "name": "<<test>>",
+      "name": "<<random>>",
       "weight": 1,
       "group": 0,
       "content": "あなたは青です"
     },
     {
-      "name": "<<test>>",
+      "name": "<<random>>",
       "weight": 1,
       "group": 0,
       "content": "あなたは赤です"
     },
     {
-      "name": "<<test>>",
+      "name": "<<random>>",
       "weight": 1,
       "group": 1,
       "content": "あなたは黄色です"
