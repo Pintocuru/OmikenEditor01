@@ -15,8 +15,6 @@ export function useDataFetcher() {
   const DEFAULT_RULES: omikujiRule[] = [
     {
       name: "デフォルトおみくじ",
-      modes: "default",
-      modeSelect: ["0"],
       switch: 1,
       matchExact: ["おみくじ"],
       matchStartsWith: [],
@@ -64,12 +62,10 @@ export function validateRules(items: any | any[]): omikujiRule[] {
   return itemsArray.map((item: any): omikujiRule => ({
     // おみくじルール名
     name: typeof item.name === 'string' ? item.name : 'おみくじ',
-    // モード(引数で渡す値)
-    modes: typeof item.modes === 'string' ? item.modes : 'none',
-    // モードのリスト
-    modeSelect: Array.isArray(item.modeSelect) ? item.modeSelect.filter((item: any) => typeof item === 'string') : ['none'],
     // ルールの有効/無効 0:OFF/1:だれでも/2:メンバー以上/3:モデレーター/4:管理者
     switch: [0, 1, 2, 3, 4].includes(item.switch) ? item.switch : 0,
+    // omikujiの適用しないIDリスト
+    disabledIds: Array.isArray(item.disabledIds) ? item.disabledIds.filter((item: any) => typeof item === 'number') : [],
     // 完全一致するキーワード
     matchExact: Array.isArray(item.matchExact) ? item.matchExact.filter((item: any) => typeof item === 'string') : ['*'],
     // 特定のフレーズで始まるキーワード
@@ -83,7 +79,21 @@ export function validateRules(items: any | any[]): omikujiRule[] {
 export function validateOmikuji(items: any | any[]): OmikujiMessage[] {
   // 単一のオブジェクトの場合は配列に変換
   const itemsArray = Array.isArray(items) ? items : [items];
-  return itemsArray.map((item: any): OmikujiMessage => ({
+  // 使用済みのIDを追跡するセット
+  const usedIds = new Set<number>();
+  // 正規化されたデータを作成
+  return itemsArray.map((item: any, index: number): OmikujiMessage => {
+    let id = item.id;
+    // IDが重複している、または無効な場合は、新しいIDを割り当て
+    if (typeof id !== 'number' || id <= 0 || usedIds.has(id)) {
+      id = index + 1; // 重複を避けるためにindexを基にしたIDを付与
+    }
+    // 使用済みIDに追加
+    usedIds.add(id);
+
+    return {
+    // ID
+    id,
     // おみくじの結果名(「大吉」など)
     name: typeof item.name === 'string' ? item.name : '大吉',
     // メッセージの重み付け
@@ -109,8 +119,9 @@ export function validateOmikuji(items: any | any[]): OmikujiMessage[] {
         delaySeconds: typeof post.delaySeconds === 'number' ? post.delaySeconds : 0,
         content: typeof post.content === 'string' ? post.content : '<<user>>さんの運勢は【大吉】',
       }))
-        .sort((a, b) => a.delaySeconds - b.delaySeconds) : []
-  }));
+        .sort((a, b) => a.delaySeconds - b.delaySeconds) : [],
+    };
+  });
 }
 
 
@@ -119,7 +130,7 @@ export function validateRandomItems(items: any | any[], generateIds: boolean = f
   // 単一のオブジェクトの場合は配列に変換
   const itemsArray = Array.isArray(items) ? items : [items];
   return itemsArray.map((item: any, index: number): Placeholder => ({
-    // id(エディター用)
+    // id(エディターのみの用途なので、読み込み時にすべて書き換えてます)
     id: generateIds ? index + 1 : (typeof item.id === 'number' ? item.id : Math.floor(Math.random() * 999999999)),
     // プレースホルダー名
     name: typeof item.name === 'string' ? item.name : '<<random>>',

@@ -105,6 +105,7 @@ provide("placeholderKey", placeholderKey); // provideで孫コンポーネント
 // コンポーザブルの使用
 const { selectCategory, updateState } = useFunkOmikenCore(STATE);
 
+
 const { fetchData } = useDataFetcher();
 const { dark, selectCols, showEditorDialog, selectItem, openEditorDialog } =
   useFunkOmikenUI(STATE);

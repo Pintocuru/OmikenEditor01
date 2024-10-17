@@ -90,7 +90,7 @@ const updateGroupKey = () => {
   }
 };
 
-// TODO 新規追加で更新されず、追加が反映されない
+
 const addRandomItem = () => {
   if (editingItems.value.length > 0) {
     const newItem: Placeholder = {

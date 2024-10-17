@@ -6,23 +6,41 @@
         <!-- 基本情報 -->
         <v-row dense>
           <v-col cols="12" sm="4">
-            <v-text-field v-model="editingItem.name" label="結果名" density="compact">
-              <v-tooltip activator="parent" location="bottom">おみくじの結果の名称（ラベル）を入力してください。<br />
-                例: 「大吉」「中吉」「小吉」など。</v-tooltip>
+            <v-text-field
+              v-model="editingItem.name"
+              label="結果名"
+              density="compact"
+            >
+              <v-tooltip activator="parent" location="bottom"
+                >おみくじの結果の名称（ラベル）を入力してください。<br />
+                例: 「大吉」「中吉」「小吉」など。</v-tooltip
+              >
             </v-text-field>
           </v-col>
           <v-col cols="3" sm="2">
-            <v-text-field v-model.number="editingItem.weight" label="出現比" type="number" min="0" max="100"
-              density="compact">
-              <v-tooltip activator="parent" location="bottom">ランダムに偏りをつける</v-tooltip>
+            <v-text-field
+              v-model.number="editingItem.weight"
+              label="出現比"
+              type="number"
+              min="0"
+              max="100"
+              density="compact"
+            >
+              <v-tooltip activator="parent" location="bottom"
+                >ランダムに偏りをつける</v-tooltip
+              >
             </v-text-field>
           </v-col>
           <v-col cols="9" sm="6">
-            <v-progress-linear :model-value="weightValues" buffer-value="10" color="primary"
-              height="35" striped>出現割合：{{
-                weightValues
-              }}
-              %</v-progress-linear>
+            <v-progress-linear
+              :model-value="weightValues"
+              buffer-value="10"
+              color="primary"
+              height="35"
+              striped
+            >
+              出現割合：{{ weightValues }} %</v-progress-linear
+            >
           </v-col>
         </v-row>
 
@@ -46,12 +64,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, watch } from 'vue';
-import type { CharaStyles, DefaultState, OmikujiMessage } from '../types';
-import type { SelectItem } from '@/AppTypes';
-import { useEditOmikuji, useItemEditor } from '../composables/funkOmikenEdit';
-import OmikujiEditorFiltering from './OmikujiEditorFiltering.vue';
-import OmikujiEditorMessage from './OmikujiEditorMessage.vue';
+import { computed, inject, watch } from "vue";
+import type { CharaStyles, DefaultState, OmikujiMessage } from "../types";
+import type { SelectItem } from "@/AppTypes";
+import { useEditOmikuji, useItemEditor } from "../composables/funkOmikenEdit";
+import OmikujiEditorFiltering from "./OmikujiEditorFiltering.vue";
+import OmikujiEditorMessage from "./OmikujiEditorMessage.vue";
 
 const props = defineProps<{
   STATE: DefaultState;
@@ -76,10 +94,13 @@ const {
 } = useEditOmikuji(props.STATE, CHARA);
 
 const weightValues = computed(() => {
-      const totalWeight = props.STATE.omikuji.reduce((sum, obj) => sum + obj.weight, 0);
-      if (totalWeight <= 0) return 0;
-      return Math.round((editingItem.value.weight / totalWeight) * 100);
-    });
+  const totalWeight = props.STATE.omikuji.reduce(
+    (sum, obj) => sum + obj.weight,
+    0
+  );
+  if (totalWeight <= 0) return 0;
+  return Math.round((editingItem.value.weight / totalWeight) * 100);
+});
 
 // フィルタリング設定の変更を監視
 watch(

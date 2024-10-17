@@ -65,14 +65,24 @@ const handleUpdate = (updatedItem: ItemContent) => {
       if (Array.isArray(updatedItem)) {
         // グループ編集の場合
         const stateArray = localState.value[type as keyof DefaultState] as Placeholder[];
+        const updatedIds = new Set(updatedItem.map(item => item.id));
+        
+        // 削除された項目を除去
+        (localState.value[type as keyof DefaultState] as Placeholder[]) = stateArray.filter(item => updatedIds.has(item.id));
+        
+        // 更新と追加
         updatedItem.forEach((item: Placeholder) => {
           const stateIndex = stateArray.findIndex((stateItem: Placeholder) => stateItem.id === item.id);
           if (stateIndex !== -1) {
+            // 既存項目の更新
             stateArray[stateIndex] = item;
+          } else {
+            // 新規項目の追加
+            stateArray.push(item);
           }
         });
       } else {
-        // 単一アイテムの編集の場合
+        // 単一アイテムの編集の場合（変更なし）
         (localState.value[type as keyof DefaultState] as ItemContent[])[index] = updatedItem as Placeholder;
       }
     }

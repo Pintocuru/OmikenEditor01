@@ -12,10 +12,10 @@ export interface DefaultState {
 export interface omikujiRule {
   name: string;  // ルール名（例: "おみくじ"）
   switch: 0 | 1 | 2 | 3 | 4;  // ルールの有効/無効 0:OFF/1:だれでも/2:メンバー以上/3:モデレーター/4:管理者
+  disabledIds?: number[]; // omikujiの適用しないIDリスト
   matchExact?: string[];  // 完全一致するキーワードの配列（省略可）
   matchStartsWith?: string[];  // 特定のフレーズで始まるキーワード（省略可）
   matchIncludes?: string[];  // 部分一致するキーワード（省略可）
-  disabledIds?: number[];
 }
 
 // おみくじメッセージの型定義

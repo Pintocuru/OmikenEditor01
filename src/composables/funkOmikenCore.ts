@@ -36,6 +36,11 @@ export function useFunkOmikenCore(STATE: Ref<DefaultState>) {
     return -1;
   });
 
+
+
+
+  
+
   return {
     STATE,
     selectCategory,

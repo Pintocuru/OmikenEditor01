@@ -271,8 +271,13 @@ export function useItemEditor(
 
   watch(
     editingItem,
-    (newValue) => newValue && emit("update:item", newValue),
-    { deep: true }
+    (newValue) => {
+      if (newValue) {
+        console.log("Emitting update:item", newValue);
+        emit("update:item", JSON.parse(JSON.stringify(newValue)));
+      }
+    },
+    { deep: true, immediate: true }
   );
 
   return { editingItem };
