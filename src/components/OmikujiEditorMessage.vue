@@ -10,7 +10,7 @@
     </v-toolbar>
     <v-card-text>
       <v-expansion-panels multiple>
-        <v-expansion-panel v-for="(post, index) in editingItem.post" :key="index">
+        <v-expansion-panel v-for="(post, index) in currentOmikuji.post" :key="index">
           <v-expansion-panel-title
             :style="['onecomme', 'toast'].includes(post.type) ? { backgroundColor: getCharaColor(post.botKey) } : {}">
             <v-row no-gutters align="center">
@@ -31,28 +31,28 @@
             <v-row dense>
               <v-col cols="6" sm="3">
                 <v-select v-model="post.type" :items="onecommeTypeItems" label="投稿の種類" item-title="text"
-                  item-value="value" density="compact">
+                  item-value="value" density="compact" @change="updateOmikuji">
                 </v-select>
               </v-col>
               <v-col cols="6" sm="3" v-if="['onecomme', 'toast'].includes(post.type)">
                 <v-select v-model="post.botKey" :items="botKeyItems" label="ボットキー" item-title="text" item-value="value"
-                  density="compact">
+                  density="compact" @change="updateOmikuji">
                 </v-select>
               </v-col>
               <v-col cols="6" sm="3" v-if="['onecomme', 'toast'].includes(post.type)">
                 <v-select v-model="post.iconKey" :items="getIconKeyItems(post.botKey)" label="アイコンキー" item-title="text"
-                  item-value="value" density="compact">
+                  item-value="value" density="compact" @change="updateOmikuji">
                 </v-select>
               </v-col>
               <v-col cols="12" sm="3">
                 <v-text-field v-model.number="post.delaySeconds" label="遅延時間(秒)" type="number" step="0.1" min="-1"
-                  density="compact">
+                  density="compact" @input="updateOmikuji">
                 </v-text-field>
               </v-col>
             </v-row>
             <v-row dense>
               <v-col>
-                <v-text-field v-model="post.content" label="内容" rows="2" auto-grow density="compact">
+                <v-text-field v-model="post.content" label="内容" rows="2" auto-grow density="compact" @input="updateOmikuji">
                 </v-text-field>
               </v-col>
               <v-col cols="auto">
@@ -62,7 +62,7 @@
               </v-col>
               <v-col cols="12">
                 <v-slider v-model.number="post.delaySeconds" prepend-icon="mdi-alarm" :thumb-size="24"
-                  thumb-label="always" class="pa-2" min="-1" max="10" step="0.1" />
+                  thumb-label="always" class="pa-2" min="-1" max="10" step="0.1" @change="updateOmikuji" />
               </v-col>
             </v-row>
           </v-expansion-panel-text>
@@ -79,72 +79,108 @@
 
 <script setup lang="ts">
 import { computed, inject, Ref, ref } from "vue";
-import type { CharaStyles, OmikujiMessage, Placeholder, PostOnecomme } from "../types";
+import type { CHARAType, omikujiType, placeType, postType } from "../types";
 
 const props = defineProps<{
-  editingItem: OmikujiMessage;
+  currentOmikuji: omikujiType;
 }>();
 
 const emit = defineEmits<{
-  (e: "addPost", editingItem: OmikujiMessage): void;
-  (e: "removePost", editingItem: OmikujiMessage, index: number): void;
+  (e: "update", omikuji: omikujiType): void;
+  (e: "addPost"): void;
+  (e: "removePost", index: number): void;
 }>();
 
-const CHARA = inject<CharaStyles>("charaKey");
-const placeholderKey = inject<Ref<Placeholder[]>>("placeholderKey");
-const placeholder = placeholderKey?.value;
+const CHARA = inject<CHARAType>("charaKey");
+const placeholderKey = inject<Ref<placeType[]>>("placeholderKey");
+const place = placeholderKey?.value;
 
 // 画像を大きくするtest
-const hoveredImage: Ref<PostOnecomme | null> = ref(null);
-const isHovered = (post: PostOnecomme) => {
+const hoveredImage: Ref<postType | null> = ref(null);
+const isHovered = (post: postType) => {
   return hoveredImage.value === post;
 };
 
 // メッセージが存在しないかどうかをチェック
-const hasNoMessages = computed(() => props.editingItem.post.length === 0);
+const hasNoMessages = computed(() => props.currentOmikuji.post.length === 0);
 
-const addPost = () => emit("addPost", props.editingItem);
-const removePost = (index: number) =>
-  emit("removePost", props.editingItem, index);
+const addPost = () => emit("addPost");
+const removePost = (index: number) => emit("removePost", index);
+
+const updateOmikuji = () => {
+  emit("update", props.currentOmikuji);
+};
 
 // 型ガード関数
-const isValidChara = (chara: unknown): chara is CharaStyles =>
-  typeof chara === "object" && chara !== null;
+const isValidChara = (chara: unknown): chara is CHARAType => {
+  if (typeof chara !== "object" || chara === null) {
+    console.error('無効なキャラクター:', chara);
+    return false;
+  }
+  return true;
+};
 
 // キャラクター一覧の作成
-const botKeyItems = computed(() =>
-  !CHARA || !isValidChara(CHARA)
-    ? []
-    : Object.keys(CHARA).map((key) => ({
+const botKeyItems = computed(() => {
+  try {
+    if (!CHARA || !isValidChara(CHARA)) {
+      console.warn('CHARAが無効です');
+      return [];
+    }
+    return Object.keys(CHARA).map((key) => ({
       text: CHARA[key].name,
       value: key,
-    }))
-);
+    }));
+  } catch (error) {
+    console.error('キャラクター一覧の作成中にエラーが発生しました:', error);
+    return [];
+  }
+});
 
-const getIconKeyItems = (botKey: string | undefined) =>
-  !botKey || !CHARA || !isValidChara(CHARA) || !(botKey in CHARA)
-    ? []
-    : Object.keys(CHARA[botKey].image).map((key) => ({
+// アイコンキーアイテムの取得
+const getIconKeyItems = (botKey: string | undefined) => {
+  try {
+    if (!botKey || !CHARA || !isValidChara(CHARA) || !(botKey in CHARA)) {
+      console.warn('無効なボットキーまたはCHARA:', { botKey, CHARA });
+      return [];
+    }
+    return Object.keys(CHARA[botKey].image).map((key) => ({
       text: key,
       value: key,
     }));
+  } catch (error) {
+    console.error('アイコンキーアイテムの取得中にエラーが発生しました:', error);
+    return [];
+  }
+};
 
 // キャラクターの背景色を取得する関数
-const getCharaColor = (botKey: string | undefined) =>
-  botKey && CHARA && CHARA[botKey]
-    ? CHARA[botKey].color["--lcv-background-color"]
-    : "";
+const getCharaColor = (botKey: string | undefined) => {
+  try {
+    if (botKey && CHARA && CHARA[botKey]) {
+      return CHARA[botKey].color["--lcv-background-color"];
+    }
+    console.warn('無効なボットキーまたはCHARA:', { botKey, CHARA });
+    return "";
+  } catch (error) {
+    console.error('キャラクターの背景色取得中にエラーが発生しました:', error);
+    return "";
+  }
+};
 
 // キャラクターの画像を取得する関数
-const getCharaImage = (
-  botKey: string | undefined,
-  iconKey: string | undefined
-) => {
-  if (botKey && CHARA && CHARA[botKey] && iconKey) {
-    // 画像パスを明示的に指定
-    return `/img/${CHARA[botKey].image[iconKey]}`;
+const getCharaImage = (botKey: string | undefined, iconKey: string | undefined) => {
+  try {
+    if (botKey && CHARA && CHARA[botKey] && iconKey) {
+      // 画像パスを明示的に指定
+      return `/img/${CHARA[botKey].image[iconKey]}`;
+    }
+    console.warn('無効なボットキーまたはアイコンキー:', { botKey, iconKey, CHARA });
+    return "";
+  } catch (error) {
+    console.error('キャラクターの画像取得中にエラーが発生しました:', error);
+    return "";
   }
-  return "";
 };
 
 // 投稿タイプに応じた色を取得する関数
@@ -186,14 +222,15 @@ const onecommeTypeItems = [
   { text: "スピーチ", value: "speech" },
 ];
 
-// placeholder を使ってプレースホルダーを置き換え
+// place を使ってプレースホルダーを置き換え
 const replacePlaceholder = (content: string): string => {
-  if (!placeholder) return content;
-  console.log(placeholder);
+  if (!place) return content;
+  console.log(place);
 
   // プレースホルダーの形式を <<...>> に変更
   return content.replace(/<<(.*?)>>/g, (_, name) => {
-    const matchedPlaceholders = placeholder.filter(ph => ph.name === `<<${name}>>`);
+    // 新しいplace構造に基づいてフィルタリング
+    const matchedPlaceholders = Object.values(place).filter(ph => ph.name === `<<${name}>>`);
 
     if (matchedPlaceholders.length > 0) {
       const randomPlaceholder = matchedPlaceholders[Math.floor(Math.random() * matchedPlaceholders.length)];

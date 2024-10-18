@@ -15,21 +15,21 @@
     <v-main>
       <v-container>
         <AppMain
-          v-model:STATE="STATE"
+          :STATE="STATE"
           :selectCategory="selectCategory"
           :selectCols="selectCols"
-          @update:STATE="STATE = $event"
-          @open-editor="openEditorDialog"
+          @update:STATE="updateSTATE"
+          @open-editor="openEditor"
         />
       </v-container>
     </v-main>
 
     <EditorDialog
-      v-model:show="showEditorDialog"
+      v-model:show="dialogs"
+      v-model:selectItem="selectItem"
       :STATE="STATE"
-      :selectItem="selectItem"
-      @update:show="showEditorDialog = $event"
-      @update:STATE="updateState"
+      @update:STATE="updateSTATE"
+      @open-editor="openEditor"
     />
   </v-app>
 </template>
@@ -40,18 +40,9 @@ import AppHeader from "./components/AppHeader.vue";
 import AppNavigation from "./components/AppNavigation.vue";
 import AppMain from "./components/AppMain.vue";
 import EditorDialog from "./components/EditorDialog.vue";
-import { useFunkOmikenCore } from "./composables/funkOmikenCore";
+import { funkSTATE } from "./composables/funkOmikenSTATE";
 import { useDataFetcher } from "./composables/funkOmikenJSON";
-import { useFunkOmikenUI } from "./composables/funkOmikenUI";
-import { DefaultState } from "./types";
-
-// アプリケーションの状態
-const STATE = ref<DefaultState>({
-  defaultRules: [],
-  rules: [],
-  omikuji: [],
-  placeholder: [],
-});
+import { funkUI } from "./composables/funkOmikenUI";
 
 // キャラクターデータ
 const CHARA = {
@@ -98,21 +89,21 @@ const CHARA = {
     },
   },
 };
-provide("charaKey", CHARA); // provideで孫コンポーネントに渡す
-const placeholderKey = ref(STATE.value.placeholder);
-provide("placeholderKey", placeholderKey); // provideで孫コンポーネントに渡す
-
 // コンポーザブルの使用
-const { selectCategory, updateState } = useFunkOmikenCore(STATE);
+const { STATE, updateSTATE } = funkSTATE();
+
+provide("charaKey", CHARA); // provideで孫コンポーネントに渡す
+const placeholderKey = ref(STATE.value.place);
+provide("placeholderKey", placeholderKey); // provideで孫コンポーネントに渡す
 
 
 const { fetchData } = useDataFetcher();
-const { dark, selectCols, showEditorDialog, selectItem, openEditorDialog } =
-  useFunkOmikenUI(STATE);
+const { dark, selectCols, selectCategory, selectItem,dialogs, openEditor } =
+  funkUI();
 
 // コンポーネントのマウント時にデータを取得
 onMounted(async () => {
   await fetchData(STATE.value);
-  placeholderKey.value = STATE.value.placeholder;
+  placeholderKey.value = STATE.value.place;
 });
 </script>

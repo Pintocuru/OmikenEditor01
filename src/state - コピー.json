@@ -1,0 +1,120 @@
+{
+  "defaultRules": [
+    {
+      "name": "おみくじ",
+      "modes": "none",
+      "modeSelect": ["none"],
+      "switch": 1,
+      "matchExact": ["🥠"],
+      "matchStartsWith": ["おみくじ", "御神籤", "omikuji"],
+      "matchIncludes": ["【おみくじ】"]
+    }
+  ],
+  "rules": [
+    {
+      "name": "おみくじ1",
+      "modes": "none",
+      "modeSelect": ["none"],
+      "switch": 1,
+      "matchExact": ["🥠"],
+      "matchStartsWith": ["おみくじ", "御神籤", "omikuji"],
+      "matchIncludes": ["【おみくじ】"]
+    },
+    {
+      "name": "おみくじ2",
+      "modes": "none",
+      "modeSelect": ["none"],
+      "switch": 1,
+      "matchExact": ["🥠"],
+      "matchStartsWith": ["おみくじ", "御神籤", "omikuji"],
+      "matchIncludes": ["【おみくじ】"]
+    }
+  ],
+  "omikuji": [
+    {
+      "weight": 5,
+      "threshold": {
+        "type": "none",
+        "value": 1000,
+        "loop": true,
+        "comparison": -1
+      },
+      "post": [
+        {
+          "type": "onecomme",
+          "botKey": "reimu",
+          "iconKey": "joy02",
+          "delaySeconds": 1,
+          "content": "<<user>>さんの運勢は【大吉】<<random>>"
+        },
+        {
+          "type": "party",
+          "delaySeconds": 1,
+          "content": "!レベルアップ"
+        }
+      ]
+    },
+        {
+          "weight": 5,
+          "threshold": {
+            "type": "none",
+            "value": 1000,
+            "loop": true,
+            "comparison": -1
+          },
+          "post": [
+            {
+              "type": "onecomme",
+              "botKey": "reimu",
+              "iconKey": "joy02",
+              "delaySeconds": 1,
+              "content": "<<user>>さんの運勢は【中吉】<<random>>"
+            },
+            {
+              "type": "party",
+              "delaySeconds": 1,
+              "content": "!レベルアップ"
+            }
+          ]
+        }
+
+  ],
+  "placeholder": [
+    {
+      "name": "<<random>>",
+      "weight": 1,
+      "group": 0,
+      "content": "あなたは茶色です"
+    },
+    {
+      "name": "<<random>>",
+      "weight": 1,
+      "group": 0,
+      "content": "あなたは緑です"
+    },
+    {
+      "name": "<<random>>",
+      "weight": 1,
+      "group": 0,
+      "content": "あなたは青です"
+    },
+    {
+      "name": "<<random>>",
+      "weight": 1,
+      "group": 0,
+      "content": "あなたは赤です"
+    },
+    {
+      "name": "<<random>>",
+      "weight": 1,
+      "group": 1,
+      "content": "あなたは黄色です"
+    },
+    {
+      "name": "<<test2>>",
+      "weight": 1,
+      "group": 1,
+      "content": "その気になればこんなものなんて!"
+    }
+  ]
+}

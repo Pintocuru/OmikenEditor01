@@ -1,14 +1,14 @@
 <!-- src/components/RuleEditor.vue -->
 <template>
-  <v-card v-if="editingItem">
+  <v-card v-if="currentRule">
     <v-card-text>
       <v-row dense>
         <v-col cols="12" sm="4">
-          <v-text-field v-model="editingItem.name" label="おみくじ名"></v-text-field>
+          <v-text-field v-model="currentRule.name" label="おみくじ名" @input="updateRule"></v-text-field>
         </v-col>
         <v-col cols="12" sm="8">
           <v-slider
-            v-model="editingItem.switch"
+            v-model="currentRule.switch"
             :max="4"
             :ticks="{
               0: '無効',
@@ -20,20 +20,24 @@
             show-ticks="always"
             step="1"
             tick-size="4"
-            :color="getThumbColor(editingItem.switch)"
+            :color="switchColor(currentRule.switch)"
+            @change="updateRule"
           ></v-slider>
         </v-col>
       </v-row>
       <v-row>
-        <v-col cols="12" sm="6">
+<v-col cols="12" sm="6">
           <v-list dense>
-            <v-subheader>有効なおみくじ一覧</v-subheader>
-            <v-list-item v-for="option in validOmikujiOptions" :key="option.id">
+            <v-list-item
+              v-for="option in validOmikujiOptions"
+              :key="option.id"
+              @click="openEditor(option)"
+            >
               {{ option.name }}
             </v-list-item>
           </v-list>
           <v-select
-            v-model="editingItem.disabledIds"
+            v-model="currentRule.disabledIds"
             :items="omikujiOptions"
             label="無効にするID"
             clearable
@@ -41,6 +45,7 @@
             multiple
             item-title="name"
             item-value="id"
+            @change="updateRule"
           >
             <template v-slot:item="{ props, item }">
               <v-list-item v-bind="props" :title="item.raw.name" :value="item.raw.id"></v-list-item>
@@ -48,9 +53,9 @@
           </v-select>
         </v-col>
         <v-col cols="12" sm="6">
-          <v-combobox v-model="editingItem.matchExact" label="完全一致" clearable chips multiple></v-combobox>
-          <v-combobox v-model="editingItem.matchStartsWith" label="前方一致" clearable chips multiple></v-combobox>
-          <v-combobox v-model="editingItem.matchIncludes" label="部分一致" clearable chips multiple></v-combobox>
+          <v-combobox v-model="currentRule.matchExact" label="完全一致" clearable chips multiple @change="updateRule"></v-combobox>
+          <v-combobox v-model="currentRule.matchStartsWith" label="前方一致" clearable chips multiple @change="updateRule"></v-combobox>
+          <v-combobox v-model="currentRule.matchIncludes" label="部分一致" clearable chips multiple @change="updateRule"></v-combobox>
         </v-col>
       </v-row>
     </v-card-text>
@@ -59,44 +64,66 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from "vue";
-import { useItemEditor } from "@/composables/funkOmikenEdit";
-import type { DefaultState, omikujiRule } from "../types";
-import { SelectItem } from "@/AppTypes";
+import { computed } from "vue";
+import type { ItemContent, STATEType, SelectItem, rulesType } from "../types";
 
-// props/emits
+  // props/emits
 const props = defineProps<{
-  STATE: DefaultState;
+  STATE: STATEType;
   selectItem: SelectItem;
 }>();
 
 const emit = defineEmits<{
-  (e: "update:item", value: omikujiRule): void;
+  (e: "update:STATE", payload: SelectItem): void;
+    (e: "open-editor", selectItem: SelectItem): void;
 }>();
 
-// 更新のコンポーザブル
-const { editingItem } = useItemEditor(props, emit);
+// propsからデータを解読
+const currentRule = computed(() => {
+  if (props.selectItem?.type === 'rules') {
+    const firstKey = Object.keys(props.selectItem.items)[0];
+    return props.selectItem.items[firstKey] as rulesType;
+  }
+  return null;
+});
 
-// omikujiのpost配列からIDを抽出
+// props.STATE.omikujiのpost配列からIDを抽出
 const omikujiOptions = computed(() =>
-  props.STATE.omikuji.map((omikuji) => ({
-    id: omikuji.id, // 選択するためのID
-    name: omikuji.name, // 表示するための名前
+  Object.entries(props.STATE.omikuji).map(([id, omikuji]) => ({
+    id,
+    name: omikuji.name,
   }))
 );
 
 const validOmikujiOptions = computed(() => {
-  if (!editingItem.value || !editingItem.value.disabledIds) return omikujiOptions.value;
-  return omikujiOptions.value.filter(option => !editingItem.value.disabledIds.includes(option.id));
+  const disabledIds = currentRule.value?.disabledIds;
+  if (!disabledIds) return omikujiOptions.value;
+  return omikujiOptions.value.filter(option => !disabledIds.includes(option.id));
 });
 
-const getThumbColor = (value: number) => {
+// switchの数値に合わせて色を変更
+const switchColor = (value: number) => {
   const colors = ['', 'yellow', 'green', 'blue', 'red'];
   return colors[value] || '';
 };
 
-const getTrackColor = (value: number) => {
-  const colors = ['', 'yellow', 'green', 'blue', 'red'];
-  return colors[value] ? `${colors[value]}--lighten-3` : '';
+// 更新アップデート
+const updateRule = () => {
+  if (props.selectItem && currentRule.value) {
+    emit("update:STATE", {
+      type: "rules",
+      items: { [currentRule.value.id]: currentRule.value },
+      operation: "update",
+    });
+  }
 };
+
+// エディターを開く
+function openEditor(option: { id: string; name: string }) {
+  console.log({ [option.id]: props.STATE.omikuji[option.id] });
+  emit("open-editor", {
+    type: 'omikuji',
+    items: { [option.id]: props.STATE.omikuji[option.id] },
+  });
+}
 </script>

@@ -1,120 +1,80 @@
 {
-  "defaultRules": [
-    {
-      "name": "おみくじ",
-      "modes": "none",
-      "modeSelect": ["none"],
+  "rules": {
+    "rule1": {
+      "id": "rule1",
+      "name": "基本ルール",
       "switch": 1,
-      "matchExact": ["🥠"],
-      "matchStartsWith": ["おみくじ", "御神籤", "omikuji"],
-      "matchIncludes": ["【おみくじ】"]
-    }
-  ],
-  "rules": [
-    {
-      "name": "おみくじ1",
-      "modes": "none",
-      "modeSelect": ["none"],
-      "switch": 1,
-      "matchExact": ["🥠"],
-      "matchStartsWith": ["おみくじ", "御神籤", "omikuji"],
-      "matchIncludes": ["【おみくじ】"]
+      "disabledIds": [101, 102],
+      "matchExact": ["運試し", "おみくじ"]
     },
-    {
-      "name": "おみくじ2",
-      "modes": "none",
-      "modeSelect": ["none"],
-      "switch": 1,
-      "matchExact": ["🥠"],
-      "matchStartsWith": ["おみくじ", "御神籤", "omikuji"],
-      "matchIncludes": ["【おみくじ】"]
+    "rule2": {
+      "id": "rule2",
+      "name": "限定ルール",
+      "switch": 2,
+      "matchStartsWith": ["特別", "限定"]
     }
-  ],
-  "omikuji": [
-    {
+  },
+  "omikuji": {
+    "omikuji1": {
+      "id": "omikuji1",
+      "name": "大吉",
       "weight": 5,
       "threshold": {
-        "type": "none",
-        "value": 1000,
-        "loop": true,
-        "comparison": -1
+        "type": "day",
+        "value": 1,
+        "valueMax": 7,
+        "comparison": "range"
       },
       "post": [
         {
           "type": "onecomme",
-          "botKey": "reimu",
-          "iconKey": "joy02",
-          "delaySeconds": 1,
-          "content": "<<user>>さんの運勢は【大吉】<<random>>"
-        },
-        {
-          "type": "party",
-          "delaySeconds": 1,
-          "content": "!レベルアップ"
+          "delaySeconds": 5,
+          "content": "今日は大吉！<<random>>"
         }
       ]
     },
+    "omikuji2": {
+      "id": "omikuji2",
+      "name": "中吉",
+      "weight": 3,
+      "threshold": {
+        "type": "time",
+        "value": 12,
+        "comparison": "min"
+      },
+      "post": [
         {
-          "weight": 5,
-          "threshold": {
-            "type": "none",
-            "value": 1000,
-            "loop": true,
-            "comparison": -1
-          },
-          "post": [
-            {
-              "type": "onecomme",
-              "botKey": "reimu",
-              "iconKey": "joy02",
-              "delaySeconds": 1,
-              "content": "<<user>>さんの運勢は【中吉】<<random>>"
-            },
-            {
-              "type": "party",
-              "delaySeconds": 1,
-              "content": "!レベルアップ"
-            }
-          ]
+          "type": "toast",
+          "delaySeconds": 3,
+          "content": "中吉です。<<random>>でリフレッシュ！"
         }
-
-  ],
-  "placeholder": [
-    {
-      "name": "<<random>>",
-      "weight": 1,
-      "group": 0,
-      "content": "あなたは茶色です"
-    },
-    {
-      "name": "<<random>>",
-      "weight": 1,
-      "group": 0,
-      "content": "あなたは緑です"
-    },
-    {
-      "name": "<<random>>",
-      "weight": 1,
-      "group": 0,
-      "content": "あなたは青です"
-    },
-    {
-      "name": "<<random>>",
-      "weight": 1,
-      "group": 0,
-      "content": "あなたは赤です"
-    },
-    {
-      "name": "<<random>>",
-      "weight": 1,
-      "group": 1,
-      "content": "あなたは黄色です"
-    },
-    {
-      "name": "<<test2>>",
-      "weight": 1,
-      "group": 1,
-      "content": "その気になればこんなものなんて!"
+      ]
     }
-  ]
+  },
+  "place": {
+    "place1": {
+      "id": "place1",
+      "randomKey": "<<random>>",
+      "weight": 10,
+      "group": 1,
+      "content": "お参りは大切です。"
+    },
+    "place2": {
+      "id": "place2",
+      "randomKey": "<<random>>",
+      "weight": 5,
+      "group": 2,
+      "content": "散歩で心を整えましょう。"
+    },
+    "place3": {
+      "id": "place3",
+      "randomKey": "<<random>>",
+      "weight": 8,
+      "group": 3,
+      "content": "温泉で疲れを癒しましょう。"
+    }
+  },
+  "rulesOrder": ["rule1", "rule2"],
+  "omikujiOrder": ["omikuji1", "omikuji2"],
+  "placeOrder": ["place1", "place2", "place3"]
 }

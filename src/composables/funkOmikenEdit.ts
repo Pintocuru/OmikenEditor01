@@ -1,17 +1,16 @@
 // src/composables/funkOmikenEdit.ts
 import { reactive, ref, computed, Ref, onMounted, watch } from "vue";
 
-import { validateRules, validateOmikuji, validateRandomItems } from "../composables/funkOmikenJSON";
+import { validateRules, validateOmikuji, validatePlace } from "../composables/funkOmikenJSON";
 
 import type {
-  DefaultState,
-  OmikujiMessage,
-  omikujiRule,
-  Placeholder,
-  CharaStyles,
-  PostOnecomme,
+  STATEType,
+  omikujiType,
+  rulesType,
+  placeType,
+  CHARAType,
+  postType, SelectItem, ItemCategory, ItemContent
 } from "../types";
-import type { SelectItem, ItemType, ItemContent } from "../AppTypes";
 /*
 
 アイテムの編集機能を担当
@@ -20,9 +19,9 @@ useRuleEditor: ルールの編集機能を提供（新規追加）
 useRandomItemEditor: ランダムアイテムの編集機能を提供（新規追加）
 */
 // TODO useFunkOmikenEdit は不要かも(どこでも使われていない)
-export function useFunkOmikenEdit(STATE: Ref<DefaultState>) {
+export function useFunkOmikenEdit(STATE: Ref<STATEType>) {
   // アイテムを更新 // TODO updateItemは使われていないようだ
-  const updateItem = (type: ItemType, updatedItem: ItemContent) => {
+  const updateItem = (type: ItemCategory, updatedItem: ItemContent) => {
     const index = STATE.value[type].findIndex((i) => i === updatedItem);
     if (index !== -1) {
       STATE.value[type][index] = updatedItem;
@@ -33,18 +32,18 @@ export function useFunkOmikenEdit(STATE: Ref<DefaultState>) {
   const typeValidators = {
     rules: validateRules,
     omikuji: validateOmikuji,
-    placeholder: validateRandomItems,
+    place: validatePlace,
   } as const;
   const typeStateKeys = {
     rules: "rules",
     omikuji: "omikuji",
-    placeholder: "placeholder",
+    place: "place",
   } as const;
   // タイプごとの `name` フォーマット関数を用意
   const generateName = {
     rules: (count: number) => `新しいルール ${count + 1}`,
     omikuji: (count: number) => `${getRandomFortune()}`,
-    placeholder: (count: number) => `<<random${count + 1}>>`,
+    place: (count: number) => `<<random${count + 1}>>`,
   } as const;
 
   const omikujiFortunes = ["大吉", "中吉", "小吉", "末吉", "吉", "凶", "福沢諭吉"];
@@ -53,7 +52,7 @@ export function useFunkOmikenEdit(STATE: Ref<DefaultState>) {
     omikujiFortunes[Math.floor(Math.random() * omikujiFortunes.length)];
 
   // アイテムを追加する
-    const addItem = (type: ItemType): void => {
+    const addItem = (type: ItemCategory): void => {
       console.log(type);
     const validator = typeValidators[type];
     const stateKey = typeStateKeys[type];
@@ -67,7 +66,7 @@ export function useFunkOmikenEdit(STATE: Ref<DefaultState>) {
 
   
   // アイテムを削除 // TODO deleteItemは使われていないようだ
-  const deleteItem = (type: ItemType, index: number) => {
+  const deleteItem = (type: ItemCategory, index: number) => {
     if (index !== -1 && STATE.value[type][index]) {
       STATE.value[type].splice(index, 1);
     }
@@ -82,8 +81,8 @@ export function useFunkOmikenEdit(STATE: Ref<DefaultState>) {
 
 // おみくじエディット用
 export function useEditOmikuji(
-  STATE: DefaultState,
-  CHARA: CharaStyles | undefined = {}
+  STATE: STATEType,
+  CHARA: CHARAType | undefined = {}
 ) {
   // メッセージタイプの配列
 
@@ -111,14 +110,14 @@ export function useEditOmikuji(
   ];
 
   // 新しいメッセージを追加 
-  const addPost = (omikuji: OmikujiMessage, ) => {
+  const addPost = (omikuji: omikujiType, ) => {
     // CHARAの最初のキーを取得
     const firstKey = Object.keys(CHARA)[0];
 
     if (!Array.isArray(omikuji.post)) {
       omikuji.post = [];
     }
-    (omikuji.post as PostOnecomme[]).push({
+    (omikuji.post as postType[]).push({
       type: "onecomme",
       botKey: firstKey || "mamono",
       iconKey: "Default",
@@ -129,10 +128,10 @@ export function useEditOmikuji(
 
   // メッセージを削除
   const removePost = (
-    omikuji: OmikujiMessage,
+    omikuji: omikujiType,
     index: number
   ) => {
-    (omikuji.post as PostOnecomme[])?.splice(index, 1);
+    (omikuji.post as postType[])?.splice(index, 1);
   };
 
   function sanitizeThresholdSettings(editingItem: Ref<any>) {
@@ -233,9 +232,10 @@ export function useEditOmikuji(
   };
 }
 
+// TODO この関数自体不要になるかも？
 export function useItemEditor(
   props: {
-    STATE: DefaultState;
+    STATE: STATEType;
     selectItem: SelectItem;
   },
   emit: (event: "update:item", value: any) => void
@@ -245,12 +245,12 @@ export function useItemEditor(
   const initializeEditingItem = () => {
     if (props.selectItem) {
       const { type, index, items } = props.selectItem;
-      const itemArray = props.STATE[type as keyof DefaultState] as any[];
+      const itemArray = props.STATE[type as keyof STATEType] as any[];
 
       const validationFunction = {
         rules: validateRules,
         omikuji: validateOmikuji,
-        placeholder: (items: any) => validateRandomItems(items, false)
+        place: (items: any) => validatePlace(items, false)
       }[type];
 
       if (validationFunction) {
@@ -287,10 +287,10 @@ export function useItemEditor(
 
 
 // プレースホルダー用
-export function useEditRandom(  STATE: DefaultState,) {
+export function useEditRandom(  STATE: STATEType,) {
  
   // 新しいメッセージを追加
-  const addRandomItem = (placeholder: Placeholder,) => {
+  const addRandomItem = (place: placeType,) => {
 
 
   };

@@ -6,27 +6,29 @@
         <v-app-bar color="primary" density="compact">
           <v-app-bar-title>
             {{ selectCategory }}
-            <v-chip label> {{ filteredItems.length }} items </v-chip>
+            <v-chip label> {{ filterItems.length }} items </v-chip>
           </v-app-bar-title>
-          <template v-slot:append>
-            <v-btn elevation="2" variant="outlined" @click="addNewItem" prepend-icon="mdi-plus">
+          <template #append>
+            <v-btn elevation="2" variant="outlined" @click="addItem" prepend-icon="mdi-plus">
               追加
             </v-btn>
           </template>
         </v-app-bar>
 
         <MainFilter
-          :select-category="selectCategory"
-          :filter-options="filterOptions"
-          @update-filter="updateFilter"
+          v-model:filterRef="filterRef"
+          :STATE="STATE"
+          :selectCategory="selectCategory"
+          @update:STATE="updateSTATE"
         />
 
         <MainItemList
-          :items="filteredItems"
+          :items="filterItems"
+          :itemOrder="STATE[`${selectCategory}Order`]"
           :select-category="selectCategory"
           :selectCols="selectCols"
-          :group-by="selectCategory === 'placeholder' ? filterOptions.placeholderSort : undefined"
-          @update-items="updateItems"
+          :group-by="selectCategory === 'place' ? filterRef.placeSortName : undefined"
+          @update:STATE="updateSTATE"
           @open-editor="openEditor"
         />
       </v-main>
@@ -35,121 +37,97 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed, onMounted, ref } from "vue";
 import MainFilter from "./MainFilter.vue";
 import MainItemList from "./MainItemList.vue";
-import type { ItemContent, ItemType, SelectItem } from "../AppTypes";
-import type { DefaultState, omikujiRule, OmikujiMessage, Placeholder, OmikujiThresholdType } from "@/types";
-import { validateOmikuji, validateRandomItems, validateRules } from "@/composables/funkOmikenJSON";
+import { z } from "zod";
+import _ from "lodash";
+import type { STATEType, ItemCategory, SelectItem, thresholdType, omikujiType, placeType, rulesType } from "@/types";
 
+// Props Emits
 const props = defineProps<{
-  STATE: DefaultState;
-  selectCategory: ItemType;
+  STATE: STATEType;
+  selectCategory: ItemCategory;
   selectCols: number;
 }>();
 
 const emit = defineEmits<{
-  (e: "update:STATE", state: DefaultState): void;
+  (e: "update:STATE", payload: SelectItem): void;
   (e: "open-editor", selectItem: SelectItem): void;
 }>();
 
-// アイテム追加のための設定
-type StateKey = keyof Pick<DefaultState, 'rules' | 'omikuji' | 'placeholder'>;
-
-const typeConfig: Record<ItemType, { 
-  validator: (item: any) => any[], 
-  stateKey: StateKey, 
-  nameGen: (count: number) => string 
-}> = {
-  rules: { 
-    validator: validateRules, 
-    stateKey: "rules", 
-    nameGen: (count: number) => `新しいルール ${count + 1}` 
-  },
-  omikuji: { 
-    validator: validateOmikuji, 
-    stateKey: "omikuji", 
-    nameGen: () => getRandomFortune() 
-  },
-  placeholder: { 
-    validator: validateRandomItems, 
-    stateKey: "placeholder", 
-    nameGen: (count: number) => `<<random${count + 1}>>` 
-  },
-};
-
-// ランダムな運勢を取得
-const getRandomFortune = () => ["大吉", "中吉", "小吉", "末吉", "吉", "凶", "福沢諭吉"][Math.floor(Math.random() * 7)];
-
-// アイテムを追加
-const addItem = (type: ItemType): void => {
-  const { validator, stateKey, nameGen } = typeConfig[type];
-  const name = nameGen(props.STATE[stateKey].length);
-  const newItem = validator({ name })[0];
-  (props.STATE[stateKey] as any[]).push(newItem);
-  emit('update:STATE', { ...props.STATE });
-};
-
-// フィルターオプションの初期設定
-const filterOptions = ref({
-  showAllRules: true,
-  omikujiSort: "weightDesc" as "weightDesc" | "weightAsc",
-  omikujiFilter: "all" as "all" | OmikujiThresholdType,
-  placeholderSort: "name" as "none" | "name" | "group",
+// フィルタリングを管理するref
+const FilterRefSchema = z.object({
+  rulesSortName: z.enum(["none", "highFreq", "lowFreq"]),
+  rulesFilterSwitch: z.array(z.string()),
+  omikujiSortName: z.enum(["none", "highFreq", "lowFreq"]),
+  omikujiFilterThreshold: z.array(z.custom<thresholdType>()),
+  omikujiSortWeight: z.enum(["none", "highFreq", "lowFreq"]),
+  placeSortName: z.enum(["none", "name", "group"]),
+  placeSortWeight: z.enum(["none", "highFreq", "lowFreq"]),
 });
 
-const filteredItems = ref<ItemContent[]>([]);
+const filterRef = ref(FilterRefSchema.parse({
+  rulesSortName: "highFreq",
+  rulesFilterSwitch: [],
+  omikujiSortName: "highFreq",
+  omikujiFilterThreshold: [],
+  omikujiSortWeight: "highFreq",
+  placeSortName: "name",
+  placeSortWeight: "highFreq",
+}));
 
-// フィルタリングとソートのロジック
-const filterAndSortItems = (): ItemContent[] => {
-  const items = props.STATE[props.selectCategory] as ItemContent[];
-  switch (props.selectCategory) {
-    case "rules":
-      return filterOptions.value.showAllRules ? items : (items as omikujiRule[]).filter(rule => rule.switch !== 0);
-    case "omikuji":
-      return (items as OmikujiMessage[])
-        .filter(item => filterOptions.value.omikujiFilter === "all" || item.threshold.type === filterOptions.value.omikujiFilter)
-        .sort((a, b) => filterOptions.value.omikujiSort === "weightDesc" ? b.weight - a.weight : a.weight - b.weight);
-    case "placeholder":
-      return filterOptions.value.placeholderSort === "none" ? items :
-        (items as Placeholder[]).sort((a, b) => 
-          filterOptions.value.placeholderSort === "name" ? a.name.localeCompare(b.name) : a.group - b.group
-        );
-    default:
-      return items;
-  }
+// フィルターオプションに合わせて表示を変更
+const filterItems = computed(() => {
+  const items = props.STATE[props.selectCategory];
+  const filters = {
+    rules: () => _.pickBy(items as Record<string, rulesType>, item =>
+      filterRef.value.rulesFilterSwitch.length === 0 ||
+      filterRef.value.rulesFilterSwitch.includes(item.switch.toString())
+    ),
+    omikuji: () => _.pickBy(items as Record<string, omikujiType>, item => 
+      filterRef.value.omikujiFilterThreshold.length === 0 || 
+      filterRef.value.omikujiFilterThreshold.includes(item.threshold.type)
+    ),
+    place: () => {
+      if (filterRef.value.placeSortName === "none") return items;
+      return _.fromPairs(_.sortBy(Object.entries(items as Record<string, placeType>), ([, item]) => 
+        filterRef.value.placeSortName === "name" ? item.name : item.group
+      ));
+    },
+    default: () => items,
+  };
+
+  const filter = filters[props.selectCategory as keyof typeof filters] || filters.default;
+  return filter();
+});
+
+// アイテムを追加
+const addItem = () => {
+  emit("update:STATE", { type: props.selectCategory, addKeys: [{}] });
 };
 
-// フィルタリングとソートを適用して結果を更新
-const updateFilteredItems = (): void => {
-  filteredItems.value = filterAndSortItems();
-};
-
-// 新しいアイテムを追加
-const addNewItem = (): void => {
-  addItem(props.selectCategory);
-  updateFilteredItems();
-};
-
-// エディターを開く
+// selectItemをAppに送り、エディターを開く
 const openEditor = (selectItem: SelectItem) => emit("open-editor", selectItem);
 
-// フィルターオプションを更新
-const updateFilter = (options: Partial<typeof filterOptions.value>): void => {
-  Object.assign(filterOptions.value, options);
-  updateFilteredItems();
-};
+// STATEの更新をemit
+const updateSTATE = (payload: SelectItem) => emit("update:STATE", payload);
 
-// アイテムリストを更新
-const updateItems = (newItems: ItemContent[]): void => {
-  filteredItems.value = newItems;
-  emit("update:STATE", { ...props.STATE, [props.selectCategory]: newItems });
-};
+// 初期化時、omikuji.postをdelaySecondsが小さい順にソート
+onMounted(() => {
+  if (props.selectCategory === "omikuji") {
+    const sortedItems = _.sortBy(Object.entries(props.STATE.omikuji), 
+      ([, item]) => _.get(item, 'post[0].delaySeconds', Infinity)
+    );
+    const newOrder = sortedItems.map(([id]) => id);
+    updateSTATE({
+      type: "omikuji",
+      items: _.fromPairs(sortedItems),
+      reorder: newOrder,
+    });
+  }
+});
 
-// ウォッチャーを設定
-watch(() => props.STATE[props.selectCategory], updateFilteredItems, { deep: true });
-watch(() => props.selectCategory, updateFilteredItems);
-
-// 初期化時にフィルタリングを適用
-updateFilteredItems();
 </script>
+
+

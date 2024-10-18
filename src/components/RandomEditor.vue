@@ -1,6 +1,6 @@
 <!-- src/components/RandomEditor.vue -->
 <template>
-  <v-card v-if="editingItem">
+  <v-card v-if="currentItem">
     <v-card-title>ランダムメッセージエディタ</v-card-title>
     <v-card-text>
       <!-- グループ編集時のみ表示 -->
@@ -15,26 +15,26 @@
 
       <!-- アイテムリスト -->
       <v-list>
-        <v-list-item v-for="(item, index) in editingItems" :key="index">
+        <v-list-item v-for="(item, key) in editingItems" :key="key">
           <v-row align="center">
-            <template v-if="!isGroupEdit || props.selectItem?.index === -2">
+            <template v-if="!isGroupEdit || selectItem.type === 'place'">
               <v-col cols="3">
-                <v-text-field v-model="item.name" label="タグ" density="compact" />
+                <v-text-field v-model="item.name" label="タグ" density="compact" @input="updateItem(key, item)" />
               </v-col>
             </template>
-            <template v-if="!isGroupEdit || props.selectItem?.index === -1">
+            <template v-if="!isGroupEdit || selectItem.type === 'omikuji'">
               <v-col cols="3">
-                <v-text-field v-model.number="item.group" label="グループ" type="number" density="compact" />
+                <v-text-field v-model.number="item.group" label="グループ" type="number" density="compact" @input="updateItem(key, item)" />
               </v-col>
             </template>
             <v-col :cols="isGroupEdit ? 3 : 2">
-              <v-text-field v-model.number="item.weight" label="重み" type="number" density="compact" />
+              <v-text-field v-model.number="item.weight" label="重み" type="number" density="compact" @input="updateItem(key, item)" />
             </v-col>
             <v-col :cols="isGroupEdit ? 5 : 4">
-              <v-text-field v-model="item.content" label="内容" density="compact" />
+              <v-text-field v-model="item.content" label="内容" density="compact" @input="updateItem(key, item)" />
             </v-col>
             <v-col cols="1" v-if="isGroupEdit">
-              <v-btn icon @click="removeRandomItem(index)" color="error" density="compact">
+              <v-btn icon @click="removeRandomItem(key)" color="error" density="compact">
                 <v-icon>mdi-delete</v-icon>
               </v-btn>
             </v-col>
@@ -54,66 +54,93 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { useItemEditor } from "@/composables/funkOmikenEdit";
-import type { DefaultState, Placeholder } from "../types";
-import { SelectItem } from "@/AppTypes";
+import type { STATEType, placeType, omikujiType, SelectItem } from "../types";
 
+// Props / emit
 const props = defineProps<{
-  STATE: DefaultState;
+  STATE: STATEType;
   selectItem: SelectItem;
 }>();
 
 const emit = defineEmits<{
-  (e: "update:item", value: any): void;
+  (e: "update:STATE", payload: SelectItem): void;
 }>();
 
-const { editingItem } = useItemEditor(props, emit);
-
-const editingItems = computed(() => {
-  return Array.isArray(editingItem.value) ? editingItem.value : [editingItem.value];
+// propsからデータを解読
+const currentItem = computed(() => {
+  if (props.selectItem && props.selectItem.items) {
+    return Object.values(props.selectItem.items)[0];
+  }
+  return null;
 });
 
-const isGroupEdit = computed(() => Array.isArray(editingItem.value));
+const editingItems = computed(() => {
+  if (currentItem.value) {
+    return props.selectItem?.items || {};
+  }
+  return {};
+});
+
+const isGroupEdit = computed(() => Object.keys(editingItems.value).length > 1);
 
 const groupKey = ref('');
-const groupKeyLabel = computed(() => props.selectItem?.index === -1 ? 'タグ' : 'グループ');
+const groupKeyLabel = computed(() => props.selectItem?.type === 'omikuji' ? 'タグ' : 'グループ');
 
 const updateGroupKey = () => {
   if (isGroupEdit.value) {
-    editingItems.value.forEach(item => {
-      if (props.selectItem?.index === -1) {
-        item.name = groupKey.value;
+    Object.entries(editingItems.value).forEach(([key, item]) => {
+      if (props.selectItem?.type === 'omikuji') {
+        (item as omikujiType).name = groupKey.value;
       } else {
-        item.group = parseInt(groupKey.value) || 0;
+        (item as placeType).group = parseInt(groupKey.value) || 0;
       }
+      updateItem(key, item);
     });
   }
 };
 
-
-const addRandomItem = () => {
-  if (editingItems.value.length > 0) {
-    const newItem: Placeholder = {
-      id: editingItems.value.length+2,
-      name: editingItems.value[0].name,
-      weight: 1,
-      group: editingItems.value[0].group,
-      content: "",
-    };
-    editingItem.value = [...editingItems.value, newItem];
+const updateItem = (key: string, item: placeType | omikujiType) => {
+  if (props.selectItem) {
+    emit("update:STATE", {
+      type: props.selectItem.type,
+      items: { [key]: item },
+      operation: "update"
+    });
   }
 };
 
-const removeRandomItem = (index: number) => {
-  if (editingItems.value.length > 1) {
-    const newItems = [...editingItems.value];
-    newItems.splice(index, 1);
-    editingItem.value = newItems;
+const addRandomItem = () => {
+  if (Object.keys(editingItems.value).length > 0) {
+    const newKey = Date.now().toString();
+    const firstItem = Object.values(editingItems.value)[0];
+    const newItem: placeType | omikujiType = {
+      id: newKey,
+      name: firstItem.name,
+      weight: 1,
+      group: (firstItem as placeType).group || 0,
+      content: "",
+    };
+    emit("update:STATE", {
+      type: props.selectItem!.type,
+      items: { [newKey]: newItem },
+      operation: "add"
+    });
+  }
+};
+
+const removeRandomItem = (key: string) => {
+  if (Object.keys(editingItems.value).length > 1) {
+    emit("update:STATE", {
+      type: props.selectItem!.type,
+      items: { [key]: {} },
+      operation: "delete"
+    });
   }
 };
 
 // 初期化時にgroupKeyを設定
-if (isGroupEdit.value && editingItems.value.length > 0) {
-  groupKey.value = props.selectItem?.index === -1 ? editingItems.value[0].name : editingItems.value[0].group.toString();
+if (isGroupEdit.value && Object.keys(editingItems.value).length > 0) {
+  const firstItem = Object.values(editingItems.value)[0];
+  groupKey.value = props.selectItem?.type === 'omikuji' ? firstItem.name : (firstItem as placeType).group.toString();
 }
 </script>

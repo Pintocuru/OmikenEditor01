@@ -1,91 +1,46 @@
 // src/composables/funkOmikenUI.ts
 import { ref, computed, Ref } from 'vue';
-import type { DefaultState } from '../types';
-import type { ItemType, ItemContent, SelectItem } from '../AppTypes';
+import type { STATEType, ItemCategory, ItemContent, SelectItem } from '../types';
 /*
-
 UIコンポーネントとインタラクションを担当
 useOmikujiDialog: おみくじダイアログの管理
 useNavigation: ナビゲーション機能
 */
 
-export function useFunkOmikenUI(STATE: Ref<DefaultState>) {
+export function funkUI() {
+  // UI:ダークモード
   const dark = ref('dark');
+  // Mainのcols変更 //TODO 不要かも…細長いの1種類だけでいいなあと
   const selectCols = ref<number>(1);
-  const showEditorDialog = ref(false);
+
+  // リスト用:選択したカテゴリ
+  const selectCategory = ref<ItemCategory>("rules");
+
+  // ダイアログ用:選択したアイテム
   const selectItem = ref<SelectItem | null>(null);
 
-  const openEditorDialog = (item: SelectItem) => {
+  // ダイアログ表示
+  const dialogs = ref({
+    rules: false,
+    omikuji: false,
+    place: false,
+  });
+
+  // ダイアログを開く
+  const openEditor = (item: SelectItem) => {
+    console.log('item:',item);
     if (item) {
       selectItem.value = item;
-      showEditorDialog.value = true;
-    }
-  };
-
-
-  const closeEditorDialog = () => {
-    showEditorDialog.value = false;
-    selectItem.value = null;
-  };
-
-  // ナビゲーション関連の機能
-  const sections = computed(() => [
-    {
-      key: 'rules' as const,
-      title: 'ルール',
-      items: STATE.value.rules,
-      color: 'primary',
-    },
-    {
-      key: 'omikuji' as const,
-      title: 'おみくじ',
-      items: STATE.value.omikuji,
-      color: 'secondary',
-    },
-    {
-      key: 'placeholder' as const,
-      title: 'プレースホルダー',
-      items: STATE.value.placeholder,
-      color: 'accent',
-    },
-  ]);
-
-  const getItemTitle = (item: any, index: number, itemKey: ItemType): string => {
-    switch (itemKey) {
-      case 'placeholder':
-        return `${item.name} (${item.content.split('\n').length} items)`;
-      case 'rules':
-        return item.name || `ルール ${index + 1}`;
-      case 'omikuji':
-        return item.name || `おみくじ ${index + 1}`;
-      default:
-        return item.name || `アイテム ${index + 1}`;
-    }
-  };
-
-  // メインリスト用の機能
-  const getListItems = (type: ItemType) => {
-    switch (type) {
-      case 'rules':
-        return STATE.value.rules.map(rule => ({ name: rule.name }));
-      case 'omikuji':
-        return STATE.value.omikuji.map(item => ({ name: item.name }));
-      case 'placeholder':
-        return STATE.value.placeholder.map(item => ({ name: item.name }));
-      default:
-        return [];
+      dialogs.value[item.type] = true;
     }
   };
 
   return {
     dark,
     selectCols,
-    showEditorDialog,
+    selectCategory,
     selectItem,
-    openEditorDialog,
-    closeEditorDialog,
-    sections,
-    getItemTitle,
-    getListItems,
+    dialogs,
+    openEditor,
   };
 }

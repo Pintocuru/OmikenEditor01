@@ -3,10 +3,10 @@
   <v-navigation-drawer permanent>
     <v-list>
       <v-list-item v-for="(section, index) in sections" :key="index">
-        <v-card @click="openList(section.type)" class="mb-2">
+        <v-card @click="openList(section.type as ItemCategory)" class="mb-2">
           <v-card-title class="d-flex justify-space-between align-center">
             {{ section.title }}
-            <v-badge :content="section.items.length" color="primary"></v-badge>
+            <v-badge :content="Object.keys(section.items).length" color="primary"></v-badge>
           </v-card-title>
         </v-card>
       </v-list-item>
@@ -16,27 +16,26 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import type { ItemType } from "../AppTypes";
-import { DefaultState } from "@/types";
+import { STATEType, ItemCategory } from "@/types";
 
 // Props定義
 const props = defineProps<{
-  STATE: DefaultState;
-  selectCategory: ItemType;
+  STATE: STATEType;
+  selectCategory: ItemCategory;
 }>();
 
 // Emit定義
 const emit = defineEmits<{
-  (e: 'update:category', value: ItemType): void;
+  (e: "update:category", value: ItemCategory): void;
 }>();
 
 // セクション情報の計算
 const sections = computed(() => [
-  { title: "Rules", type: "rules", items: props.STATE.rules || [] },
-  { title: "Omikuji", type: "omikuji", items: props.STATE.omikuji || [] },
-  { title: "Placeholder", type: "placeholder", items: props.STATE.placeholder || [] },
+  { title: "Rules", type: "rules" as const, items: props.STATE.rules || {} },
+  { title: "Omikuji", type: "omikuji" as const, items: props.STATE.omikuji || {} },
+  { title: "Placeholder", type: "place" as const, items: props.STATE.place || {} },
 ]);
 
 // リスト開閉関数
-const openList = (type: ItemType) => emit('update:category', type);
+const openList = (type: ItemCategory) => emit("update:category", type);
 </script>

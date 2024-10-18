@@ -1,17 +1,20 @@
-// types.ts:型指定
+// src/types.ts:型指定
 
-// DefaultStateインターフェース: 全体の設定を管理する
-export interface DefaultState {
-  defaultRules: omikujiRule[];  // プリセットルール
-  rules: omikujiRule[];  // おみくじのルールを管理
-  omikuji: OmikujiMessage[];  // おみくじ関連のメッセージ
-  placeholder: Placeholder[];  // プレースホルダー
+// STATE:おみくじBOTのJSONの型定義
+export interface STATEType {
+  rules: Record<string, rulesType>;      // おみくじのルールを管理
+  omikuji: Record<string, omikujiType>;  // おみくじ関連のメッセージ
+  place: Record<string, placeType>;       // プレースホルダー
+  rulesOrder: string[];                   // ルールの順序
+  omikujiOrder: string[];                 // おみくじの順序
+  placeOrder: string[];                   // プレースホルダーの順序
 }
 
 // おみくじルールの型定義
-export interface omikujiRule {
+export interface rulesType {
+  id: string; // キー名
   name: string;  // ルール名（例: "おみくじ"）
-  switch: 0 | 1 | 2 | 3 | 4;  // ルールの有効/無効 0:OFF/1:だれでも/2:メンバー以上/3:モデレーター/4:管理者
+  switch: 0 | 1 | 2 | 3 | 4;  // ルールの有効/無効 0:OFF/1:だれでも/2:メンバー/3:モデレーター/4:管理者
   disabledIds?: number[]; // omikujiの適用しないIDリスト
   matchExact?: string[];  // 完全一致するキーワードの配列（省略可）
   matchStartsWith?: string[];  // 特定のフレーズで始まるキーワード（省略可）
@@ -19,16 +22,12 @@ export interface omikujiRule {
 }
 
 // おみくじメッセージの型定義
-export interface OmikujiMessage {
-  id: number; // id
+export interface omikujiType {
+  id: string; // キー名
   name: string;  // 結果名
   weight: number;  // メッセージの重み付け
-  threshold: { // フィルタリング基準
-    // none:基準なし time:時間指定(0-23時) lc:配信枠のコメント番号 no:配信枠の個人コメント数
-    // tc:総数の個人コメント数 hour:投稿してからの時間(interval*1000*60*60)
-    // minute: 投稿してからの分(interval*1000*60) second: 投稿してからの秒(interval*1000)
-    // day: 投稿してからの日数(interval*1000*60*60*24) price:ギフト金額 custom:その他(script参照)
-    type: OmikujiThresholdType;
+  threshold: {
+    type: thresholdType; // フィルタリング基準
     value: number;  // 基準となる値（必須）
     valueMax: number;  // 基準となる最大値（オプション）
     comparison: // 比較方法
@@ -38,9 +37,9 @@ export interface OmikujiMessage {
     | 'loop' // loop:ループ
     | 'range'; // range:範囲
   };
-  post: PostOnecomme[]; // 
+  post: postType[]; // 
 }
-export type OmikujiThresholdType =
+export type thresholdType =
   | 'none' // none:基準なし
   | 'time' // time:時間指定(0-23時)
   | 'lc' // lc:配信枠のコメント番号
@@ -55,7 +54,7 @@ export type OmikujiThresholdType =
 
 
 // メッセージの投稿情報を管理する型
-export interface PostOnecomme {
+export interface postType {
   type:
   | 'onecomme' // わんコメへの投稿
   | 'party' // WordPartyの投稿
@@ -68,8 +67,8 @@ export interface PostOnecomme {
 }
 
 // プレースホルダー項目の型定義
-export interface Placeholder {
-  id: number;
+export interface placeType {
+  id: string; // キー名
   name: string; // プレースホルダー名
   weight: number;  // ランダム選択時の重み付け
   group: number;  // グループ番号
@@ -78,8 +77,8 @@ export interface Placeholder {
 
 // ---------------------------------------------------
 
-// キャラクターJSONの型定義
-export interface CharaStyles {
+// CHARA:キャラクターJSONの型定義
+export interface CHARAType {
   [key: string]: {
     name: string; // キャラクターの名前
     frameId?: string; // わんコメの枠を指定
@@ -110,3 +109,19 @@ export interface CharaStyleEdit {
     path: string; // 画像のパス
   }>;
 }
+
+// ---------------------------------------------------
+
+// ファイル操作用型指定
+export type SelectItem = {
+  type: ItemCategory;
+  items?: Record<string, ItemContent>; // ダイアログを開く際のアイテム
+  update?: Record<string, ItemContent>; // 更新用アイテム
+  addKeys?: Object[]; // 新規追加用アイテム
+  delKeys?: string[]; // 削除するアイテムのキー名
+  reorder?: string[]; // 再配置するアイテムのキー名
+} | null;
+
+export type ItemCategory = 'rules' | 'omikuji' | 'place';
+export type ItemContent = rulesType | omikujiType | placeType;
+

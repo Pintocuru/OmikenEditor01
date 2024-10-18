@@ -1,98 +1,124 @@
 <!-- src/components/EditorDialog.vue -->
 <template>
-  <v-dialog :model-value="show" @update:model-value="updateShow" max-width="800px">
+  <v-dialog
+    v-for="(isVisible, key) in show"
+    :key="key"
+    :model-value="isVisible"
+    @update:model-value="(value) => updateShow(key, value)"
+    max-width="800px"
+  >
     <v-card>
       <component
         :is="editorComponent"
         :STATE="STATE"
         :selectItem="selectItem"
-        @update:item="handleUpdate"
+        @update:STATE="updateSTATE"
+                  @open-editor="openEditor"
       />
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn color="blue darken-1" @click="closeDialog">Close</v-btn>
+        <v-btn color="blue darken-1" @click="() => closeDialog(key)"
+          >閉じる</v-btn
+        >
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed, onMounted } from "vue";
 import RuleEditor from "./RuleEditor.vue";
 import OmikujiEditor from "./OmikujiEditor.vue";
 import RandomEditor from "./RandomEditor.vue";
-import type { ItemContent, SelectItem } from "../AppTypes";
-import { DefaultState, Placeholder } from "@/types";
+import { STATEType, SelectItem } from "@/types";
 
-// Props and emits
+// Props / emit
 const props = defineProps<{
-  show: boolean;
-  STATE: DefaultState;
+  show: {
+    rules: boolean;
+    omikuji: boolean;
+    place: boolean;
+  };
+  STATE: STATEType;
   selectItem: SelectItem;
 }>();
 
 const emit = defineEmits<{
-  (e: "update:show", value: boolean): void;
-  (e: "update:STATE", STATE: DefaultState): void;
+  (
+    e: "update:show",
+    newShow: {
+      rules: boolean;
+      omikuji: boolean;
+      place: boolean;
+    }
+  ): void;
+  (e: "update:STATE", payload: SelectItem): void;
+    (e: "open-editor", selectItem: SelectItem): void;
 }>();
 
-// Computed property for editor component
+// 編集用コンポーネントを取得する計算プロパティ
+// TODO このエラーハンドリングを消す
 const editorComponent = computed(() => {
-  console.log(props.selectItem);
-  const type = props.selectItem?.type;
-  const editorMap = {
-    rules: RuleEditor,
-    omikuji: OmikujiEditor,
-    placeholder: RandomEditor
-  };
-  return editorMap[type as keyof typeof editorMap] || null;
+  try {
+    const type = props.selectItem?.type;
+    const editorMap = {
+      rules: RuleEditor,
+      omikuji: OmikujiEditor,
+      place: RandomEditor,
+    };
+    // 該当するコンポーネントを返す
+    const component = editorMap[type as keyof typeof editorMap];
+    if (!component) {
+      throw new Error(`コンポーネントが見つかりません: ${type}`);
+    }
+    return component;
+  } catch (error) {
+    console.error("エラーが発生しました:", error);
+    return null; // コンポーネントが見つからない場合はnullを返す
+  }
 });
 
-// Local state management
-const localState = ref<DefaultState>(JSON.parse(JSON.stringify(props.STATE)));
+// showの更新をemitする関数
+const updateShow = (key: keyof typeof props.show, value: boolean) => {
+  emit("update:show", {
+    ...props.show,
+    [key]: value,
+  });
+};
 
-watch(() => props.STATE, (newState) => {
-  localState.value = JSON.parse(JSON.stringify(newState));
-}, { deep: true });
-
-// Event handlers
-const updateShow = (value: boolean) => emit("update:show", value);
-
-const handleUpdate = (updatedItem: ItemContent) => {
-  if (props.selectItem) {
-    const { type, index } = props.selectItem;
-    if (index !== undefined && type in localState.value) {
-      if (Array.isArray(updatedItem)) {
-        // グループ編集の場合
-        const stateArray = localState.value[type as keyof DefaultState] as Placeholder[];
-        const updatedIds = new Set(updatedItem.map(item => item.id));
-        
-        // 削除された項目を除去
-        (localState.value[type as keyof DefaultState] as Placeholder[]) = stateArray.filter(item => updatedIds.has(item.id));
-        
-        // 更新と追加
-        updatedItem.forEach((item: Placeholder) => {
-          const stateIndex = stateArray.findIndex((stateItem: Placeholder) => stateItem.id === item.id);
-          if (stateIndex !== -1) {
-            // 既存項目の更新
-            stateArray[stateIndex] = item;
-          } else {
-            // 新規項目の追加
-            stateArray.push(item);
-          }
-        });
-      } else {
-        // 単一アイテムの編集の場合（変更なし）
-        (localState.value[type as keyof DefaultState] as ItemContent[])[index] = updatedItem as Placeholder;
-      }
-    }
-    emit("update:STATE", localState.value);
+// selectItemをAppに送り、エディターを開く
+const openEditor = (selectItem: SelectItem) => {
+  try {
+    emit("open-editor", selectItem);
+  } catch (error) {
+    console.error('エディターオープン中にエラーが発生しました:', error);
   }
 };
 
+// STATEの更新をemit
+const updateSTATE = (payload: SelectItem) => emit("update:STATE", payload);
 
-const closeDialog = () => {
-  emit("update:STATE", localState.value);
-  emit("update:show", false);
+// ダイアログを閉じる
+const closeDialog = (key: keyof typeof props.show) => {
+  emit("update:show", { ...props.show, [key]: false });
 };
+
+// ダイアログの外部クリックで閉じる
+const closeClickOutside = (event: MouseEvent) => {
+  const target = event.target as Node;
+  const dialogElement = event.currentTarget as HTMLElement;
+
+  // place > omikuji > rules の順で1つずつ閉じる
+  if (!dialogElement.contains(target)) {
+    if (props.show.place) {
+      closeDialog("place");
+    } else if (props.show.omikuji) {
+      closeDialog("omikuji");
+    } else if (props.show.rules) {
+      closeDialog("rules");
+    }
+  }
+};
+// クリック時に起動
+onMounted(() => document.addEventListener("mousedown", closeClickOutside));
 </script>
