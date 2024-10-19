@@ -1,6 +1,14 @@
 // src/composables/funkOmikenUI.ts
-import { ref, computed, Ref } from 'vue';
-import type { STATEType, ItemCategory, ItemContent, SelectItem } from '../types';
+import { ref, computed, Ref } from "vue";
+import type {
+  STATEType,
+  ItemCategory,
+  ItemContent,
+  SelectItem,
+  placeType,
+  omikujiType,
+  rulesType,
+} from "../types";
 /*
 UIコンポーネントとインタラクションを担当
 useOmikujiDialog: おみくじダイアログの管理
@@ -9,15 +17,21 @@ useNavigation: ナビゲーション機能
 
 export function funkUI() {
   // UI:ダークモード
-  const dark = ref('dark');
+  const dark = ref("dark");
   // Mainのcols変更 //TODO 不要かも…細長いの1種類だけでいいなあと
-  const selectCols = ref<number>(1);
+  const selectCols = ref<number>(0);
 
   // リスト用:選択したカテゴリ
   const selectCategory = ref<ItemCategory>("rules");
 
-  // ダイアログ用:選択したアイテム
-  const selectItem = ref<SelectItem | null>(null);
+  // ダイアログで表示させるアイテム
+  const selectItem = ref({
+    rules: <Record<string, rulesType> | null>null,
+    omikuji: <Record<string, omikujiType> | null>null,
+    place: <Record<string, placeType> | null>null,
+  });
+  // ダイアログでの表示モード
+  const selectMode = ref<string | null>(null);
 
   // ダイアログ表示
   const dialogs = ref({
@@ -27,11 +41,23 @@ export function funkUI() {
   });
 
   // ダイアログを開く
-  const openEditor = (item: SelectItem) => {
-    console.log('item:',item);
-    if (item) {
-      selectItem.value = item;
-      dialogs.value[item.type] = true;
+  const openEditor = (
+    type: ItemCategory,
+    item: Record<string, ItemContent>,
+    mode: string | null = null
+  ) => {
+    console.log("funkOmikenUI - openEditor called:", type, item, selectItem.value    );
+    if (type === "rules") {
+      selectItem.value.rules = item as Record<string, rulesType>;
+      dialogs.value.rules = true;
+    } else if (type === "omikuji") {
+      selectItem.value.omikuji = item as Record<string, omikujiType>;
+      console.log(selectItem.value.omikuji);
+      dialogs.value.omikuji = true;
+    } else if (type === "place") {
+      selectItem.value.place = item as Record<string, placeType>;
+      dialogs.value.place = true;
+      if (mode) selectMode.value = mode;
     }
   };
 
@@ -40,6 +66,7 @@ export function funkUI() {
     selectCols,
     selectCategory,
     selectItem,
+    selectMode,
     dialogs,
     openEditor,
   };

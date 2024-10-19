@@ -29,6 +29,7 @@ declare module 'vue' {
     OmikujiEditorFiltering: typeof import('./src/components/OmikujiEditorFiltering.vue')['default']
     OmikujiEditorMessage: typeof import('./src/components/OmikujiEditorMessage.vue')['default']
     OmikujiList: typeof import('./src/components/OmikujiList.vue')['default']
+    PlaceEditor: typeof import('./src/components/PlaceEditor.vue')['default']
     RandomEditor: typeof import('./src/components/RandomEditor.vue')['default']
     RuleEditor: typeof import('./src/components/RuleEditor.vue')['default']
     'コピー': typeof import('./src/components/NavigationList - コピー.vue')['default']

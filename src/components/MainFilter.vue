@@ -84,18 +84,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import { ItemCategory, SelectItem, STATEType, thresholdType } from '@/types';
+import { ref, computed } from "vue";
+import { ItemCategory, SelectItem, STATEType, thresholdType } from "@/types";
 
 const props = defineProps<{
   filterRef: {
-    rulesSortName: 'none' | 'highFreq' | 'lowFreq';
+    rulesSortName: "none" | "highFreq" | "lowFreq";
     rulesFilterSwitch: number[];
-    omikujiSortName: 'none' | 'highFreq' | 'lowFreq';
+    omikujiSortName: "none" | "highFreq" | "lowFreq";
     omikujiFilterThreshold: thresholdType[];
-    omikujiSortWeight: 'none' | 'highFreq' | 'lowFreq';
-    placeSortName: 'none' | 'name' | 'group';
-    placeSortWeight: 'none' | 'highFreq' | 'lowFreq';
+    omikujiSortWeight: "none" | "highFreq" | "lowFreq";
+    placeSortName: "none" | "name" | "group";
+    placeSortWeight: "none" | "highFreq" | "lowFreq";
   };
   STATE: STATEType;
   selectCategory: ItemCategory;
@@ -108,15 +108,15 @@ const emit = defineEmits<{
 
 // thresholdTypeに基づいたセレクトボックスの項目
 const thresholdItems = computed(() => [
-  { title: '時間指定(0-23時)', value: 'time' as thresholdType },
-  { title: '配信枠のコメント番号', value: 'lc' as thresholdType },
-  { title: '配信枠の個人コメント数', value: 'no' as thresholdType },
-  { title: '総数の個人コメント数', value: 'tc' as thresholdType },
-  { title: '投稿後の秒数', value: 'second' as thresholdType },
-  { title: '投稿後の分', value: 'minute' as thresholdType },
-  { title: '投稿後の時間', value: 'hour' as thresholdType },
-  { title: '投稿後の日数', value: 'day' as thresholdType },
-  { title: 'ギフト', value: 'price'  },
+  { title: "時間指定(0-23時)", value: "time" as thresholdType },
+  { title: "配信枠のコメント番号", value: "lc" as thresholdType },
+  { title: "配信枠の個人コメント数", value: "no" as thresholdType },
+  { title: "総数の個人コメント数", value: "tc" as thresholdType },
+  { title: "投稿後の秒数", value: "second" as thresholdType },
+  { title: "投稿後の分", value: "minute" as thresholdType },
+  { title: "投稿後の時間", value: "hour" as thresholdType },
+  { title: "投稿後の日数", value: "day" as thresholdType },
+  { title: "ギフト", value: "price" },
 ]);
 
 // フィルターの更新を親コンポーネントに通知
@@ -129,9 +129,12 @@ const updateSTATE = (): void => {
   let newOrder: string[] = [];
 
   switch (props.selectCategory) {
-    case 'omikuji':
-    case 'place':
-      newOrder = sortItems(props.STATE[`${props.selectCategory}Order`], props.selectCategory);
+    case "omikuji":
+    case "place":
+      newOrder = sortItems(
+        props.STATE[`${props.selectCategory}Order`],
+        props.selectCategory
+      );
       break;
     // rulesはソートがないため、case 'rules'は省略
   }
@@ -139,23 +142,27 @@ const updateSTATE = (): void => {
   if (newOrder.length > 0) {
     emit("update:STATE", {
       type: props.selectCategory,
-      items: {}, 
-      operation: "reorder",
       reorder: newOrder,
     });
   }
 };
 
 // アイテムのソート関数
-const sortItems = (items: string[], category: 'omikuji' | 'place'): string[] => {
-  const sortWeight = category === 'omikuji' ? props.filterRef.omikujiSortWeight : props.filterRef.placeSortWeight;
-  
-  if (sortWeight === 'none') return items;
+const sortItems = (
+  items: string[],
+  category: "omikuji" | "place"
+): string[] => {
+  const sortWeight =
+    category === "omikuji"
+      ? props.filterRef.omikujiSortWeight
+      : props.filterRef.placeSortWeight;
+
+  if (sortWeight === "none") return items;
 
   return [...items].sort((a, b) => {
     const weightA = props.STATE[category][a]?.weight || 0;
     const weightB = props.STATE[category][b]?.weight || 0;
-    return sortWeight === 'highFreq' ? weightB - weightA : weightA - weightB;
+    return sortWeight === "highFreq" ? weightB - weightA : weightA - weightB;
   });
 };
 </script>

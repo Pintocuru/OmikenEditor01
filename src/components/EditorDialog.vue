@@ -9,11 +9,12 @@
   >
     <v-card>
       <component
-        :is="editorComponent"
+        :is="getEditorComponent(key)"
         :STATE="STATE"
-        :selectItem="selectItem"
+        :selectItem="selectItem[key]"
+        :selectMode="selectMode"
         @update:STATE="updateSTATE"
-                  @open-editor="openEditor"
+        @open-editor="openEditor"
       />
       <v-card-actions>
         <v-spacer></v-spacer>
@@ -26,80 +27,62 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from "vue";
+import { onMounted } from "vue";
 import RuleEditor from "./RuleEditor.vue";
 import OmikujiEditor from "./OmikujiEditor.vue";
-import RandomEditor from "./RandomEditor.vue";
-import { STATEType, SelectItem } from "@/types";
+import PlaceEditor from "./PlaceEditor.vue";
+import { ItemCategory, ItemContent, STATEType, SelectItem } from "@/types";
 
 // Props / emit
 const props = defineProps<{
-  show: {
-    rules: boolean;
-    omikuji: boolean;
-    place: boolean;
-  };
+  show: Record<ItemCategory, boolean>;
   STATE: STATEType;
-  selectItem: SelectItem;
+  selectItem: Record<ItemCategory, Record<string, ItemContent> | null>;
+  selectMode:string | null;
 }>();
 
 const emit = defineEmits<{
-  (
-    e: "update:show",
-    newShow: {
-      rules: boolean;
-      omikuji: boolean;
-      place: boolean;
-    }
-  ): void;
+  (e: "update:show", newShow: Record<ItemCategory, boolean>): void;
   (e: "update:STATE", payload: SelectItem): void;
-    (e: "open-editor", selectItem: SelectItem): void;
+  (
+    e: "open-editor",
+    type: ItemCategory,
+    item: Record<string, ItemContent>,
+    mode: string | null
+  ): void;
 }>();
 
-// 編集用コンポーネントを取得する計算プロパティ
-// TODO このエラーハンドリングを消す
-const editorComponent = computed(() => {
-  try {
-    const type = props.selectItem?.type;
-    const editorMap = {
-      rules: RuleEditor,
-      omikuji: OmikujiEditor,
-      place: RandomEditor,
-    };
-    // 該当するコンポーネントを返す
-    const component = editorMap[type as keyof typeof editorMap];
-    if (!component) {
-      throw new Error(`コンポーネントが見つかりません: ${type}`);
-    }
-    return component;
-  } catch (error) {
-    console.error("エラーが発生しました:", error);
-    return null; // コンポーネントが見つからない場合はnullを返す
-  }
-});
+// エディターコンポーネントを取得する関数
+const getEditorComponent = (type: ItemCategory) => {
+  console.log(props.selectItem);
+  const editorMap: Record<ItemCategory, any> = {
+    rules: RuleEditor,
+    omikuji: OmikujiEditor,
+    place: PlaceEditor,
+  };
+  return editorMap[type] || null;
+};
 
 // showの更新をemitする関数
-const updateShow = (key: keyof typeof props.show, value: boolean) => {
-  emit("update:show", {
-    ...props.show,
-    [key]: value,
-  });
+const updateShow = (key: ItemCategory, value: boolean) => {
+  emit("update:show", { ...props.show, [key]: value });
 };
 
 // selectItemをAppに送り、エディターを開く
-const openEditor = (selectItem: SelectItem) => {
-  try {
-    emit("open-editor", selectItem);
-  } catch (error) {
-    console.error('エディターオープン中にエラーが発生しました:', error);
-  }
+const openEditor = (
+  type: ItemCategory,
+  item: Record<string, ItemContent>,
+  mode: string | null = null
+) => {
+  console.log("EditorDialog - openEditor called:", type, item);
+  emit("open-editor", type, item, mode);
 };
 
 // STATEの更新をemit
 const updateSTATE = (payload: SelectItem) => emit("update:STATE", payload);
 
 // ダイアログを閉じる
-const closeDialog = (key: keyof typeof props.show) => {
+const closeDialog = (key: ItemCategory) => {
   emit("update:show", { ...props.show, [key]: false });
 };
 
@@ -108,14 +91,13 @@ const closeClickOutside = (event: MouseEvent) => {
   const target = event.target as Node;
   const dialogElement = event.currentTarget as HTMLElement;
 
-  // place > omikuji > rules の順で1つずつ閉じる
   if (!dialogElement.contains(target)) {
-    if (props.show.place) {
-      closeDialog("place");
-    } else if (props.show.omikuji) {
-      closeDialog("omikuji");
-    } else if (props.show.rules) {
-      closeDialog("rules");
+    const keys: ItemCategory[] = ["place", "omikuji", "rules"];
+    for (const key of keys) {
+      if (props.show[key]) {
+        closeDialog(key);
+        break;
+      }
     }
   }
 };

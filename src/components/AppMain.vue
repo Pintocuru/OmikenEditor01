@@ -42,7 +42,7 @@ import MainFilter from "./MainFilter.vue";
 import MainItemList from "./MainItemList.vue";
 import { z } from "zod";
 import _ from "lodash";
-import type { STATEType, ItemCategory, SelectItem, thresholdType, omikujiType, placeType, rulesType } from "@/types";
+import type { STATEType, ItemCategory, SelectItem, thresholdType, omikujiType, placeType, rulesType, ItemContent } from "@/types";
 
 // Props Emits
 const props = defineProps<{
@@ -53,7 +53,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: "update:STATE", payload: SelectItem): void;
-  (e: "open-editor", selectItem: SelectItem): void;
+  (e: "open-editor", type: ItemCategory,item: Record<string, ItemContent>): void;
 }>();
 
 // フィルタリングを管理するref
@@ -108,7 +108,8 @@ const addItem = () => {
 };
 
 // selectItemをAppに送り、エディターを開く
-const openEditor = (selectItem: SelectItem) => emit("open-editor", selectItem);
+const openEditor = (type: ItemCategory,item: Record<string, ItemContent>) =>
+ emit("open-editor", type,item);
 
 // STATEの更新をemit
 const updateSTATE = (payload: SelectItem) => emit("update:STATE", payload);

@@ -109,7 +109,7 @@ export function useEditOmikuji(
     { text: "範囲", value: "range" },
   ];
 
-  // 新しいメッセージを追加 
+  // 新しいメッセージを追加 // TODO 移行終了
   const addPost = (omikuji: omikujiType, ) => {
     // CHARAの最初のキーを取得
     const firstKey = Object.keys(CHARA)[0];
@@ -134,6 +134,7 @@ export function useEditOmikuji(
     (omikuji.post as postType[])?.splice(index, 1);
   };
 
+  // TODO 統合したのでもう不要です
   function sanitizeThresholdSettings(editingItem: Ref<any>) {
     if (!editingItem.value || !editingItem.value.threshold) {
       return false;

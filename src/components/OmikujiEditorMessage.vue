@@ -10,7 +10,7 @@
     </v-toolbar>
     <v-card-text>
       <v-expansion-panels multiple>
-        <v-expansion-panel v-for="(post, index) in currentOmikuji.post" :key="index">
+        <v-expansion-panel v-for="(post, index) in currentItem.post" :key="index">
           <v-expansion-panel-title
             :style="['onecomme', 'toast'].includes(post.type) ? { backgroundColor: getCharaColor(post.botKey) } : {}">
             <v-row no-gutters align="center">
@@ -79,16 +79,14 @@
 
 <script setup lang="ts">
 import { computed, inject, Ref, ref } from "vue";
-import type { CHARAType, omikujiType, placeType, postType } from "../types";
+import type { CHARAType, omikujiType, placeType, postType, SelectItem } from "../types";
 
 const props = defineProps<{
-  currentOmikuji: omikujiType;
+  currentItem: omikujiType;
 }>();
 
 const emit = defineEmits<{
-  (e: "update", omikuji: omikujiType): void;
-  (e: "addPost"): void;
-  (e: "removePost", index: number): void;
+  (e: "update:STATE", payload: SelectItem): void;
 }>();
 
 const CHARA = inject<CHARAType>("charaKey");
@@ -102,13 +100,48 @@ const isHovered = (post: postType) => {
 };
 
 // メッセージが存在しないかどうかをチェック
-const hasNoMessages = computed(() => props.currentOmikuji.post.length === 0);
+const hasNoMessages = computed(() => props.currentItem.post.length === 0);
 
-const addPost = () => emit("addPost");
-const removePost = (index: number) => emit("removePost", index);
+// postに追加
+const addPost = () => {
+  const item = props.currentItem;
+  // キャラクターキーを取得
+  const botKey = CHARA ? Object.keys(CHARA)[0] : "mamono";
+  // ポストを追加
+  (item.post as postType[]).push({
+    type: "onecomme",
+    botKey: botKey,
+    iconKey: "Default",
+    delaySeconds: 0,
+    content: "<<user>>さんの運勢は【大吉】",
+  });
+  // 状態を更新
+  emit("update:STATE", {
+    type: "omikuji",
+    update: { [item.id]: item },
+  });
+};
 
+
+const removePost = (index: number) => {
+  const item = props.currentItem;
+  // ポストを削除
+   (item.post as postType[])?.splice(index, 1);
+  // 状態を更新
+  emit("update:STATE", {
+    type: "omikuji",
+    update: { [item.id]: item },
+  });
+};
+
+// 更新アップデート
 const updateOmikuji = () => {
-  emit("update", props.currentOmikuji);
+  if (props.currentItem) {
+    emit("update:STATE", {
+      type: "omikuji",
+      update: { [props.currentItem.id]: props.currentItem },
+    });
+  }
 };
 
 // 型ガード関数

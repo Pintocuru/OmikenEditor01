@@ -47,18 +47,18 @@
 
         <!-- フィルタリング設定 -->
         <OmikujiEditorFiltering
-          :currentOmikuji="currentItem"
+          :currentItem="currentItem"
           :thresholdTypes="thresholdTypes"
           :comparisonItems="comparisonItems"
-          @update="updateOmikuji"
+          @update="updateSTATE"
         />
 
         <!-- メッセージ設定 -->
         <OmikujiEditorMessage
-          :currentOmikuji="currentItem"
+          :currentItem="currentItem"
           @addPost="addPost"
           @removePost="removePost"
-          @update="updateOmikuji"
+          @update="updateSTATE"
         />
       </v-form>
     </v-card-text>
@@ -68,14 +68,15 @@
 
 <script setup lang="ts">
 import { computed, inject } from "vue";
-import type { CHARAType, STATEType, omikujiType, SelectItem } from "../types";
+import type { CHARAType, STATEType, omikujiType, SelectItem, placeType, rulesType } from "../types";
 import { useEditOmikuji } from "../composables/funkOmikenEdit";
 import OmikujiEditorFiltering from "./OmikujiEditorFiltering.vue";
 import OmikujiEditorMessage from "./OmikujiEditorMessage.vue";
 
+// props/emits
 const props = defineProps<{
   STATE: STATEType;
-  selectItem: SelectItem;
+  selectItem: Record<string, omikujiType> | null;
 }>();
 
 const emit = defineEmits<{
@@ -91,18 +92,20 @@ const {
   thresholdTypes,
   comparisonItems,
   removePost,
-  sanitizeThresholdSettings,
 } = useEditOmikuji(props.STATE, CHARA);
 
 // propsからデータを解読
 const currentItem = computed(() => {
-  if (props.selectItem && props.selectItem.items) {
-    const firstKey = Object.keys(props.selectItem.items)[0];
-    return props.selectItem.items[firstKey] as omikujiType;
+  if (props.selectItem) {
+    // オブジェクトの最初のキーの値を返す
+    const firstKey = Object.keys(props.selectItem)[0];
+    return props.selectItem[firstKey];
   }
   return null;
 });
 
+// 全体の出現割合から％を取る
+// TODO 全体の出現割合の数値も取って表示させたい
 const weightValues = computed(() => {
   if (!currentItem.value) return 0;
   const totalWeight = Object.values(props.STATE.omikuji).reduce(
@@ -115,13 +118,14 @@ const weightValues = computed(() => {
 
 // 更新アップデート
 const updateOmikuji = () => {
-  if (props.selectItem && currentItem.value) {
-    sanitizeThresholdSettings(currentItem.value);
+  if (currentItem.value) {
     emit("update:STATE", {
       type: "omikuji",
-      items: { [currentItem.value.id]: currentItem.value },
-      operation: "update",
+      update: { [currentItem.value.id]: currentItem.value },
     });
   }
 };
+// 子コンポーネントのSTATE更新
+const updateSTATE = (payload: SelectItem) => emit("update:STATE", payload);
+
 </script>

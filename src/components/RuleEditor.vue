@@ -1,14 +1,18 @@
 <!-- src/components/RuleEditor.vue -->
 <template>
-  <v-card v-if="currentRule">
+  <v-card v-if="currentItem">
     <v-card-text>
       <v-row dense>
         <v-col cols="12" sm="4">
-          <v-text-field v-model="currentRule.name" label="おみくじ名" @input="updateRule"></v-text-field>
+          <v-text-field
+            v-model="currentItem.name"
+            label="おみくじ名"
+            @input="updateItem"
+          ></v-text-field>
         </v-col>
         <v-col cols="12" sm="8">
           <v-slider
-            v-model="currentRule.switch"
+            v-model="currentItem.switch"
             :max="4"
             :ticks="{
               0: '無効',
@@ -20,13 +24,24 @@
             show-ticks="always"
             step="1"
             tick-size="4"
-            :color="switchColor(currentRule.switch)"
-            @change="updateRule"
+            :color="switchColor(currentItem.switch)"
+            @change="updateItem"
           ></v-slider>
         </v-col>
       </v-row>
       <v-row>
-<v-col cols="12" sm="6">
+        <v-col cols="12" sm="6">
+          <v-select
+            v-model="currentItem.disabledIds"
+            :items="omikujiOptions"
+            label="無効にするID"
+            chips
+            multiple
+            item-title="name"
+            item-value="id"
+            @change="updateItem"
+          >
+          </v-select>
           <v-list dense>
             <v-list-item
               v-for="option in validOmikujiOptions"
@@ -36,53 +51,60 @@
               {{ option.name }}
             </v-list-item>
           </v-list>
-          <v-select
-            v-model="currentRule.disabledIds"
-            :items="omikujiOptions"
-            label="無効にするID"
+        </v-col>
+        <v-col cols="12" sm="6">
+          <v-combobox
+            v-model="currentItem.matchExact"
+            label="完全一致"
             clearable
             chips
             multiple
-            item-title="name"
-            item-value="id"
-            @change="updateRule"
-          >
-            <template v-slot:item="{ props, item }">
-              <v-list-item v-bind="props" :title="item.raw.name" :value="item.raw.id"></v-list-item>
-            </template>
-          </v-select>
-        </v-col>
-        <v-col cols="12" sm="6">
-          <v-combobox v-model="currentRule.matchExact" label="完全一致" clearable chips multiple @change="updateRule"></v-combobox>
-          <v-combobox v-model="currentRule.matchStartsWith" label="前方一致" clearable chips multiple @change="updateRule"></v-combobox>
-          <v-combobox v-model="currentRule.matchIncludes" label="部分一致" clearable chips multiple @change="updateRule"></v-combobox>
+            @change="updateItem"
+          ></v-combobox>
+          <v-combobox
+            v-model="currentItem.matchStartsWith"
+            label="前方一致"
+            clearable
+            chips
+            multiple
+            @change="updateItem"
+          ></v-combobox>
+          <v-combobox
+            v-model="currentItem.matchIncludes"
+            label="部分一致"
+            clearable
+            chips
+            multiple
+            @change="updateItem"
+          ></v-combobox>
         </v-col>
       </v-row>
     </v-card-text>
   </v-card>
-  <v-alert v-else type="warning">アイテムが選択されていません。</v-alert>
+  <v-alert v-else type="warning">アイテムが選択されていないか、データの形式が正しくありません。</v-alert>
 </template>
 
 <script setup lang="ts">
 import { computed } from "vue";
-import type { ItemContent, STATEType, SelectItem, rulesType } from "../types";
+import type { ItemCategory, ItemContent, STATEType, SelectItem, omikujiType, placeType, rulesType } from "../types";
 
-  // props/emits
+// props/emits
 const props = defineProps<{
   STATE: STATEType;
-  selectItem: SelectItem;
+  selectItem: Record<string, rulesType> | null;
 }>();
 
 const emit = defineEmits<{
   (e: "update:STATE", payload: SelectItem): void;
-    (e: "open-editor", selectItem: SelectItem): void;
+  (e: "open-editor", type: ItemCategory,item: Record<string, ItemContent>): void;
 }>();
 
 // propsからデータを解読
-const currentRule = computed(() => {
-  if (props.selectItem?.type === 'rules') {
-    const firstKey = Object.keys(props.selectItem.items)[0];
-    return props.selectItem.items[firstKey] as rulesType;
+const currentItem = computed(() => {
+  if (props.selectItem) {
+    // オブジェクトの最初のキーの値を返す
+    const firstKey = Object.keys(props.selectItem)[0];
+    return props.selectItem[firstKey];
   }
   return null;
 });
@@ -95,35 +117,38 @@ const omikujiOptions = computed(() =>
   }))
 );
 
+// TODO 型エラー
 const validOmikujiOptions = computed(() => {
-  const disabledIds = currentRule.value?.disabledIds;
-  if (!disabledIds) return omikujiOptions.value;
-  return omikujiOptions.value.filter(option => !disabledIds.includes(option.id));
+  const disabledIds = currentItem.value?.disabledIds;
+  if (!Array.isArray(disabledIds)) return omikujiOptions.value;
+  return omikujiOptions.value.filter(
+    (option) => !disabledIds.includes(Number(option.id))
+  );
 });
 
 // switchの数値に合わせて色を変更
 const switchColor = (value: number) => {
-  const colors = ['', 'yellow', 'green', 'blue', 'red'];
-  return colors[value] || '';
+  const colors = ["", "yellow", "green", "blue", "red"];
+  return colors[value] || "";
 };
 
 // 更新アップデート
-const updateRule = () => {
-  if (props.selectItem && currentRule.value) {
+const updateItem = () => {
+  if (props.selectItem && currentItem.value) {
     emit("update:STATE", {
       type: "rules",
-      items: { [currentRule.value.id]: currentRule.value },
-      operation: "update",
+      update: { [currentItem.value.id]: currentItem.value },
     });
   }
 };
 
 // エディターを開く
 function openEditor(option: { id: string; name: string }) {
-  console.log({ [option.id]: props.STATE.omikuji[option.id] });
-  emit("open-editor", {
-    type: 'omikuji',
-    items: { [option.id]: props.STATE.omikuji[option.id] },
-  });
+  if (props.STATE.omikuji && props.STATE.omikuji[option.id]) {
+    emit("open-editor", 
+      "omikuji",
+      { [option.id]: props.STATE.omikuji[option.id] },
+    );
+  }
 }
 </script>

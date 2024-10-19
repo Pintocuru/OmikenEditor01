@@ -26,7 +26,8 @@
 
     <EditorDialog
       v-model:show="dialogs"
-      v-model:selectItem="selectItem"
+      :selectItem="selectItem"
+      :selectMode="selectMode"
       :STATE="STATE"
       @update:STATE="updateSTATE"
       @open-editor="openEditor"
@@ -98,7 +99,7 @@ provide("placeholderKey", placeholderKey); // provideで孫コンポーネント
 
 
 const { fetchData } = useDataFetcher();
-const { dark, selectCols, selectCategory, selectItem,dialogs, openEditor } =
+const { dark, selectCols, selectCategory, selectItem,selectMode,dialogs, openEditor } =
   funkUI();
 
 // コンポーネントのマウント時にデータを取得

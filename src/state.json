@@ -4,7 +4,7 @@
       "id": "rule1",
       "name": "基本ルール",
       "switch": 1,
-      "disabledIds": [101, 102],
+      "disabledIds": [],
       "matchExact": ["運試し", "おみくじ"]
     },
     "rule2": {

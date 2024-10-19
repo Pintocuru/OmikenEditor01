@@ -1,33 +1,8 @@
 // src/composables/funkOmikenSTATE.ts
 import { ref } from 'vue';
 import type { STATEType, ItemCategory, ItemContent, SelectItem } from '../types';
+import { validateData } from "../composables/funkOmikenJSON";
 import _ from 'lodash';
-import { z } from 'zod';
-
-// Zodスキーマの定義
-const rulesSchema = z.record(z.object({
-  someRulesProperty: z.string(),
-}));
-
-const omikujiSchema = z.record(z.object({
-  weight: z.number(),
-  threshold: z.number(),
-  postts: z.string(),
-}));
-
-const placeSchema = z.record(z.object({
-  location: z.string(),
-  capacity: z.number(),
-}));
-
-// スキーマをまとめる
-const schemas = {
-  rules: rulesSchema,
-  omikuji: omikujiSchema,
-  place: placeSchema,
-} as const;
-
-type Schemas = typeof schemas;
 
 export function funkSTATE() {
   const STATE = ref<STATEType>({
@@ -41,19 +16,40 @@ export function funkSTATE() {
 
   // emitsから送られたデータの処理
   const updateSTATE = (payload: SelectItem) => {
+    console.log('payload:', payload);
     if (!payload) return;
     const { type, update, addKeys, delKeys, reorder } = payload;
 
-    if (update) {
-      updateItem(type, update);
-    }
-
+    // カテゴリの更新
+    if (update) updateItem(type, update);
+    // 追加
     addKeys?.forEach(item => addItem(type, item));
+    // 削除
     delKeys?.forEach(key => deleteItem(type, key));
+    // 順番の再設定
+    if (Array.isArray(reorder)) updateOrder(type, reorder);
+  };
 
-    if (Array.isArray(reorder)) {
-      updateOrder(type, reorder);
-    }
+  // カテゴリの更新
+  const updateItem = (type: ItemCategory, item: Record<string, ItemContent>) => {
+    const newItem = validateData(type, item);
+    (STATE.value[type] as Record<string, ItemContent>) = _.merge({}, STATE.value[type], newItem);
+  };
+
+  // アイテムの追加
+  const addItem = (type: ItemCategory, item: object) => {
+    console.log(type, item);
+    const newKey = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    const newItem = validateData(type, { [newKey]: item });
+    (STATE.value[type] as Record<string, ItemContent>) = _.merge({}, STATE.value[type], newItem);
+    STATE.value[`${type}Order`].push(newKey);
+  };
+
+  // アイテムの削除
+  const deleteItem = (type: ItemCategory, itemId: string) => {
+    STATE.value[type] = _.omit(STATE.value[type], [itemId]);
+    // xxxOrderから削除
+    STATE.value[`${type}Order`] = STATE.value[`${type}Order`].filter(id => id !== itemId);
   };
 
   // 順番(xxxOrder)の更新
@@ -64,26 +60,6 @@ export function funkSTATE() {
     STATE.value[`${type}Order`] = newOrder;
   };
 
-  // カテゴリの更新
-  const updateItem = (type: ItemCategory, item: Record<string, ItemContent>) => {
-    schemas[type].parse(item);
-    (STATE.value[type] as Record<string, ItemContent>) = _.merge({}, STATE.value[type], item);
-  };
-
-  // アイテムの追加
-  const addItem = (type: ItemCategory, item: object) => {
-    const newKey = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-    const validatedItem = schemas[type].parse({ [newKey]: item }); // Zodでバリデーション
-    (STATE.value[type] as Record<string, ItemContent>) = _.merge({}, STATE.value[type], validatedItem);
-    STATE.value[`${type}Order`].push(newKey);
-  };
-
-  // アイテムの削除
-  const deleteItem = (type: ItemCategory, itemId: string) => {
-    STATE.value[type] = _.omit(STATE.value[type], [itemId]);
-    // xxxOrderから削除
-    STATE.value[`${type}Order`] = STATE.value[`${type}Order`].filter(id => id !== itemId);
-  };
 
   return {
     STATE,

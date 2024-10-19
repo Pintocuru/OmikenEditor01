@@ -68,7 +68,11 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: "update:STATE", payload: SelectItem): void;
-  (e: "open-editor", selectItem: SelectItem): void;
+  (
+    e: "open-editor",
+    type: ItemCategory,
+    item: Record<string, ItemContent>
+  ): void;
 }>();
 
 // グループ編集かどうか
@@ -92,15 +96,13 @@ function handleReorder(newOrder: ItemContent[]) {
 
 // エディターを開く
 function openEditor(element: ItemContent & { id: string }) {
-  emit("open-editor", {
-    type: props.selectCategory,
-    items: { [element.id]: props.items[element.id] },
+  console.log(props.items[element.id]);
+  emit("open-editor", props.selectCategory, {
+    [element.id]: props.items[element.id],
   });
 }
 
 function deleteItem(element: any) {
-  // TODO 入っているものを確認して、下記を修正する
-  console.log(element);
   if (!isGrouped.value) {
     Swal.fire({
       title: `${element.name} を消去する`,
@@ -115,11 +117,9 @@ function deleteItem(element: any) {
       denyButtonText: "キャンセル",
     }).then((result) => {
       if (result.isConfirmed) {
-
-        return
         emit("update:STATE", {
           type: props.selectCategory,
-          delKeys:[],
+          delKeys: [element.id],
         });
       }
     });
@@ -144,7 +144,6 @@ const colProps = computed(() => {
 const cardHeight = computed(() => {
   return props.selectCols === 0 ? 50 : 100;
 });
-
 
 function getItemCount(
   element: ItemContent | { title: string; items: ItemContent[] }
