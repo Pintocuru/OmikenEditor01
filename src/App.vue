@@ -3,9 +3,7 @@
   <v-app :theme="dark">
     <AppHeader
       v-model:dark="dark"
-      v-model:selectCols="selectCols"
       @update:dark="dark = $event"
-      @update:selectCols="selectCols = $event"
     />
     <AppNavigation
       v-model:selectCategory="selectCategory"
@@ -17,7 +15,6 @@
         <AppMain
           :STATE="STATE"
           :selectCategory="selectCategory"
-          :selectCols="selectCols"
           @update:STATE="updateSTATE"
           @open-editor="openEditor"
         />
@@ -99,7 +96,7 @@ provide("placeholderKey", placeholderKey); // provideで孫コンポーネント
 
 
 const { fetchData } = useDataFetcher();
-const { dark, selectCols, selectCategory, selectItem,selectMode,dialogs, openEditor } =
+const { dark,  selectCategory, selectItem,selectMode,dialogs, openEditor } =
   funkUI();
 
 // コンポーネントのマウント時にデータを取得

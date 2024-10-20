@@ -18,8 +18,6 @@ useNavigation: ナビゲーション機能
 export function funkUI() {
   // UI:ダークモード
   const dark = ref("dark");
-  // Mainのcols変更 //TODO 不要かも…細長いの1種類だけでいいなあと
-  const selectCols = ref<number>(0);
 
   // リスト用:選択したカテゴリ
   const selectCategory = ref<ItemCategory>("rules");
@@ -63,7 +61,6 @@ export function funkUI() {
 
   return {
     dark,
-    selectCols,
     selectCategory,
     selectItem,
     selectMode,

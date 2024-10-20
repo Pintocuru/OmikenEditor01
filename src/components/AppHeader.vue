@@ -6,18 +6,6 @@
     <v-btn @click="toggleTheme">
       {{ dark === "dark" ? "Light Mode" : "Dark Mode" }}
     </v-btn>
-    <!-- グリッドレイアウト選択ラジオボタングループ -->
-    <v-radio-group inline v-model="localSelectCols" @change="updateSelectCols">
-      <v-radio
-        v-for="(col, index) in gridcols"
-        :key="index"
-        :value="index"
-        hide-details
-        class="ma-4"
-      >
-        <v-icon>{{ col.icon }}</v-icon>
-      </v-radio>
-    </v-radio-group>
   </v-app-bar>
 </template>
 
@@ -25,27 +13,15 @@
 import { ref } from "vue";
 import { defineProps, defineEmits } from "vue";
 
-const props = defineProps<{ dark: string; selectCols: number }>();
+const props = defineProps<{
+   dark: string;  
+  }>();
 const emit = defineEmits<{
   (e: "update:dark", value: string): void;
-  (e: "update:selectCols", value: number): void;
 }>();
 
 // テーマ切り替え関数
 const toggleTheme = () => emit("update:dark", props.dark === "dark" ? "light" : "dark");
 
-// グリッドレイアウト設定
-const localSelectCols = ref(props.selectCols);
-const gridcols = [
-  { icon: "mdi-view-list" },
-  { icon: "mdi-view-grid" },
-  { icon: "mdi-view-module" },
-];
 
-// グリッドレイアウト更新関数
-const updateSelectCols = (event: { target: { value: number } }) => {
-  const value = Number(event.target.value);
-  localSelectCols.value = value;
-  emit("update:selectCols", value);
-};
 </script>

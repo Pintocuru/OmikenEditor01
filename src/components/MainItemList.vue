@@ -67,7 +67,6 @@ const props = defineProps<{
   items: Record<string, ItemContent>;
   itemOrder: string[];
   selectCategory: ItemCategory;
-  selectCols: number;
   groupBy?: "none" | "name" | "group";
 }>();
 
@@ -134,25 +133,27 @@ function openEditor(element: ItemContent | { name: string; items: ItemContent[] 
 }
 
 // 配列データxxxOrderの更新
-function handleReorder(newOrder: { name: string; items: ItemContent[] }[]) {
-  // 通常モード
-  if (props.groupBy === "none") {
-    const newItemOrder = _.flatMap(newOrder, (group) =>
-      group.items.map((item) => item.id)
-    );
+type draggableGroup = {name: string;  items: ItemContent[];};
+function handleReorder(newOrder: ItemContent[] | draggableGroup[]) {
+  console.log(newOrder);
+  try {
+    let newItemOrder: string[];
+
+    // 通常モード
+    if (!props.groupBy || props.groupBy === "none") {
+      newItemOrder = (newOrder as ItemContent[]).map(item => item.id);
+    } else {
+      // グループモード
+      newItemOrder = (newOrder as draggableGroup[]).flatMap(group =>
+        group.items.map(item => item.id)
+      );
+    }
     emit("update:STATE", {
       type: props.selectCategory,
       reorder: newItemOrder,
     });
-  } else {
-    // グループモード
-    const newItemOrder = _.flatMap(newOrder, (group) =>
-      group.items.map((item) => item.id)
-    );
-    emit("update:STATE", {
-      type: props.selectCategory,
-      reorder: newItemOrder,
-    });
+  } catch (error) {
+    console.error("Error in handleReorder:", error);
   }
 }
 
@@ -194,21 +195,19 @@ function deleteItem(
   });
 }
 
+// colProps は1種類にする
 const colProps = computed(() => {
-  switch (props.selectCols) {
+  switch (0) {
     case 0:
       return { cols: 12, sm: 12, md: 12, lg: 6 };
-    case 1:
-      return { cols: 12, sm: 6, md: 4, lg: 3 };
-    case 2:
-      return { cols: 4, sm: 3, md: 2, lg: 1 };
     default:
       return { cols: 12, sm: 6, md: 4, lg: 3 };
   }
 });
 
+// カテゴリによって高さを変える
 const cardHeight = computed(() => {
-  return props.selectCols === 0 ? 50 : 100;
+  return 100;
 });
 
 onMounted(() => {

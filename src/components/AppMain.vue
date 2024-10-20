@@ -31,7 +31,6 @@
           :items="filterItems"
           :itemOrder="STATE[`${selectCategory}Order`]"
           :select-category="selectCategory"
-          :selectCols="selectCols"
           :group-by="
             selectCategory === 'place' ? filterRef.placeSortName : undefined
           "
@@ -64,7 +63,6 @@ import type {
 const props = defineProps<{
   STATE: STATEType;
   selectCategory: ItemCategory;
-  selectCols: number;
 }>();
 
 const emit = defineEmits<{
