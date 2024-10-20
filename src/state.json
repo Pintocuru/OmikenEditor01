@@ -2,16 +2,29 @@
   "rules": {
     "rule1": {
       "id": "rule1",
-      "name": "基本ルール",
+      "name": "おみくじ",
       "switch": 1,
       "disabledIds": [],
-      "matchExact": ["運試し", "おみくじ"]
+      "matchExact": [
+        "運試し",
+        "おみくじ"
+      ],
+      "matchStartsWith": [],
+      "matchIncludes": []
     },
     "rule2": {
       "id": "rule2",
-      "name": "限定ルール",
+      "name": "フラワーおみくじ",
       "switch": 2,
-      "matchStartsWith": ["特別", "限定"]
+      "disabledIds": [],
+      "matchExact": [
+        "*"
+      ],
+      "matchStartsWith": [
+        "特別",
+        "限定"
+      ],
+      "matchIncludes": []
     }
   },
   "omikuji": {
@@ -20,15 +33,17 @@
       "name": "大吉",
       "weight": 5,
       "threshold": {
-        "type": "day",
+        "type": "none",
+        "comparison": "range",
         "value": 1,
-        "valueMax": 7,
-        "comparison": "range"
+        "valueMax": 7
       },
       "post": [
         {
           "type": "onecomme",
-          "delaySeconds": 5,
+          "botKey": "reimu",
+          "iconKey": "Default",
+          "delaySeconds": 1,
           "content": "今日は大吉！<<random>>"
         }
       ]
@@ -38,15 +53,18 @@
       "name": "中吉",
       "weight": 3,
       "threshold": {
-        "type": "time",
+        "type": "none",
+        "comparison": "range",
         "value": 12,
-        "comparison": "min"
+        "valueMax": 0
       },
       "post": [
         {
-          "type": "toast",
-          "delaySeconds": 3,
-          "content": "中吉です。<<random>>でリフレッシュ！"
+          "type": "onecomme",
+          "botKey": "reimu",
+          "iconKey": "Default",
+          "delaySeconds": 1,
+          "content": "中吉です。<<random>>"
         }
       ]
     }
@@ -54,27 +72,45 @@
   "place": {
     "place1": {
       "id": "place1",
-      "randomKey": "<<random>>",
-      "weight": 10,
+      "name": "<<random>>",
+      "weight": 2,
       "group": 1,
       "content": "お参りは大切です。"
     },
     "place2": {
       "id": "place2",
-      "randomKey": "<<random>>",
-      "weight": 5,
-      "group": 2,
+      "name": "<<random>>",
+      "weight": 2,
+      "group": 1,
       "content": "散歩で心を整えましょう。"
     },
     "place3": {
       "id": "place3",
-      "randomKey": "<<random>>",
-      "weight": 8,
-      "group": 3,
+      "name": "<<random>>",
+      "weight": 2,
+      "group": 1,
       "content": "温泉で疲れを癒しましょう。"
+    },
+    "1729400435766-t37np": {
+      "id": "1729400435766-t37np",
+      "name": "<<random>>",
+      "weight": 1,
+      "group": 1,
+      "content": "眠いときは寝ましょう"
     }
   },
-  "rulesOrder": ["rule1", "rule2"],
-  "omikujiOrder": ["omikuji1", "omikuji2"],
-  "placeOrder": ["place1", "place2", "place3"]
+  "rulesOrder": [
+    "rule1",
+    "rule2"
+  ],
+  "omikujiOrder": [
+    "omikuji1",
+    "omikuji2"
+  ],
+  "placeOrder": [
+    "place1",
+    "place2",
+    "place3",
+    "1729400435766-t37np"
+  ]
 }

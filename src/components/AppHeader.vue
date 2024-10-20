@@ -11,7 +11,6 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import { defineProps, defineEmits } from "vue";
 
 const props = defineProps<{
    dark: string;  

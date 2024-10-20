@@ -1,10 +1,7 @@
 <!-- src/App.vue -->
 <template>
   <v-app :theme="dark">
-    <AppHeader
-      v-model:dark="dark"
-      @update:dark="dark = $event"
-    />
+    <AppHeader v-model:dark="dark" @update:dark="dark = $event" />
     <AppNavigation
       v-model:selectCategory="selectCategory"
       :STATE="STATE"
@@ -39,7 +36,6 @@ import AppNavigation from "./components/AppNavigation.vue";
 import AppMain from "./components/AppMain.vue";
 import EditorDialog from "./components/EditorDialog.vue";
 import { funkSTATE } from "./composables/funkOmikenSTATE";
-import { useDataFetcher } from "./composables/funkOmikenJSON";
 import { funkUI } from "./composables/funkOmikenUI";
 
 // キャラクターデータ
@@ -88,20 +84,19 @@ const CHARA = {
   },
 };
 // コンポーザブルの使用
-const { STATE, updateSTATE } = funkSTATE();
+const { STATE, isInitialized, canUpdateJSON, initializeSTATE, updateSTATE } =
+  funkSTATE();
 
 provide("charaKey", CHARA); // provideで孫コンポーネントに渡す
 const placeholderKey = ref(STATE.value.place);
 provide("placeholderKey", placeholderKey); // provideで孫コンポーネントに渡す
 
-
-const { fetchData } = useDataFetcher();
-const { dark,  selectCategory, selectItem,selectMode,dialogs, openEditor } =
+const { dark, selectCategory, selectItem, selectMode, dialogs, openEditor } =
   funkUI();
 
 // コンポーネントのマウント時にデータを取得
 onMounted(async () => {
-  await fetchData(STATE.value);
+  await initializeSTATE();
   placeholderKey.value = STATE.value.place;
 });
 </script>

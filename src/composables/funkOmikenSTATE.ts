@@ -1,7 +1,7 @@
 // src/composables/funkOmikenSTATE.ts
 import { ref } from 'vue';
 import type { STATEType, ItemCategory, ItemContent, SelectItem } from '../types';
-import { validateData } from "../composables/funkOmikenJSON";
+import { useInitializeFunkOmiken, validateData } from "../composables/funkOmikenJSON";
 import _ from 'lodash';
 
 export function funkSTATE() {
@@ -14,21 +14,36 @@ export function funkSTATE() {
     placeOrder: [],
   });
 
+  const { isInitialized, canUpdateJSON, fetchData, saveData } = useInitializeFunkOmiken();
+
+  // 初期読み込み
+  const initializeSTATE = async () => {
+    const data = await fetchData();
+    if (data) {
+      STATE.value = data;
+    }
+  };
+
   // emitsから送られたデータの処理
-  const updateSTATE = (payload: SelectItem) => {
-    console.log('payload:', payload);
+  const updateSTATEInternal = (payload: SelectItem) => {
+    // 読み込み失敗なら一切の編集不可 // TODO 編集不可のスナックバーを出す
+    if (!isInitialized.value) {
+      return;
+    }
+
     if (!payload) return;
     const { type, update, addKeys, delKeys, reorder } = payload;
 
-    // カテゴリの更新
-    if (update) updateItem(type, update);
-    // 追加
-    addKeys?.forEach(item => addItem(type, item));
-    // 削除
-    delKeys?.forEach(key => deleteItem(type, key));
-    // 順番の再設定
-    if (Array.isArray(reorder)) updateOrder(type, reorder);
+    if (update) updateItem(type, update); // カテゴリの更新
+    addKeys?.forEach(item => addItem(type, item)); // 追加
+    delKeys?.forEach(key => deleteItem(type, key)); // 削除
+    if (Array.isArray(reorder)) updateOrder(type, reorder); // 順番の再設定
+
+    saveData(STATE.value);
   };
+
+  // デバウンスされた updateSTATE 関数
+  const updateSTATE = _.debounce(updateSTATEInternal, 500);
 
   // カテゴリの更新
   const updateItem = (type: ItemCategory, item: Record<string, ItemContent>) => {
@@ -63,6 +78,9 @@ export function funkSTATE() {
 
   return {
     STATE,
-    updateSTATE,
+    isInitialized,
+    canUpdateJSON,
+    initializeSTATE,
+    updateSTATE
   };
 }

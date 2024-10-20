@@ -1,28 +1,24 @@
 // src/composables/funkOmikenJSON.ts
 import { ref } from 'vue';
-import type { STATEType, omikujiType, rulesType, placeType, postType, ItemCategory } from '../types';
+import type { STATEType, ItemCategory } from '../types';
 import { z } from 'zod';
 import _ from 'lodash';
+import Swal from 'sweetalert2';
 
-/*
-JSONデータの操作を担当
-useDataFetcher: JSONデータの読み込み機能を提供
-useDataSaver: JSONデータの保存機能を提供
-*/
+// JSONデータの読み込み・書き込み
+export function useInitializeFunkOmiken() {
+  const isInitialized = ref(false);
+  const canUpdateJSON = ref(false); // テストモード:JSONを書き込みするか
 
-
-// データ読み込み
-export function useDataFetcher() {
-  const loading = ref(false);
-
-  const fetchData = async (STATE: STATEType) => {
+  const fetchData = async (): Promise<STATEType | null> => {
     try {
-      loading.value = true;
       const response = await fetch('/src/state.json');
       if (!response.ok) {
         throw new Error('Network response was not ok: ' + response.statusText);
       }
       const data = await response.json();
+
+      console.log(data);
 
       // データの検証と正規化
       const validatedData: STATEType = {
@@ -34,19 +30,65 @@ export function useDataFetcher() {
         placeOrder: generateOrder(data.place),
       };
 
-      Object.assign(STATE, validatedData);
+      isInitialized.value = true;
+      await Swal.fire({
+        title: '読み込み完了',
+        text: 'データの読み込みが完了しました。',
+        icon: 'success',
+        confirmButtonText: 'OK'
+      });
+      return validatedData;
     } catch (error) {
       console.error('Error fetching data:', error);
-    } finally {
-      loading.value = false;
+      await Swal.fire({
+        title: '読み込み失敗',
+        text: 'データの読み込みに失敗しました。このままでは更新できません。',
+        icon: 'error',
+        confirmButtonText: 'OK',
+        allowOutsideClick: false,
+        allowEscapeKey: false
+      });
+      return null;
+    }
+  };
+
+  const saveData = async (STATE: STATEType): Promise<void> => {
+    if (!canUpdateJSON.value) {
+      console.warn('canUpdateJSON:false, saveDataまで届きました');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/save-state', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(STATE)
+      });
+      if (!response.ok) {
+        throw new Error(`Network response was not ok: ${response.status}`);
+      }
+      console.log('データの保存が完了しました。');
+    } catch (error) {
+      console.error('Error saving data:', error);
+      await Swal.fire({
+        title: '保存失敗',
+        text: 'データの保存に失敗しました。',
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
     }
   };
 
   return {
-    loading,
-    fetchData
+    isInitialized,
+    canUpdateJSON,
+    fetchData,
+    saveData
   };
 }
+
+
+
 
 // rulesのZodスキーマ
 const rulesSchema = z.record(z.object({
@@ -57,13 +99,12 @@ const rulesSchema = z.record(z.object({
   // ルールの有効/無効 0:OFF/1:だれでも/2:メンバー以上/3:モデレーター/4:管理者
   switch: z.union([z.literal(0), z.literal(1), z.literal(2), z.literal(3), z.literal(4)]).default(1),
   // omikujiの適用しないIDリスト
-  disabledIds: z.array(z.number()).default([]),
+  disabledIds: z.array(z.string()).default([]),
   // キーワード(完全一致/前方一致/部分一致)
   matchExact: z.array(z.string()).default(['*']),
   matchStartsWith: z.array(z.string()).default([]),
   matchIncludes: z.array(z.string()).default([])
 }));
-
 
 // omikuji.thresholdスキーマ
 const baseThresholdSchema = z.object({
@@ -220,10 +261,6 @@ function getRandomFortune() {
   return ["大吉", "中吉", "小吉", "末吉", "吉", "凶", "福沢諭吉"][Math.floor(Math.random() * 7)];
 }
 
-
-
-
-
 // rules omikuji placeのバリデーション
 // TODO 返り値がanyなので　ItemContent　にしたい(すると型エラーになるが)
 export function validateData(type: ItemCategory, items: Record<string, any>): Record<string, any> {
@@ -251,132 +288,8 @@ export function validateData(type: ItemCategory, items: Record<string, any>): Re
   return validatedData;
 }
 
-
-
-// rulesの検証
-export function validateRules(items: Record<string, any>): Record<string, rulesType> {
-  const validatedRules: { [key: string]: rulesType } = {};
-  for (const [key, item] of Object.entries(items)) {
-    validatedRules[key] = {
-      // ID
-      id: typeof item.id === 'string' ? item.id : key,
-      // おみくじルール名
-      name: typeof item.name === 'string' ? item.name : 'おみくじ',
-      // ルールの有効/無効 0:OFF/1:だれでも/2:メンバー以上/3:モデレーター/4:管理者
-      switch: [0, 1, 2, 3, 4].includes(item.switch) ? item.switch : 1,
-      // omikujiの適用しないIDリスト
-      disabledIds: Array.isArray(item.disabledIds) ? item.disabledIds.filter((id: any) => typeof id === 'number') : [],
-      // キーワード(完全一致/前方一致/部分一致)
-      matchExact: Array.isArray(item.matchExact) ? item.matchExact.filter((phrase: any) => typeof phrase === 'string') : ['*'],
-      matchStartsWith: Array.isArray(item.matchStartsWith) ? item.matchStartsWith.filter((phrase: any) => typeof phrase === 'string') : [],
-      matchIncludes: Array.isArray(item.matchIncludes) ? item.matchIncludes.filter((phrase: any) => typeof phrase === 'string') : [],
-    };
-  }
-  return validatedRules;
-}
-
-// Omikujiの検証
-export function validateOmikuji(items: { [key: string]: any }): { [key: string]: omikujiType } {
-  const validatedOmikuji: { [key: string]: omikujiType } = {};
-
-  for (const [key, item] of Object.entries(items)) {
-    // ランダムな運勢を取得
-    const getRandomFortune = () => ["大吉", "中吉", "小吉", "末吉", "吉", "凶", "福沢諭吉"][Math.floor(Math.random() * 7)];
-
-    validatedOmikuji[key] = {
-      // ID
-      id: typeof item.id === 'string' ? item.id : key,
-      // おみくじの結果名(「大吉」など)
-      name: typeof item.name === 'string' ? item.name : getRandomFortune(),
-      // メッセージの重み付け
-      weight: typeof item.weight === 'number' || typeof item.weight === 'string'
-        ? Math.abs(parseInt(item.weight)) || 1
-        : 1,
-      // フィルタリング基準
-      threshold: {
-        // タイプ
-        type: ['none', 'time', 'lc', 'no', 'tc', 'second', 'minute', 'hour', 'day', 'price', 'custom'].includes(item.threshold?.type) ? item.threshold.type : 'none',
-        // 比較方法
-        comparison: ['min', 'equal', 'max', 'loop', 'range'].includes(item.threshold?.comparison) ? item.threshold.comparison : 'equal',
-        // 基準となる数値
-        value: typeof item.threshold?.value === 'number' ? Math.abs(item.threshold.value) : 0,
-        valueMax: typeof item.threshold?.valueMax === 'number' ? Math.abs(item.threshold.valueMax) : 0,
-      },
-      // メッセージの投稿情報 message:わんコメ party:WordParty toast:トースト speech:わんコメspeech
-      post: Array.isArray(item.post) ?
-        (item.post as postType[]).map((post: any): postType => ({
-          type: ['onecomme', 'party', 'toast', 'speech'].includes(post.type) ? post.type : 'onecomme',
-          botKey: typeof post.botKey === 'string' ? post.botKey : "mamono",
-          iconKey: typeof post.iconKey === 'string' ? post.iconKey : "Default",
-          delaySeconds: typeof post.delaySeconds === 'number' ? post.delaySeconds : 0,
-          content: typeof post.content === 'string' ? post.content : '<<user>>さんの運勢は【大吉】',
-        }))
-          .sort((a, b) => a.delaySeconds - b.delaySeconds) : [],
-    };
-  }
-  return validatedOmikuji;
-}
-
-// placeの検証
-export function validatePlace(items: { [key: string]: any }): { [key: string]: placeType } {
-  const validatedPlace: { [key: string]: placeType } = {};
-
-  for (const [key, item] of Object.entries(items)) {
-    validatedPlace[key] = {
-      // ID
-      id: typeof item.id === 'string' ? item.id : key,
-      // プレースホルダー名
-      name: typeof item.name === 'string' ? item.name : '<<random>>',
-      // ランダム選択時の重み付け
-      weight: typeof item.weight === 'number' ? Math.abs(item.weight) : 1,
-      // グループ番号
-      group: typeof item.group === 'number' ? item.group : 0,
-      // メッセージ内容
-      content: typeof item.content === 'string' ? item.content : '',
-    };
-  }
-
-  return validatedPlace;
-}
-
-// xxxOrderの生成関数
+// xxxOrderの生成
 function generateOrder(items: { [key: string]: any }): string[] {
   return Object.keys(items);
 }
-
-
-// データ保存
-export function useDataSaver() {
-  const saveStatus = ref('');
-  const showSnackbar = ref(false);
-
-  const saveData = async (STATE: STATEType) => {
-    try {
-      saveStatus.value = 'Saving...';
-      const response = await fetch('/src/state.json', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(STATE)
-      });
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      saveStatus.value = 'Saved successfully!';
-      showSnackbar.value = true;
-    } catch (error) {
-      console.error('Error saving data:', error);
-      saveStatus.value = 'Error saving data';
-      showSnackbar.value = true;
-    }
-  };
-
-  return {
-    saveData,
-    saveStatus,
-    showSnackbar
-  };
-}
-
 

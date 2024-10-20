@@ -25,7 +25,7 @@
             step="1"
             tick-size="4"
             :color="switchColor(currentItem.switch)"
-            @change="updateItem"
+            @update:modelValue="updateItem"
           ></v-slider>
         </v-col>
       </v-row>
@@ -39,7 +39,7 @@
             multiple
             item-title="name"
             item-value="id"
-            @change="updateItem"
+            @update:modelValue="onSelectInput"
           >
           </v-select>
           <v-list dense>
@@ -59,7 +59,7 @@
             clearable
             chips
             multiple
-            @change="updateItem"
+            @update:modelValue="updateItem"
           ></v-combobox>
           <v-combobox
             v-model="currentItem.matchStartsWith"
@@ -67,7 +67,7 @@
             clearable
             chips
             multiple
-            @change="updateItem"
+            @update:modelValue="updateItem"
           ></v-combobox>
           <v-combobox
             v-model="currentItem.matchIncludes"
@@ -75,18 +75,28 @@
             clearable
             chips
             multiple
-            @change="updateItem"
+            @update:modelValue="updateItem"
           ></v-combobox>
         </v-col>
       </v-row>
     </v-card-text>
   </v-card>
-  <v-alert v-else type="warning">アイテムが選択されていないか、データの形式が正しくありません。</v-alert>
+  <v-alert v-else type="warning"
+    >アイテムが選択されていないか、データの形式が正しくありません。</v-alert
+  >
 </template>
 
 <script setup lang="ts">
 import { computed } from "vue";
-import type { ItemCategory, ItemContent, STATEType, SelectItem, omikujiType, placeType, rulesType } from "../types";
+import type {
+  ItemCategory,
+  ItemContent,
+  STATEType,
+  SelectItem,
+  omikujiType,
+  placeType,
+  rulesType,
+} from "../types";
 
 // props/emits
 const props = defineProps<{
@@ -96,7 +106,11 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: "update:STATE", payload: SelectItem): void;
-  (e: "open-editor", type: ItemCategory,item: Record<string, ItemContent>): void;
+  (
+    e: "open-editor",
+    type: ItemCategory,
+    item: Record<string, ItemContent>
+  ): void;
 }>();
 
 // propsからデータを解読
@@ -122,7 +136,7 @@ const validOmikujiOptions = computed(() => {
   const disabledIds = currentItem.value?.disabledIds;
   if (!Array.isArray(disabledIds)) return omikujiOptions.value;
   return omikujiOptions.value.filter(
-    (option) => !disabledIds.includes(Number(option.id))
+    (option) => !disabledIds.includes(option.id)
   );
 });
 
@@ -132,8 +146,25 @@ const switchColor = (value: number) => {
   return colors[value] || "";
 };
 
+// デバッグ
+const onSliderInput = (value: number) => {
+  console.log("Slider input:", value);
+  updateItem();
+};
+
+const onSelectInput = (value: any) => {
+  console.log("Select input:", value);
+  updateItem();
+};
+
+const onComboboxInput = (value: any) => {
+  console.log("Combobox input:", value);
+  updateItem();
+};
+
 // 更新アップデート
 const updateItem = () => {
+  console.log("コンソールコメント");
   if (props.selectItem && currentItem.value) {
     emit("update:STATE", {
       type: "rules",
@@ -145,10 +176,9 @@ const updateItem = () => {
 // エディターを開く
 function openEditor(option: { id: string; name: string }) {
   if (props.STATE.omikuji && props.STATE.omikuji[option.id]) {
-    emit("open-editor", 
-      "omikuji",
-      { [option.id]: props.STATE.omikuji[option.id] },
-    );
+    emit("open-editor", "omikuji", {
+      [option.id]: props.STATE.omikuji[option.id],
+    });
   }
 }
 </script>

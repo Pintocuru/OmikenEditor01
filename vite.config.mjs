@@ -1,3 +1,4 @@
+// vite.config.mjs
 // Plugins
 import Components from 'unplugin-vue-components/vite'
 import Vue from '@vitejs/plugin-vue'
@@ -40,9 +41,6 @@ export default defineConfig({
       '.vue',
     ],
   },
-  server: {
-    port: 3000,
-  },
   build: {
     minify: false, // ミニファイを無効化
     lib: {
@@ -63,5 +61,15 @@ export default defineConfig({
       },
     },
     sourcemap: true, // ソースマップを生成
+  },
+  server: {
+    port: 3000,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        secure: false,
+      }
+    }
   },
 })
