@@ -44,8 +44,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: "update:show", newShow: Record<ItemCategory, boolean>): void;
   (e: "update:STATE", payload: SelectItem): void;
-  (
-    e: "open-editor",
+  (    e: "open-editor",
     type: ItemCategory,
     item: Record<string, ItemContent>,
     mode: string | null
@@ -74,7 +73,6 @@ const openEditor = (
   item: Record<string, ItemContent>,
   mode: string | null = null
 ) => {
-  console.log("EditorDialog - openEditor called:", type, item);
   emit("open-editor", type, item, mode);
 };
 

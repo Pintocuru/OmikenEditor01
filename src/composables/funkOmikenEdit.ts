@@ -18,66 +18,7 @@ useOmikujiEditor: おみくじアイテムの編集機能を提供
 useRuleEditor: ルールの編集機能を提供（新規追加）
 useRandomItemEditor: ランダムアイテムの編集機能を提供（新規追加）
 */
-// TODO useFunkOmikenEdit は不要かも(どこでも使われていない)
-export function useFunkOmikenEdit(STATE: Ref<STATEType>) {
-  // アイテムを更新 // TODO updateItemは使われていないようだ
-  const updateItem = (type: ItemCategory, updatedItem: ItemContent) => {
-    const index = STATE.value[type].findIndex((i) => i === updatedItem);
-    if (index !== -1) {
-      STATE.value[type][index] = updatedItem;
-    }
-  };
 
-  // アイテムを追加するための変数群
-  const typeValidators = {
-    rules: validateRules,
-    omikuji: validateOmikuji,
-    place: validatePlace,
-  } as const;
-  const typeStateKeys = {
-    rules: "rules",
-    omikuji: "omikuji",
-    place: "place",
-  } as const;
-  // タイプごとの `name` フォーマット関数を用意
-  const generateName = {
-    rules: (count: number) => `新しいルール ${count + 1}`,
-    omikuji: (count: number) => `${getRandomFortune()}`,
-    place: (count: number) => `<<random${count + 1}>>`,
-  } as const;
-
-  const omikujiFortunes = ["大吉", "中吉", "小吉", "末吉", "吉", "凶", "福沢諭吉"];
-  // ランダムな結果を返す関数
-  const getRandomFortune = () =>
-    omikujiFortunes[Math.floor(Math.random() * omikujiFortunes.length)];
-
-  // アイテムを追加する
-    const addItem = (type: ItemCategory): void => {
-      console.log(type);
-    const validator = typeValidators[type];
-    const stateKey = typeStateKeys[type];
-    // カウントに基づいて `name` を生成
-    const name = generateName[type](STATE.value[stateKey].length);
-    // バリデータで新しいアイテムを生成
-    const newItem = validator({ name })[0];
-    // アイテムを対応する配列に追加
-    (STATE.value[stateKey] as any[]).push(newItem);
-  };
-
-  
-  // アイテムを削除 // TODO deleteItemは使われていないようだ
-  const deleteItem = (type: ItemCategory, index: number) => {
-    if (index !== -1 && STATE.value[type][index]) {
-      STATE.value[type].splice(index, 1);
-    }
-  };
-
-  return {
-    updateItem,
-    addItem,
-    deleteItem,
-  };
-}
 
 // おみくじエディット用
 export function useEditOmikuji(
@@ -233,56 +174,6 @@ export function useEditOmikuji(
   };
 }
 
-// TODO この関数自体不要になるかも？
-export function useItemEditor(
-  props: {
-    STATE: STATEType;
-    selectItem: SelectItem;
-  },
-  emit: (event: "update:item", value: any) => void
-) {
-  const editingItem = ref<any>(null);
-
-  const initializeEditingItem = () => {
-    if (props.selectItem) {
-      const { type, index, items } = props.selectItem;
-      const itemArray = props.STATE[type as keyof STATEType] as any[];
-
-      const validationFunction = {
-        rules: validateRules,
-        omikuji: validateOmikuji,
-        place: (items: any) => validatePlace(items, false)
-      }[type];
-
-      if (validationFunction) {
-        if (index >= 0) {
-          // 単一アイテムの編集
-          editingItem.value = validationFunction([itemArray[index]])[0];
-        } else if (items) {
-          // グループ編集
-          editingItem.value = validationFunction(items);
-        }
-      }
-    } else {
-      editingItem.value = null;
-    }
-  };
-
-  watch(() => props.selectItem, initializeEditingItem, { immediate: true });
-
-  watch(
-    editingItem,
-    (newValue) => {
-      if (newValue) {
-        console.log("Emitting update:item", newValue);
-        emit("update:item", JSON.parse(JSON.stringify(newValue)));
-      }
-    },
-    { deep: true, immediate: true }
-  );
-
-  return { editingItem };
-}
 
 
 
