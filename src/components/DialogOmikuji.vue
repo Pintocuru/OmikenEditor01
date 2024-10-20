@@ -1,4 +1,4 @@
-<!-- src/components/OmikujiEditor.vue -->
+<!-- src/components/DialogOmikuji.vue -->
 <template>
   <v-card v-if="currentItem">
     <v-card-text>
@@ -46,15 +46,15 @@
         </v-row>
 
         <!-- フィルタリング設定 -->
-        <OmikujiEditorFiltering
+        <DialogOmikujiFilter
           :currentItem="currentItem"
           :thresholdTypes="thresholdTypes"
           :comparisonItems="comparisonItems"
           @update="updateSTATE"
         />
 
-        <!-- メッセージ設定 -->
-        <OmikujiEditorMessage
+        <!-- Post設定 -->
+        <DialogOmikujiPost
           :currentItem="currentItem"
           @addPost="addPost"
           @removePost="removePost"
@@ -68,10 +68,10 @@
 
 <script setup lang="ts">
 import { computed, inject } from "vue";
-import type { CHARAType, STATEType, omikujiType, SelectItem, placeType, rulesType } from "../types";
+import type { CHARAType, STATEType, omikujiType, SelectItem, placeType, rulesType, EditorItem } from "../types";
 import { useEditOmikuji } from "../composables/funkOmikenEdit";
-import OmikujiEditorFiltering from "./OmikujiEditorFiltering.vue";
-import OmikujiEditorMessage from "./OmikujiEditorMessage.vue";
+import DialogOmikujiFilter from "./DialogOmikujiFilter.vue";
+import DialogOmikujiPost from "./DialogOmikujiPost.vue";
 
 // props/emits
 const props = defineProps<{
@@ -81,6 +81,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: "update:STATE", payload: SelectItem): void;
+    (e: "open-editor", editorItem: EditorItem): void;
 }>();
 
 // キャラクターデータのインジェクト

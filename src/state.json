@@ -2,19 +2,23 @@
   "rules": {
     "rule1": {
       "id": "rule1",
-      "name": "おみくじ",
+      "name": "基本ルール",
       "switch": 1,
       "disabledIds": [],
       "matchExact": [
         "運試し",
         "おみくじ"
       ],
-      "matchStartsWith": [],
-      "matchIncludes": []
+      "matchStartsWith": [
+        "おみくじ"
+      ],
+      "matchIncludes": [
+        "【おみくじ】"
+      ]
     },
     "rule2": {
       "id": "rule2",
-      "name": "フラワーおみくじ",
+      "name": "限定ルール",
       "switch": 2,
       "disabledIds": [],
       "matchExact": [
@@ -33,7 +37,7 @@
       "name": "大吉",
       "weight": 5,
       "threshold": {
-        "type": "none",
+        "type": "day",
         "comparison": "range",
         "value": 1,
         "valueMax": 7
@@ -41,9 +45,9 @@
       "post": [
         {
           "type": "onecomme",
-          "botKey": "reimu",
+          "botKey": "mamono",
           "iconKey": "Default",
-          "delaySeconds": 1,
+          "delaySeconds": 5,
           "content": "今日は大吉！<<random>>"
         }
       ]
@@ -53,18 +57,18 @@
       "name": "中吉",
       "weight": 3,
       "threshold": {
-        "type": "none",
+        "type": "time",
         "comparison": "range",
         "value": 12,
         "valueMax": 0
       },
       "post": [
         {
-          "type": "onecomme",
-          "botKey": "reimu",
+          "type": "toast",
+          "botKey": "mamono",
           "iconKey": "Default",
-          "delaySeconds": 1,
-          "content": "中吉です。<<random>>"
+          "delaySeconds": 3,
+          "content": "中吉です。<<random>>でリフレッシュ！"
         }
       ]
     }
@@ -74,29 +78,29 @@
       "id": "place1",
       "name": "<<random>>",
       "weight": 2,
-      "group": 1,
+      "group": 0,
       "content": "お参りは大切です。"
     },
     "place2": {
       "id": "place2",
       "name": "<<random>>",
       "weight": 2,
-      "group": 1,
+      "group": 0,
       "content": "散歩で心を整えましょう。"
     },
     "place3": {
       "id": "place3",
       "name": "<<random>>",
       "weight": 2,
-      "group": 1,
+      "group": 0,
       "content": "温泉で疲れを癒しましょう。"
     },
-    "1729400435766-t37np": {
-      "id": "1729400435766-t37np",
-      "name": "<<random>>",
+    "1729411657835-id8rj": {
+      "id": "1729411657835-id8rj",
+      "name": "<<random2>>",
       "weight": 1,
-      "group": 1,
-      "content": "眠いときは寝ましょう"
+      "group": 0,
+      "content": "やったね。"
     }
   },
   "rulesOrder": [
@@ -111,6 +115,6 @@
     "place1",
     "place2",
     "place3",
-    "1729400435766-t37np"
+    "1729411657835-id8rj"
   ]
 }

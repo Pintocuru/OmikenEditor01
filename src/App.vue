@@ -9,7 +9,7 @@
     />
     <v-main>
       <v-container>
-        <AppMain
+        <AppList
           :STATE="STATE"
           :selectCategory="selectCategory"
           @update:STATE="updateSTATE"
@@ -18,7 +18,7 @@
       </v-container>
     </v-main>
 
-    <EditorDialog
+    <AppDialog
       v-model:show="dialogs"
       :selectItem="selectItem"
       :selectMode="selectMode"
@@ -27,14 +27,14 @@
       @open-editor="openEditor"
     />
   </v-app>
-</template>
+</template>AppList
 
 <script setup lang="ts">
 import { onMounted, provide, ref } from "vue";
 import AppHeader from "./components/AppHeader.vue";
 import AppNavigation from "./components/AppNavigation.vue";
-import AppMain from "./components/AppMain.vue";
-import EditorDialog from "./components/EditorDialog.vue";
+import AppList from "./components/AppList.vue";
+import AppDialog from "./components/AppDialog.vue";
 import { funkSTATE } from "./composables/funkOmikenSTATE";
 import { funkUI } from "./composables/funkOmikenUI";
 

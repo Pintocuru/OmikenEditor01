@@ -1,4 +1,4 @@
-<!-- src/components/RuleEditor.vue -->
+<!-- src/components/DialogRule.vue -->
 <template>
   <v-card v-if="currentItem">
     <v-card-text>
@@ -39,7 +39,7 @@
             multiple
             item-title="name"
             item-value="id"
-            @update:modelValue="onSelectInput"
+            @update:modelValue="updateItem"
           >
           </v-select>
           <v-list dense>
@@ -89,6 +89,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import type {
+  EditorItem,
   ItemCategory,
   ItemContent,
   STATEType,
@@ -106,11 +107,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: "update:STATE", payload: SelectItem): void;
-  (
-    e: "open-editor",
-    type: ItemCategory,
-    item: Record<string, ItemContent>
-  ): void;
+  (e: "open-editor", editorItem: EditorItem): void;
 }>();
 
 // propsからデータを解読
@@ -144,22 +141,6 @@ const validOmikujiOptions = computed(() => {
 const switchColor = (value: number) => {
   const colors = ["", "yellow", "green", "blue", "red"];
   return colors[value] || "";
-};
-
-// デバッグ
-const onSliderInput = (value: number) => {
-  console.log("Slider input:", value);
-  updateItem();
-};
-
-const onSelectInput = (value: any) => {
-  console.log("Select input:", value);
-  updateItem();
-};
-
-const onComboboxInput = (value: any) => {
-  console.log("Combobox input:", value);
-  updateItem();
 };
 
 // 更新アップデート

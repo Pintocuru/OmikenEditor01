@@ -1,4 +1,4 @@
-<!-- src/components/MainItemList.vue -->
+<!-- src/components/ListItem.vue -->
 <template>
   <v-card-text>
     <draggable
@@ -157,14 +157,6 @@ function handleReorder(newOrder: ItemContent[] | draggableGroup[]) {
   }
 }
 
-/**
-// エディターを開く
-function openEditor(element: ItemContent & { id: string }) {
-  const mode = props.groupBy !== "none" ? (props.groupBy as string) : null;
-  const item = { [element.id]: props.items[element.id] };
-  emit("open-editor", props.selectCategory, item, mode);
-}
- */
 function deleteItem(
   element: { name: string; items: ItemContent[] } | ItemContent
 ) {

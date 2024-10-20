@@ -1,4 +1,4 @@
-<!-- src/components/OmikujiEditorMessage.vue -->
+<!-- src/components/DialogOmikujiPost.vue -->
 <template>
   <v-card>
     <v-toolbar :color="hasNoMessages ? 'error' : 'primary'" density="compact">
@@ -79,7 +79,7 @@
 
 <script setup lang="ts">
 import { computed, inject, Ref, ref } from "vue";
-import type { CHARAType, omikujiType, placeType, postType, SelectItem } from "../types";
+import type { CHARAType, EditorItem, omikujiType, placeType, postType, SelectItem } from "../types";
 
 const props = defineProps<{
   currentItem: omikujiType;
@@ -87,6 +87,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: "update:STATE", payload: SelectItem): void;
+    (e: "open-editor", editorItem: EditorItem): void;
 }>();
 
 const CHARA = inject<CHARAType>("charaKey");

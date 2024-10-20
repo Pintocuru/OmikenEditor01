@@ -1,51 +1,43 @@
-<!-- src/components/AppMain.vue -->
+<!-- src/components/AppList.vue -->
 <template>
   <v-card>
-    <v-layout>
-      <v-main>
-        <v-app-bar color="primary" density="compact">
-          <v-app-bar-title>
-            {{ selectCategory }}
-            <v-chip label> {{ filterItems.length }} items </v-chip>
-          </v-app-bar-title>
-          <template #append>
-            <v-btn
-              elevation="2"
-              variant="outlined"
-              @click="addItem"
-              prepend-icon="mdi-plus"
-            >
-              追加
-            </v-btn>
-          </template>
-        </v-app-bar>
+    <v-toolbar density="compact" color="primary">
+      <v-toolbar-title>
+        {{ selectCategory }}
+        <v-chip label> {{ filterItemsCount }} items </v-chip>
+      </v-toolbar-title>
+      <template v-slot:append>
+        <v-btn variant="outlined" @click="addItem" prepend-icon="mdi-plus">
+          追加
+        </v-btn>
+      </template>
+    </v-toolbar>
 
-        <MainFilter
-          v-model:filterRef="filterRef"
-          :STATE="STATE"
-          :selectCategory="selectCategory"
-          @update:STATE="updateSTATE"
-        />
+    <ListFilter
+      v-model:filterRef="filterRef"
+      :STATE="STATE"
+      :selectCategory="selectCategory"
+      @update:STATE="updateSTATE"
+    />
 
-        <MainItemList
-          :items="filterItems"
-          :itemOrder="STATE[`${selectCategory}Order`]"
-          :select-category="selectCategory"
-          :group-by="
-            selectCategory === 'place' ? filterRef.placeSortName : undefined
-          "
-          @update:STATE="updateSTATE"
-          @open-editor="openEditor"
-        />
-      </v-main>
-    </v-layout>
+    <ListItem
+      :STATE="STATE"
+      :items="filterItems"
+      :itemOrder="STATE[`${selectCategory}Order`]"
+      :select-category="selectCategory"
+      :group-by="
+        selectCategory === 'place' ? filterRef.placeSortName : undefined
+      "
+      @update:STATE="updateSTATE"
+      @open-editor="openEditor"
+    />
   </v-card>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
-import MainFilter from "./MainFilter.vue";
-import MainItemList from "./MainItemList.vue";
+import ListFilter from "./ListFilter.vue";
+import ListItem from "./ListItem.vue";
 import { z } from "zod";
 import _ from "lodash";
 import type {
@@ -56,7 +48,7 @@ import type {
   omikujiType,
   placeType,
   rulesType,
-  ItemContent,
+  EditorItem,
 } from "@/types";
 
 // Props Emits
@@ -67,11 +59,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: "update:STATE", payload: SelectItem): void;
-  (    e: "open-editor",
-    type: ItemCategory,
-    item: Record<string, ItemContent>,
-    mode: string | null
-  ): void;
+  (e: "open-editor", editorItem: EditorItem): void;
 }>();
 
 // フィルタリングを管理するref
@@ -96,6 +84,10 @@ const filterRef = ref(
     placeSortWeight: "highFreq",
   })
 );
+
+// アイテムカウント
+const filterItemsCount = computed(() => Object.keys(filterItems.value).length);
+
 
 // フィルターオプションに合わせて表示を変更
 const filterItems = computed(() => {
@@ -139,13 +131,7 @@ const addItem = () => {
 };
 
 // selectItemをAppに送り、エディターを開く
-const openEditor = (
-  type: ItemCategory,
-  item: Record<string, ItemContent>,
-  mode: string | null = null
-) => {
-  emit("open-editor", type, item, mode);
-};
+const openEditor = (editorItem: EditorItem) => emit("open-editor", editorItem);
 
 // STATEの更新をemit
 const updateSTATE = (payload: SelectItem) => emit("update:STATE", payload);

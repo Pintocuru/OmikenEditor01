@@ -1,4 +1,4 @@
-<!-- src/components/OmikujiEditorFiltering.vue -->
+<!-- src/components/DialogOmikujiFilter.vue -->
 <template>
   <v-card>
     <v-toolbar color="primary" density="compact">

@@ -1,4 +1,4 @@
-<!-- src/components/PlaceEditor.vue -->
+<!-- src/components/DialogPlace.vue -->
 <template>
   <v-card v-if="currentItem">
     <v-card-title>ランダムメッセージエディタ</v-card-title>

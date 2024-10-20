@@ -1,8 +1,8 @@
-<!-- src/components/MainFilter.vue -->
+<!-- src/components/ListFilter.vue -->
 <template>
-  <v-card-text>
+
     <!-- ルール用フィルター -->
-    <v-row v-if="selectCategory === 'rules'">
+    <v-row v-if="selectCategory === 'rules'" dense>
       <v-col>
         <v-select
           v-model="filterRef.rulesSortName"
@@ -80,7 +80,6 @@
         />
       </v-col>
     </v-row>
-  </v-card-text>
 </template>
 
 <script setup lang="ts">
@@ -90,7 +89,7 @@ import { ItemCategory, SelectItem, STATEType, thresholdType } from "@/types";
 const props = defineProps<{
   filterRef: {
     rulesSortName: "none" | "highFreq" | "lowFreq";
-    rulesFilterSwitch: number[];
+    rulesFilterSwitch: string[];
     omikujiSortName: "none" | "highFreq" | "lowFreq";
     omikujiFilterThreshold: thresholdType[];
     omikujiSortWeight: "none" | "highFreq" | "lowFreq";

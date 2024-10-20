@@ -125,3 +125,8 @@ export type SelectItem = {
 export type ItemCategory = 'rules' | 'omikuji' | 'place';
 export type ItemContent = rulesType | omikujiType | placeType;
 
+export type EditorItem = {
+  type: ItemCategory;
+  item: Record<string, ItemContent>;
+  mode?: string | null;
+};

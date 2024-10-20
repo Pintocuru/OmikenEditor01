@@ -8,6 +8,7 @@ import type {
   placeType,
   omikujiType,
   rulesType,
+  EditorItem,
 } from "../types";
 /*
 UIコンポーネントとインタラクションを担当
@@ -39,12 +40,9 @@ export function funkUI() {
   });
 
   // ダイアログを開く
-  const openEditor = (
-    type: ItemCategory,
-    item: Record<string, ItemContent>,
-    mode: string | null = null
-  ) => {
-    console.log("funkOmikenUI - openEditor called:", type, item, selectItem.value    );
+  const openEditor = (editorItem: EditorItem) => {
+    const { type, item, mode } = editorItem;
+    console.log("funkOmikenUI - openEditor called:", type, item, selectItem.value);
     if (type === "rules") {
       selectItem.value.rules = item as Record<string, rulesType>;
       dialogs.value.rules = true;

@@ -1,4 +1,4 @@
-<!-- src/components/EditorDialog.vue -->
+<!-- src/components/AppDialog.vue -->
 <template>
   <v-dialog
     v-for="(isVisible, key) in show"
@@ -28,10 +28,12 @@
 
 <script setup lang="ts">
 import { onMounted } from "vue";
-import RuleEditor from "./RuleEditor.vue";
-import OmikujiEditor from "./OmikujiEditor.vue";
-import PlaceEditor from "./PlaceEditor.vue";
-import { ItemCategory, ItemContent, STATEType, SelectItem } from "@/types";
+import DialogRule from "./DialogRule.vue";
+import DialogOmikuji from "./DialogOmikuji.vue";
+import DialogPlace from "./DialogPlace.vue";
+import { EditorItem, ItemCategory, ItemContent, STATEType, SelectItem } from "@/types";
+import { z } from "zod";
+import _ from "lodash";
 
 // Props / emit
 const props = defineProps<{
@@ -44,20 +46,16 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: "update:show", newShow: Record<ItemCategory, boolean>): void;
   (e: "update:STATE", payload: SelectItem): void;
-  (    e: "open-editor",
-    type: ItemCategory,
-    item: Record<string, ItemContent>,
-    mode: string | null
-  ): void;
+  (e: "open-editor", editorItem: EditorItem): void;
 }>();
 
 // エディターコンポーネントを取得する関数
 const getEditorComponent = (type: ItemCategory) => {
   console.log(props.selectItem);
   const editorMap: Record<ItemCategory, any> = {
-    rules: RuleEditor,
-    omikuji: OmikujiEditor,
-    place: PlaceEditor,
+    rules: DialogRule,
+    omikuji: DialogOmikuji,
+    place: DialogPlace,
   };
   return editorMap[type] || null;
 };
@@ -68,13 +66,7 @@ const updateShow = (key: ItemCategory, value: boolean) => {
 };
 
 // selectItemをAppに送り、エディターを開く
-const openEditor = (
-  type: ItemCategory,
-  item: Record<string, ItemContent>,
-  mode: string | null = null
-) => {
-  emit("open-editor", type, item, mode);
-};
+const openEditor = (editorItem: EditorItem) => emit("open-editor", editorItem);
 
 // STATEの更新をemit
 const updateSTATE = (payload: SelectItem) => emit("update:STATE", payload);
