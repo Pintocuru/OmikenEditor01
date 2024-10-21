@@ -1,15 +1,13 @@
 <!-- src/components/AppList.vue -->
 <template>
   <v-card>
-    <v-toolbar density="compact" color="primary">
+    <v-toolbar>
       <v-toolbar-title>
         {{ selectCategory }}
-        <v-chip label> {{ filterItemsCount }} items </v-chip>
+        <v-chip label class="ml-4"> {{ filterItemsCount }} items </v-chip>
       </v-toolbar-title>
-      <template v-slot:append>
-        <v-btn variant="outlined" @click="addItem" prepend-icon="mdi-plus">
-          追加
-        </v-btn>
+      <template #append>
+        <v-btn variant="outlined" @click="addItem" prepend-icon="mdi-plus">追加</v-btn>
       </template>
     </v-toolbar>
 
@@ -25,9 +23,7 @@
       :items="filterItems"
       :itemOrder="STATE[`${selectCategory}Order`]"
       :select-category="selectCategory"
-      :group-by="
-        selectCategory === 'place' ? filterRef.placeSortName : undefined
-      "
+      :group-by="selectCategory === 'place' ? filterRef.placeSortName : undefined"
       @update:STATE="updateSTATE"
       @open-editor="openEditor"
     />
@@ -93,36 +89,17 @@ const filterItemsCount = computed(() => Object.keys(filterItems.value).length);
 const filterItems = computed(() => {
   const items = props.STATE[props.selectCategory];
   const filters = {
-    rules: () =>
-      _.pickBy(
-        items as Record<string, rulesType>,
-        (item) =>
-          filterRef.value.rulesFilterSwitch.length === 0 ||
-          filterRef.value.rulesFilterSwitch.includes(item.switch.toString())
-      ),
-    omikuji: () =>
-      _.pickBy(
-        items as Record<string, omikujiType>,
-        (item) =>
-          filterRef.value.omikujiFilterThreshold.length === 0 ||
-          filterRef.value.omikujiFilterThreshold.includes(item.threshold.type)
-      ),
-    place: () => {
-      if (filterRef.value.placeSortName === "none") return items;
-      return _.fromPairs(
-        _.sortBy(
-          Object.entries(items as Record<string, placeType>),
-          ([, item]) =>
-            filterRef.value.placeSortName === "name" ? item.name : item.group
-        )
-      );
-    },
+    rules: () => _.pickBy(items as Record<string, rulesType>, item => 
+      filterRef.value.rulesFilterSwitch.length === 0 || filterRef.value.rulesFilterSwitch.includes(item.switch.toString())),
+    omikuji: () => _.pickBy(items as Record<string, omikujiType>, item => 
+      filterRef.value.omikujiFilterThreshold.length === 0 || filterRef.value.omikujiFilterThreshold.includes(item.threshold.type)),
+    place: () => filterRef.value.placeSortName === "none" ? items : 
+      _.fromPairs(_.sortBy(Object.entries(items as Record<string, placeType>), 
+        ([, item]) => filterRef.value.placeSortName === "name" ? item.name : item.group)),
     default: () => items,
   };
 
-  const filter =
-    filters[props.selectCategory as keyof typeof filters] || filters.default;
-  return filter();
+  return (filters[props.selectCategory as keyof typeof filters] || filters.default)();
 });
 
 // アイテムを追加
@@ -130,13 +107,12 @@ const addItem = () => {
   emit("update:STATE", { type: props.selectCategory, addKeys: [{}] });
 };
 
-// selectItemをAppに送り、エディターを開く
+// 各種操作関数(エディターを開く/STATE更新)
 const openEditor = (editorItem: EditorItem) => emit("open-editor", editorItem);
-
-// STATEの更新をemit
 const updateSTATE = (payload: SelectItem) => emit("update:STATE", payload);
 
 // 初期化時、omikuji.postをdelaySecondsが小さい順にソート
+// TODO タイミングはlistではなく、ダイアログを開く時に表示させよう
 onMounted(() => {
   if (props.selectCategory === "omikuji") {
     const sortedItems = _.sortBy(

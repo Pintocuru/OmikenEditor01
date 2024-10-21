@@ -36,7 +36,7 @@
     </v-row>
 
     <!-- おみくじ用フィルター -->
-    <v-row v-if="selectCategory === 'omikuji'">
+    <v-row v-if="selectCategory === 'omikuji'" dense>
       <v-col>
         <v-select
           v-model="filterRef.omikujiSortWeight"
@@ -64,7 +64,7 @@
     </v-row>
 
     <!-- プレースホルダー用フィルター -->
-    <v-row v-if="selectCategory === 'place'">
+    <v-row v-if="selectCategory === 'place'" dense>
       <v-col>
         <v-select
           v-model="filterRef.placeSortName"
@@ -85,6 +85,7 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import { ItemCategory, SelectItem, STATEType, thresholdType } from "@/types";
+import _ from 'lodash';
 
 const props = defineProps<{
   filterRef: {

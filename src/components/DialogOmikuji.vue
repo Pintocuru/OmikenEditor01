@@ -1,6 +1,6 @@
 <!-- src/components/DialogOmikuji.vue -->
 <template>
-  <v-card v-if="currentItem">
+  <v-card v-if="currentItem" style="max-height: 80vh; overflow-y: auto;">
     <v-card-text>
       <v-form @submit.prevent>
         <!-- 基本情報 -->
@@ -72,7 +72,7 @@ import type { CHARAType, STATEType, omikujiType, SelectItem, placeType, rulesTyp
 import { useEditOmikuji } from "../composables/funkOmikenEdit";
 import DialogOmikujiFilter from "./DialogOmikujiFilter.vue";
 import DialogOmikujiPost from "./DialogOmikujiPost.vue";
-
+import _ from 'lodash';
 // props/emits
 const props = defineProps<{
   STATE: STATEType;

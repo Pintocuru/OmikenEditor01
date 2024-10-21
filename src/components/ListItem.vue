@@ -1,6 +1,6 @@
 <!-- src/components/ListItem.vue -->
 <template>
-  <v-row>
+  <v-row dense>
     <draggable
       :model-value="groupedItems"
       item-key="name"
@@ -9,17 +9,15 @@
       @update:model-value="handleReorder"
     >
       <template #item="{ element }">
-        <v-col cols="12">
-          <component
-            :is="getComponentForCategory"
-            :STATE="STATE"
-            :item="element"
-            :selectCategory="selectCategory"
-            :groupBy="groupBy"
-            @update:STATE="updateSTATE"
-            @open-editor="openEditor"
-          />
-        </v-col>
+        <component
+          :is="getComponentForCategory"
+          :STATE="STATE"
+          :item="element"
+          :selectCategory="selectCategory"
+          :groupBy="groupBy"
+          @update:STATE="updateSTATE"
+          @open-editor="openEditor"
+        />
       </template>
     </draggable>
   </v-row>
@@ -31,8 +29,13 @@ import draggable from "vuedraggable";
 import ListItemRules from "./ListItemRules.vue";
 import ListItemOmikuji from "./ListItemOmikuji.vue";
 import ListItemPlace from "./ListItemPlace.vue";
-import ListItemPartsAction from "./common/ListItemPartsAction.vue";
-import type { EditorItem, ItemCategory, ItemContent, SelectItem, STATEType } from "@/types";
+import type {
+  EditorItem,
+  ItemCategory,
+  ItemContent,
+  SelectItem,
+  STATEType,
+} from "@/types";
 import _ from "lodash";
 
 // Props Emits
@@ -62,7 +65,6 @@ const getComponentForCategory = computed(() => {
       return null;
   }
 });
-
 
 // draggable用に配列にする
 const sortedItems = computed(() => {
@@ -115,7 +117,6 @@ function handleReorder(newOrder: ItemContent[] | draggableGroup[]) {
 }
 // STATEの更新をemit
 const updateSTATE = (payload: SelectItem) => emit("update:STATE", payload);
-
 
 // これはplaceコンポーネント
 onMounted(() => {

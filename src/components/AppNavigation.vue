@@ -1,13 +1,22 @@
 <!-- src/components/AppNavigation.vue -->
 <template>
-  <v-navigation-drawer permanent>
+  <v-navigation-drawer permanent rail rail-width="100" expand-on-hover>
     <v-list>
       <v-list-item v-for="(section, index) in sections" :key="index">
-        <v-card @click="openList(section.type as ItemCategory)" class="mb-2">
-          <v-card-title class="d-flex justify-space-between align-center">
-            {{ section.title }}
-            <v-badge :content="Object.keys(section.items).length" color="primary"></v-badge>
+        <v-card @click="openList(section.type as ItemCategory)">
+          <v-card-title class="d-flex align-center">
+            <v-badge  class="mr-4"
+              :content="Object.keys(section.items).length"
+              color="primary"
+              :model-value="true"
+              location="bottom end"
+            >
+              <v-icon :icon="section.icon" size="large"></v-icon>
+            </v-badge> {{ section.title }}
           </v-card-title>
+          <v-card-text>
+           
+          </v-card-text>
         </v-card>
       </v-list-item>
     </v-list>
@@ -18,22 +27,36 @@
 import { computed } from "vue";
 import { STATEType, ItemCategory } from "@/types";
 
-// Props定義
+// Props / Emit
 const props = defineProps<{
   STATE: STATEType;
   selectCategory: ItemCategory;
 }>();
 
-// Emit定義
 const emit = defineEmits<{
   (e: "update:category", value: ItemCategory): void;
 }>();
 
 // セクション情報の計算
 const sections = computed(() => [
-  { title: "Rules", type: "rules" as const, items: props.STATE.rules || {} },
-  { title: "Omikuji", type: "omikuji" as const, items: props.STATE.omikuji || {} },
-  { title: "Placeholder", type: "place" as const, items: props.STATE.place || {} },
+  { 
+    title: "Rules", 
+    type: "rules" as const, 
+    items: props.STATE.rules || {},
+    icon: "mdi-book-open-variant"
+  },
+  { 
+    title: "Omikuji", 
+    type: "omikuji" as const, 
+    items: props.STATE.omikuji || {},
+    icon: "mdi-cards"
+  },
+  { 
+    title: "Placeholder", 
+    type: "place" as const, 
+    items: props.STATE.place || {},
+    icon: "mdi-tag"
+  },
 ]);
 
 // リスト開閉関数

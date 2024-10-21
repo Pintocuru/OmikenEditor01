@@ -1,16 +1,13 @@
 // src/composables/funkOmikenEdit.ts
-import { reactive, ref, computed, Ref, onMounted, watch } from "vue";
-
-import { validateRules, validateOmikuji, validatePlace } from "../composables/funkOmikenJSON";
+import { Ref } from "vue";
+import _ from 'lodash';
 
 import type {
   STATEType,
   omikujiType,
-  rulesType,
   placeType,
   CHARAType,
-  postType, SelectItem, ItemCategory, ItemContent
-} from "../types";
+  postType} from "../types";
 /*
 
 アイテムの編集機能を担当

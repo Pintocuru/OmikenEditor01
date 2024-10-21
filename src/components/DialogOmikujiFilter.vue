@@ -31,7 +31,7 @@
 
 <script setup lang="ts">
 import type { omikujiType, SelectItem } from '../types';
-
+import _ from 'lodash';
 const props = defineProps<{
   currentItem: omikujiType;
   thresholdTypes: Array<{ text: string; value: string }>;

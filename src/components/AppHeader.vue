@@ -1,26 +1,34 @@
 <!-- src/components/AppHeader.vue -->
 <template>
   <v-app-bar app>
-    <v-app-bar-title>Funk Omiken App</v-app-bar-title>
-    <!-- ダークモード切り替えボタン -->
-    <v-btn @click="toggleTheme">
-      {{ dark === "dark" ? "Light Mode" : "Dark Mode" }}
-    </v-btn>
+    <v-app-bar-title>おみくじメーカー</v-app-bar-title>
+    <template v-slot:append>
+      <!-- ダークモード切り替えボタン -->
+      <v-btn @click="toggleTheme">
+        {{ uiDark === "dark" ? "Light Mode" : "Dark Mode" }}
+      </v-btn>
+    </template>
   </v-app-bar>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
 
 const props = defineProps<{
-   dark: string;  
-  }>();
+  uiDark: string;
+}>();
+
 const emit = defineEmits<{
-  (e: "update:dark", value: string): void;
+  (e: "update:uidark", value: string): void;
 }>();
 
 // テーマ切り替え関数
-const toggleTheme = () => emit("update:dark", props.dark === "dark" ? "light" : "dark");
+const toggleTheme = () =>
+  emit("update:uidark", props.uiDark === "dark" ? "light" : "dark");
 
+/*
+    <template v-slot:prepend>
+       <v-app-bar-nav-icon />
+    </template>
+*/
 
 </script>

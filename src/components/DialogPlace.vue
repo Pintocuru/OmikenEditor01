@@ -1,13 +1,13 @@
 <!-- src/components/DialogPlace.vue -->
 <template>
-  <v-card v-if="currentItem">
+  <v-card v-if="currentItem"  style="max-height: 80vh; overflow-y: auto;">
     <v-card-title>ランダムメッセージエディタ</v-card-title>
     <v-card-text>
       <!-- グループ編集時のみ表示 -->
       <div v-if="isGroupEdit" class="mb-4">
         <v-text-field
           v-model="groupName"
-          :label="groupName"
+          :label="groupName || ''"
           density="compact"
           @input="updateGroupName"
         />
@@ -17,7 +17,7 @@
       <v-list>
         <v-list-item v-for="(item, key) in selectItem" :key="key">
           <v-row align="center">
-            <v-col cols="3">
+            <v-col cols="8" sm="2">
               <v-text-field
                 v-model="item.name"
                 label="タグ"
@@ -25,16 +25,7 @@
                 @input="updateItem(key, { name: item.name })"
               />
             </v-col>
-            <v-col cols="3">
-              <v-text-field
-                v-model.number="item.group"
-                label="グループ"
-                type="number"
-                density="compact"
-                @input="updateItem(key, { group: item.group })"
-              />
-            </v-col>
-            <v-col cols="2">
+            <v-col cols="4" sm="2">
               <v-text-field
                 v-model.number="item.weight"
                 label="出現割合"
@@ -43,7 +34,16 @@
                 @input="updateItem(key, { weight: item.weight })"
               />
             </v-col>
-            <v-col cols="4">
+            <v-col cols="3" sm="2">
+              <v-text-field
+                v-model.number="item.group"
+                label="グループ"
+                type="number"
+                density="compact"
+                @input="updateItem(key, { group: item.group })"
+              />
+            </v-col>
+            <v-col cols="8" sm="5">
               <v-text-field
                 v-model="item.content"
                 label="内容"
@@ -84,8 +84,9 @@
 
 <script setup lang="ts">
 import { ref, computed } from "vue";
-import type { STATEType, placeType, omikujiType, SelectItem } from "../types";
-
+import type { STATEType, placeType, SelectItem } from "../types";
+import _ from 'lodash';
+import Swal from "sweetalert2";
 // props/emits
 const props = defineProps<{
   STATE: STATEType;
@@ -103,7 +104,6 @@ const isGroupEdit = computed(() => props.selectMode !== null);
 // propsからデータを解読
 const currentItem = computed(() => {
   if (props.selectItem) {
-    // TODO 複数ある場合の対処をする
     const firstKey = Object.keys(props.selectItem)[0];
     return props.selectItem[firstKey];
   }
@@ -123,20 +123,20 @@ const updateItem = (key: string, item: Partial<placeType>) => {
   }
 };
 
-// グループ名の更新
+// グループ名の更新は無効になりました
 const updateGroupName = () => {
-  // グループ名の更新処理を実装
 };
 
 // グループ編集時の内容追加
+// TODO Q.追加時、すぐに表示させたいが、どうすればいい?
 const addRandomItem = () => {
   if (props.selectItem) {
     const firstItem = Object.values(props.selectItem)[0];
     let newItem: Partial<placeType> = {};
 
-    if (props.selectMode === "place") {
+    if (props.selectMode === "name") {
       newItem = { name: firstItem.name };
-    } else if (props.selectMode === "omikuji") {
+    } else if (props.selectMode === "group") {
       newItem = { group: firstItem.group };
     }
 
@@ -148,8 +148,20 @@ const addRandomItem = () => {
 };
 
 // グループ編集時の内容削除
-const removeRandomItem = (key: string) => {
-  if (props.selectItem) {
+// TODO sweetalert2 を使って削除していいか聞く
+const removeRandomItem = async (key: string) => {
+  console.log(key);
+  const result = await Swal.fire({
+    title: '削除の確認',
+    text: "このアイテムを削除してもよろしいですか？",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: '削除する'
+  });
+
+  if (result.isConfirmed && props.selectItem) {
     emit("update:STATE", {
       type: "place",
       delKeys: [key],

@@ -2,12 +2,10 @@
   "rules": {
     "rule1": {
       "id": "rule1",
-      "name": "基本ルール",
+      "name": "おみくじ",
       "switch": 1,
       "disabledIds": [],
       "matchExact": [
-        "運試し",
-        "おみくじ"
       ],
       "matchStartsWith": [
         "おみくじ"
@@ -18,11 +16,10 @@
     },
     "rule2": {
       "id": "rule2",
-      "name": "限定ルール",
+      "name": "フラワーおみくじ",
       "switch": 2,
       "disabledIds": [],
       "matchExact": [
-        "*"
       ],
       "matchStartsWith": [
         "特別",
@@ -35,40 +32,40 @@
     "omikuji1": {
       "id": "omikuji1",
       "name": "大吉",
-      "weight": 5,
+      "weight": 1,
       "threshold": {
-        "type": "day",
-        "comparison": "range",
-        "value": 1,
-        "valueMax": 7
+        "type": "none",
+        "comparison": "equal",
+        "value": 0,
+        "valueMax": 0
       },
       "post": [
         {
           "type": "onecomme",
-          "botKey": "mamono",
+          "botKey": "reimu",
           "iconKey": "Default",
-          "delaySeconds": 5,
-          "content": "今日は大吉！<<random>>"
+          "delaySeconds": 0,
+          "content": "<<user>>さんの運勢は【大吉】<<random>>"
         }
       ]
     },
     "omikuji2": {
       "id": "omikuji2",
-      "name": "中吉",
-      "weight": 3,
+      "name": "吉",
+      "weight": 1,
       "threshold": {
-        "type": "time",
-        "comparison": "range",
-        "value": 12,
+        "type": "none",
+        "comparison": "equal",
+        "value": 0,
         "valueMax": 0
       },
       "post": [
         {
-          "type": "toast",
-          "botKey": "mamono",
+          "type": "onecomme",
+          "botKey": "reimu",
           "iconKey": "Default",
-          "delaySeconds": 3,
-          "content": "中吉です。<<random>>でリフレッシュ！"
+          "delaySeconds": 0,
+          "content": "<<user>>さんの運勢は【吉】<<random>>"
         }
       ]
     }

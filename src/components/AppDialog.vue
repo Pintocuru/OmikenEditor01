@@ -10,17 +10,13 @@
     <v-card>
       <component
         :is="getEditorComponent(key)"
-        :STATE="STATE"
-        :selectItem="selectItem[key]"
-        :selectMode="selectMode"
+        v-bind="{ STATE, selectItem: selectItem[key], selectMode }"
         @update:STATE="updateSTATE"
         @open-editor="openEditor"
       />
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn color="blue darken-1" @click="() => closeDialog(key)"
-          >閉じる</v-btn
-        >
+        <v-btn color="blue darken-1" @click="() => closeDialog(key)">閉じる</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -32,8 +28,6 @@ import DialogRule from "./DialogRule.vue";
 import DialogOmikuji from "./DialogOmikuji.vue";
 import DialogPlace from "./DialogPlace.vue";
 import { EditorItem, ItemCategory, ItemContent, STATEType, SelectItem } from "@/types";
-import { z } from "zod";
-import _ from "lodash";
 
 // Props / emit
 const props = defineProps<{
@@ -60,16 +54,14 @@ const getEditorComponent = (type: ItemCategory) => {
   return editorMap[type] || null;
 };
 
-// showの更新をemitする関数
+// 各種操作関数(エディターを開く/STATE更新)
+const openEditor = (editorItem: EditorItem) => emit("open-editor", editorItem);
+const updateSTATE = (payload: SelectItem) => emit("update:STATE", payload);
+
+// ダイアログの状態
 const updateShow = (key: ItemCategory, value: boolean) => {
   emit("update:show", { ...props.show, [key]: value });
 };
-
-// selectItemをAppに送り、エディターを開く
-const openEditor = (editorItem: EditorItem) => emit("open-editor", editorItem);
-
-// STATEの更新をemit
-const updateSTATE = (payload: SelectItem) => emit("update:STATE", payload);
 
 // ダイアログを閉じる
 const closeDialog = (key: ItemCategory) => {
@@ -80,7 +72,6 @@ const closeDialog = (key: ItemCategory) => {
 const closeClickOutside = (event: MouseEvent) => {
   const target = event.target as Node;
   const dialogElement = event.currentTarget as HTMLElement;
-
   if (!dialogElement.contains(target)) {
     const keys: ItemCategory[] = ["place", "omikuji", "rules"];
     for (const key of keys) {

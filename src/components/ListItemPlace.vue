@@ -1,6 +1,7 @@
 <!-- src/components/ListItemPlace.vue -->
 <template>
-  <v-card height="120" @click="openEditor">
+    <v-col cols="12">
+  <v-card @click="openEditor">
     <v-toolbar :color="toolbarColor" density="compact">
       <v-toolbar-title>
         {{
@@ -20,6 +21,7 @@
       </template>
     </v-toolbar>
     <v-card-text>
+      <!-- 単独表示 -->
       <template v-if="!isGroup">
         <v-chip
           :color="getWeightColor((item as placeType).weight)"
@@ -34,19 +36,18 @@
           <strong>内容:</strong> {{ (item as placeType).content }}
         </div>
       </template>
+      <!-- グループ表示 -->
       <template v-else>
-        <v-list>
-          <v-list-item
-            v-for="place in (item as PlaceGroup).items"
-            :key="place.id"
-          >
-            {{ place.name }} (重み: {{ place.weight }}, グループ:
-            {{ place.group }})
-          </v-list-item>
-        </v-list>
+          <span v-for="place in (item as PlaceGroup).items"
+            :key="place.id"          >
+            <!-- 1行で収まらない場合は　…　と省略させる -->
+            <!-- 最後の　/　は表示させない -->
+            {{ place.content }} / 
+          </span>
       </template>
     </v-card-text>
   </v-card>
+  </v-col>
 </template>
 
 <script setup lang="ts">
@@ -61,7 +62,7 @@ import {
 } from "@/types";
 import ListItemPartsAction from "./common/ListItemPartsAction.vue";
 import { useSwitchStyles } from "../composables/useSwitchStyles";
-
+import _ from 'lodash';
 // ここでの限定型
 export interface PlaceGroup {
   name: string;

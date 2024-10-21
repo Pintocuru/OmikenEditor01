@@ -32,6 +32,7 @@ const emit = defineEmits<{
 
 // アイテムの削除
 function deleteItem() {
+  console.log(props.item);
   const item = props.item;
   const isGroup = "items" in item;
   const itemsToDelete = isGroup ? item.items : [item];

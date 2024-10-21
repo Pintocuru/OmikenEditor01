@@ -14,7 +14,7 @@ export function funkSTATE() {
     placeOrder: [],
   });
 
-  const { isInitialized, canUpdateJSON, fetchData, saveData } = useInitializeFunkOmiken();
+  const { fetchData, saveData } = useInitializeFunkOmiken();
 
   // 初期読み込み
   const initializeSTATE = async () => {
@@ -26,10 +26,6 @@ export function funkSTATE() {
 
   // emitsから送られたデータの処理
   const updateSTATEInternal = (payload: SelectItem) => {
-    // 読み込み失敗なら一切の編集不可 // TODO 編集不可のスナックバーを出す
-    if (!isInitialized.value) {
-      return;
-    }
 
     if (!payload) return;
     const { type, update, addKeys, delKeys, reorder } = payload;
@@ -78,8 +74,6 @@ export function funkSTATE() {
 
   return {
     STATE,
-    isInitialized,
-    canUpdateJSON,
     initializeSTATE,
     updateSTATE
   };

@@ -80,7 +80,7 @@
 <script setup lang="ts">
 import { computed, inject, Ref, ref } from "vue";
 import type { CHARAType, EditorItem, omikujiType, placeType, postType, SelectItem } from "../types";
-
+import _ from 'lodash';
 const props = defineProps<{
   currentItem: omikujiType;
 }>();

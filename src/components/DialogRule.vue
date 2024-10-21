@@ -88,17 +88,8 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import type {
-  EditorItem,
-  ItemCategory,
-  ItemContent,
-  STATEType,
-  SelectItem,
-  omikujiType,
-  placeType,
-  rulesType,
-} from "../types";
-
+import type { EditorItem, STATEType, SelectItem, rulesType } from "../types";
+import _ from 'lodash';
 // props/emits
 const props = defineProps<{
   STATE: STATEType;
@@ -157,8 +148,9 @@ const updateItem = () => {
 // エディターを開く
 function openEditor(option: { id: string; name: string }) {
   if (props.STATE.omikuji && props.STATE.omikuji[option.id]) {
-    emit("open-editor", "omikuji", {
-      [option.id]: props.STATE.omikuji[option.id],
+    emit("open-editor", {
+      type: "omikuji",
+      item: { [option.id]: props.STATE.omikuji[option.id] },
     });
   }
 }

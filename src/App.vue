@@ -1,7 +1,10 @@
 <!-- src/App.vue -->
 <template>
-  <v-app :theme="dark">
-    <AppHeader v-model:dark="dark" @update:dark="dark = $event" />
+  <v-app :theme="uiDark">
+    <AppHeader
+      v-model:uiDark="uiDark"
+      @update:uidark="uiDark = $event"
+    />
     <AppNavigation
       v-model:selectCategory="selectCategory"
       :STATE="STATE"
@@ -27,7 +30,7 @@
       @open-editor="openEditor"
     />
   </v-app>
-</template>AppList
+</template>
 
 <script setup lang="ts">
 import { onMounted, provide, ref } from "vue";
@@ -84,15 +87,22 @@ const CHARA = {
   },
 };
 // コンポーザブルの使用
-const { STATE, isInitialized, canUpdateJSON, initializeSTATE, updateSTATE } =
-  funkSTATE();
+const { STATE, initializeSTATE, updateSTATE } = funkSTATE();
 
+// provide
 provide("charaKey", CHARA); // provideで孫コンポーネントに渡す
 const placeholderKey = ref(STATE.value.place);
 provide("placeholderKey", placeholderKey); // provideで孫コンポーネントに渡す
 
-const { dark, selectCategory, selectItem, selectMode, dialogs, openEditor } =
-  funkUI();
+const {
+  uiDark,
+  uiDrawer,
+  selectCategory,
+  selectItem,
+  selectMode,
+  dialogs,
+  openEditor,
+} = funkUI();
 
 // コンポーネントのマウント時にデータを取得
 onMounted(async () => {

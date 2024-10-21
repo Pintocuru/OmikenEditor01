@@ -1,15 +1,13 @@
 // src/composables/funkOmikenUI.ts
-import { ref, computed, Ref } from "vue";
+import { ref } from "vue";
 import type {
-  STATEType,
   ItemCategory,
-  ItemContent,
-  SelectItem,
   placeType,
   omikujiType,
   rulesType,
   EditorItem,
 } from "../types";
+import _ from 'lodash';
 /*
 UIコンポーネントとインタラクションを担当
 useOmikujiDialog: おみくじダイアログの管理
@@ -17,8 +15,9 @@ useNavigation: ナビゲーション機能
 */
 
 export function funkUI() {
-  // UI:ダークモード
-  const dark = ref("dark");
+  // UI
+  const uiDark = ref("dark"); // ダークモード
+  const uiDrawer = ref(null); // ナビゲーションドロワーの表示/非表示
 
   // リスト用:選択したカテゴリ
   const selectCategory = ref<ItemCategory>("rules");
@@ -58,7 +57,8 @@ export function funkUI() {
   };
 
   return {
-    dark,
+    uiDark,
+    uiDrawer,
     selectCategory,
     selectItem,
     selectMode,

@@ -1,9 +1,10 @@
 <!-- src/components/ListItemRules.vue -->
 <template>
-  <v-card height="200" @click="openEditor">
+          <v-col cols="12">
+  <v-card  @click="openEditor">
     <v-toolbar :color="getSwitchColor(item.switch)" density="compact">
       <v-toolbar-title>
-        {{ item.name }}
+        {{ item.name }} <v-chip  class="ml-4" label variant="outlined"> {{ getSwitchLabel(item.switch) }}</v-chip>
       </v-toolbar-title>
       <template v-slot:append>
         <ListItemPartsAction
@@ -24,10 +25,7 @@
           {{ option.name }}
         </v-chip>
       </v-chip-group>
-      <v-sheet class="mt-2">
-        <v-chip :color="getSwitchColor(item.switch)">
-          {{ getSwitchLabel(item.switch) }}
-        </v-chip>
+      <v-sheet>
         <span v-if="item.matchExact && item.matchExact.length > 0">
           <v-icon color="primary">mdi-equal-box</v-icon>
           {{ item.matchExact.join(", ") }}
@@ -43,6 +41,7 @@
       </v-sheet>
     </v-card-text>
   </v-card>
+  </v-col>
 </template>
 
 <script setup lang="ts">
@@ -56,7 +55,7 @@ import {
 } from "@/types";
 import ListItemPartsAction from "./common/ListItemPartsAction.vue";
 import { useSwitchStyles } from "../composables/useSwitchStyles";
-
+import _ from 'lodash';
 // Props Emits
 const props = defineProps<{
   STATE: STATEType;
