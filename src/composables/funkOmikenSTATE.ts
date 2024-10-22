@@ -19,56 +19,48 @@ export function funkSTATE() {
   // 初期読み込み
   const initializeSTATE = async () => {
     const data = await fetchData();
-    if (data) {
-      STATE.value = data;
-    }
+    if (data) STATE.value = data;
   };
 
-  // emitsから送られたデータの処理
-  const updateSTATEInternal = (payload: SelectItem) => {
-
+  const updateSTATE = (payload: SelectItem) => {
     if (!payload) return;
     const { type, update, addKeys, delKeys, reorder } = payload;
 
-    if (update) updateItem(type, update); // カテゴリの更新
-    addKeys?.forEach(item => addItem(type, item)); // 追加
-    delKeys?.forEach(key => deleteItem(type, key)); // 削除
-    if (Array.isArray(reorder)) updateOrder(type, reorder); // 順番の再設定
+    // 現在のステートのディープコピーを作成
+    const newState: STATEType = JSON.parse(JSON.stringify(STATE.value));
 
-    saveData(STATE.value);
-  };
-
-  // デバウンスされた updateSTATE 関数
-  const updateSTATE = _.debounce(updateSTATEInternal, 500);
-
-  // カテゴリの更新
-  const updateItem = (type: ItemCategory, item: Record<string, ItemContent>) => {
-    const newItem = validateData(type, item);
-    (STATE.value[type] as Record<string, ItemContent>) = _.merge({}, STATE.value[type], newItem);
-  };
-
-  // アイテムの追加
-  const addItem = (type: ItemCategory, item: object) => {
-    console.log(type, item);
-    const newKey = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-    const newItem = validateData(type, { [newKey]: item });
-    (STATE.value[type] as Record<string, ItemContent>) = _.merge({}, STATE.value[type], newItem);
-    STATE.value[`${type}Order`].push(newKey);
-  };
-
-  // アイテムの削除
-  const deleteItem = (type: ItemCategory, itemId: string) => {
-    STATE.value[type] = _.omit(STATE.value[type], [itemId]);
-    // xxxOrderから削除
-    STATE.value[`${type}Order`] = STATE.value[`${type}Order`].filter(id => id !== itemId);
-  };
-
-  // 順番(xxxOrder)の更新
-  const updateOrder = (type: ItemCategory, newOrder: string[]) => {
-    if (!Array.isArray(newOrder)) {
-      throw new Error(`newOrder must be an array for type: ${type}`);
+    // 更新処理
+    if (update) {
+      const validatedUpdate = validateData(type, update);
+      Object.assign(newState[type], validatedUpdate);
     }
-    STATE.value[`${type}Order`] = newOrder;
+
+    // 追加処理
+    if (addKeys?.length) {
+      addKeys.forEach(item => {
+        const newKey = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+        const validatedItem = validateData(type, { [newKey]: item });
+        Object.assign(newState[type], validatedItem);
+        newState[`${type}Order`].push(newKey);
+      });
+    }
+
+    // 削除処理
+    if (delKeys?.length) {
+      delKeys.forEach(key => {
+        delete newState[type][key];
+        newState[`${type}Order`] = newState[`${type}Order`].filter(id => id !== key);
+      });
+    }
+
+    // 順序の更新
+    if (reorder) {
+      newState[`${type}Order`] = reorder;
+    }
+
+    // ステートの一括更新
+    STATE.value = newState;
+    saveData(newState);
   };
 
 

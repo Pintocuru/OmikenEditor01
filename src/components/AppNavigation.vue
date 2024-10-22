@@ -40,19 +40,19 @@ const emit = defineEmits<{
 // セクション情報の計算
 const sections = computed(() => [
   { 
-    title: "Rules", 
+    title: "ルール", 
     type: "rules" as const, 
     items: props.STATE.rules || {},
     icon: "mdi-book-open-variant"
   },
   { 
-    title: "Omikuji", 
+    title: "おみくじ", 
     type: "omikuji" as const, 
     items: props.STATE.omikuji || {},
-    icon: "mdi-cards"
+    icon: "mdi-crystal-ball"
   },
   { 
-    title: "Placeholder", 
+    title: "プレースホルダー", 
     type: "place" as const, 
     items: props.STATE.place || {},
     icon: "mdi-tag"

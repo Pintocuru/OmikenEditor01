@@ -16,6 +16,7 @@
         <ListItemPartsAction
           :selectCategory="selectCategory"
           :item="item"
+            @edit="openEditor"
           @update:STATE="updateSTATE"
         />
       </template>

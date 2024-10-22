@@ -27,6 +27,7 @@ import { onMounted } from "vue";
 import DialogRule from "./DialogRule.vue";
 import DialogOmikuji from "./DialogOmikuji.vue";
 import DialogPlace from "./DialogPlace.vue";
+import { useSwitchStyles } from "../composables/useSwitchStyles";
 import { EditorItem, ItemCategory, ItemContent, STATEType, SelectItem } from "@/types";
 
 // Props / emit
@@ -45,7 +46,6 @@ const emit = defineEmits<{
 
 // エディターコンポーネントを取得する関数
 const getEditorComponent = (type: ItemCategory) => {
-  console.log(props.selectItem);
   const editorMap: Record<ItemCategory, any> = {
     rules: DialogRule,
     omikuji: DialogOmikuji,

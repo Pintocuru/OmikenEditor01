@@ -1,21 +1,23 @@
 <!-- src/components/common/ListItemPartsAction.vue -->
 <template>
-  <v-btn height="30" width="30" icon @click.stop="$emit('edit')">
-    <v-icon>mdi-pencil</v-icon>
+  <v-btn
+    v-for="(action, index) in actions"
+    :key="index"
+    height="30"
+    width="30"
+    icon
+    @click.stop="action.handler"
+  >
+    <v-icon>{{ action.icon }}</v-icon>
     <v-tooltip activator="parent" location="bottom">
-      編集
-    </v-tooltip>
-  </v-btn>
-  <v-btn height="30" width="30" icon @click.stop="deleteItem">
-    <v-icon>mdi-close</v-icon>
-    <v-tooltip activator="parent" location="bottom">
-      削除
+      {{ action.tooltip }}
     </v-tooltip>
   </v-btn>
 </template>
 
 <script setup lang="ts">
 import { ItemCategory, ItemContent, SelectItem } from '@/types';
+import { cloneDeep } from 'lodash';
 import Swal from 'sweetalert2';
 
 type ItemOrGroup = ItemContent | { name: string; items: ItemContent[] };
@@ -29,6 +31,46 @@ const emit = defineEmits<{
   (e: "edit"): void;
   (e: "update:STATE", payload: SelectItem): void;
 }>();
+
+// 
+type Action = {  icon: string;  tooltip: string;  handler: () => void;};
+const actions = [
+  {
+    icon: 'mdi-pencil',
+    tooltip: '編集',
+    handler: () => emit('edit')
+  },
+  {
+    icon: 'mdi-content-copy',
+    tooltip: '複製',
+    handler: duplicateItem
+  },
+  {
+    icon: 'mdi-close',
+    tooltip: '削除',
+    handler: deleteItem
+  }
+];
+
+
+// アイテムの複製
+function duplicateItem() {
+  const item = props.item;
+  const isGroup = "items" in item;
+  const itemsToDuplicate = isGroup ? item.items : [item as ItemContent];
+
+  const duplicatedItems = itemsToDuplicate.map(originalItem => {
+    const newItem = cloneDeep(originalItem);
+    delete (newItem as any).id;
+    newItem.name = `${newItem.name} のコピー`;
+    return newItem;
+  });
+
+  emit("update:STATE", {
+    type: props.selectCategory,
+    addKeys: duplicatedItems,
+  });
+}
 
 // アイテムの削除
 function deleteItem() {
@@ -61,5 +103,9 @@ function deleteItem() {
       });
     }
   });
+}
+
+function ref(arg0: { icon: string; tooltip: string; handler: () => void; }[]) {
+  throw new Error('Function not implemented.');
 }
 </script>

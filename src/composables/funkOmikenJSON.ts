@@ -137,83 +137,109 @@ const rulesSchema = z.record(z.object({
   // omikujiの適用しないIDリスト
   disabledIds: z.array(z.string()).default([]),
   // キーワード(完全一致/前方一致/部分一致)
-  matchExact: z.array(z.string()).default(['*']),
+  matchExact: z.array(z.string()).default([]),
   matchStartsWith: z.array(z.string()).default([]),
   matchIncludes: z.array(z.string()).default([])
 }));
 
 // omikuji.thresholdスキーマ
-const baseThresholdSchema = z.object({
-  type: z.enum(['none', 'time', 'lc', 'no', 'tc', 'second', 'minute', 'hour', 'day', 'price', 'custom']).default('none'),
-  // 比較方法
-  comparison: z.enum(['min', 'equal', 'max', 'loop', 'range']).default('equal'),
-  // 基準となる数値
-  value: z.number().nonnegative().default(0),
-  valueMax: z.number().nonnegative().default(0),
+const baseComparisonSchema = z.enum(['min', 'equal', 'max', 'loop', 'range']);
+
+// 時間フィルターのスキーマ
+const timeFilterSchema = z.object({
+  isEnabled: z.boolean().default(false),
+  value1: z.number().transform(val => {
+    // 0-23の範囲外なら0に
+    return val < 0 || val >= 24 ? 0 : val;
+  }),
+  value2: z.number().transform(val => {
+    // 0-23の範囲外なら0に
+    return val < 0 || val >= 24 ? 0 : val;
+  })
 });
 
-// 入力制限チェック
-function validateThreshold(data: z.infer<typeof baseThresholdSchema>) {
-  let { type, comparison, value, valueMax } = data;
-
-  // 数値の調整
-  const sanitizeNumber = (num: number, min: number, max: number) => {
-    return Math.max(min, Math.min(num, max));
-  };
-
-  switch (type) {
-    // 時間指定
-    case "time":
-      comparison = "range";
-      value = sanitizeNumber(value, 0, 23);
-      valueMax = sanitizeNumber(valueMax ?? 0, 0, 23);
-      if (value > valueMax && valueMax !== value) {
-        // OK
-      } else if (value === valueMax) {
-        valueMax = (value + 1) % 24;
-      }
-      break;
-
-      // 経過時間系
-    case "second": case "minute": case "hour": case "day": case "price":
-      if (["equal", "loop"].includes(comparison) && type !== "price") {
-        comparison = "min";
-      }
-      value = Math.max(0, value);
-      if (comparison === "range") {
-        valueMax = Math.max(value + 1, valueMax ?? 0);
-      }
-      break;
-
-    // コメント数関系
-    case "lc":
-    case "no":
-    case "tc":
-    case "custom":
-      value = Math.max(0, value);
-      if (comparison === "range") {
-        valueMax = Math.max(value + 1, valueMax ?? 0);
-      }
-      break;
-
-    default:
-      // "none" の場合は何もしない
-      break;
+// 経過時間フィルターのスキーマ
+const elapsedFilterSchema = z.object({
+  isEnabled: z.boolean().default(false),
+  unit: z.enum(['second', 'minute', 'hour', 'day']),
+  comparison: baseComparisonSchema,
+  value1: z.number().transform(val => {
+    // 負の値または数値以外は0に
+    return typeof val !== 'number' || val < 0 ? 0 : val;
+  }),
+  value2: z.number().transform(val => {
+    // 負の値または数値以外は0に
+    return typeof val !== 'number' || val < 0 ? 0 : val;
+  })
+}).transform(data => {
+  if (data.comparison === 'range') {
+    // value1がvalue2より大きい場合は入れ替え
+    if (data.value1 > data.value2) {
+      const temp = data.value1;
+      data.value1 = data.value2;
+      data.value2 = temp;
+    }
   }
+  return data;
+});
 
-  return { type, comparison, value, valueMax };
-}
+// カウントフィルターのスキーマ
+const countFilterSchema = z.object({
+  isEnabled: z.boolean().default(false),
+  unit: z.enum(['lc', 'no', 'tc']),
+  comparison: baseComparisonSchema,
+  value1: z.number().transform(val => {
+    // 負の値または数値以外は0に
+    return typeof val !== 'number' || val < 0 ? 0 : val;
+  }),
+  value2: z.number().transform(val => {
+    // 負の値または数値以外は0に
+    return typeof val !== 'number' || val < 0 ? 0 : val;
+  })
+}).transform(data => {
+  if (data.comparison === 'range') {
+    // value1がvalue2より大きい場合は入れ替え
+    if (data.value1 > data.value2) {
+      const temp = data.value1;
+      data.value1 = data.value2;
+      data.value2 = temp;
+    }
+  }
+  return data;
+});
 
+// カウントフィルターのスキーマ
+const giftFilterSchema = z.object({
+  isEnabled: z.boolean().default(false),
+  comparison: baseComparisonSchema,
+  value1: z.number().transform(val => {
+    // 負の値または数値以外は0に
+    return typeof val !== 'number' || val < 0 ? 0 : val;
+  }),
+  value2: z.number().transform(val => {
+    // 負の値または数値以外は0に
+    return typeof val !== 'number' || val < 0 ? 0 : val;
+  })
+}).transform(data => {
+  if (data.comparison === 'range') {
+    // value1がvalue2より大きい場合は入れ替え
+    if (data.value1 > data.value2) {
+      const temp = data.value1;
+      data.value1 = data.value2;
+      data.value2 = temp;
+    }
+  }
+  return data;
+});
 
-// Zodスキーマとカスタムバリデーションを組み合わせる
-const thresholdSchema = baseThresholdSchema.refine(
-  (data) => {
-    const validated = validateThreshold(data);
-    return true;
-  },
-  // エラーメッセージ
-  { message: "Invalid threshold settings", path: ["threshold"], }
-).transform(validateThreshold);
+// しきい値のスキーマ
+const thresholdSchema = z.object({
+  isSyoken: z.boolean().default(false),
+  time: timeFilterSchema,
+  elapsed: elapsedFilterSchema,
+  count: countFilterSchema,
+  gift: giftFilterSchema,
+});
 
 // omikujiのZodスキーマ
 const omikujiSchema = z.record(z.object({
@@ -231,7 +257,7 @@ const omikujiSchema = z.record(z.object({
     botKey: z.string().default('mamono'),
     iconKey: z.string().default('Default'),
     delaySeconds: z.number().nonnegative().default(0),
-    content: z.string().default('<<user>>さんの運勢は【大吉】')
+    content: z.string().default('<<user>>さんの運勢は【大吉】<<random>>')
   })).default([])
 }));
 
@@ -263,18 +289,40 @@ const defaultValues = {
     name: 'おみくじ',
     switch: 1,
     disabledIds: [],
-    matchExact: ['*'],
+    matchExact: [],
     matchStartsWith: [],
     matchIncludes: []
   },
   omikuji: {
-    name: getRandomFortune(),
+    name: '大吉',
     weight: 1,
     threshold: {
-      type: 'none',
-      comparison: 'equal',
-      value: 0,
-      valueMax: 0
+      isSyoken:false,
+      time: {
+        isEnabled: false, // 時間指定が無効
+        value1: 0, // 開始時間
+        value2: 0, // 終了時間
+      },
+      elapsed: {
+        isEnabled: false, // 経過時間が無効
+        unit: 'hour', // デフォルトの単位
+        value1: 0, // 開始値
+        value2: 0, // 終了値
+        comparison: 'max', // デフォルトの比較方法
+      },
+      count: {
+        isEnabled: false, // コメント数が無効
+        unit: 'no', // デフォルトの単位
+        value1: 0, // 開始値
+        value2: 0, // 終了値
+        comparison: 'max', // デフォルトの比較方法
+      },
+      gift: {
+        isEnabled: false, // ギフトが無効
+        value1: 0, // 開始値
+        value2: 0, // 終了値
+        comparison: 'max', // デフォルトの比較方法
+      },
     },
     post: [{
       type: 'onecomme',
