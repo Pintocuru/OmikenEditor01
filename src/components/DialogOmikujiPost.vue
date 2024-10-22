@@ -11,21 +11,28 @@
     <v-card-text>
       <v-expansion-panels multiple>
         <v-expansion-panel v-for="(post, index) in currentItem.post" :key="index">
-          <v-expansion-panel-title
-            :style="['onecomme', 'toast'].includes(post.type) ? { backgroundColor: getCharaColor(post.botKey) } : {}">
-            <v-row no-gutters align="center">
-              <v-col>
-                <v-chip variant="flat" :color="getTypeColor(post.type)" class="mr-2">
-                  {{ getTypeLabel(post.type) }}
-                </v-chip>
+          <v-expansion-panel-title hide-actions :color="['onecomme', 'toast'].includes(post.type)
+              ? getCharaColor(post.botKey)
+              : ''
+            ">
+            <v-toolbar flat color="transparent">
+              <!-- 左側のコンテンツ -->
+              <v-chip variant="flat" :color="getTypeColor(post.type)" class="mr-2">
+                {{ getTypeLabel(post.type) }}
+              </v-chip>
+
+              <v-img v-if="['onecomme', 'toast'].includes(post.type)"
+                :src="getCharaImage(post.botKey ?? '', post.iconKey ?? '')" max-height="80" max-width="80" />
+
+              <v-toolbar-title>
                 {{ replacePlaceholder(post.content) }}
-              </v-col>
-              <v-col cols="2" class="d-flex justify-end" v-if="['onecomme', 'toast'].includes(post.type)">
-                <v-img :src="getCharaImage(post.botKey ?? '', post.iconKey ?? '')"
-                  :max-height="isHovered(post) ? 150 : 40" :max-width="isHovered(post) ? 150 : 40"
-                  @mouseover="hoveredImage = post" @mouseleave="hoveredImage = null" />
-              </v-col>
-            </v-row>
+              </v-toolbar-title>
+
+              <v-chip variant="flat" color="while" class="mr-2">
+                <v-icon class="mr-2">mdi-clock-outline</v-icon>
+                <span class="font-weight-bold">{{ post.delaySeconds }}秒</span>
+              </v-chip>
+            </v-toolbar>
           </v-expansion-panel-title>
           <v-expansion-panel-text>
             <v-row dense>
@@ -52,7 +59,8 @@
             </v-row>
             <v-row dense>
               <v-col>
-                <v-text-field v-model="post.content" label="内容" rows="2" auto-grow density="compact" @input="updateOmikuji">
+                <v-text-field v-model="post.content" label="内容" rows="2" auto-grow density="compact"
+                  @input="updateOmikuji">
                 </v-text-field>
               </v-col>
               <v-col cols="auto">
@@ -79,15 +87,22 @@
 
 <script setup lang="ts">
 import { computed, inject, Ref, ref } from "vue";
-import type { CHARAType, EditorItem, omikujiType, placeType, postType, SelectItem } from "../types";
-import _ from 'lodash';
+import type {
+  CHARAType,
+  EditorItem,
+  omikujiType,
+  placeType,
+  postType,
+  SelectItem,
+} from "../types";
+import _ from "lodash";
 const props = defineProps<{
   currentItem: omikujiType;
 }>();
 
 const emit = defineEmits<{
   (e: "update:STATE", payload: SelectItem): void;
-    (e: "open-editor", editorItem: EditorItem): void;
+  (e: "open-editor", editorItem: EditorItem): void;
 }>();
 
 const CHARA = inject<CHARAType>("charaKey");
@@ -123,11 +138,10 @@ const addPost = () => {
   });
 };
 
-
 const removePost = (index: number) => {
   const item = props.currentItem;
   // ポストを削除
-   (item.post as postType[])?.splice(index, 1);
+  (item.post as postType[])?.splice(index, 1);
   // 状態を更新
   emit("update:STATE", {
     type: "omikuji",
@@ -148,7 +162,7 @@ const updateOmikuji = () => {
 // 型ガード関数
 const isValidChara = (chara: unknown): chara is CHARAType => {
   if (typeof chara !== "object" || chara === null) {
-    console.error('無効なキャラクター:', chara);
+    console.error("無効なキャラクター:", chara);
     return false;
   }
   return true;
@@ -158,7 +172,7 @@ const isValidChara = (chara: unknown): chara is CHARAType => {
 const botKeyItems = computed(() => {
   try {
     if (!CHARA || !isValidChara(CHARA)) {
-      console.warn('CHARAが無効です');
+      console.warn("CHARAが無効です");
       return [];
     }
     return Object.keys(CHARA).map((key) => ({
@@ -166,7 +180,7 @@ const botKeyItems = computed(() => {
       value: key,
     }));
   } catch (error) {
-    console.error('キャラクター一覧の作成中にエラーが発生しました:', error);
+    console.error("キャラクター一覧の作成中にエラーが発生しました:", error);
     return [];
   }
 });
@@ -175,7 +189,7 @@ const botKeyItems = computed(() => {
 const getIconKeyItems = (botKey: string | undefined) => {
   try {
     if (!botKey || !CHARA || !isValidChara(CHARA) || !(botKey in CHARA)) {
-      console.warn('無効なボットキーまたはCHARA:', { botKey, CHARA });
+      console.warn("無効なボットキーまたはCHARA:", { botKey, CHARA });
       return [];
     }
     return Object.keys(CHARA[botKey].image).map((key) => ({
@@ -183,7 +197,7 @@ const getIconKeyItems = (botKey: string | undefined) => {
       value: key,
     }));
   } catch (error) {
-    console.error('アイコンキーアイテムの取得中にエラーが発生しました:', error);
+    console.error("アイコンキーアイテムの取得中にエラーが発生しました:", error);
     return [];
   }
 };
@@ -194,25 +208,32 @@ const getCharaColor = (botKey: string | undefined) => {
     if (botKey && CHARA && CHARA[botKey]) {
       return CHARA[botKey].color["--lcv-background-color"];
     }
-    console.warn('無効なボットキーまたはCHARA:', { botKey, CHARA });
+    console.warn("無効なボットキーまたはCHARA:", { botKey, CHARA });
     return "";
   } catch (error) {
-    console.error('キャラクターの背景色取得中にエラーが発生しました:', error);
+    console.error("キャラクターの背景色取得中にエラーが発生しました:", error);
     return "";
   }
 };
 
 // キャラクターの画像を取得する関数
-const getCharaImage = (botKey: string | undefined, iconKey: string | undefined) => {
+const getCharaImage = (
+  botKey: string | undefined,
+  iconKey: string | undefined
+) => {
   try {
     if (botKey && CHARA && CHARA[botKey] && iconKey) {
       // 画像パスを明示的に指定
       return `/img/${CHARA[botKey].image[iconKey]}`;
     }
-    console.warn('無効なボットキーまたはアイコンキー:', { botKey, iconKey, CHARA });
+    console.warn("無効なボットキーまたはアイコンキー:", {
+      botKey,
+      iconKey,
+      CHARA,
+    });
     return "";
   } catch (error) {
-    console.error('キャラクターの画像取得中にエラーが発生しました:', error);
+    console.error("キャラクターの画像取得中にエラーが発生しました:", error);
     return "";
   }
 };
@@ -264,16 +285,19 @@ const replacePlaceholder = (content: string): string => {
   // プレースホルダーの形式を <<...>> に変更
   return content.replace(/<<(.*?)>>/g, (_, name) => {
     // 新しいplace構造に基づいてフィルタリング
-    const matchedPlaceholders = Object.values(place).filter(ph => ph.name === `<<${name}>>`);
+    const matchedPlaceholders = Object.values(place).filter(
+      (ph) => ph.name === `<<${name}>>`
+    );
 
     if (matchedPlaceholders.length > 0) {
-      const randomPlaceholder = matchedPlaceholders[Math.floor(Math.random() * matchedPlaceholders.length)];
+      const randomPlaceholder =
+        matchedPlaceholders[
+        Math.floor(Math.random() * matchedPlaceholders.length)
+        ];
       return randomPlaceholder.content;
     }
 
     return `<<${name}>>`; // プレースホルダーが見つからなかった場合はそのまま表示
   });
 };
-
-
 </script>
