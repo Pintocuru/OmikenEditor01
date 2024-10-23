@@ -1,8 +1,28 @@
 // src/composables/funkOmikenSTATE.ts
 import { ref } from 'vue';
-import type { STATEType, ItemCategory, ItemContent, SelectItem } from '../types';
+import type {
+  STATEType,
+  SelectItem,
+  ItemCategory,
+  ItemContent} from '../types';
 import { useInitializeFunkOmiken, validateData } from "../composables/funkOmikenJSON";
-import _ from 'lodash';
+
+// 型安全なマッピングの定義
+type OrderMapping = {
+  [K in ItemCategory]: K extends 'preferences' ? never : `${K}Order`;
+};
+
+const typeToOrderMap: OrderMapping = {
+  rules: 'rulesOrder',
+  omikuji: 'omikujiOrder',
+  place: 'placeOrder',
+  preferences: null as never
+} as const;
+
+// 型ガードの定義
+function isDataCategory(type: ItemCategory): type is Exclude<ItemCategory, 'preferences'> {
+  return type !== 'preferences';
+}
 
 export function funkSTATE() {
   const STATE = ref<STATEType>({
@@ -12,6 +32,12 @@ export function funkSTATE() {
     rulesOrder: [],
     omikujiOrder: [],
     placeOrder: [],
+    preferences:{
+      basicDelay: 1,
+      omikujiCooldown: 2,
+      commentDuration: 5,
+      BotUserIDname: 'FirstCounter'
+    }
   });
 
   const { fetchData, saveData } = useInitializeFunkOmiken();
@@ -24,38 +50,48 @@ export function funkSTATE() {
 
   const updateSTATE = (payload: SelectItem) => {
     if (!payload) return;
-    const { type, update, addKeys, delKeys, reorder } = payload;
+    const { type, update, addKeys, delKeys, reorder, preferences } = payload;
 
     // 現在のステートのディープコピーを作成
     const newState: STATEType = JSON.parse(JSON.stringify(STATE.value));
 
-    // 更新処理
-    if (update) {
-      const validatedUpdate = validateData(type, update);
-      Object.assign(newState[type], validatedUpdate);
-    }
+    if (type === 'preferences' && preferences) {
+      // preferences の更新
+      newState.preferences = {
+        ...newState.preferences,
+        ...preferences
+      };
+    } else if (isDataCategory(type)) {
+      const orderKey = typeToOrderMap[type];
+      // 他のタイプの更新処理
+      // 更新処理
+      if (update) {
+        const validatedUpdate = validateData(type, update);
+        Object.assign(newState[type], validatedUpdate);
+      }
 
-    // 追加処理
-    if (addKeys?.length) {
-      addKeys.forEach(item => {
-        const newKey = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-        const validatedItem = validateData(type, { [newKey]: item });
-        Object.assign(newState[type], validatedItem);
-        newState[`${type}Order`].push(newKey);
-      });
-    }
+      // 追加処理
+      if (addKeys?.length) {
+        addKeys.forEach(item => {
+          const newKey = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+          const validatedItem = validateData(type, { [newKey]: item as ItemContent });
+          Object.assign(newState[type], validatedItem);
+          newState[orderKey].push(newKey);
+        });
+      }
 
-    // 削除処理
-    if (delKeys?.length) {
-      delKeys.forEach(key => {
-        delete newState[type][key];
-        newState[`${type}Order`] = newState[`${type}Order`].filter(id => id !== key);
-      });
-    }
+      // 削除処理
+      if (delKeys?.length) {
+        delKeys.forEach(key => {
+          delete newState[type][key];
+          newState[orderKey] = newState[orderKey].filter(id => id !== key);
+        });
+      }
 
-    // 順序の更新
-    if (reorder) {
-      newState[`${type}Order`] = reorder;
+      // 順序の更新
+      if (reorder) {
+        newState[orderKey] = reorder;
+      }
     }
 
     // ステートの一括更新

@@ -3,20 +3,30 @@
   <v-navigation-drawer permanent rail rail-width="100" expand-on-hover>
     <v-list>
       <v-list-item v-for="(section, index) in sections" :key="index">
-        <v-card @click="openList(section.type as ItemCategory)">
+        <v-card @click="openList(section.type as ItemCategory)" class="py-4">
           <v-card-title class="d-flex align-center">
-            <v-badge  class="mr-4"
+            <v-badge
+              class="mr-4"
               :content="Object.keys(section.items).length"
               color="primary"
               :model-value="true"
               location="bottom end"
             >
               <v-icon :icon="section.icon" size="large"></v-icon>
-            </v-badge> {{ section.title }}
+            </v-badge>
+            {{ section.title }}
           </v-card-title>
-          <v-card-text>
-           
-          </v-card-text>
+        </v-card>
+      </v-list-item>
+      <v-divider  class="my-4" />
+
+      <!-- preferences  -->
+      <v-list-item>
+        <v-card @click="openList('preferences')" class="py-4">
+          <v-card-title class="d-flex align-center">
+            <v-icon icon="mdi-cog" size="large" class="mr-4"></v-icon>
+            設定画面
+          </v-card-title>
         </v-card>
       </v-list-item>
     </v-list>
@@ -39,23 +49,23 @@ const emit = defineEmits<{
 
 // セクション情報の計算
 const sections = computed(() => [
-  { 
-    title: "ルール", 
-    type: "rules" as const, 
+  {
+    title: "ルール",
+    type: "rules" as const,
     items: props.STATE.rules || {},
-    icon: "mdi-book-open-variant"
+    icon: "mdi-book-open-variant",
   },
-  { 
-    title: "おみくじ", 
-    type: "omikuji" as const, 
+  {
+    title: "おみくじ",
+    type: "omikuji" as const,
     items: props.STATE.omikuji || {},
-    icon: "mdi-crystal-ball"
+    icon: "mdi-crystal-ball",
   },
-  { 
-    title: "プレースホルダー", 
-    type: "place" as const, 
+  {
+    title: "プレースホルダー",
+    type: "place" as const,
     items: props.STATE.place || {},
-    icon: "mdi-tag"
+    icon: "mdi-tag",
   },
 ]);
 

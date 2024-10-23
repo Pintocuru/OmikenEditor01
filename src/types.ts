@@ -8,6 +8,7 @@ export interface STATEType {
   rulesOrder: string[]; // ルールの順序
   omikujiOrder: string[]; // おみくじの順序
   placeOrder: string[]; // プレースホルダーの順序
+  preferences: PreferencesType;
 }
 
 // おみくじルールの型定義
@@ -30,7 +31,7 @@ export interface omikujiType {
   post: postType[];
 }
 
-interface thresholdType {
+export interface thresholdType {
   isSyoken: boolean; // isSyoken:初見かどうか。これがONなら、下記は設定不可
   time: { // time:時間指定(0-23時)
     isEnabled: boolean;
@@ -100,11 +101,20 @@ export interface placeType {
   content: string; // メッセージ内容
 }
 
+// 設定の型定義
+export interface  PreferencesType{
+  basicDelay: number; // コメントしてからBotが反応するまでの遅延(秒)
+  omikujiCooldown: number; // おみくじ機能のクールダウン時間（秒)
+  commentDuration: number; // コメントしてからおみくじを有効とする時間(秒)
+  BotUserIDname: string; // このスクリプトBOTのcomment.data.userId
+}
+
 // ---------------------------------------------------
 
 // CHARA:キャラクターJSONの型定義
 export interface CHARAType {
   [key: string]: {
+    id: string; // キー名
     name: string; // キャラクターの名前
     frameId?: string; // わんコメの枠
     color: {
@@ -120,7 +130,7 @@ export interface CHARAType {
 }
 
 // キャラクターJSON（編集時）
-export interface CharaStyleEdit {
+export interface CharaStyleType {
   id: string; // キー名（編集時に変更可能）
   name: string; // キャラクターの名前
   frameId?: string; // わんコメの枠を指定
@@ -145,9 +155,10 @@ export type SelectItem = {
   addKeys?: Object[]; // 新規追加用アイテム
   delKeys?: string[]; // 削除するアイテムのキー名
   reorder?: string[]; // 再配置するアイテムのキー名
+  preferences?: PreferencesType; // 設定用
 } | null;
 
-export type ItemCategory = 'rules' | 'omikuji' | 'place';
+export type ItemCategory = 'rules' | 'omikuji' | 'place' | 'preferences';
 export type ItemContent = rulesType | omikujiType | placeType;
 
 export type EditorItem = {

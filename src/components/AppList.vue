@@ -4,29 +4,46 @@
     <v-toolbar>
       <v-toolbar-title>
         {{ selectCategory }}
-        <v-chip label class="ml-4"> {{ filterItemsCount }} items </v-chip>
+        <v-chip v-if="selectCategory !== 'preferences'" label class="ml-4">
+          {{ filterItemsCount }} items
+        </v-chip>
       </v-toolbar-title>
       <template #append>
-        <v-btn variant="outlined" @click="addItem" prepend-icon="mdi-plus">追加</v-btn>
+        <v-btn 
+          v-if="selectCategory !== 'preferences'"
+          variant="outlined" 
+          @click="addItem" 
+          prepend-icon="mdi-plus"
+        >
+          追加
+        </v-btn>
       </template>
     </v-toolbar>
 
-    <ListFilter
-      v-model:filterRef="filterRef"
-      :STATE="STATE"
-      :selectCategory="selectCategory"
-      @update:STATE="updateSTATE"
-    />
+    <template v-if="selectCategory === 'preferences'">
+      <ListPreferences
+        :STATE="STATE"
+        @update:STATE="updateSTATE"
+      />
+    </template>
+    <template v-else>
+      <ListFilter
+        v-model:filterRef="filterRef"
+        :STATE="STATE"
+        :selectCategory="selectCategory"
+        @update:STATE="updateSTATE"
+      />
 
-    <ListItem
-      :STATE="STATE"
-      :items="filterItems"
-      :itemOrder="STATE[`${selectCategory}Order`]"
-      :select-category="selectCategory"
-      :group-by="selectCategory === 'place' ? filterRef.placeSortName : undefined"
-      @update:STATE="updateSTATE"
-      @open-editor="openEditor"
-    />
+      <ListItem
+        :STATE="STATE"
+        :items="filterItems"
+        :itemOrder="STATE[`${selectCategory}Order`]"
+        :select-category="selectCategory"
+        :group-by="selectCategory === 'place' ? filterRef.placeSortName : undefined"
+        @update:STATE="updateSTATE"
+        @open-editor="openEditor"
+      />
+    </template>
   </v-card>
 </template>
 
@@ -34,17 +51,18 @@
 import { computed, onMounted, ref } from "vue";
 import ListFilter from "./ListFilter.vue";
 import ListItem from "./ListItem.vue";
+import ListPreferences from "./ListPreferences.vue"; // 追加
 import { z } from "zod";
 import _ from "lodash";
 import type {
   STATEType,
   ItemCategory,
   SelectItem,
-  thresholdType,
   omikujiType,
   placeType,
   rulesType,
   EditorItem,
+  thresholdType,
 } from "@/types";
 
 // Props Emits
@@ -87,12 +105,16 @@ const filterItemsCount = computed(() => Object.keys(filterItems.value).length);
 
 // フィルターオプションに合わせて表示を変更
 const filterItems = computed(() => {
+  if (props.selectCategory === 'preferences') return {};
+
   const items = props.STATE[props.selectCategory];
   const filters = {
     rules: () => _.pickBy(items as Record<string, rulesType>, item => 
-      filterRef.value.rulesFilterSwitch.length === 0 || filterRef.value.rulesFilterSwitch.includes(item.switch.toString())),
+      filterRef.value.rulesFilterSwitch.length === 0 || 
+      filterRef.value.rulesFilterSwitch.includes(item.switch.toString())),
     omikuji: () => _.pickBy(items as Record<string, omikujiType>, item => 
-      filterRef.value.omikujiFilterThreshold.length === 0 || filterRef.value.omikujiFilterThreshold.includes(item.threshold.type)),
+      filterRef.value.omikujiFilterThreshold.length === 0 || 
+      filterRef.value.omikujiFilterThreshold.includes(item.threshold.type)),
     place: () => filterRef.value.placeSortName === "none" ? items : 
       _.fromPairs(_.sortBy(Object.entries(items as Record<string, placeType>), 
         ([, item]) => filterRef.value.placeSortName === "name" ? item.name : item.group)),
@@ -104,7 +126,9 @@ const filterItems = computed(() => {
 
 // アイテムを追加
 const addItem = () => {
-  emit("update:STATE", { type: props.selectCategory, addKeys: [{}] });
+  if (props.selectCategory !== 'preferences') {
+    emit("update:STATE", { type: props.selectCategory, addKeys: [{}] });
+  }
 };
 
 // 各種操作関数(エディターを開く/STATE更新)

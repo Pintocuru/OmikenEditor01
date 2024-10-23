@@ -20,6 +20,7 @@ declare module 'vue' {
     AppNavigation: typeof import('./src/components/AppNavigation.vue')['default']
     AppPartsSnackbar: typeof import('./src/components/common/AppPartsSnackbar.vue')['default']
     AppPlaceholder: typeof import('./src/components/AppPlaceholder.vue')['default']
+    AppSettings: typeof import('./src/components/AppSettings.vue')['default']
     DeleteConfirmDialog: typeof import('./src/components/DeleteConfirmDialog.vue')['default']
     DialogOmikuji: typeof import('./src/components/DialogOmikuji.vue')['default']
     DialogOmikujiFilter: typeof import('./src/components/DialogOmikujiFilter.vue')['default']
@@ -33,6 +34,7 @@ declare module 'vue' {
     ListItemPartsAction: typeof import('./src/components/common/ListItemPartsAction.vue')['default']
     ListItemPlace: typeof import('./src/components/ListItemPlace.vue')['default']
     ListItemRules: typeof import('./src/components/ListItemRules.vue')['default']
+    ListPreferences: typeof import('./src/components/ListPreferences.vue')['default']
     MainFilter: typeof import('./src/components/MainFilter.vue')['default']
     MainItemList: typeof import('./src/components/MainItemList.vue')['default']
     MainPlaceholderList: typeof import('./src/components/MainPlaceholderList.vue')['default']
@@ -45,6 +47,7 @@ declare module 'vue' {
     PlaceEditor: typeof import('./src/components/PlaceEditor.vue')['default']
     RandomEditor: typeof import('./src/components/RandomEditor.vue')['default']
     RuleEditor: typeof import('./src/components/RuleEditor.vue')['default']
+    SettingsPreferences: typeof import('./src/components/SettingsPreferences.vue')['default']
     'コピー': typeof import('./src/components/NavigationList - コピー.vue')['default']
   }
 }

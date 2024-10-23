@@ -27,6 +27,7 @@ export function funkUI() {
     rules: <Record<string, rulesType> | null>null,
     omikuji: <Record<string, omikujiType> | null>null,
     place: <Record<string, placeType> | null>null,
+    preferences:null
   });
   // ダイアログでの表示モード
   const selectMode = ref<string | null>(null);
@@ -36,6 +37,7 @@ export function funkUI() {
     rules: false,
     omikuji: false,
     place: false,
+    preferences: false,
   });
 
   // ダイアログを開く
