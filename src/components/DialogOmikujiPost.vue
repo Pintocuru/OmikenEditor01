@@ -10,19 +10,34 @@
     </v-toolbar>
     <v-card-text>
       <v-expansion-panels multiple>
-        <v-expansion-panel v-for="(post, index) in currentItem.post" :key="index">
-          <v-expansion-panel-title hide-actions :color="['onecomme', 'toast'].includes(post.type)
-              ? getCharaColor(post.botKey)
-              : ''
-            ">
+        <v-expansion-panel
+          v-for="(post, index) in currentItem.post"
+          :key="index"
+        >
+          <v-expansion-panel-title
+            hide-actions
+            :color="
+              ['onecomme', 'toast'].includes(post.type)
+                ? getCharaColor(post.botKey)
+                : ''
+            "
+          >
             <v-toolbar flat color="transparent">
               <!-- 左側のコンテンツ -->
-              <v-chip variant="flat" :color="getTypeColor(post.type)" class="mr-2">
+              <v-chip
+                variant="flat"
+                :color="getTypeColor(post.type)"
+                class="mr-2"
+              >
                 {{ getTypeLabel(post.type) }}
               </v-chip>
 
-              <v-img v-if="['onecomme', 'toast'].includes(post.type)"
-                :src="getCharaImage(post.botKey ?? '', post.iconKey ?? '')" max-height="80" max-width="80" />
+              <v-img
+                v-if="['onecomme', 'toast'].includes(post.type)"
+                :src="getCharaImage(post.botKey ?? '', post.iconKey ?? '')"
+                max-height="80"
+                max-width="80"
+              />
 
               <v-toolbar-title>
                 {{ replacePlaceholder(post.content) }}
@@ -37,30 +52,72 @@
           <v-expansion-panel-text>
             <v-row dense>
               <v-col cols="6" sm="3">
-                <v-select v-model="post.type" :items="onecommeTypeItems" label="投稿の種類" item-title="text"
-                  item-value="value" density="compact" @change="updateOmikuji">
+                <v-select
+                  v-model="post.type"
+                  :items="onecommeTypeItems"
+                  label="投稿の種類"
+                  item-title="text"
+                  item-value="value"
+                  density="compact"
+                  @change="updateOmikuji"
+                >
                 </v-select>
               </v-col>
-              <v-col cols="6" sm="3" v-if="['onecomme', 'toast'].includes(post.type)">
-                <v-select v-model="post.botKey" :items="botKeyItems" label="ボットキー" item-title="text" item-value="value"
-                  density="compact" @change="updateOmikuji">
+              <v-col
+                cols="6"
+                sm="3"
+                v-if="['onecomme', 'toast'].includes(post.type)"
+              >
+                <v-select
+                  v-model="post.botKey"
+                  :items="botKeyItems"
+                  label="ボットキー"
+                  item-title="text"
+                  item-value="value"
+                  density="compact"
+                  @change="updateOmikuji"
+                >
                 </v-select>
               </v-col>
-              <v-col cols="6" sm="3" v-if="['onecomme', 'toast'].includes(post.type)">
-                <v-select v-model="post.iconKey" :items="getIconKeyItems(post.botKey)" label="アイコンキー" item-title="text"
-                  item-value="value" density="compact" @change="updateOmikuji">
+              <v-col
+                cols="6"
+                sm="3"
+                v-if="['onecomme', 'toast'].includes(post.type)"
+              >
+                <v-select
+                  v-model="post.iconKey"
+                  :items="getIconKeyItems(post.botKey)"
+                  label="アイコンキー"
+                  item-title="text"
+                  item-value="value"
+                  density="compact"
+                  @change="updateOmikuji"
+                >
                 </v-select>
               </v-col>
               <v-col cols="12" sm="3">
-                <v-text-field v-model.number="post.delaySeconds" label="遅延時間(秒)" type="number" step="0.1" min="-1"
-                  density="compact" @input="updateOmikuji">
+                <v-text-field
+                  v-model.number="post.delaySeconds"
+                  label="遅延時間(秒)"
+                  type="number"
+                  step="0.1"
+                  min="-1"
+                  density="compact"
+                  @input="updateOmikuji"
+                >
                 </v-text-field>
               </v-col>
             </v-row>
             <v-row dense>
               <v-col>
-                <v-text-field v-model="post.content" label="内容" rows="2" auto-grow density="compact"
-                  @input="updateOmikuji">
+                <v-text-field
+                  v-model="post.content"
+                  label="内容"
+                  rows="2"
+                  auto-grow
+                  density="compact"
+                  @input="updateOmikuji"
+                >
                 </v-text-field>
               </v-col>
               <v-col cols="auto">
@@ -69,8 +126,17 @@
                 </v-btn>
               </v-col>
               <v-col cols="12">
-                <v-slider v-model.number="post.delaySeconds" prepend-icon="mdi-alarm" :thumb-size="24"
-                  thumb-label="always" class="pa-2" min="-1" max="10" step="0.1" @change="updateOmikuji" />
+                <v-slider
+                  v-model.number="post.delaySeconds"
+                  prepend-icon="mdi-alarm"
+                  :thumb-size="24"
+                  thumb-label="always"
+                  class="pa-2"
+                  min="-1"
+                  max="10"
+                  step="0.1"
+                  @change="updateOmikuji"
+                />
               </v-col>
             </v-row>
           </v-expansion-panel-text>
@@ -78,7 +144,13 @@
       </v-expansion-panels>
     </v-card-text>
     <v-card-actions>
-      <v-btn block @click="addPost()" color="primary" variant="flat" class="mb-2">
+      <v-btn
+        block
+        @click="addPost()"
+        color="primary"
+        variant="flat"
+        class="mb-2"
+      >
         <v-icon left>mdi-plus</v-icon> 追加
       </v-btn>
     </v-card-actions>
@@ -88,6 +160,7 @@
 <script setup lang="ts">
 import { computed, inject, Ref, ref } from "vue";
 import type {
+  AppStateType,
   CHARAType,
   EditorItem,
   omikujiType,
@@ -105,15 +178,10 @@ const emit = defineEmits<{
   (e: "open-editor", editorItem: EditorItem): void;
 }>();
 
-const CHARA = inject<CHARAType>("charaKey");
-const placeholderKey = inject<Ref<placeType[]>>("placeholderKey");
-const place = placeholderKey?.value;
-
-// 画像を大きくするtest
-const hoveredImage: Ref<postType | null> = ref(null);
-const isHovered = (post: postType) => {
-  return hoveredImage.value === post;
-};
+// inject
+const AppState = inject<Ref<AppStateType>>("AppStateKey");
+const CHARA = AppState?.value.CHARA;
+const place = AppState?.value.STATE.place;
 
 // メッセージが存在しないかどうかをチェック
 const hasNoMessages = computed(() => props.currentItem.post.length === 0);
@@ -203,8 +271,9 @@ const getIconKeyItems = (botKey: string | undefined) => {
 };
 
 // キャラクターの背景色を取得する関数
-const getCharaColor = (botKey: string | undefined) => {
+const getCharaColor = (botKey: string | undefined): string => {
   try {
+    // CHARAが存在し、値が取得できるかを確認
     if (botKey && CHARA && CHARA[botKey]) {
       return CHARA[botKey].color["--lcv-background-color"];
     }
@@ -220,8 +289,9 @@ const getCharaColor = (botKey: string | undefined) => {
 const getCharaImage = (
   botKey: string | undefined,
   iconKey: string | undefined
-) => {
+): string => {
   try {
+    // CHARA.valueを使用してアクセス
     if (botKey && CHARA && CHARA[botKey] && iconKey) {
       // 画像パスを明示的に指定
       return `/img/${CHARA[botKey].image[iconKey]}`;
@@ -280,7 +350,6 @@ const onecommeTypeItems = [
 // place を使ってプレースホルダーを置き換え
 const replacePlaceholder = (content: string): string => {
   if (!place) return content;
-  console.log(place);
 
   // プレースホルダーの形式を <<...>> に変更
   return content.replace(/<<(.*?)>>/g, (_, name) => {
@@ -292,7 +361,7 @@ const replacePlaceholder = (content: string): string => {
     if (matchedPlaceholders.length > 0) {
       const randomPlaceholder =
         matchedPlaceholders[
-        Math.floor(Math.random() * matchedPlaceholders.length)
+          Math.floor(Math.random() * matchedPlaceholders.length)
         ];
       return randomPlaceholder.content;
     }

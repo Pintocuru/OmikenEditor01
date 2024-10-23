@@ -99,7 +99,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, ref } from "vue";
+import { computed, inject, Ref, ref } from "vue";
 import type {
   CHARAType,
   STATEType,
@@ -108,6 +108,7 @@ import type {
   placeType,
   rulesType,
   EditorItem,
+  AppStateType,
 } from "../types";
 import { useEditOmikuji } from "../composables/funkOmikenEdit";
 import DialogOmikujiFilter from "./DialogOmikujiFilter.vue";
@@ -125,7 +126,8 @@ const emit = defineEmits<{
 }>();
 
 // キャラクターデータのインジェクト
-const CHARA = inject<CHARAType>("charaKey");
+const AppState = inject<Ref<AppStateType>>("AppStateKey");
+const CHARA = AppState?.value.CHARA
 
 // コンポーザブルの使用
 const { addPost, thresholdTypes, comparisonItems, removePost } = useEditOmikuji(

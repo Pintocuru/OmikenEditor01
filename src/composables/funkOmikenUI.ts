@@ -43,13 +43,11 @@ export function funkUI() {
   // ダイアログを開く
   const openEditor = (editorItem: EditorItem) => {
     const { type, item, mode } = editorItem;
-    console.log("funkOmikenUI - openEditor called:", type, item, selectItem.value);
     if (type === "rules") {
       selectItem.value.rules = item as Record<string, rulesType>;
       dialogs.value.rules = true;
     } else if (type === "omikuji") {
       selectItem.value.omikuji = item as Record<string, omikujiType>;
-      console.log(selectItem.value.omikuji);
       dialogs.value.omikuji = true;
     } else if (type === "place") {
       selectItem.value.place = item as Record<string, placeType>;

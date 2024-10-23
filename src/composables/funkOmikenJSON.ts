@@ -1,6 +1,6 @@
 // src/composables/funkOmikenJSON.ts
 import { ref } from 'vue';
-import type { STATEType, ItemCategory } from '../types';
+import type { STATEType, ItemCategory, CHARAType } from '../types';
 import { z } from 'zod';
 import _ from 'lodash';
 import Swal from 'sweetalert2';
@@ -14,7 +14,7 @@ export function useInitializeFunkOmiken() {
   const lastSavedState = ref<STATEType | null>(null); // 1つ前へ戻る機能
   const toast = useToast(); // vue-toastification
 
-  const fetchData = async (): Promise<STATEType | null> => {
+  const fetchSTATE = async (): Promise<STATEType | null> => {
     // 取得中ならreturn
     if (isLoading.value) {
       console.warn('データの取得が既に進行中です');
@@ -38,6 +38,7 @@ export function useInitializeFunkOmiken() {
         rulesOrder: generateOrder(data.rules),
         omikujiOrder: generateOrder(data.omikuji),
         placeOrder: generateOrder(data.place),
+        preferences: data.preferences
       };
 
       lastSavedState.value = _.cloneDeep(validatedData);
@@ -58,16 +59,18 @@ export function useInitializeFunkOmiken() {
         confirmButtonText: 'OK',
       });
       throw new Error('データ読み込み失敗');
-    } 
+    }
   };
 
-  const saveData = async (STATE: STATEType): Promise<void> => {
+  const saveSTATE = async (STATE: STATEType): Promise<void> => {
+
+    console.log(STATE);
     if (noAppBoot.value) {
       toast('🚫データ保存はできません');
       return;
     }
     // テストモード:保存できたことをログに表示
-    if (!canUpdateJSON.value ) {
+    if (!canUpdateJSON.value) {
       console.warn('🚫canUpdateJSON:false, saveDataまで届きました');
       return;
     }
@@ -105,6 +108,26 @@ export function useInitializeFunkOmiken() {
     }
   };
 
+  // fetchCHARA関数の定義
+  async function fetchCHARA(fileNames: string[]): Promise<CHARAType> {
+
+    const charaData = await Promise.all(
+      fileNames.map(async (fileName) => {
+        const response = await fetch(`/img/${fileName}`);
+        if (!response.ok) {
+          throw new Error(`Error fetching ${fileName}: ${response.statusText}`);
+        }
+        return await response.json() as { id: string; name: string; frameId?: string; color: { "--lcv-name-color": string; "--lcv-text-color": string; "--lcv-background-color": string; }; image: { Default: string;[key: string]: string; }; }; // 型を明示的に指定
+      })
+    );
+
+    // 配列からオブジェクトに変換
+    return charaData.reduce<CHARAType>((acc, chara) => {
+      acc[chara.id] = chara; // idをキーにしてオブジェクトを構築
+      return acc;
+    }, {});
+  }
+
   // 1つ前に戻る機能(使えるだろうか…？)
   const undoLastChange = () => {
     if (lastSavedState.value) {
@@ -117,8 +140,9 @@ export function useInitializeFunkOmiken() {
   return {
     canUpdateJSON,
     isLoading,
-    fetchData,
-    saveData,
+    fetchSTATE,
+    saveSTATE,
+    fetchCHARA,
     undoLastChange
   };
 }
@@ -275,12 +299,24 @@ const placeSchema = z.record(z.object({
   content: z.string().default('')
 }));
 
+const preferencesSchema = z.record(z.object({
+  // コメントしてからBotが反応するまでの遅延(秒)
+  basicDelay: z.number().default(1),
+  // おみくじ機能のクールダウン時間（秒)
+  omikujiCooldown: z.number().default(2),
+  // コメントしてからおみくじを有効とする時間(秒)
+  commentDuration: z.number().positive().default(5),
+  // このスクリプトBOTのcomment.data.userId
+  BotUserIDname: z.string().default('FirstCounter')
+}));
+
 
 // スキーマをまとめる
 const schemas = {
   rules: rulesSchema,
   omikuji: omikujiSchema,
   place: placeSchema,
+  preferences: preferencesSchema
 } as const;
 
 // デフォルト値の設定
@@ -297,7 +333,7 @@ const defaultValues = {
     name: '大吉',
     weight: 1,
     threshold: {
-      isSyoken:false,
+      isSyoken: false,
       time: {
         isEnabled: false, // 時間指定が無効
         value1: 0, // 開始時間
@@ -337,6 +373,12 @@ const defaultValues = {
     weight: 1,
     group: 0,
     content: ''
+  },
+  preferences: {
+    basicDelay: 1,
+    omikujiCooldown: 2,
+    commentDuration: 5,
+    BotUserIDname: 'FirstCounter'
   }
 };
 

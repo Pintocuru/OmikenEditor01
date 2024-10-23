@@ -1,5 +1,11 @@
 // src/types.ts:型指定
 
+
+export interface AppStateType {
+  STATE: STATEType;
+  CHARA: CHARAType;
+  activePresetId: string | null;
+}
 // STATE:おみくじBOTのJSONの型定義
 export interface STATEType {
   rules: Record<string, rulesType>; // おみくじのルールを管理

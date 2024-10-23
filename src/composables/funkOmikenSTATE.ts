@@ -1,10 +1,12 @@
 // src/composables/funkOmikenSTATE.ts
-import { ref } from 'vue';
+import { provide, ref } from 'vue';
 import type {
   STATEType,
   SelectItem,
   ItemCategory,
-  ItemContent} from '../types';
+  ItemContent,
+  AppStateType
+} from '../types';
 import { useInitializeFunkOmiken, validateData } from "../composables/funkOmikenJSON";
 
 // 型安全なマッピングの定義
@@ -25,27 +27,42 @@ function isDataCategory(type: ItemCategory): type is Exclude<ItemCategory, 'pref
 }
 
 export function funkSTATE() {
-  const STATE = ref<STATEType>({
-    rules: {},
-    omikuji: {},
-    place: {},
-    rulesOrder: [],
-    omikujiOrder: [],
-    placeOrder: [],
-    preferences:{
-      basicDelay: 1,
-      omikujiCooldown: 2,
-      commentDuration: 5,
-      BotUserIDname: 'FirstCounter'
-    }
+  const AppState = ref<AppStateType>({
+    STATE: {
+      rules: {},
+      omikuji: {},
+      place: {},
+      rulesOrder: [],
+      omikujiOrder: [],
+      placeOrder: [],
+      preferences: {
+        basicDelay: 1,
+        omikujiCooldown: 2,
+        commentDuration: 5,
+        BotUserIDname: 'FirstCounter'
+      }
+    },
+    CHARA: {},
+    activePresetId: null
   });
 
-  const { fetchData, saveData } = useInitializeFunkOmiken();
+  // provide
+  provide("AppStateKey", AppState);
+
+  const { fetchSTATE, saveSTATE, fetchCHARA } = useInitializeFunkOmiken();
 
   // 初期読み込み
-  const initializeSTATE = async () => {
-    const data = await fetchData();
-    if (data) STATE.value = data;
+  const initializeAppState = async () => {
+    // CHARA読み込み
+    const charaFileNames = ['reimu.json', 'marisa.json',];
+    const CHARAData = await fetchCHARA(charaFileNames);
+    if (CHARAData) AppState.value.CHARA = CHARAData;
+
+    // STATE読み込み
+    const STATEData = await fetchSTATE();
+    if (STATEData) AppState.value.STATE = STATEData;
+
+
   };
 
   const updateSTATE = (payload: SelectItem) => {
@@ -53,7 +70,7 @@ export function funkSTATE() {
     const { type, update, addKeys, delKeys, reorder, preferences } = payload;
 
     // 現在のステートのディープコピーを作成
-    const newState: STATEType = JSON.parse(JSON.stringify(STATE.value));
+    const newState: STATEType = JSON.parse(JSON.stringify(AppState.value.STATE));
 
     if (type === 'preferences' && preferences) {
       // preferences の更新
@@ -95,14 +112,14 @@ export function funkSTATE() {
     }
 
     // ステートの一括更新
-    STATE.value = newState;
-    saveData(newState);
+    AppState.value.STATE = newState;
+    saveSTATE(newState);
   };
 
 
   return {
-    STATE,
-    initializeSTATE,
+    AppState,
+    initializeAppState,
     updateSTATE
   };
 }
