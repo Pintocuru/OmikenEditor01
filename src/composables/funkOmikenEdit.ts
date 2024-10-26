@@ -19,7 +19,6 @@ useRandomItemEditor: ランダムアイテムの編集機能を提供（新規�
 
 // おみくじエディット用
 export function useEditOmikuji(
-  STATE: STATEType,
   CHARA: CHARAType | undefined = {}
 ) {
   // メッセージタイプの配列

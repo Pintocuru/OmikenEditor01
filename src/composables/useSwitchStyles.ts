@@ -1,31 +1,33 @@
 // src/composables/useOmikujiStyles.ts
 
-import { computed } from 'vue';
-import { OmikujiType, RulesType } from '@/types';
+import { computed } from "vue";
+import { OmikujiType, RulesType } from "@/types";
 
-export function useSwitchStyles(omikuji: Record<string, OmikujiType>, item?: RulesType) {
+export function useSwitchStyles(
+  omikuji: Record<string, OmikujiType> | undefined = {},
+  item?: RulesType |null
+) {
+  console.log(item);
 
   // 定数をオブジェクトにまとめる
   const SWITCH_CONFIG = {
-    labels: ['無効', 'だれでも', 'メンバー', 'モデレーター', '管理者'],
-    colors: ['', 'yellow', 'green', 'blue', 'red']
+    labels: ["無効", "だれでも", "メンバー", "モデレーター", "管理者"],
+    colors: ["", "yellow", "green", "blue", "red"],
   };
 
   const WEIGHT_THRESHOLDS = [
-    { threshold: 80, color: 'red' },
-    { threshold: 60, color: 'yellow' },
-    { threshold: 40, color: 'green' },
-    { threshold: 20, color: 'cyan' },
-    { threshold: 1, color: 'blue' },
+    { threshold: 80, color: "red" },
+    { threshold: 60, color: "yellow" },
+    { threshold: 40, color: "green" },
+    { threshold: 20, color: "cyan" },
+    { threshold: 1, color: "blue" },
   ];
 
-
   const getSwitchLabel = (switchValue: number) =>
-    SWITCH_CONFIG.labels[switchValue] || 'Unknown';
+    SWITCH_CONFIG.labels[switchValue] || "Unknown";
 
   const getSwitchColor = (switchValue: number) =>
-    SWITCH_CONFIG.colors[switchValue] || '';
-
+    SWITCH_CONFIG.colors[switchValue] || "";
 
   // おみくじのオプションを定義
   const omikujiOptions = computed(() =>
@@ -50,35 +52,42 @@ export function useSwitchStyles(omikuji: Record<string, OmikujiType>, item?: Rul
   });
 
   const chipColors = computed(() => {
-    return validOmikujiOptions.value.map(option => ({
+    return validOmikujiOptions.value.map((option) => ({
       id: option.id,
       color: getWeightColor(option.id),
     }));
   });
 
   // v-chipに色を付与
-const getWeightColor = (optionId: string): string => {
-  const option = omikuji[optionId];
-  if (!option?.weight) return "";
-  
-  // 有効なおみくじの合計重みを計算
-  const validOmikujiIds = validOmikujiOptions.value.map(o => o.id);
-  const totalWeight = validOmikujiIds
-    .reduce((sum, id) => sum + (omikuji[id]?.weight || 0), 0);
-  
-  const percentage = (option.weight / totalWeight) * 100;
-  
-  return WEIGHT_THRESHOLDS.find(({threshold}) => percentage >= threshold)?.color || "";
-};
+  const getWeightColor = (optionId: string): string => {
+    const option = omikuji[optionId];
+    if (!option?.weight) return "";
+
+    // 有効なおみくじの合計重みを計算
+    const validOmikujiIds = validOmikujiOptions.value.map((o) => o.id);
+    const totalWeight = validOmikujiIds.reduce(
+      (sum, id) => sum + (omikuji[id]?.weight || 0),
+      0
+    );
+
+    const percentage = (option.weight / totalWeight) * 100;
+
+    return (
+      WEIGHT_THRESHOLDS.find(({ threshold }) => percentage >= threshold)
+        ?.color || ""
+    );
+  };
 
   return {
     chipColors,
-    switchLabels: Object.fromEntries(SWITCH_CONFIG.labels.map((label, i) => [i, label])),
+    switchLabels: Object.fromEntries(
+      SWITCH_CONFIG.labels.map((label, i) => [i, label])
+    ),
     getSwitchLabel,
     getSwitchColor,
     omikujiOptions,
     validOmikujiOptions,
     isAllDisabled,
-    getWeightColor
+    getWeightColor,
   };
 }

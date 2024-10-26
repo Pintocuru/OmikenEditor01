@@ -6,7 +6,7 @@
         <v-toolbar-title>{{ item.name }}</v-toolbar-title>
         <template v-slot:append>
           <ListItemPartsAction
-            :selectCategory="selectCategory"
+            :selectCategory="naviCategory"
             :item="item"
               @edit="openEditor"
             @update:STATE="updateSTATE"
@@ -35,7 +35,7 @@ import _ from "lodash";
 const props = defineProps<{
   STATE: STATEType;
   item: OmikujiType;
-  selectCategory: ListCategory;
+  naviCategory: ListCategory;
 }>();
 const emit = defineEmits<{
   (e: "update:STATE", payload: STATEEntry<STATECategory>): void;
@@ -69,7 +69,7 @@ const getComparisonLabel = (comparison: string) => {
 function openEditor() {
   const item = { [props.item.id]: props.item };
   emit("open-editor", {
-    type: props.selectCategory,
+    type: props.naviCategory,
     item: item,
   });
 }

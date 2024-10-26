@@ -32,9 +32,14 @@ export type NaviCategory = BaseCategory | 'preset' | 'preferences';
 // リスト用カテゴリー
 export type ListCategory = BaseCategory;
 export type ListEntry<T extends ListCategory> = {
+  isOpen: boolean; // ダイアログの開閉状態
   type: T;
-  item: Record<string, EditerTypeMap[T]>; // 表示するアイテム(単独または複数)
+  item: Record<string, EditerTypeMap[T]> | null; // 表示するアイテム(単独または複数)
   mode?: string | null; // 複数の際の表示モード(place用)
+};
+// listEntry全体の型 // TODO 名前ダサい
+export type ListEntries = {
+  [K in ListCategory]: ListEntry<K>;
 };
 
 // ファイル操作用

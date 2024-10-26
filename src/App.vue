@@ -6,15 +6,15 @@
       @update:uidark="uiDark = $event"
     />
     <AppNavigation
-      v-model:selectCategory="selectCategory"
+      v-model:naviCategory="naviCategory"
       :STATE="AppState.STATE"
-      @update:category="selectCategory = $event"
+      @update:category="naviCategory = $event"
     />
     <v-main>
       <v-container>
         <AppList
           :STATE="AppState.STATE"
-          :selectCategory="selectCategory"
+          :naviCategory="naviCategory"
           @update:STATE="updateSTATE"
           @open-editor="openEditor"
         />
@@ -22,10 +22,7 @@
     </v-main>
 
     <AppDialog
-      v-model:show="dialogs"
-      :selectItem="selectItem"
-      :selectMode="selectMode"
-      :STATE="AppState.STATE"
+       v-model:listEntry="listEntry"
       @update:STATE="updateSTATE"
       @open-editor="openEditor"
     />
@@ -47,10 +44,8 @@ const { AppState,  initializeAppState, updateSTATE } = funkSTATE();
 const {
   uiDark,
   uiDrawer,
-  selectCategory,
-  selectItem,
-  selectMode,
-  dialogs,
+  naviCategory,
+  listEntry,
   openEditor,
 } = funkUI();
 

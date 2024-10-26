@@ -14,7 +14,7 @@
       </v-toolbar-title>
       <template v-slot:append>
         <ListItemPartsAction
-          :selectCategory="selectCategory"
+          :selectCategory="naviCategory"
           :item="item"
             @edit="openEditor"
           @update:STATE="updateSTATE"
@@ -73,7 +73,7 @@ export interface PlaceGroup {
 const props = defineProps<{
   STATE: STATEType;
   item: PlaceType | { name: string; items: PlaceType[] };
-  selectCategory: ListCategory;
+  naviCategory: ListCategory;
   groupBy?: "none" | "name" | "group";
 }>();
 const emit = defineEmits<{
@@ -96,14 +96,14 @@ function openEditor() {
       {} as Record<string, PlaceType>
     );
     emit("open-editor", {
-      type: props.selectCategory,
+      type: props.naviCategory,
       item: groupItems,
       mode: props.groupBy as string,
     });
   } else {
     // 単独
     const item = { [(props.item as PlaceType).id]: props.item as PlaceType };
-    emit("open-editor", { type: props.selectCategory, item: item });
+    emit("open-editor", { type: props.naviCategory, item: item });
   }
 }
 

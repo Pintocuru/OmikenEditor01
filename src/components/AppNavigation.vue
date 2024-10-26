@@ -49,7 +49,7 @@ import { STATEType, ListCategory, NaviCategory } from "@/types";
 // Props / Emit
 const props = defineProps<{
   STATE: STATEType;
-  selectCategory: NaviCategory;
+  naviCategory: NaviCategory;
 }>();
 
 const emit = defineEmits<{

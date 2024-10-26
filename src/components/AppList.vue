@@ -3,14 +3,14 @@
   <v-card>
     <v-toolbar>
       <v-toolbar-title>
-        {{ selectCategory }}
-        <v-chip v-if="selectCategory !== 'preferences'" label class="ml-4">
+        {{ naviCategory }}
+        <v-chip v-if="naviCategory !== 'preferences'" label class="ml-4">
           {{ filterItemsCount }} items
         </v-chip>
       </v-toolbar-title>
       <template #append>
         <v-btn 
-          v-if="selectCategory !== 'preferences'"
+          v-if="naviCategory !== 'preferences'"
           variant="outlined" 
           @click="addItem" 
           prepend-icon="mdi-plus"
@@ -20,13 +20,13 @@
       </template>
     </v-toolbar>
 
-    <template v-if="selectCategory === 'preset'">
+    <template v-if="naviCategory === 'preset'">
       <ListPreset
         :STATE="STATE"
         @update:STATE="updateSTATE"
       />
     </template>
-    <template v-else-if="selectCategory === 'preferences'">
+    <template v-else-if="naviCategory === 'preferences'">
       <ListPreferences
         :STATE="STATE"
         @update:STATE="updateSTATE"
@@ -36,16 +36,16 @@
       <ListFilter
         v-model:filterRef="filterRef"
         :STATE="STATE"
-        :selectCategory="selectCategory"
+        :naviCategory="naviCategory"
         @update:STATE="updateSTATE"
       />
 
       <ListItem
         :STATE="STATE"
         :items="filterItems"
-        :itemOrder="STATE[`${selectCategory}Order`]"
-        :select-category="selectCategory"
-        :group-by="selectCategory === 'place' ? filterRef.placeSortName : undefined"
+        :itemOrder="STATE[`${naviCategory}Order`]"
+        :naviCategory="naviCategory"
+        :group-by="naviCategory === 'place' ? filterRef.placeSortName : undefined"
         @update:STATE="updateSTATE"
         @open-editor="openEditor"
       />
@@ -77,7 +77,7 @@ import type {
 // Props Emits
 const props = defineProps<{
   STATE: STATEType;
-  selectCategory: NaviCategory;
+  naviCategory: NaviCategory;
 }>();
 
 const emit = defineEmits<{
@@ -114,10 +114,10 @@ const filterItemsCount = computed(() => Object.keys(filterItems.value).length);
 
 // フィルターオプションに合わせて表示を変更
 const filterItems = computed(() => {
-  if (props.selectCategory === 'preset') return {};
-    if (props.selectCategory === 'preferences') return {};
+  if (props.naviCategory === 'preset') return {};
+    if (props.naviCategory === 'preferences') return {};
 
-  const items = props.STATE[props.selectCategory];
+  const items = props.STATE[props.naviCategory];
   const filters = {
     rules: () => _.pickBy(items as Record<string, RulesType>, item => 
       filterRef.value.rulesFilterSwitch.length === 0 || 
@@ -131,13 +131,13 @@ const filterItems = computed(() => {
     default: () => items,
   };
 
-  return (filters[props.selectCategory as keyof typeof filters] || filters.default)();
+  return (filters[props.naviCategory as keyof typeof filters] || filters.default)();
 });
 
 // アイテムを追加
 const addItem = () => {
-  if (props.selectCategory !== 'preferences') {
-    emit("update:STATE", { type: props.selectCategory, addKeys: [{}] });
+  if (props.naviCategory !== 'preferences') {
+    emit("update:STATE", { type: props.naviCategory, addKeys: [{}] });
   }
 };
 

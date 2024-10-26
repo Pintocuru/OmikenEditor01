@@ -15,7 +15,7 @@
 
       <!-- アイテムリスト -->
       <v-list>
-        <v-list-item v-for="(item, key) in selectItem" :key="key">
+        <v-list-item v-for="(item, key) in entry" :key="key">
           <v-row align="center">
             <v-col cols="8" sm="2">
               <v-text-field
@@ -84,13 +84,12 @@
 
 <script setup lang="ts">
 import { ref, computed } from "vue";
-import type { STATEType, PlaceType, STATEEntry, STATECategory } from "../types";
+import type { STATEType, PlaceType, STATEEntry, STATECategory, ListEntry } from "../types";
 import _ from 'lodash';
 import Swal from "sweetalert2";
 // props/emits
 const props = defineProps<{
-  STATE: STATEType;
-  selectItem: Record<string, PlaceType> | null;
+  entry: ListEntry<'place'> | null
   selectMode: string | null;
 }>();
 
@@ -103,9 +102,9 @@ const isGroupEdit = computed(() => props.selectMode !== null);
 
 // propsからデータを解読
 const currentItem = computed(() => {
-  if (props.selectItem) {
-    const firstKey = Object.keys(props.selectItem)[0];
-    return props.selectItem[firstKey];
+  if (props.entry) {
+    const firstKey = Object.keys(props.entry)[0];
+    return props.entry[firstKey];
   }
   return null;
 });
@@ -115,10 +114,10 @@ const groupName = ref(props.selectMode);
 
 // 更新アップデート
 const updateItem = (key: string, item: Partial<PlaceType>) => {
-  if (props.selectItem) {
+  if (props.entry) {
     emit("update:STATE", {
       type: "place",
-      update: { [key]: { ...props.selectItem[key], ...item } },
+      update: { [key]: { ...props.entry[key], ...item } },
     });
   }
 };
@@ -130,8 +129,8 @@ const updateGroupName = () => {
 // グループ編集時の内容追加
 // TODO Q.追加時、すぐに表示させたいが、どうすればいい?
 const addRandomItem = () => {
-  if (props.selectItem) {
-    const firstItem = Object.values(props.selectItem)[0];
+  if (props.entry) {
+    const firstItem = Object.values(props.entry)[0];
     let newItem: Partial<PlaceType> = {};
 
     if (props.selectMode === "name") {
@@ -161,7 +160,7 @@ const removeRandomItem = async (key: string) => {
     confirmButtonText: '削除する'
   });
 
-  if (result.isConfirmed && props.selectItem) {
+  if (result.isConfirmed && props.entry) {
     emit("update:STATE", {
       type: "place",
       delKeys: [key],

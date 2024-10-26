@@ -115,8 +115,7 @@ import DialogOmikujiPost from "./DialogOmikujiPost.vue";
 import _ from "lodash";
 // props/emits
 const props = defineProps<{
-  STATE: STATEType;
-  selectItem: Record<string, OmikujiType> | null;
+  entry: ListEntry<'omikuji'> | null
 }>();
 
 const emit = defineEmits<{
@@ -126,25 +125,21 @@ const emit = defineEmits<{
 
 // キャラクターデータのインジェクト
 const AppState = inject<Ref<AppStateType>>("AppStateKey");
-const CHARA = AppState?.value.CHARA
+const omikuji = AppState?.value.STATE.omikuji;
+const CHARA = AppState?.value.CHARA;
 
 // コンポーザブルの使用
-const { addPost, thresholdTypes, comparisonItems, removePost } = useEditOmikuji(
-  props.STATE,
-  CHARA
-);
+const { addPost, thresholdTypes, comparisonItems, removePost } =
+  useEditOmikuji(CHARA);
 
 // タブの状態管理
 const tab = ref("post");
 
 // propsからデータを解読
 const currentItem = computed(() => {
-  if (props.selectItem) {
-    // オブジェクトの最初のキーの値を返す
-    const firstKey = Object.keys(props.selectItem)[0];
-    return props.selectItem[firstKey];
-  }
-  return null;
+  const item = props.entry?.item;
+  console.log('props.entry?.item:', item ? Object.values(item)[0] : null);
+  return item ? Object.values(item)[0] : null;
 });
 
 // 投稿数のcomputed property
@@ -166,7 +161,7 @@ const activeFilters = computed(() => {
       color: "primary",
     });
     // isSyoken=trueならこれだけ返せばOK
-    return filters
+    return filters;
   }
   if (threshold.time.isEnabled) {
     filters.push({
@@ -201,15 +196,11 @@ const activeFilters = computed(() => {
 });
 
 // 全体の出現割合から％を取る
-// TODO 全体の出現割合の数値も取って表示させたい
+// TODO rulesからこのおみくじが適用されている者を見つけ出し、それをリスト表示させる。
+// そして選択しているリストの全体の分母から、パーセンテージを取る。
+// どのrulesからも選択されてないなら、0を返す
 const weightValues = computed(() => {
-  if (!currentItem.value) return 0;
-  const totalWeight = Object.values(props.STATE.omikuji).reduce(
-    (sum, obj) => sum + obj.weight,
-    0
-  );
-  if (totalWeight <= 0) return 0;
-  return Math.round((currentItem.value.weight / totalWeight) * 100);
+return 0;
 });
 
 // 更新アップデート
@@ -222,5 +213,6 @@ const updateOmikuji = () => {
   }
 };
 // 子コンポーネントのSTATE更新
-const updateSTATE = (payload: STATEEntry<STATECategory>) => emit("update:STATE", payload);
+const updateSTATE = (payload: STATEEntry<STATECategory>) =>
+  emit("update:STATE", payload);
 </script>

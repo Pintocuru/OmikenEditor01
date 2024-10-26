@@ -11,7 +11,7 @@
         </v-toolbar-title>
         <template v-slot:append>
           <ListItemPartsAction
-            :selectCategory="selectCategory"
+            :selectCategory="naviCategory"
             :item="item"
             @edit="openEditor"
             @update:STATE="updateSTATE"
@@ -41,15 +41,24 @@
           </v-hover>
         </v-chip-group>
         <v-sheet class="mt-2">
-          <span v-if="item.matchExact && item.matchExact.length > 0" class="mr-4">
+          <span
+            v-if="item.matchExact && item.matchExact.length > 0"
+            class="mr-4"
+          >
             <v-icon color="primary">mdi-equal-box</v-icon>
             {{ item.matchExact.join(", ") }}
           </span>
-          <span v-if="item.matchStartsWith && item.matchStartsWith.length > 0" class="mr-4">
+          <span
+            v-if="item.matchStartsWith && item.matchStartsWith.length > 0"
+            class="mr-4"
+          >
             <v-icon color="primary">mdi-arrow-right-bold-box</v-icon>
             {{ item.matchStartsWith.join(", ") }}
           </span>
-          <span v-if="item.matchIncludes && item.matchIncludes.length > 0" class="mr-4">
+          <span
+            v-if="item.matchIncludes && item.matchIncludes.length > 0"
+            class="mr-4"
+          >
             <v-icon color="primary">mdi-contain</v-icon>
             {{ item.matchIncludes.join(", ") }}
           </span>
@@ -60,7 +69,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed } from "vue";
 import {
   ListEntry,
   ListCategory,
@@ -68,6 +77,7 @@ import {
   STATEEntry,
   STATEType,
   STATECategory,
+  EditerType,
 } from "@/types";
 import ListItemPartsAction from "./common/ListItemPartsAction.vue";
 import { useSwitchStyles } from "../composables/useSwitchStyles";
@@ -76,7 +86,7 @@ import _ from "lodash";
 const props = defineProps<{
   STATE: STATEType;
   item: RulesType;
-  selectCategory: ListCategory;
+  naviCategory: EditerType;
 }>();
 
 const emit = defineEmits<{
@@ -120,7 +130,8 @@ const isAllDisabled = computed(() => {
 function openEditor() {
   const item = { [props.item.id]: props.item };
   emit("open-editor", {
-    type: props.selectCategory,
+    isOpen: true,
+    type: "rules",
     item: item,
   });
 }
@@ -130,6 +141,7 @@ const openEditorOmikuji = (option: { id: string; name: string }) => {
   const omikuji = props.STATE.omikuji?.[option.id];
   if (omikuji) {
     emit("open-editor", {
+      isOpen: true,
       type: "omikuji",
       item: { [option.id]: omikuji },
     });

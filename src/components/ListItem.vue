@@ -13,7 +13,7 @@
           :is="getComponentForCategory"
           :STATE="STATE"
           :item="element"
-          :selectCategory="selectCategory"
+          :naviCategory="naviCategory"
           :groupBy="groupBy"
           @update:STATE="updateSTATE"
           @open-editor="openEditor"
@@ -36,6 +36,7 @@ import type {
   STATEEntry,
   STATEType,
   STATECategory,
+  NaviCategory,
 } from "@/types";
 import _ from "lodash";
 
@@ -44,7 +45,7 @@ const props = defineProps<{
   STATE: STATEType;
   items: Record<string, EditerType>;
   itemOrder: string[];
-  selectCategory: ListCategory;
+  naviCategory: NaviCategory;
   groupBy?: "none" | "name" | "group";
 }>();
 
@@ -55,7 +56,7 @@ const emit = defineEmits<{
 
 // 各種子コンポーネント
 const getComponentForCategory = computed(() => {
-  switch (props.selectCategory) {
+  switch (props.naviCategory) {
     case "rules":
       return ListItemRules;
     case "omikuji":
@@ -93,7 +94,6 @@ const groupedItems = computed(() => {
 // 配列データxxxOrderの更新
 type draggableGroup = { name: string; items: EditerType[] };
 function handleReorder(newOrder: EditerType[] | draggableGroup[]) {
-  console.log(newOrder);
   try {
     let newItemOrder: string[];
 
@@ -107,7 +107,7 @@ function handleReorder(newOrder: EditerType[] | draggableGroup[]) {
       );
     }
     emit("update:STATE", {
-      type: props.selectCategory,
+      type: props.naviCategory,
       reorder: newItemOrder,
     });
   } catch (error) {
@@ -132,7 +132,7 @@ onMounted(() => {
     ]);
 
     emit("update:STATE", {
-      type: props.selectCategory,
+      type: props.naviCategory,
       reorder: sortedOrder,
     });
   }

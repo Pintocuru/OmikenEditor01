@@ -36,26 +36,26 @@
             @update:modelValue="updateItem"
           />
           <v-alert v-if="isAllDisabled" type="warning">
-          おみくじが選択されていません
-        </v-alert>
-        <v-chip-group v-else>
-<v-hover v-slot="{ isHovering, props }">
-  <v-card
-    v-for="option in validOmikujiOptions"
-    :key="option.id"
-    class="ma-1 d-inline-block"
-    min-width="100"
-    :color="getWeightColor(option.id)"
-    variant="outlined"
-    v-bind="props"
-    @click.stop="openEditorOmikuji(option)"
-  >
-    <v-card-text class="text-center">
-      {{ option.name }}
-    </v-card-text>
-  </v-card>
-</v-hover>
-        </v-chip-group>
+            おみくじが選択されていません
+          </v-alert>
+          <v-chip-group v-else>
+            <v-hover v-slot="{ isHovering, props }">
+              <v-card
+                v-for="option in validOmikujiOptions"
+                :key="option.id"
+                class="ma-1 d-inline-block"
+                min-width="100"
+                :color="getWeightColor(option.id)"
+                variant="outlined"
+                v-bind="props"
+                @click.stop="openEditorOmikuji(option)"
+              >
+                <v-card-text class="text-center">
+                  {{ option.name }}
+                </v-card-text>
+              </v-card>
+            </v-hover>
+          </v-chip-group>
         </v-col>
         <v-col cols="12" sm="6">
           <v-combobox
@@ -78,14 +78,20 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
-import type { ListEntry, STATEType, STATEEntry, RulesType, ListCategory, STATECategory } from "../types";
+import { computed, inject, Ref } from "vue";
+import type {
+  ListEntry,
+  STATEEntry,
+  RulesType,
+  ListCategory,
+  STATECategory,
+  AppStateType,
+} from "../types";
 import { useSwitchStyles } from "../composables/useSwitchStyles";
 
 // props/emits
 const props = defineProps<{
-  STATE: STATEType;
-  selectItem: Record<string, RulesType> | null;
+  entry: ListEntry<'rules'> | null;
 }>();
 
 const emit = defineEmits<{
@@ -93,10 +99,15 @@ const emit = defineEmits<{
   (e: "open-editor", editorItem: ListEntry<ListCategory>): void;
 }>();
 
-// 現在のアイテムを計算
-const currentItem = computed(
-  () => props.selectItem && Object.values(props.selectItem)[0]
-);
+// inject
+const AppState = inject<Ref<AppStateType>>("AppStateKey");
+const omikuji = AppState?.value.STATE.omikuji;
+
+// propsからデータを解読
+const currentItem = computed(() => {
+  const item = props.entry?.item;
+  return item ? Object.values(item)[0] : null;
+});
 
 // コンポーザブルの使用
 const {
@@ -108,8 +119,8 @@ const {
   isAllDisabled,
   getWeightColor,
 } = useSwitchStyles(
-  props.STATE.omikuji,
-  props.selectItem?.[Object.keys(props.selectItem)[0]]
+  omikuji,
+  props.entry?.item && Object.values(props.entry.item)[0]
 );
 
 // マッチングのラベル
@@ -131,11 +142,13 @@ const updateItem = () => {
 
 // おみくじのエディターを開く
 const openEditorOmikuji = (option: { id: string; name: string }) => {
-  const omikuji = props.STATE.omikuji?.[option.id];
-  if (omikuji) {
+  const omi = omikuji?.[option.id];
+  console.log(omi);
+  if (omi) {
     emit("open-editor", {
+      isOpen: true,
       type: "omikuji",
-      item: { [option.id]: omikuji },
+      item: { [option.id]: omi },
     });
   }
 };
