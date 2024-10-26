@@ -4,8 +4,8 @@ import _ from 'lodash';
 
 import type {
   STATEType,
-  omikujiType,
-  placeType,
+  OmikujiType,
+  PlaceType,
   CHARAType,
   postType} from "../types";
 /*
@@ -48,7 +48,7 @@ export function useEditOmikuji(
   ];
 
   // 新しいメッセージを追加 // TODO 移行終了
-  const addPost = (omikuji: omikujiType, ) => {
+  const addPost = (omikuji: OmikujiType, ) => {
     // CHARAの最初のキーを取得
     const firstKey = Object.keys(CHARA)[0];
 
@@ -66,7 +66,7 @@ export function useEditOmikuji(
 
   // メッセージを削除
   const removePost = (
-    omikuji: omikujiType,
+    omikuji: OmikujiType,
     index: number
   ) => {
     (omikuji.post as postType[])?.splice(index, 1);
@@ -179,7 +179,7 @@ export function useEditOmikuji(
 export function useEditRandom(  STATE: STATEType,) {
  
   // 新しいメッセージを追加
-  const addRandomItem = (place: placeType,) => {
+  const addRandomItem = (place: PlaceType,) => {
 
 
   };

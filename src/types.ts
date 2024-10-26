@@ -1,26 +1,82 @@
-// src/types.ts:型指定
+// src/types.ts:型定義
 
+// エディター用型定義
 
+// AppState
 export interface AppStateType {
   STATE: STATEType;
   CHARA: CHARAType;
+  preset: Record<string, PresetOmiBotType>; // プリセットデータ
   activePresetId: string | null;
 }
-// STATE:おみくじBOTのJSONの型定義
-export interface STATEType {
-  rules: Record<string, rulesType>; // おみくじのルールを管理
-  omikuji: Record<string, omikujiType>; // おみくじ関連のメッセージ
-  place: Record<string, placeType>; // プレースホルダー
+
+// STATE:おみくじエディター用型定義 // TODO OmiEditに名前変えようかな？
+export interface STATEType extends OmiBotType {
   rulesOrder: string[]; // ルールの順序
   omikujiOrder: string[]; // おみくじの順序
   placeOrder: string[]; // プレースホルダーの順序
+}
+// preset には preferences は不要
+type PresetOmiBotType = Omit<OmiBotType, 'preferences'>;
+
+// 基本となるカテゴリー
+type BaseCategory = 'rules' | 'omikuji' | 'place';
+export type EditerType = RulesType | OmikujiType | PlaceType;
+
+// xxxOrder用の型
+export type OrderKey<T extends BaseCategory> = `${T}Order`;
+
+// ナビゲーション用カテゴリー
+export type NaviCategory = BaseCategory | 'preset' | 'preferences';
+
+// リスト用カテゴリー
+export type ListCategory = BaseCategory;
+export type ListEntry<T extends ListCategory> = {
+  type: T;
+  item: Record<string, EditerTypeMap[T]>; // 表示するアイテム(単独または複数)
+  mode?: string | null; // 複数の際の表示モード(place用)
+};
+
+// ファイル操作用
+export type STATECategory = BaseCategory | 'preset' | 'preferences';
+export type STATEEntry<T extends STATECategory> = {
+  type: T;
+  update?: T extends BaseCategory ? Record<string, EditerTypeMap[T]> : never; // 更新アイテム
+  addKeys?: T extends BaseCategory ? Partial<EditerTypeMap[T]>[] : never // 新規追加アイテム(部分入力可)
+  delKeys?: string[]; // 削除するアイテムのキー名
+  reorder?: T extends BaseCategory ? string[] : never; // 順番の指定
+  preset?: T extends 'preset' ? Record<string, PresetOmiBotType> : never; // プリセット用
+  preferences?: T extends 'preferences' ? PreferencesType : never; // 設定用
+} | null;
+
+
+
+// ---------------------------------------------------
+
+
+// Omibot:おみくじボット用型定義
+export interface OmiBotType {
+  rules: Record<string, EditerTypeMap['rules']>; // おみくじのルールを管理
+  omikuji: Record<string, EditerTypeMap['omikuji']>; // おみくじ関連のメッセージ
+  place: Record<string, EditerTypeMap['place']>; // プレースホルダー
   preferences: PreferencesType;
 }
 
-// おみくじルールの型定義
-export interface rulesType {
+// コンテンツの型マッピング
+export type EditerTypeMap = {
+  rules: RulesType;
+  omikuji: OmikujiType;
+  place: PlaceType;
+}
+
+// 基本となる項目のインターフェース
+interface BaseType {
   id: string; // キー名
-  name: string; // ルール名（例: "おみくじ"）
+  name: string; // ルール名
+}
+
+// rules:おみくじルールの型定義
+export interface RulesType extends BaseType {
   switch: 0 | 1 | 2 | 3 | 4; // ルールの有効/無効 0:OFF/1:だれでも/2:メンバー/3:モデレーター/4:管理者
   disabledIds: string[]; // omikujiの適用しないIDリスト
   matchExact: string[]; // 完全一致するキーワードの配列（省略可）
@@ -29,15 +85,13 @@ export interface rulesType {
 }
 
 // おみくじメッセージの型定義
-export interface omikujiType {
-  id: string; // キー名
-  name: string; // 結果名
+export interface OmikujiType extends BaseType {
   weight: number; // 出現割合
   threshold: thresholdType;
   post: postType[];
 }
 
-export interface thresholdType {
+export interface thresholdType{
   isSyoken: boolean; // isSyoken:初見かどうか。これがONなら、下記は設定不可
   time: { // time:時間指定(0-23時)
     isEnabled: boolean;
@@ -99,9 +153,7 @@ export interface postType {
 }
 
 // プレースホルダー項目の型定義
-export interface placeType {
-  id: string; // キー名
-  name: string; // プレースホルダー名
+export interface PlaceType extends BaseType {
   weight: number; // 出現割合
   group: number; // グループ番号
   content: string; // メッセージ内容
@@ -152,23 +204,3 @@ export interface CharaStyleType {
 }
 
 // ---------------------------------------------------
-
-// ファイル操作用型指定
-export type SelectItem = {
-  type: ItemCategory;
-  items?: Record<string, ItemContent>; // ダイアログを開く際のアイテム
-  update?: Record<string, ItemContent>; // 更新用アイテム
-  addKeys?: Object[]; // 新規追加用アイテム
-  delKeys?: string[]; // 削除するアイテムのキー名
-  reorder?: string[]; // 再配置するアイテムのキー名
-  preferences?: PreferencesType; // 設定用
-} | null;
-
-export type ItemCategory = 'rules' | 'omikuji' | 'place' | 'preferences';
-export type ItemContent = rulesType | omikujiType | placeType;
-
-export type EditorItem = {
-  type: ItemCategory;
-  item: Record<string, ItemContent>;
-  mode?: string | null;
-};

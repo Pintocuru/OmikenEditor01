@@ -84,18 +84,18 @@
 
 <script setup lang="ts">
 import { ref, computed } from "vue";
-import type { STATEType, placeType, SelectItem } from "../types";
+import type { STATEType, PlaceType, STATEEntry, STATECategory } from "../types";
 import _ from 'lodash';
 import Swal from "sweetalert2";
 // props/emits
 const props = defineProps<{
   STATE: STATEType;
-  selectItem: Record<string, placeType> | null;
+  selectItem: Record<string, PlaceType> | null;
   selectMode: string | null;
 }>();
 
 const emit = defineEmits<{
-  (e: "update:STATE", payload: SelectItem): void;
+  (e: "update:STATE", payload: STATEEntry<STATECategory>): void;
 }>();
 
 // 2つ以上あるならグループ
@@ -114,7 +114,7 @@ const currentItem = computed(() => {
 const groupName = ref(props.selectMode);
 
 // 更新アップデート
-const updateItem = (key: string, item: Partial<placeType>) => {
+const updateItem = (key: string, item: Partial<PlaceType>) => {
   if (props.selectItem) {
     emit("update:STATE", {
       type: "place",
@@ -132,7 +132,7 @@ const updateGroupName = () => {
 const addRandomItem = () => {
   if (props.selectItem) {
     const firstItem = Object.values(props.selectItem)[0];
-    let newItem: Partial<placeType> = {};
+    let newItem: Partial<PlaceType> = {};
 
     if (props.selectMode === "name") {
       newItem = { name: firstItem.name };

@@ -35,6 +35,7 @@ declare module 'vue' {
     ListItemPlace: typeof import('./src/components/ListItemPlace.vue')['default']
     ListItemRules: typeof import('./src/components/ListItemRules.vue')['default']
     ListPreferences: typeof import('./src/components/ListPreferences.vue')['default']
+    ListPreset: typeof import('./src/components/ListPreset.vue')['default']
     MainFilter: typeof import('./src/components/MainFilter.vue')['default']
     MainItemList: typeof import('./src/components/MainItemList.vue')['default']
     MainPlaceholderList: typeof import('./src/components/MainPlaceholderList.vue')['default']

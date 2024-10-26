@@ -13,24 +13,9 @@
           />
         </template>
       </v-toolbar>
+      <!-- リストに載せる内容(v-col:6の縦長) -->
       <v-card-text>
-        <v-chip :color="getWeightColor(item.weight)" class="ma-2">
-          重み: {{ item.weight }}
-        </v-chip>
-        <div class="mt-2">
-          <strong>閾値タイプ:</strong>
-          {{ getThresholdTypeLabel(item.threshold.type) }}
-        </div>
-        <div class="mt-2">
-          <strong>閾値:</strong> {{ item.threshold.value }}
-          <span v-if="item.threshold.valueMax">
-            - {{ item.threshold.valueMax }}</span
-          >
-        </div>
-        <div class="mt-2">
-          <strong>比較方法:</strong>
-          {{ getComparisonLabel(item.threshold.comparison) }}
-        </div>
+     
       </v-card-text>
     </v-card>
   </v-col>
@@ -38,23 +23,23 @@
 
 <script setup lang="ts">
 import {
-  EditorItem,
-  ItemCategory,
-  omikujiType,
-  SelectItem,
+  ListEntry,
+  ListCategory,
+  OmikujiType,
+  STATEEntry,
   STATEType,
-  thresholdType,
+  STATECategory,
 } from "@/types";
 import { computed } from "vue";
 import _ from "lodash";
 const props = defineProps<{
   STATE: STATEType;
-  item: omikujiType;
-  selectCategory: ItemCategory;
+  item: OmikujiType;
+  selectCategory: ListCategory;
 }>();
 const emit = defineEmits<{
-  (e: "update:STATE", payload: SelectItem): void;
-  (e: "open-editor", editorItem: EditorItem): void;
+  (e: "update:STATE", payload: STATEEntry<STATECategory>): void;
+  (e: "open-editor", editorItem: ListEntry<ListCategory>): void;
 }>();
 
 const toolbarColor = computed(() => {
@@ -68,22 +53,6 @@ const getWeightColor = (weight: number) => {
   return "info";
 };
 
-const getThresholdTypeLabel = (type: thresholdType) => {
-  const labels: Record<thresholdType, string> = {
-    none: "基準なし",
-    time: "時間指定",
-    lc: "配信枠のコメント番号",
-    no: "配信枠の個人コメント数",
-    tc: "総数の個人コメント数",
-    second: "投稿してからの秒",
-    minute: "投稿してからの分",
-    hour: "投稿してからの時間",
-    day: "投稿してからの日数",
-    price: "ギフト金額",
-    custom: "カスタム",
-  };
-  return labels[type] || "Unknown";
-};
 
 const getComparisonLabel = (comparison: string) => {
   const labels: Record<string, string> = {
@@ -106,5 +75,5 @@ function openEditor() {
 }
 
 // STATEの更新をemit
-const updateSTATE = (payload: SelectItem) => emit("update:STATE", payload);
+const updateSTATE = (payload: STATEEntry<STATECategory>) => emit("update:STATE", payload);
 </script>

@@ -16,20 +16,20 @@
 </template>
 
 <script setup lang="ts">
-import { ItemCategory, ItemContent, SelectItem } from '@/types';
+import { ListCategory, EditerType, STATEEntry, STATECategory } from '@/types';
 import { cloneDeep } from 'lodash';
 import Swal from 'sweetalert2';
 
-type ItemOrGroup = ItemContent | { name: string; items: ItemContent[] };
+type ItemOrGroup = EditerType | { name: string; items: EditerType[] };
 
 const props = defineProps<{
-  selectCategory: ItemCategory;
+  selectCategory: ListCategory;
   item: ItemOrGroup;
 }>();
 
 const emit = defineEmits<{
   (e: "edit"): void;
-  (e: "update:STATE", payload: SelectItem): void;
+  (e: "update:STATE", payload: STATEEntry<STATECategory>): void;
 }>();
 
 // 
@@ -57,7 +57,7 @@ const actions = [
 function duplicateItem() {
   const item = props.item;
   const isGroup = "items" in item;
-  const itemsToDuplicate = isGroup ? item.items : [item as ItemContent];
+  const itemsToDuplicate = isGroup ? item.items : [item as EditerType];
 
   const duplicatedItems = itemsToDuplicate.map(originalItem => {
     const newItem = cloneDeep(originalItem);
@@ -80,7 +80,7 @@ function deleteItem() {
   const itemsToDelete = isGroup ? item.items : [item];
   const itemNames = isGroup
     ? `${item.name} グループ`
-    : (item as ItemContent).name;
+    : (item as EditerType).name;
 
   Swal.fire({
     title: `${itemNames} を削除する`,
@@ -105,7 +105,4 @@ function deleteItem() {
   });
 }
 
-function ref(arg0: { icon: string; tooltip: string; handler: () => void; }[]) {
-  throw new Error('Function not implemented.');
-}
 </script>

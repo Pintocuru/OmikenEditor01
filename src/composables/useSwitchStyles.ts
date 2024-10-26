@@ -1,9 +1,9 @@
 // src/composables/useOmikujiStyles.ts
 
 import { computed } from 'vue';
-import { omikujiType, rulesType } from '@/types';
+import { OmikujiType, RulesType } from '@/types';
 
-export function useSwitchStyles(omikuji: Record<string, omikujiType>, item?: rulesType) {
+export function useSwitchStyles(omikuji: Record<string, OmikujiType>, item?: RulesType) {
 
   // 定数をオブジェクトにまとめる
   const SWITCH_CONFIG = {

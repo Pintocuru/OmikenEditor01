@@ -79,18 +79,18 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import type { EditorItem, STATEType, SelectItem, rulesType } from "../types";
+import type { ListEntry, STATEType, STATEEntry, RulesType, ListCategory, STATECategory } from "../types";
 import { useSwitchStyles } from "../composables/useSwitchStyles";
 
 // props/emits
 const props = defineProps<{
   STATE: STATEType;
-  selectItem: Record<string, rulesType> | null;
+  selectItem: Record<string, RulesType> | null;
 }>();
 
 const emit = defineEmits<{
-  (e: "update:STATE", payload: SelectItem): void;
-  (e: "open-editor", editorItem: EditorItem): void;
+  (e: "update:STATE", payload: STATEEntry<STATECategory>): void;
+  (e: "open-editor", editorItem: ListEntry<ListCategory>): void;
 }>();
 
 // 現在のアイテムを計算

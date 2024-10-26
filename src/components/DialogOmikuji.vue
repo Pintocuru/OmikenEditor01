@@ -101,14 +101,13 @@
 <script setup lang="ts">
 import { computed, inject, Ref, ref } from "vue";
 import type {
-  CHARAType,
   STATEType,
-  omikujiType,
-  SelectItem,
-  placeType,
-  rulesType,
-  EditorItem,
+  OmikujiType,
+  STATEEntry,
+  ListEntry,
   AppStateType,
+  STATECategory,
+  ListCategory,
 } from "../types";
 import { useEditOmikuji } from "../composables/funkOmikenEdit";
 import DialogOmikujiFilter from "./DialogOmikujiFilter.vue";
@@ -117,12 +116,12 @@ import _ from "lodash";
 // props/emits
 const props = defineProps<{
   STATE: STATEType;
-  selectItem: Record<string, omikujiType> | null;
+  selectItem: Record<string, OmikujiType> | null;
 }>();
 
 const emit = defineEmits<{
-  (e: "update:STATE", payload: SelectItem): void;
-  (e: "open-editor", editorItem: EditorItem): void;
+  (e: "update:STATE", payload: STATEEntry<STATECategory>): void;
+  (e: "open-editor", editorItem: ListEntry<ListCategory>): void;
 }>();
 
 // キャラクターデータのインジェクト
@@ -223,5 +222,5 @@ const updateOmikuji = () => {
   }
 };
 // 子コンポーネントのSTATE更新
-const updateSTATE = (payload: SelectItem) => emit("update:STATE", payload);
+const updateSTATE = (payload: STATEEntry<STATECategory>) => emit("update:STATE", payload);
 </script>

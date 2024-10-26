@@ -30,26 +30,27 @@ import ListItemRules from "./ListItemRules.vue";
 import ListItemOmikuji from "./ListItemOmikuji.vue";
 import ListItemPlace from "./ListItemPlace.vue";
 import type {
-  EditorItem,
-  ItemCategory,
-  ItemContent,
-  SelectItem,
+  ListEntry,
+  ListCategory,
+  EditerType,
+  STATEEntry,
   STATEType,
+  STATECategory,
 } from "@/types";
 import _ from "lodash";
 
 // Props Emits
 const props = defineProps<{
   STATE: STATEType;
-  items: Record<string, ItemContent>;
+  items: Record<string, EditerType>;
   itemOrder: string[];
-  selectCategory: ItemCategory;
+  selectCategory: ListCategory;
   groupBy?: "none" | "name" | "group";
 }>();
 
 const emit = defineEmits<{
-  (e: "update:STATE", payload: SelectItem): void;
-  (e: "open-editor", editorItem: EditorItem): void;
+  (e: "update:STATE", payload: STATEEntry<STATECategory>): void;
+  (e: "open-editor", editorItem: ListEntry<ListCategory>): void;
 }>();
 
 // 各種子コンポーネント
@@ -88,19 +89,17 @@ const groupedItems = computed(() => {
   return _.map(groups, (items, name) => ({ name, items }));
 });
 
-// エディターを開く
-const openEditor = (editorItem: EditorItem) => emit("open-editor", editorItem);
 
 // 配列データxxxOrderの更新
-type draggableGroup = { name: string; items: ItemContent[] };
-function handleReorder(newOrder: ItemContent[] | draggableGroup[]) {
+type draggableGroup = { name: string; items: EditerType[] };
+function handleReorder(newOrder: EditerType[] | draggableGroup[]) {
   console.log(newOrder);
   try {
     let newItemOrder: string[];
 
     // 通常モード
     if (!props.groupBy || props.groupBy === "none") {
-      newItemOrder = (newOrder as ItemContent[]).map((item) => item.id);
+      newItemOrder = (newOrder as EditerType[]).map((item) => item.id);
     } else {
       // グループモード
       newItemOrder = (newOrder as draggableGroup[]).flatMap((group) =>
@@ -115,8 +114,10 @@ function handleReorder(newOrder: ItemContent[] | draggableGroup[]) {
     console.error("Error in handleReorder:", error);
   }
 }
-// STATEの更新をemit
-const updateSTATE = (payload: SelectItem) => emit("update:STATE", payload);
+
+// 各種操作関数(エディターを開く/STATE更新)
+const updateSTATE = (payload: STATEEntry<STATECategory>) => emit("update:STATE", payload);
+const openEditor = (editorItem: ListEntry<ListCategory>) => emit("open-editor", editorItem);
 
 // これはplaceコンポーネント
 onMounted(() => {

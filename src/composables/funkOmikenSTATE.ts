@@ -2,29 +2,15 @@
 import { provide, ref } from 'vue';
 import type {
   STATEType,
-  SelectItem,
-  ItemCategory,
-  ItemContent,
-  AppStateType
+  STATEEntry,
+  ListCategory,
+  EditerType,
+  AppStateType,
+  OrderKey,
+  STATECategory
 } from '../types';
 import { useInitializeFunkOmiken, validateData } from "../composables/funkOmikenJSON";
 
-// 型安全なマッピングの定義
-type OrderMapping = {
-  [K in ItemCategory]: K extends 'preferences' ? never : `${K}Order`;
-};
-
-const typeToOrderMap: OrderMapping = {
-  rules: 'rulesOrder',
-  omikuji: 'omikujiOrder',
-  place: 'placeOrder',
-  preferences: null as never
-} as const;
-
-// 型ガードの定義
-function isDataCategory(type: ItemCategory): type is Exclude<ItemCategory, 'preferences'> {
-  return type !== 'preferences';
-}
 
 export function funkSTATE() {
   const AppState = ref<AppStateType>({
@@ -40,10 +26,11 @@ export function funkSTATE() {
         omikujiCooldown: 2,
         commentDuration: 5,
         BotUserIDname: 'FirstCounter'
-      }
+      },
     },
     CHARA: {},
-    activePresetId: null
+    preset: {},
+    activePresetId: null,
   });
 
   // provide
@@ -65,7 +52,7 @@ export function funkSTATE() {
 
   };
 
-  const updateSTATE = (payload: SelectItem) => {
+  const updateSTATE = (payload: STATEEntry<STATECategory>) => {
     if (!payload) return;
     const { type, update, addKeys, delKeys, reorder, preferences } = payload;
 
@@ -78,9 +65,9 @@ export function funkSTATE() {
         ...newState.preferences,
         ...preferences
       };
-    } else if (isDataCategory(type)) {
-      const orderKey = typeToOrderMap[type];
-      // 他のタイプの更新処理
+    } else if (type === 'rules' || type === 'omikuji' || type === 'place') {
+      const orderKey: OrderKey<typeof type> = `${type}Order`;
+
       // 更新処理
       if (update) {
         const validatedUpdate = validateData(type, update);
@@ -91,7 +78,7 @@ export function funkSTATE() {
       if (addKeys?.length) {
         addKeys.forEach(item => {
           const newKey = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-          const validatedItem = validateData(type, { [newKey]: item as ItemContent });
+          const validatedItem = validateData(type, { [newKey]: item as EditerType });
           Object.assign(newState[type], validatedItem);
           newState[orderKey].push(newKey);
         });

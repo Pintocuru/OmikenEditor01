@@ -62,11 +62,12 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import {
-  EditorItem,
-  ItemCategory,
-  rulesType,
-  SelectItem,
+  ListEntry,
+  ListCategory,
+  RulesType,
+  STATEEntry,
   STATEType,
+  STATECategory,
 } from "@/types";
 import ListItemPartsAction from "./common/ListItemPartsAction.vue";
 import { useSwitchStyles } from "../composables/useSwitchStyles";
@@ -74,13 +75,13 @@ import _ from "lodash";
 // Props Emits
 const props = defineProps<{
   STATE: STATEType;
-  item: rulesType;
-  selectCategory: ItemCategory;
+  item: RulesType;
+  selectCategory: ListCategory;
 }>();
 
 const emit = defineEmits<{
-  (e: "update:STATE", payload: SelectItem): void;
-  (e: "open-editor", editorItem: EditorItem): void;
+  (e: "update:STATE", payload: STATEEntry<STATECategory>): void;
+  (e: "open-editor", editorItem: ListEntry<ListCategory>): void;
 }>();
 
 // 0～4のswitchによって色を変える
@@ -136,7 +137,7 @@ const openEditorOmikuji = (option: { id: string; name: string }) => {
 };
 
 // STATEの更新をemit
-function updateSTATE(payload: SelectItem) {
+function updateSTATE(payload: STATEEntry<STATECategory>) {
   emit("update:STATE", payload);
 }
 </script>

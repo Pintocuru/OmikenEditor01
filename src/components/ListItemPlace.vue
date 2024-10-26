@@ -9,7 +9,7 @@
             ? `${(item as PlaceGroup).name} (${getItemCount(
                 item as PlaceGroup
               )})`
-            : (item as placeType).name
+            : (item as PlaceType).name
         }}
       </v-toolbar-title>
       <template v-slot:append>
@@ -25,16 +25,16 @@
       <!-- 単独表示 -->
       <template v-if="!isGroup">
         <v-chip
-          :color="getWeightColor((item as placeType).weight)"
+          :color="getWeightColor((item as PlaceType).weight)"
           class="ma-2"
         >
-          重み: {{ (item as placeType).weight }}
+          重み: {{ (item as PlaceType).weight }}
         </v-chip>
-        <v-chip :color="getGroupColor((item as placeType).group)" class="ma-2">
-          グループ: {{ (item as placeType).group }}
+        <v-chip :color="getGroupColor((item as PlaceType).group)" class="ma-2">
+          グループ: {{ (item as PlaceType).group }}
         </v-chip>
         <div class="mt-2 text-truncate">
-          <strong>内容:</strong> {{ (item as placeType).content }}
+          <strong>内容:</strong> {{ (item as PlaceType).content }}
         </div>
       </template>
       <!-- グループ表示 -->
@@ -54,32 +54,31 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import {
-  EditorItem,
-  ItemCategory,
-  placeType,
-  rulesType,
-  SelectItem,
+  ListEntry,
+  ListCategory,
+  PlaceType,
+  STATEEntry,
   STATEType,
+  STATECategory,
 } from "@/types";
 import ListItemPartsAction from "./common/ListItemPartsAction.vue";
-import { useSwitchStyles } from "../composables/useSwitchStyles";
 import _ from 'lodash';
-// ここでの限定型
+// ここでの限定型 // TODOなくすこと
 export interface PlaceGroup {
   name: string;
-  items: placeType[];
+  items: PlaceType[];
 }
 
 // Props Emits
 const props = defineProps<{
   STATE: STATEType;
-  item: placeType | { name: string; items: placeType[] };
-  selectCategory: ItemCategory;
+  item: PlaceType | { name: string; items: PlaceType[] };
+  selectCategory: ListCategory;
   groupBy?: "none" | "name" | "group";
 }>();
 const emit = defineEmits<{
-  (e: "update:STATE", payload: SelectItem): void;
-  (e: "open-editor", editorItem: EditorItem): void;
+  (e: "update:STATE", payload: STATEEntry<STATECategory>): void;
+  (e: "open-editor", editorItem: ListEntry<ListCategory>): void;
 }>();
 
 // グループかどうか
@@ -89,12 +88,12 @@ const isGroup = computed(() => "items" in props.item);
 function openEditor() {
   if (isGroup.value) {
     // グループ
-    const groupItems = (props.item as { items: placeType[] }).items.reduce(
+    const groupItems = (props.item as { items: PlaceType[] }).items.reduce(
       (acc, item) => {
         acc[item.id] = item;
         return acc;
       },
-      {} as Record<string, placeType>
+      {} as Record<string, PlaceType>
     );
     emit("open-editor", {
       type: props.selectCategory,
@@ -103,16 +102,16 @@ function openEditor() {
     });
   } else {
     // 単独
-    const item = { [(props.item as placeType).id]: props.item as placeType };
+    const item = { [(props.item as PlaceType).id]: props.item as PlaceType };
     emit("open-editor", { type: props.selectCategory, item: item });
   }
 }
 
-function updateSTATE(payload: SelectItem) {
-  emit("update:STATE", payload);
-}
+// 各種操作関数(STATE更新)
+const updateSTATE = (payload: STATEEntry<STATECategory>) => emit("update:STATE", payload);
 
-function getItemCount(element: { items: placeType[] }): number {
+
+function getItemCount(element: { items: PlaceType[] }): number {
   return element.items.length;
 }
 
@@ -126,7 +125,7 @@ const getWeightColor = (weight: number) => {
 
 const toolbarColor = computed(() => {
   if (isGroup.value) return "primary";
-  return getGroupColor((props.item as placeType).group);
+  return getGroupColor((props.item as PlaceType).group);
 });
 
 const getGroupColor = (group: number) => {

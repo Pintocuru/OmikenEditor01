@@ -3,7 +3,7 @@
   <v-navigation-drawer permanent rail rail-width="100" expand-on-hover>
     <v-list>
       <v-list-item v-for="(section, index) in sections" :key="index">
-        <v-card @click="openList(section.type as ItemCategory)" class="py-4">
+        <v-card @click="openList(section.type as ListCategory)" class="py-4">
           <v-card-title class="d-flex align-center">
             <v-badge
               class="mr-4"
@@ -20,6 +20,15 @@
       </v-list-item>
       <v-divider  class="my-4" />
 
+            <!-- preset  -->
+      <v-list-item>
+        <v-card @click="openList('preset')" class="py-4">
+          <v-card-title class="d-flex align-center">
+            <v-icon icon="mdi-file" size="large" class="mr-4"></v-icon>
+            プリセット
+          </v-card-title>
+        </v-card>
+      </v-list-item>
       <!-- preferences  -->
       <v-list-item>
         <v-card @click="openList('preferences')" class="py-4">
@@ -35,16 +44,16 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { STATEType, ItemCategory } from "@/types";
+import { STATEType, ListCategory, NaviCategory } from "@/types";
 
 // Props / Emit
 const props = defineProps<{
   STATE: STATEType;
-  selectCategory: ItemCategory;
+  selectCategory: NaviCategory;
 }>();
 
 const emit = defineEmits<{
-  (e: "update:category", value: ItemCategory): void;
+  (e: "update:category", value: NaviCategory): void;
 }>();
 
 // セクション情報の計算
@@ -70,5 +79,5 @@ const sections = computed(() => [
 ]);
 
 // リスト開閉関数
-const openList = (type: ItemCategory) => emit("update:category", type);
+const openList = (type: NaviCategory) => emit("update:category", type);
 </script>

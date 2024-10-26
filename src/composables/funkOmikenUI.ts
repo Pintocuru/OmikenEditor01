@@ -1,11 +1,11 @@
 // src/composables/funkOmikenUI.ts
 import { ref } from "vue";
 import type {
-  ItemCategory,
-  placeType,
-  omikujiType,
-  rulesType,
-  EditorItem,
+  ListCategory,
+  PlaceType,
+  OmikujiType,
+  RulesType,
+  ListEntry,
 } from "../types";
 import _ from 'lodash';
 /*
@@ -20,14 +20,15 @@ export function funkUI() {
   const uiDrawer = ref(null); // ナビゲーションドロワーの表示/非表示
 
   // リスト用:選択したカテゴリ
-  const selectCategory = ref<ItemCategory>("rules");
+  const selectCategory = ref<ListCategory>("rules");
 
   // ダイアログで表示させるアイテム
   const selectItem = ref({
-    rules: <Record<string, rulesType> | null>null,
-    omikuji: <Record<string, omikujiType> | null>null,
-    place: <Record<string, placeType> | null>null,
-    preferences:null
+    rules: <Record<string, RulesType> | null>null,
+    omikuji: <Record<string, OmikujiType> | null>null,
+    place: <Record<string, PlaceType> | null>null,
+    preset: null,
+    preferences:null,
   });
   // ダイアログでの表示モード
   const selectMode = ref<string | null>(null);
@@ -37,20 +38,21 @@ export function funkUI() {
     rules: false,
     omikuji: false,
     place: false,
+    preset: false,
     preferences: false,
   });
 
   // ダイアログを開く
-  const openEditor = (editorItem: EditorItem) => {
+  const openEditor = (editorItem: ListEntry<ListCategory>) => {
     const { type, item, mode } = editorItem;
     if (type === "rules") {
-      selectItem.value.rules = item as Record<string, rulesType>;
+      selectItem.value.rules = item as Record<string, RulesType>;
       dialogs.value.rules = true;
     } else if (type === "omikuji") {
-      selectItem.value.omikuji = item as Record<string, omikujiType>;
+      selectItem.value.omikuji = item as Record<string, OmikujiType>;
       dialogs.value.omikuji = true;
     } else if (type === "place") {
-      selectItem.value.place = item as Record<string, placeType>;
+      selectItem.value.place = item as Record<string, PlaceType>;
       dialogs.value.place = true;
       if (mode) selectMode.value = mode;
     }

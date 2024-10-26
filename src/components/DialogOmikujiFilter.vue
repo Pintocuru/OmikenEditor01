@@ -268,15 +268,15 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
-import type { omikujiType, SelectItem } from "../types";
+import type { OmikujiType, STATECategory, STATEEntry } from "../types";
 import _ from "lodash";
 
 const props = defineProps<{
-  currentItem: omikujiType;
+  currentItem: OmikujiType;
 }>();
 
 const emit = defineEmits<{
-  (e: "update:STATE", payload: SelectItem): void;
+  (e: "update:STATE", payload: STATEEntry<STATECategory>): void;
 }>();
 
 // 配列の型定義

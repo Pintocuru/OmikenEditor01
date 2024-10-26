@@ -1,7 +1,7 @@
-<!-- src/components/ListPreferences.vue -->
+<!-- src/components/ListPreset.vue -->
 <template>
   <v-card>
-    <v-card-title>環境設定</v-card-title>
+    <v-card-title>プリセットリスト</v-card-title>
     <v-card-text>
         <v-row>
           <v-col cols="12">

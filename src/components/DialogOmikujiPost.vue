@@ -162,20 +162,21 @@ import { computed, inject, Ref, ref } from "vue";
 import type {
   AppStateType,
   CHARAType,
-  EditorItem,
-  omikujiType,
-  placeType,
+  ListCategory,
+  ListEntry,
+  OmikujiType,
   postType,
-  SelectItem,
+  STATECategory,
+  STATEEntry,
 } from "../types";
 import _ from "lodash";
 const props = defineProps<{
-  currentItem: omikujiType;
+  currentItem: OmikujiType;
 }>();
 
 const emit = defineEmits<{
-  (e: "update:STATE", payload: SelectItem): void;
-  (e: "open-editor", editorItem: EditorItem): void;
+  (e: "update:STATE", payload: STATEEntry<STATECategory>): void;
+  (e: "open-editor", editorItem: ListEntry<ListCategory>): void;
 }>();
 
 // inject

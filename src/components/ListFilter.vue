@@ -84,7 +84,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from "vue";
-import { ItemCategory, SelectItem, STATEType, thresholdType } from "@/types";
+import { ListCategory, STATECategory, STATEEntry, STATEType, thresholdType } from "@/types";
 import _ from 'lodash';
 
 const props = defineProps<{
@@ -98,24 +98,24 @@ const props = defineProps<{
     placeSortWeight: "none" | "highFreq" | "lowFreq";
   };
   STATE: STATEType;
-  selectCategory: ItemCategory;
+  selectCategory: ListCategory;
 }>();
 
 const emit = defineEmits<{
   (e: "update:filterRef", value: typeof props.filterRef): void;
-  (e: "update:STATE", payload: SelectItem): void;
+  (e: "update:STATE", payload: STATEEntry<STATECategory>): void;
 }>();
 
 // thresholdTypeに基づいたセレクトボックスの項目
 const thresholdItems = computed(() => [
-  { title: "時間指定(0-23時)", value: "time" as thresholdType },
-  { title: "配信枠のコメント番号", value: "lc" as thresholdType },
-  { title: "配信枠の個人コメント数", value: "no" as thresholdType },
-  { title: "総数の個人コメント数", value: "tc" as thresholdType },
-  { title: "投稿後の秒数", value: "second" as thresholdType },
-  { title: "投稿後の分", value: "minute" as thresholdType },
-  { title: "投稿後の時間", value: "hour" as thresholdType },
-  { title: "投稿後の日数", value: "day" as thresholdType },
+  { title: "時間指定(0-23時)", value: "time" as unknown as thresholdType },
+  { title: "配信枠のコメント番号", value: "lc" as unknown as thresholdType },
+  { title: "配信枠の個人コメント数", value: "no" as unknown as thresholdType },
+  { title: "総数の個人コメント数", value: "tc" as unknown as thresholdType },
+  { title: "投稿後の秒数", value: "second" as unknown as thresholdType },
+  { title: "投稿後の分", value: "minute" as unknown as thresholdType },
+  { title: "投稿後の時間", value: "hour" as unknown as thresholdType },
+  { title: "投稿後の日数", value: "day" as unknown as thresholdType },
   { title: "ギフト", value: "price" },
 ]);
 

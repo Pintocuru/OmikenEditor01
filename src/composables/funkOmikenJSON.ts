@@ -1,6 +1,6 @@
 // src/composables/funkOmikenJSON.ts
 import { ref } from 'vue';
-import type { STATEType, ItemCategory, CHARAType } from '../types';
+import type { STATEType, ListCategory, CHARAType } from '../types';
 import { z } from 'zod';
 import _ from 'lodash';
 import Swal from 'sweetalert2';
@@ -389,7 +389,7 @@ function getRandomFortune() {
 
 // rules omikuji placeのバリデーション
 // TODO 返り値がanyなので　ItemContent　にしたい(すると型エラーになるが)
-export function validateData(type: ItemCategory, items: Record<string, any>): Record<string, any> {
+export function validateData(type: ListCategory, items: Record<string, any>): Record<string, any> {
   const validatedData: Record<string, any> = {};
 
   for (const [key, item] of Object.entries(items)) {
