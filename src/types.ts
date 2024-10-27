@@ -35,7 +35,7 @@ export type ListEntry<T extends ListCategory> = {
   isOpen: boolean; // ダイアログの開閉状態
   type: T;
   item: Record<string, EditerTypeMap[T]> | null; // 表示するアイテム(単独または複数)
-  mode?: string | null; // 複数の際の表示モード(place用)
+  mode?: string | null; // 複数の際の表示モード(omikujiで出現割合を複数調整する時に使う)
 };
 // listEntry全体の型 // TODO 名前ダサい
 export type ListEntries = {
@@ -163,7 +163,7 @@ export interface PlaceType extends BaseType {
 }
 
 // プレースホルダーの値
-type PlaceValueType = string | {
+export type PlaceValueType =  {
   type: 'simple' | 'weight'; // モード
   weight: number; // 出現割合
   value: string; // 値（他のプレースホルダーへの参照可能: <<place_name>>）

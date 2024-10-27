@@ -2,7 +2,7 @@
 <template>
   <v-row dense>
     <draggable
-      :model-value="groupedItems"
+      :model-value="sortedItems"
       item-key="name"
       tag="div"
       class="d-flex flex-wrap w-100"
@@ -13,8 +13,7 @@
           :is="getComponentForCategory"
           :STATE="STATE"
           :item="element"
-          :naviCategory="naviCategory"
-          :groupBy="groupBy"
+          :naviCategory="listCategory"
           @update:STATE="updateSTATE"
           @open-editor="openEditor"
         />
@@ -24,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from "vue";
+import { computed } from "vue";
 import draggable from "vuedraggable";
 import ListItemRules from "./ListItemRules.vue";
 import ListItemOmikuji from "./ListItemOmikuji.vue";
@@ -36,17 +35,14 @@ import type {
   STATEEntry,
   STATEType,
   STATECategory,
-  NaviCategory,
 } from "@/types";
-import _ from "lodash";
 
 // Props Emits
 const props = defineProps<{
   STATE: STATEType;
   items: Record<string, EditerType>;
   itemOrder: string[];
-  naviCategory: NaviCategory;
-  groupBy?: "none" | "name" | "group";
+  listCategory: ListCategory;
 }>();
 
 const emit = defineEmits<{
@@ -56,7 +52,7 @@ const emit = defineEmits<{
 
 // 各種子コンポーネント
 const getComponentForCategory = computed(() => {
-  switch (props.naviCategory) {
+  switch (props.listCategory) {
     case "rules":
       return ListItemRules;
     case "omikuji":
@@ -75,39 +71,12 @@ const sortedItems = computed(() => {
   }));
 });
 
-// グループモード用computed
-const groupedItems = computed(() => {
-  if (!props.groupBy || props.groupBy === "none") {
-    return sortedItems.value;
-  }
-
-  const groups = _.groupBy(sortedItems.value, (item) =>
-    props.groupBy === "name"
-      ? item.name
-      : (item as any).group?.toString() || "その他"
-  );
-
-  return _.map(groups, (items, name) => ({ name, items }));
-});
-
-
 // 配列データxxxOrderの更新
-type draggableGroup = { name: string; items: EditerType[] };
-function handleReorder(newOrder: EditerType[] | draggableGroup[]) {
+function handleReorder(newOrder: EditerType[]) {
   try {
-    let newItemOrder: string[];
-
-    // 通常モード
-    if (!props.groupBy || props.groupBy === "none") {
-      newItemOrder = (newOrder as EditerType[]).map((item) => item.id);
-    } else {
-      // グループモード
-      newItemOrder = (newOrder as draggableGroup[]).flatMap((group) =>
-        group.items.map((item) => item.id)
-      );
-    }
+    const newItemOrder = newOrder.map((item) => item.id);
     emit("update:STATE", {
-      type: props.naviCategory,
+      type: props.listCategory,
       reorder: newItemOrder,
     });
   } catch (error) {
@@ -118,23 +87,4 @@ function handleReorder(newOrder: EditerType[] | draggableGroup[]) {
 // 各種操作関数(エディターを開く/STATE更新)
 const updateSTATE = (payload: STATEEntry<STATECategory>) => emit("update:STATE", payload);
 const openEditor = (editorItem: ListEntry<ListCategory>) => emit("open-editor", editorItem);
-
-// これはplaceコンポーネント
-onMounted(() => {
-  if (props.groupBy !== "none") {
-    const sortedOrder = _.orderBy(props.itemOrder, [
-      (id) => {
-        const item = props.items[id];
-        return props.groupBy === "name"
-          ? item.name
-          : (item as any).group?.toString() || "その他";
-      },
-    ]);
-
-    emit("update:STATE", {
-      type: props.naviCategory,
-      reorder: sortedOrder,
-    });
-  }
-});
 </script>

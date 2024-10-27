@@ -36,7 +36,7 @@
       <ListFilter
         v-model:filterRef="filterRef"
         :STATE="STATE"
-        :naviCategory="naviCategory"
+        :listCategory="naviCategory"
         @update:STATE="updateSTATE"
       />
 
@@ -44,8 +44,7 @@
         :STATE="STATE"
         :items="filterItems"
         :itemOrder="STATE[`${naviCategory}Order`]"
-        :naviCategory="naviCategory"
-        :group-by="naviCategory === 'place' ? filterRef.placeSortName : undefined"
+        :listCategory="naviCategory"
         @update:STATE="updateSTATE"
         @open-editor="openEditor"
       />

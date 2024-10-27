@@ -2,7 +2,7 @@
 <template>
 
     <!-- ルール用フィルター -->
-    <v-row v-if="naviCategory === 'rules'" dense>
+    <v-row v-if="listCategory === 'rules'" dense>
       <v-col>
         <v-select
           v-model="filterRef.rulesSortName"
@@ -36,7 +36,7 @@
     </v-row>
 
     <!-- おみくじ用フィルター -->
-    <v-row v-if="naviCategory === 'omikuji'" dense>
+    <v-row v-if="listCategory === 'omikuji'" dense>
       <v-col>
         <v-select
           v-model="filterRef.omikujiSortWeight"
@@ -64,7 +64,7 @@
     </v-row>
 
     <!-- プレースホルダー用フィルター -->
-    <v-row v-if="naviCategory === 'place'" dense>
+    <v-row v-if="listCategory === 'place'" dense>
       <v-col>
         <v-select
           v-model="filterRef.placeSortName"
@@ -98,7 +98,7 @@ const props = defineProps<{
     placeSortWeight: "none" | "highFreq" | "lowFreq";
   };
   STATE: STATEType;
-  naviCategory: ListCategory;
+  listCategory: ListCategory;
 }>();
 
 const emit = defineEmits<{
@@ -128,12 +128,12 @@ const updateFilter = () => {
 const updateSTATE = (): void => {
   let newOrder: string[] = [];
 
-  switch (props.naviCategory) {
+  switch (props.listCategory) {
     case "omikuji":
     case "place":
       newOrder = sortItems(
-        props.STATE[`${props.naviCategory}Order`],
-        props.naviCategory
+        props.STATE[`${props.listCategory}Order`],
+        props.listCategory
       );
       break;
     // rulesはソートがないため、case 'rules'は省略
@@ -141,7 +141,7 @@ const updateSTATE = (): void => {
 
   if (newOrder.length > 0) {
     emit("update:STATE", {
-      type: props.naviCategory,
+      type: props.listCategory,
       reorder: newOrder,
     });
   }

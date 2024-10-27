@@ -1,6 +1,6 @@
 // src/composables/funkOmikenJSON.ts
 import { ref } from 'vue';
-import type { STATEType, ListCategory, CHARAType } from '../types';
+import type { STATEType, ListCategory, CHARAType, EditerTypeMap } from '../types';
 import { z } from 'zod';
 import _ from 'lodash';
 import Swal from 'sweetalert2';
@@ -168,6 +168,9 @@ const rulesSchema = z.record(z.object({
 
 // omikuji.thresholdスキーマ
 const baseComparisonSchema = z.enum(['min', 'equal', 'max', 'loop', 'range']);
+const elapsedComparisonSchema = z.enum(['min', 'max', 'range']);
+const giftComparisonSchema = z.enum(['min', 'equal', 'max', 'range']);
+
 
 // 時間フィルターのスキーマ
 const timeFilterSchema = z.object({
@@ -186,18 +189,15 @@ const timeFilterSchema = z.object({
 const elapsedFilterSchema = z.object({
   isEnabled: z.boolean().default(false),
   unit: z.enum(['second', 'minute', 'hour', 'day']),
-  comparison: baseComparisonSchema,
+  comparison: elapsedComparisonSchema, 
   value1: z.number().transform(val => {
-    // 負の値または数値以外は0に
     return typeof val !== 'number' || val < 0 ? 0 : val;
   }),
   value2: z.number().transform(val => {
-    // 負の値または数値以外は0に
     return typeof val !== 'number' || val < 0 ? 0 : val;
   })
 }).transform(data => {
   if (data.comparison === 'range') {
-    // value1がvalue2より大きい場合は入れ替え
     if (data.value1 > data.value2) {
       const temp = data.value1;
       data.value1 = data.value2;
@@ -232,21 +232,18 @@ const countFilterSchema = z.object({
   return data;
 });
 
-// カウントフィルターのスキーマ
+// ギフトフィルターのスキーマ
 const giftFilterSchema = z.object({
   isEnabled: z.boolean().default(false),
-  comparison: baseComparisonSchema,
+  comparison: giftComparisonSchema, // 修正：適切な比較方法のみ許可
   value1: z.number().transform(val => {
-    // 負の値または数値以外は0に
     return typeof val !== 'number' || val < 0 ? 0 : val;
   }),
   value2: z.number().transform(val => {
-    // 負の値または数値以外は0に
     return typeof val !== 'number' || val < 0 ? 0 : val;
   })
 }).transform(data => {
   if (data.comparison === 'range') {
-    // value1がvalue2より大きい場合は入れ替え
     if (data.value1 > data.value2) {
       const temp = data.value1;
       data.value1 = data.value2;
@@ -291,12 +288,15 @@ const placeSchema = z.record(z.object({
   id: z.string(),
   // プレースホルダー名
   name: z.string().default('<<random>>'),
-  // ランダム選択時の重み付け
-  weight: z.number().positive().default(1),
-  // グループ番号
-  group: z.number().nonnegative().default(0),
-  // メッセージ内容
-  content: z.string().default('')
+  // 値の配列
+  values: z.array(z.object({
+    // タイプ(出現割合の有無)
+    type: z.enum(['simple', 'weight']),
+    // 出現割合
+    weight: z.number().positive().default(1),
+    // 内容(1度だけプレースホルダーを利用可能)
+    value: z.string().default('')
+  })).default([])
 }));
 
 const preferencesSchema = z.record(z.object({
@@ -382,32 +382,26 @@ const defaultValues = {
   }
 };
 
-// ランダムな運勢を取得
-function getRandomFortune() {
-  return ["大吉", "中吉", "小吉", "末吉", "吉", "凶", "福沢諭吉"][Math.floor(Math.random() * 7)];
-}
-
 // rules omikuji placeのバリデーション
-// TODO 返り値がanyなので　ItemContent　にしたい(すると型エラーになるが)
-export function validateData(type: ListCategory, items: Record<string, any>): Record<string, any> {
-  const validatedData: Record<string, any> = {};
+export function validateData<T extends ListCategory>(
+  type: T,
+  items: Record<string, unknown>
+): Record<string, EditerTypeMap[T]> {
+  const validatedData: Record<string, EditerTypeMap[T]> = {};
 
   for (const [key, item] of Object.entries(items)) {
-    // デフォルト値とマージ
     const itemWithDefaults = _.merge({}, defaultValues[type], { id: key }, item);
 
     try {
-      // Zodスキーマでバリデーション
       const validatedItem = schemas[type].parse({ [key]: itemWithDefaults });
-      validatedData[key] = validatedItem[key];
+      validatedData[key] = validatedItem[key] as EditerTypeMap[T];
     } catch (error) {
       if (error instanceof z.ZodError) {
         console.error(`Validation error for ${type} item ${key}:`, error.errors);
       } else {
         console.error(`Unexpected error validating ${type} item ${key}:`, error);
       }
-      // エラーが発生した場合は、デフォルト値を使用
-      validatedData[key] = defaultValues[type];
+      validatedData[key] = defaultValues[type] as unknown as EditerTypeMap[T];
     }
   }
 

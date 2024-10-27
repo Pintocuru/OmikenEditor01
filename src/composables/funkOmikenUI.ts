@@ -5,6 +5,7 @@ import type {
   ListEntry,
   ListEntries,
   NaviCategory,
+  EditerTypeMap,
 } from "../types";
 import _ from 'lodash';
 
@@ -24,12 +25,16 @@ export function funkUI() {
   });
 
   // ダイアログを開く
-  const openEditor = (editorItem: ListEntry<ListCategory>) => {
+  const openEditor = <T extends ListCategory>(editorItem: ListEntry<T>) => {
     console.log(editorItem);
     const { type, item, mode } = editorItem;
-    listEntry.value[type].item = item || null;
-    listEntry.value[type].mode = mode || null;
-    listEntry.value[type].isOpen = true; // ダイアログを開く
+
+    if (listEntry.value && listEntry.value[type]) {
+      const entry = listEntry.value[type] as ListEntry<T>;
+      entry.item = item as Record<string, EditerTypeMap[T]> | null;
+      entry.mode = mode || null;
+      entry.isOpen = true;
+    }
   };
 
   return {
