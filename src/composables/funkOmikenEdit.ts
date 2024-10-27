@@ -7,7 +7,7 @@ import type {
   OmikujiType,
   PlaceType,
   CHARAType,
-  postType} from "../types";
+  OmikujiPostType} from "../types";
 /*
 
 アイテムの編集機能を担当
@@ -54,7 +54,7 @@ export function useEditOmikuji(
     if (!Array.isArray(omikuji.post)) {
       omikuji.post = [];
     }
-    (omikuji.post as postType[]).push({
+    (omikuji.post as OmikujiPostType[]).push({
       type: "onecomme",
       botKey: firstKey || "mamono",
       iconKey: "Default",
@@ -68,7 +68,7 @@ export function useEditOmikuji(
     omikuji: OmikujiType,
     index: number
   ) => {
-    (omikuji.post as postType[])?.splice(index, 1);
+    (omikuji.post as OmikujiPostType[])?.splice(index, 1);
   };
 
   // TODO 統合したのでもう不要です

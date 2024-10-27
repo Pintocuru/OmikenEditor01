@@ -93,7 +93,7 @@ export interface RulesType extends BaseType {
 export interface OmikujiType extends BaseType {
   weight: number; // 出現割合
   threshold: thresholdType;
-  post: postType[];
+  post: OmikujiPostType[];
 }
 
 export interface thresholdType{
@@ -145,7 +145,7 @@ export interface thresholdType{
 }
 
 // メッセージの投稿情報を管理する型
-export interface postType {
+export interface OmikujiPostType {
   type:
   | 'onecomme' // わんコメへの投稿
   | 'party' // WordPartyの投稿
@@ -159,9 +159,14 @@ export interface postType {
 
 // プレースホルダー項目の型定義
 export interface PlaceType extends BaseType {
+  values: PlaceValueType[];  // 値の配列
+}
+
+// プレースホルダーの値
+type PlaceValueType = string | {
+  type: 'simple' | 'weight'; // モード
   weight: number; // 出現割合
-  group: number; // グループ番号
-  content: string; // メッセージ内容
+  value: string; // 値（他のプレースホルダーへの参照可能: <<place_name>>）
 }
 
 // 設定の型定義

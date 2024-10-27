@@ -165,7 +165,7 @@ import type {
   ListCategory,
   ListEntry,
   OmikujiType,
-  postType,
+  OmikujiPostType,
   STATECategory,
   STATEEntry,
 } from "../types";
@@ -193,7 +193,7 @@ const addPost = () => {
   // キャラクターキーを取得
   const botKey = CHARA ? Object.keys(CHARA)[0] : "mamono";
   // ポストを追加
-  (item.post as postType[]).push({
+  (item.post as OmikujiPostType[]).push({
     type: "onecomme",
     botKey: botKey,
     iconKey: "Default",
@@ -210,7 +210,7 @@ const addPost = () => {
 const removePost = (index: number) => {
   const item = props.currentItem;
   // ポストを削除
-  (item.post as postType[])?.splice(index, 1);
+  (item.post as OmikujiPostType[])?.splice(index, 1);
   // 状態を更新
   emit("update:STATE", {
     type: "omikuji",
