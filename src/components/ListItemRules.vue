@@ -109,20 +109,20 @@ const validOmikujiOptions = computed(() => {
   );
 
   // disabledIdsが存在しないか、Arrayでない場合はすべてのオプションを返す
-  if (!Array.isArray(props.item?.disabledIds)) {
+  if (!Array.isArray(props.item?.enabledIds)) {
     return omikujiOptions;
   }
 
   // disabledIdsに含まれていないオプションのみを返す
   return omikujiOptions.filter(
-    (option) => !props.item.disabledIds.includes(option.id)
+    (option) => !props.item.enabledIds.includes(option.id)
   );
 });
 
 // すべてのおみくじが無効かどうかを確認
 const isAllDisabled = computed(() => {
   return (
-    props.item?.disabledIds?.length === Object.keys(props.STATE.omikuji).length
+    props.item?.enabledIds?.length === Object.keys(props.STATE.omikuji).length
   );
 });
 

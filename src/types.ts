@@ -83,7 +83,7 @@ interface BaseType {
 // rules:おみくじルールの型定義
 export interface RulesType extends BaseType {
   switch: 0 | 1 | 2 | 3 | 4; // ルールの有効/無効 0:OFF/1:だれでも/2:メンバー/3:モデレーター/4:管理者
-  disabledIds: string[]; // omikujiの適用しないIDリスト
+  enabledIds: string[]; // omikujiの適用しないIDリスト
   matchExact: string[]; // 完全一致するキーワードの配列（省略可）
   matchStartsWith: string[]; // 特定のフレーズで始まるキーワード（省略可）
   matchIncludes: string[]; // 部分一致するキーワード（省略可）

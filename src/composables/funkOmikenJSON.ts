@@ -159,7 +159,7 @@ const rulesSchema = z.record(z.object({
   // ルールの有効/無効 0:OFF/1:だれでも/2:メンバー以上/3:モデレーター/4:管理者
   switch: z.union([z.literal(0), z.literal(1), z.literal(2), z.literal(3), z.literal(4)]).default(1),
   // omikujiの適用しないIDリスト
-  disabledIds: z.array(z.string()).default([]),
+  enabledIds: z.array(z.string()).default([]),
   // キーワード(完全一致/前方一致/部分一致)
   matchExact: z.array(z.string()).default([]),
   matchStartsWith: z.array(z.string()).default([]),
@@ -324,7 +324,7 @@ const defaultValues = {
   rules: {
     name: 'おみくじ',
     switch: 1,
-    disabledIds: [],
+    enabledIds: [],
     matchExact: [],
     matchStartsWith: [],
     matchIncludes: []

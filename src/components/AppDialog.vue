@@ -9,7 +9,7 @@
   >
     <v-card>
       <component
-        :is="getEditorComponent(key)"
+        :is="getEditComponent(key, entry.mode)"
         :entry="entry"
         @update:STATE="updateSTATE"
         @open-editor="openEditor"
@@ -49,10 +49,12 @@ const emit = defineEmits<{
 }>();
 
 // エディターコンポーネントを取得する関数
-const getEditorComponent = (type: ListCategory) => {
+const getEditComponent = (type: ListCategory, mode: string | null) => {
   const editorMap: Record<ListCategory, any> = {
     rules: DialogRule,
-    omikuji: DialogOmikuji,
+    omikuji: mode === 'special'
+     ? DialogSpecialOmikuji // 仮
+      : DialogOmikuji,
     place: DialogPlace,
   };
   return editorMap[type] || null;

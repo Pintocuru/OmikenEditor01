@@ -26,20 +26,20 @@
       <v-row>
         <v-col cols="12" sm="6">
           <v-select
-            v-model="currentItem.disabledIds"
+            v-model="currentItem.enabledIds"
             :items="omikujiOptions"
-            label="無効にするID"
+            label="有効にするID"
             chips
             multiple
             item-title="name"
             item-value="id"
             @update:modelValue="updateItem"
           />
-          <v-alert v-if="isAllDisabled" type="warning">
-            おみくじが選択されていません
+          <v-alert v-if="validOmikujiOptions.length === 0" type="warning">
+            少なくとも1つのおみくじを有効にしてください
           </v-alert>
           <v-chip-group v-else>
-            <v-hover v-slot="{ isHovering, props }">
+            <v-hover v-slot="{ props }">
               <v-card
                 v-for="option in validOmikujiOptions"
                 :key="option.id"
@@ -82,7 +82,6 @@ import { computed, inject, Ref } from "vue";
 import type {
   ListEntry,
   STATEEntry,
-  RulesType,
   ListCategory,
   STATECategory,
   AppStateType,
@@ -91,7 +90,7 @@ import { useSwitchStyles } from "../composables/useSwitchStyles";
 
 // props/emits
 const props = defineProps<{
-  entry: ListEntry<'rules'> | null;
+  entry: ListEntry<"rules"> | null;
 }>();
 
 const emit = defineEmits<{
@@ -112,11 +111,9 @@ const currentItem = computed(() => {
 // コンポーザブルの使用
 const {
   switchLabels,
-  getSwitchLabel,
   getSwitchColor,
   omikujiOptions,
   validOmikujiOptions,
-  isAllDisabled,
   getWeightColor,
 } = useSwitchStyles(
   omikuji,

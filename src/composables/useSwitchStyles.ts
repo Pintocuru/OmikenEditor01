@@ -40,15 +40,12 @@ export function useSwitchStyles(
 
   // 有効なおみくじオプションを計算
   const validOmikujiOptions = computed(() => {
-    if (!item || !Array.isArray(item.disabledIds)) return omikujiOptions.value;
-    return omikujiOptions.value.filter(
-      (option) => !item.disabledIds.includes(option.id)
+    // enabledIdsが空なら、すべてのおみくじが有効
+    const isAllEnabled = item?.enabledIds.length === 0;
+    if (!item || isAllEnabled) return omikujiOptions.value;
+    return omikujiOptions.value.filter((option) =>
+      item.enabledIds.includes(option.id)
     );
-  });
-
-  // すべてのおみくじが無効かどうかを確認
-  const isAllDisabled = computed(() => {
-    return item?.disabledIds?.length === Object.keys(omikuji).length;
   });
 
   const chipColors = computed(() => {
@@ -87,7 +84,6 @@ export function useSwitchStyles(
     getSwitchColor,
     omikujiOptions,
     validOmikujiOptions,
-    isAllDisabled,
     getWeightColor,
   };
 }

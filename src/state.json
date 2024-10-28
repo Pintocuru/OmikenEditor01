@@ -4,7 +4,7 @@
             "id": "1729669868469-531k4",
             "name": "おみくじ",
             "switch": 1,
-            "disabledIds": [],
+            "enabledIds": [],
             "matchExact": [],
             "matchStartsWith": [],
             "matchIncludes": []
