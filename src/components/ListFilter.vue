@@ -13,7 +13,7 @@
           item-title="title"
           item-value="value"
           label="名前順のソート"
-          @change="updateSTATE"
+          @change="updateOmiken"
         />
       </v-col>
       <v-col>
@@ -47,7 +47,7 @@
           item-title="title"
           item-value="value"
           label="出現割合でのソート"
-          @change="updateSTATE"
+          @change="updateOmiken"
         />
       </v-col>
       <v-col>
@@ -84,7 +84,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from "vue";
-import { ListCategory, STATECategory, STATEEntry, STATEType, thresholdType } from "@/types";
+import { ListCategory, OmikenCategory, OmikenEntry, OmiEditType, thresholdType } from "@/types";
 import _ from 'lodash';
 
 const props = defineProps<{
@@ -97,13 +97,13 @@ const props = defineProps<{
     placeSortName: "none" | "name" | "group";
     placeSortWeight: "none" | "highFreq" | "lowFreq";
   };
-  STATE: STATEType;
+  Omiken: OmiEditType;
   listCategory: ListCategory;
 }>();
 
 const emit = defineEmits<{
   (e: "update:filterRef", value: typeof props.filterRef): void;
-  (e: "update:STATE", payload: STATEEntry<STATECategory>): void;
+  (e: "update:Omiken", payload: OmikenEntry<OmikenCategory>): void;
 }>();
 
 // thresholdTypeに基づいたセレクトボックスの項目
@@ -125,14 +125,14 @@ const updateFilter = () => {
 };
 
 // アイテムの並び順を更新
-const updateSTATE = (): void => {
+const updateOmiken = (): void => {
   let newOrder: string[] = [];
 
   switch (props.listCategory) {
     case "omikuji":
     case "place":
       newOrder = sortItems(
-        props.STATE[`${props.listCategory}Order`],
+        props.Omiken[`${props.listCategory}Order`],
         props.listCategory
       );
       break;
@@ -140,7 +140,7 @@ const updateSTATE = (): void => {
   }
 
   if (newOrder.length > 0) {
-    emit("update:STATE", {
+    emit("update:Omiken", {
       type: props.listCategory,
       reorder: newOrder,
     });
@@ -160,8 +160,8 @@ const sortItems = (
   if (sortWeight === "none") return items;
 
   return [...items].sort((a, b) => {
-    const weightA = props.STATE[category][a]?.weight || 0;
-    const weightB = props.STATE[category][b]?.weight || 0;
+    const weightA = props.Omiken[category][a]?.weight || 0;
+    const weightB = props.Omiken[category][b]?.weight || 0;
     return sortWeight === "highFreq" ? weightB - weightA : weightA - weightB;
   });
 };

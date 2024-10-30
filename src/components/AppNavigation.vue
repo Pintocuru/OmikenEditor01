@@ -44,11 +44,11 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { STATEType, ListCategory, NaviCategory } from "@/types";
+import { OmiEditType, ListCategory, NaviCategory } from "@/types";
 
 // Props / Emit
 const props = defineProps<{
-  STATE: STATEType;
+  Omiken: OmiEditType;
   naviCategory: NaviCategory;
 }>();
 
@@ -61,19 +61,19 @@ const sections = computed(() => [
   {
     title: "ルール",
     type: "rules" as const,
-    items: props.STATE.rules || {},
+    items: props.Omiken.rules || {},
     icon: "mdi-book-open-variant",
   },
   {
     title: "おみくじ",
     type: "omikuji" as const,
-    items: props.STATE.omikuji || {},
+    items: props.Omiken.omikuji || {},
     icon: "mdi-crystal-ball",
   },
   {
     title: "プレースホルダー",
     type: "place" as const,
-    items: props.STATE.place || {},
+    items: props.Omiken.place || {},
     icon: "mdi-tag",
   },
 ]);

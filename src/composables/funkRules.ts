@@ -1,15 +1,15 @@
-// src/composables/useOmikujiStyles.ts
+// src/composables/funkRules.ts
 
 import { computed } from "vue";
 import { OmikujiType, RulesType } from "@/types";
 
-export function useSwitchStyles(
+export function funkRules(
   omikuji: Record<string, OmikujiType> | undefined = {},
   item?: RulesType |null
 ) {
-  console.log(item);
 
-  // 定数をオブジェクトにまとめる
+  // 定数
+  // 各レベルの色
   const SWITCH_CONFIG = {
     labels: ["無効", "だれでも", "メンバー", "モデレーター", "管理者"],
     colors: ["", "yellow", "green", "blue", "red"],
@@ -23,9 +23,10 @@ export function useSwitchStyles(
     { threshold: 1, color: "blue" },
   ];
 
+
+  // switch名とカラーの取得
   const getSwitchLabel = (switchValue: number) =>
     SWITCH_CONFIG.labels[switchValue] || "Unknown";
-
   const getSwitchColor = (switchValue: number) =>
     SWITCH_CONFIG.colors[switchValue] || "";
 

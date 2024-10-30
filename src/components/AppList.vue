@@ -22,30 +22,30 @@
 
     <template v-if="naviCategory === 'preset'">
       <ListPreset
-        :STATE="STATE"
-        @update:STATE="updateSTATE"
+        :Omiken="Omiken"
+        @update:Omiken="updateOmiken"
       />
     </template>
     <template v-else-if="naviCategory === 'preferences'">
       <ListPreferences
-        :STATE="STATE"
-        @update:STATE="updateSTATE"
+        :Omiken="Omiken"
+        @update:Omiken="updateOmiken"
       />
     </template>
     <template v-else>
       <ListFilter
         v-model:filterRef="filterRef"
-        :STATE="STATE"
+        :Omiken="Omiken"
         :listCategory="naviCategory"
-        @update:STATE="updateSTATE"
+        @update:Omiken="updateOmiken"
       />
 
       <ListItem
-        :STATE="STATE"
+        :Omiken="Omiken"
         :items="filterItems"
-        :itemOrder="STATE[`${naviCategory}Order`]"
+        :itemOrder="Omiken[`${naviCategory}Order`]"
         :listCategory="naviCategory"
-        @update:STATE="updateSTATE"
+        @update:Omiken="updateOmiken"
         @open-editor="openEditor"
       />
     </template>
@@ -61,26 +61,26 @@ import ListPreferences from "./ListPreferences.vue"; // 追加
 import { z } from "zod";
 import _ from "lodash";
 import type {
-  STATEType,
+  OmiEditType,
   ListCategory,
-  STATEEntry,
+  OmikenEntry,
   OmikujiType,
   PlaceType,
   RulesType,
   thresholdType,
   NaviCategory,
-  STATECategory,
+  OmikenCategory,
   ListEntry,
 } from "@/types";
 
 // Props Emits
 const props = defineProps<{
-  STATE: STATEType;
+  Omiken: OmiEditType;
   naviCategory: NaviCategory;
 }>();
 
 const emit = defineEmits<{
-  (e: "update:STATE", payload: STATEEntry<STATECategory>): void;
+  (e: "update:Omiken", payload: OmikenEntry<OmikenCategory>): void;
   (e: "open-editor", editorItem: ListEntry<ListCategory>): void;
 }>();
 
@@ -116,7 +116,7 @@ const filterItems = computed(() => {
   if (props.naviCategory === 'preset') return {};
     if (props.naviCategory === 'preferences') return {};
 
-  const items = props.STATE[props.naviCategory];
+  const items = props.Omiken[props.naviCategory];
   const filters = {
     rules: () => _.pickBy(items as Record<string, RulesType>, item => 
       filterRef.value.rulesFilterSwitch.length === 0 || 
@@ -136,12 +136,12 @@ const filterItems = computed(() => {
 // アイテムを追加
 const addItem = () => {
   if (props.naviCategory !== 'preferences') {
-    emit("update:STATE", { type: props.naviCategory, addKeys: [{}] });
+    emit("update:Omiken", { type: props.naviCategory, addKeys: [{}] });
   }
 };
 
-// 各種操作関数(エディターを開く/STATE更新)
-const updateSTATE = (payload: STATEEntry<STATECategory>) => emit("update:STATE", payload);
+// 各種操作関数(エディターを開く/Omiken更新)
+const updateOmiken = (payload: OmikenEntry<OmikenCategory>) => emit("update:Omiken", payload);
 const openEditor = (editorItem: ListEntry<ListCategory>) => emit("open-editor", editorItem);
 
 </script>

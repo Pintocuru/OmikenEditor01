@@ -5,19 +5,20 @@
       <v-form @submit.prevent>
         <!-- 基本情報 -->
         <v-row dense>
-          <v-col cols="12" sm="4">
+          <v-col cols="12" sm="3">
             <v-text-field
               v-model="currentItem.name"
               label="結果名"
               density="compact"
               @input="updateOmikuji"
             >
-              <v-tooltip activator="parent" location="bottom"
-                >おみくじの結果の名称（ラベル）を入力してください。<br />
-                例: 「大吉」「中吉」「小吉」など。</v-tooltip
-              >
-            </v-text-field> </v-col
-          ><v-col cols="3" sm="2">
+              <v-tooltip activator="parent" location="bottom">
+                おみくじの結果の名称（ラベル）を入力してください。<br />
+                例: 「大吉」「中吉」「小吉」など。
+              </v-tooltip>
+            </v-text-field>
+          </v-col>
+          <v-col cols="3" sm="2">
             <v-text-field
               v-model.number="currentItem.weight"
               label="出現比"
@@ -32,16 +33,44 @@
               </v-tooltip>
             </v-text-field>
           </v-col>
-          <v-col cols="9" sm="6">
-            <v-progress-linear
-              :model-value="weightValues"
-              buffer-value="10"
-              color="primary"
-              height="35"
-              striped
-            >
-              出現割合：{{ weightValues }} %
-            </v-progress-linear>
+          <v-col cols="9" sm="7">
+            <!-- ルール別の出現率表示 -->
+            <v-menu location="bottom">
+              <template v-slot:activator="{ props }">
+                <v-btn
+                  color="primary"
+                  v-bind="props"
+                  :disabled="!usedInRules.length"
+                  class="mr-2"
+                >
+                  {{ selectedRuleName }}
+                  <v-chip
+                    size="x-small"
+                    class="ml-2"
+                    color="primary"
+                  >
+                    {{ selectedRuleWeight }}%
+                  </v-chip>
+                </v-btn>
+              </template>
+
+              <v-list>
+                <v-list-subheader>ルール別の出現確率</v-list-subheader>
+                <v-list-item
+                  v-for="rule in usedInRules"
+                  :key="rule.id"
+                  :value="rule.id"
+                  @click="selectRuleId = rule.id"
+                >
+                  <v-list-item-title class="d-flex justify-space-between">
+                    <span>{{ rule.name }}</span>
+                    <v-chip size="small" color="primary">
+                      {{ calculateWeight(rule.id) }}%
+                    </v-chip>
+                  </v-list-item-title>
+                </v-list-item>
+              </v-list>
+            </v-menu>
           </v-col>
         </v-row>
 
@@ -78,9 +107,7 @@
           <v-window-item value="post">
             <DialogOmikujiPost
               :currentItem="currentItem"
-              @addPost="addPost"
-              @removePost="removePost"
-              @update="updateSTATE"
+              @update:Omiken="updateOmiken"
             />
           </v-window-item>
           <v-window-item value="filter">
@@ -88,7 +115,7 @@
               :currentItem="currentItem"
               :thresholdTypes="thresholdTypes"
               :comparisonItems="comparisonItems"
-              @update="updateSTATE"
+              @update="updateOmiken"
             />
           </v-window-item>
         </v-window>
@@ -101,54 +128,55 @@
 <script setup lang="ts">
 import { computed, inject, Ref, ref } from "vue";
 import type {
-  STATEType,
-  OmikujiType,
-  STATEEntry,
+  OmikenEntry,
   ListEntry,
   AppStateType,
-  STATECategory,
+  OmikenCategory,
   ListCategory,
 } from "../types";
-import { useEditOmikuji } from "../composables/funkOmikenEdit";
+import { funkOmikuji } from "../composables/funkDialog";
 import DialogOmikujiFilter from "./DialogOmikujiFilter.vue";
 import DialogOmikujiPost from "./DialogOmikujiPost.vue";
 import _ from "lodash";
+import { funkRules } from "@/composables/funkRules";
 // props/emits
 const props = defineProps<{
-  entry: ListEntry<'omikuji'> | null
+  entry: ListEntry<"omikuji"> | null;
 }>();
 
 const emit = defineEmits<{
-  (e: "update:STATE", payload: STATEEntry<STATECategory>): void;
+  (e: "update:Omiken", payload: OmikenEntry<OmikenCategory>): void;
   (e: "open-editor", editorItem: ListEntry<ListCategory>): void;
 }>();
 
 // キャラクターデータのインジェクト
 const AppState = inject<Ref<AppStateType>>("AppStateKey");
-const omikuji = AppState?.value.STATE.omikuji;
+const rules = AppState?.value.Omiken.rules;
+const omikuji = AppState?.value.Omiken.omikuji;
 const CHARA = AppState?.value.CHARA;
 
 // コンポーザブルの使用
-const { addPost, thresholdTypes, comparisonItems, removePost } =
-  useEditOmikuji(CHARA);
+const {  thresholdTypes, comparisonItems } =
+  funkOmikuji(CHARA);
+const { validOmikujiOptions } = funkRules(omikuji, null);
 
-// タブの状態管理
-const tab = ref("post");
+// ref
+const tab = ref("post"); // タブの状態管理
+const selectRuleId = ref<string | null>(null); // 選択中のルールID
 
-// propsからデータを解読
+// propsからデータを解読 // TODO 共通コンポーザブルfunkDialogAll でcurrentItemを制定したいな?
 const currentItem = computed(() => {
   const item = props.entry?.item;
-  console.log('props.entry?.item:', item ? Object.values(item)[0] : null);
   return item ? Object.values(item)[0] : null;
 });
 
-// 投稿数のcomputed property
+// 投稿数
 const postCount = computed(() => {
   if (!currentItem.value) return;
   return currentItem.value.post.length;
 });
 
-// アクティブなフィルターのcomputed property
+// アクティブなフィルター
 const activeFilters = computed(() => {
   if (!currentItem.value) return;
   const threshold = currentItem.value.threshold;
@@ -195,24 +223,69 @@ const activeFilters = computed(() => {
   return filters;
 });
 
+// このおみくじが使われているRulesを探す
+const usedInRules = computed(() => {
+  if (!currentItem.value || !rules) return [];
+
+  return Object.values(rules).filter(
+    (rule) =>
+      rule.enabledIds.length === 0 ||
+      rule.enabledIds.includes(currentItem.value!.id)
+  );
+});
+
+// 選択中のルール名とその重み
+const selectedRuleName = computed(() => {
+  if (!selectRuleId.value || !rules) {
+    return usedInRules.value[0]?.name || "ルール選択";
+  }
+  return rules[selectRuleId.value]?.name || "ルール選択";
+});
+
+const selectedRuleWeight = computed(() => {
+  if (!selectRuleId.value) {
+    return calculateWeight(usedInRules.value[0]?.id);
+  }
+  return calculateWeight(selectRuleId.value);
+});
+
 // 全体の出現割合から％を取る
-// TODO rulesからこのおみくじが適用されている者を見つけ出し、それをリスト表示させる。
-// そして選択しているリストの全体の分母から、パーセンテージを取る。
-// どのrulesからも選択されてないなら、0を返す
+const calculateWeight = (ruleId: string): number => {
+  if (!currentItem.value || !omikuji || !rules) return 0;
+
+  const rule = rules[ruleId];
+  if (!rule) return 0;
+
+  const validOmikuji = Object.values(omikuji).filter(
+    (omi) => rule.enabledIds.length === 0 || rule.enabledIds.includes(omi.id)
+  );
+
+  const totalWeight = validOmikuji.reduce((sum, omi) => sum + omi.weight, 0);
+  
+  return totalWeight > 0
+    ? Math.round((currentItem.value.weight / totalWeight) * 100)
+    : 0;
+};
+
+// weightValuesの更新
 const weightValues = computed(() => {
-return 0;
+  // rulesが存在し、usedInRulesが空でない場合、最初のルールを使用
+  if (usedInRules.value.length > 0) {
+    return calculateWeight(usedInRules.value[0].id);
+  }
+  return 0;
 });
 
 // 更新アップデート
 const updateOmikuji = () => {
   if (currentItem.value) {
-    emit("update:STATE", {
+    emit("update:Omiken", {
       type: "omikuji",
       update: { [currentItem.value.id]: currentItem.value },
     });
   }
 };
-// 子コンポーネントのSTATE更新
-const updateSTATE = (payload: STATEEntry<STATECategory>) =>
-  emit("update:STATE", payload);
+// 子コンポーネントのOmiken更新
+const updateOmiken = (payload: OmikenEntry<OmikenCategory>) =>
+  emit("update:Omiken", payload);
 </script>

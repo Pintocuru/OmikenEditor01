@@ -1,4 +1,4 @@
-<!-- src/components/DialogRule.vue -->
+<!-- src/components/DialogRules.vue -->
 <template>
   <v-card v-if="currentItem">
     <v-card-text>
@@ -81,12 +81,12 @@
 import { computed, inject, Ref } from "vue";
 import type {
   ListEntry,
-  STATEEntry,
+  OmikenEntry,
   ListCategory,
-  STATECategory,
+  OmikenCategory,
   AppStateType,
 } from "../types";
-import { useSwitchStyles } from "../composables/useSwitchStyles";
+import { funkRules } from "../composables/funkRules";
 
 // props/emits
 const props = defineProps<{
@@ -94,13 +94,13 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: "update:STATE", payload: STATEEntry<STATECategory>): void;
+  (e: "update:Omiken", payload: OmikenEntry<OmikenCategory>): void;
   (e: "open-editor", editorItem: ListEntry<ListCategory>): void;
 }>();
 
 // inject
 const AppState = inject<Ref<AppStateType>>("AppStateKey");
-const omikuji = AppState?.value.STATE.omikuji;
+const omikuji = AppState?.value.Omiken.omikuji;
 
 // propsからデータを解読
 const currentItem = computed(() => {
@@ -115,7 +115,7 @@ const {
   omikujiOptions,
   validOmikujiOptions,
   getWeightColor,
-} = useSwitchStyles(
+} = funkRules(
   omikuji,
   props.entry?.item && Object.values(props.entry.item)[0]
 );
@@ -130,7 +130,7 @@ const matchLabels = {
 // 更新処理
 const updateItem = () => {
   if (currentItem.value) {
-    emit("update:STATE", {
+    emit("update:Omiken", {
       type: "rules",
       update: { [currentItem.value.id]: currentItem.value },
     });

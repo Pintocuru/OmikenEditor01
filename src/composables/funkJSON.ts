@@ -1,20 +1,20 @@
 // src/composables/funkOmikenJSON.ts
 import { ref } from 'vue';
-import type { STATEType, ListCategory, CHARAType, EditerTypeMap } from '../types';
+import type { OmiEditType, ListCategory, CHARAType, EditerTypeMap } from '../types';
 import { z } from 'zod';
 import _ from 'lodash';
 import Swal from 'sweetalert2';
 import { useToast } from 'vue-toastification';
 
 // JSONデータの読み込み・書き込み
-export function useInitializeFunkOmiken() {
+export function funkJSON() {
   const canUpdateJSON = ref(false); // テストモード:JSONを書き込みするか
   const isLoading = ref(false); // 読み込み中かどうか、読み込み失敗ならずっとtrue
   const noAppBoot = ref(false); // 起動できたか
-  const lastSavedState = ref<STATEType | null>(null); // 1つ前へ戻る機能
+  const lastSavedState = ref<OmiEditType | null>(null); // 1つ前へ戻る機能
   const toast = useToast(); // vue-toastification
 
-  const fetchSTATE = async (): Promise<STATEType | null> => {
+  const fetchOmiken = async (): Promise<OmiEditType | null> => {
     // 取得中ならreturn
     if (isLoading.value) {
       console.warn('データの取得が既に進行中です');
@@ -30,8 +30,13 @@ export function useInitializeFunkOmiken() {
       }
       const data = await response.json();
 
+      // xxxOrderの検証
+      const generateOrder = (items: { [key: string]: any }): string[] => {
+        return Object.keys(items);
+      }
+
       // データの検証と正規化
-      const validatedData: STATEType = {
+      const validatedData: OmiEditType = {
         rules: validateData('rules', data.rules),
         omikuji: validateData('omikuji', data.omikuji),
         place: validateData('place', data.place),
@@ -62,16 +67,16 @@ export function useInitializeFunkOmiken() {
     }
   };
 
-  const saveSTATE = async (STATE: STATEType): Promise<void> => {
+  const saveOmiken = async (Omiken: OmiEditType): Promise<void> => {
 
-    console.log(STATE);
+
     if (noAppBoot.value) {
       toast('🚫データ保存はできません');
       return;
     }
     // テストモード:保存できたことをログに表示
     if (!canUpdateJSON.value) {
-      console.warn('🚫canUpdateJSON:false, saveDataまで届きました');
+      console.warn('saveDataまで届きました:',Omiken);
       return;
     }
     // ロード中ならreturn(書き込みONの表示も兼ねて)
@@ -86,13 +91,13 @@ export function useInitializeFunkOmiken() {
       const response = await fetch('/api/save-state', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(STATE)
+        body: JSON.stringify(Omiken)
       });
       if (!response.ok) {
         throw new Error(`Network response was not ok: ${response.status}`);
       }
       // 最後の状態を取得
-      lastSavedState.value = _.cloneDeep(STATE);
+      lastSavedState.value = _.cloneDeep(Omiken);
       toast('💾データ保存が完了しました。');
       console.log('💾データの保存が完了しました。');
     } catch (error) {
@@ -140,8 +145,8 @@ export function useInitializeFunkOmiken() {
   return {
     canUpdateJSON,
     isLoading,
-    fetchSTATE,
-    saveSTATE,
+    fetchOmiken: fetchOmiken,
+    saveOmiken: saveOmiken,
     fetchCHARA,
     undoLastChange
   };
@@ -156,6 +161,8 @@ const rulesSchema = z.record(z.object({
   id: z.string(),
   // おみくじルール名
   name: z.string().default('おみくじ'),
+  // 説明文
+  description: z.string().default(''), 
   // ルールの有効/無効 0:OFF/1:だれでも/2:メンバー以上/3:モデレーター/4:管理者
   switch: z.union([z.literal(0), z.literal(1), z.literal(2), z.literal(3), z.literal(4)]).default(1),
   // omikujiの適用しないIDリスト
@@ -166,121 +173,93 @@ const rulesSchema = z.record(z.object({
   matchIncludes: z.array(z.string()).default([])
 }));
 
-// omikuji.thresholdスキーマ
-const baseComparisonSchema = z.enum(['min', 'equal', 'max', 'loop', 'range']);
-const elapsedComparisonSchema = z.enum(['min', 'max', 'range']);
-const giftComparisonSchema = z.enum(['min', 'equal', 'max', 'range']);
 
+// omikujiのZodスキーマ
+// 共通の数値変換
+const thresholdValueTransform = z.number().transform(val => {
+  return typeof val !== 'number' || val < 0 ? 0 : val;
+});
+
+// value1とvalue2のチェック関数
+const thresholdValueRangeSwap = (schema:any) => schema.transform((data: any) => {
+  if (data.comparison === 'range' && data.value1 > data.value2) {
+    [data.value1, data.value2] = [data.value2, data.value1];
+  }
+  return data;
+});
 
 // 時間フィルターのスキーマ
-const timeFilterSchema = z.object({
+const thresholdTimeSchema = z.object({
   isEnabled: z.boolean().default(false),
-  value1: z.number().transform(val => {
-    // 0-23の範囲外なら0に
-    return val < 0 || val >= 24 ? 0 : val;
-  }),
-  value2: z.number().transform(val => {
-    // 0-23の範囲外なら0に
-    return val < 0 || val >= 24 ? 0 : val;
-  })
+  value1: thresholdValueTransform.refine(val => val >= 0 && val < 24, { message: "0-23の範囲で指定してください" }),
+  value2: thresholdValueTransform.refine(val => val >= 0 && val < 24, { message: "0-23の範囲で指定してください" })
 });
 
 // 経過時間フィルターのスキーマ
-const elapsedFilterSchema = z.object({
+const thresholdElapsedSchema = thresholdValueRangeSwap(z.object({
   isEnabled: z.boolean().default(false),
   unit: z.enum(['second', 'minute', 'hour', 'day']),
-  comparison: elapsedComparisonSchema, 
-  value1: z.number().transform(val => {
-    return typeof val !== 'number' || val < 0 ? 0 : val;
-  }),
-  value2: z.number().transform(val => {
-    return typeof val !== 'number' || val < 0 ? 0 : val;
-  })
-}).transform(data => {
-  if (data.comparison === 'range') {
-    if (data.value1 > data.value2) {
-      const temp = data.value1;
-      data.value1 = data.value2;
-      data.value2 = temp;
-    }
-  }
-  return data;
-});
+  comparison: z.enum(['min', 'max', 'range']),
+  value1: thresholdValueTransform,
+  value2: thresholdValueTransform
+}));
 
 // カウントフィルターのスキーマ
-const countFilterSchema = z.object({
+const thresholdCountSchema = thresholdValueRangeSwap(z.object({
   isEnabled: z.boolean().default(false),
   unit: z.enum(['lc', 'no', 'tc']),
-  comparison: baseComparisonSchema,
-  value1: z.number().transform(val => {
-    // 負の値または数値以外は0に
-    return typeof val !== 'number' || val < 0 ? 0 : val;
-  }),
-  value2: z.number().transform(val => {
-    // 負の値または数値以外は0に
-    return typeof val !== 'number' || val < 0 ? 0 : val;
-  })
-}).transform(data => {
-  if (data.comparison === 'range') {
-    // value1がvalue2より大きい場合は入れ替え
-    if (data.value1 > data.value2) {
-      const temp = data.value1;
-      data.value1 = data.value2;
-      data.value2 = temp;
-    }
-  }
-  return data;
-});
+  comparison: z.enum(['min', 'equal', 'max', 'loop', 'range']),
+  value1: thresholdValueTransform,
+  value2: thresholdValueTransform
+}));
 
 // ギフトフィルターのスキーマ
-const giftFilterSchema = z.object({
+const thresholdGiftSchema = thresholdValueRangeSwap(z.object({
   isEnabled: z.boolean().default(false),
-  comparison: giftComparisonSchema, // 修正：適切な比較方法のみ許可
-  value1: z.number().transform(val => {
-    return typeof val !== 'number' || val < 0 ? 0 : val;
-  }),
-  value2: z.number().transform(val => {
-    return typeof val !== 'number' || val < 0 ? 0 : val;
-  })
-}).transform(data => {
-  if (data.comparison === 'range') {
-    if (data.value1 > data.value2) {
-      const temp = data.value1;
-      data.value1 = data.value2;
-      data.value2 = temp;
-    }
-  }
-  return data;
+  comparison: z.enum(['min', 'equal', 'max', 'range']),
+  value1: thresholdValueTransform,
+  value2: thresholdValueTransform
+}));
+
+// omikuji.thresholdスキーマ
+const omikujiThresholdSchema = z.object({
+  isSyoken: z.boolean().default(false),
+  time: thresholdTimeSchema,
+  elapsed: thresholdElapsedSchema,
+  count: thresholdCountSchema,
+  gift: thresholdGiftSchema,
 });
 
-// しきい値のスキーマ
-const thresholdSchema = z.object({
-  isSyoken: z.boolean().default(false),
-  time: timeFilterSchema,
-  elapsed: elapsedFilterSchema,
-  count: countFilterSchema,
-  gift: giftFilterSchema,
-});
+// omikuji.postスキーマ
+const omikujiPostSchema = z.array(z.object({
+  type: z.enum(['onecomme', 'party', 'toast', 'speech']).default('onecomme'),
+  botKey: z.string().default('mamono'),
+  iconKey: z.string().default('Default'),
+  delaySeconds: z.number().nonnegative().default(0),
+  content: z.string().default('<<user>>さんの運勢は【大吉】<<random>>')
+}))
+  .transform((posts) =>
+    posts.sort((a, b) => {
+      // delaySecondsで昇順ソート
+      if (a.delaySeconds !== b.delaySeconds) {
+        return a.delaySeconds - b.delaySeconds;
+      }
+      // delaySecondsが同じ場合はtypeの順序でソート
+      const typeOrder = ['onecomme', 'party', 'toast', 'speech'];
+      return typeOrder.indexOf(a.type) - typeOrder.indexOf(b.type);
+    })
+  );
 
 // omikujiのZodスキーマ
 const omikujiSchema = z.record(z.object({
-  // ID
   id: z.string(),
-  // おみくじの結果名(「大吉」など)
-  name: z.string(),
-  // メッセージの重み付け
+  name: z.string().default('大吉'),
+  description: z.string().default(''),
   weight: z.number().int().positive().default(1),
-  // フィルタリング基準
-  threshold: thresholdSchema,
-  // メッセージの投稿情報 message:わんコメ party:WordParty toast:トースト speech:わんコメspeech
-  post: z.array(z.object({
-    type: z.enum(['onecomme', 'party', 'toast', 'speech']).default('onecomme'),
-    botKey: z.string().default('mamono'),
-    iconKey: z.string().default('Default'),
-    delaySeconds: z.number().nonnegative().default(0),
-    content: z.string().default('<<user>>さんの運勢は【大吉】<<random>>')
-  })).default([])
+  threshold: omikujiThresholdSchema,
+  post: omikujiPostSchema.default([])
 }));
+
 
 // placeのZodスキーマ
 const placeSchema = z.record(z.object({
@@ -288,10 +267,13 @@ const placeSchema = z.record(z.object({
   id: z.string(),
   // プレースホルダー名
   name: z.string().default('<<random>>'),
+  // 説明文
+  description: z.string().default(''),  
+  // タイプ(出現割合の有無)
+  isWeight: z.boolean().default(false),
+
   // 値の配列
   values: z.array(z.object({
-    // タイプ(出現割合の有無)
-    type: z.enum(['simple', 'weight']),
     // 出現割合
     weight: z.number().positive().default(1),
     // 内容(1度だけプレースホルダーを利用可能)
@@ -323,6 +305,7 @@ const schemas = {
 const defaultValues = {
   rules: {
     name: 'おみくじ',
+    description:'',
     switch: 1,
     enabledIds: [],
     matchExact: [],
@@ -331,6 +314,7 @@ const defaultValues = {
   },
   omikuji: {
     name: '大吉',
+    description: '',
     weight: 1,
     threshold: {
       isSyoken: false,
@@ -370,9 +354,12 @@ const defaultValues = {
   },
   place: {
     name: '<<random>>',
-    weight: 1,
-    group: 0,
-    content: ''
+    description: '',
+    isWeight:false,
+    values:[{
+      weight: 1,
+      value: '',
+    }],
   },
   preferences: {
     basicDelay: 1,
@@ -407,9 +394,3 @@ export function validateData<T extends ListCategory>(
 
   return validatedData;
 }
-
-// xxxOrderの生成
-function generateOrder(items: { [key: string]: any }): string[] {
-  return Object.keys(items);
-}
-

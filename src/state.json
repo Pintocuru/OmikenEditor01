@@ -1,73 +1,240 @@
 {
-    "rules": {
-        "1729669868469-531k4": {
-            "id": "1729669868469-531k4",
-            "name": "おみくじ",
-            "switch": 1,
-            "enabledIds": [],
-            "matchExact": [],
-            "matchStartsWith": [],
-            "matchIncludes": []
-        }
+  "rules": {
+    "1729669868469-531k4": {
+      "id": "1729669868469-531k4",
+      "name": "おみくじ",
+      "description": "",
+      "switch": 1,
+      "enabledIds": ["1729669848759-a4czl", "1730186257904-r3vdg"],
+      "matchExact": [],
+      "matchStartsWith": [],
+      "matchIncludes": []
     },
-    "omikuji": {
-        "1729669848759-a4czl": {
-            "id": "1729669848759-a4czl",
-            "name": "大吉",
-            "weight": 1,
-            "threshold": {
-                "isSyoken": false,
-                "time": {
-                    "isEnabled": false,
-                    "value1": 0,
-                    "value2": 0
-                },
-                "elapsed": {
-                    "isEnabled": false,
-                    "unit": "hour",
-                    "comparison": "max",
-                    "value1": 0,
-                    "value2": 0
-                },
-                "count": {
-                    "isEnabled": false,
-                    "unit": "no",
-                    "comparison": "max",
-                    "value1": 0,
-                    "value2": 0
-                },
-                "gift": {
-                    "isEnabled": false,
-                    "comparison": "max",
-                    "value1": 0,
-                    "value2": 0
-                }
-            },
-            "post": [
-                {
-                    "type": "onecomme",
-                    "botKey": "reimu",
-                    "iconKey": "Default",
-                    "delaySeconds": 0,
-                    "content": "<<user>>さんの運勢は【大吉】<<random>>"
-                }
-            ]
-        }
-    },
-    "place": {
-    },
-    "rulesOrder": [
-        "1729669868469-531k4"
-    ],
-    "omikujiOrder": [
-        "1729669848759-a4czl"
-    ],
-    "placeOrder": [
-    ],
-    "preferences": {
-        "basicDelay": 1,
-        "omikujiCooldown": 2,
-        "commentDuration": 5,
-        "BotUserIDname": "FirstCounter"
+    "1730186223570-nxukm": {
+      "id": "1730186223570-nxukm",
+      "name": "フラワーおみくじ",
+      "description": "",
+      "switch": 1,
+      "enabledIds": ["1730186417456-m98tz", "1730186488892-o4w6g"],
+      "matchExact": [],
+      "matchStartsWith": [],
+      "matchIncludes": []
     }
+  },
+  "omikuji": {
+    "1729669848759-a4czl": {
+      "id": "1729669848759-a4czl",
+      "name": "大吉",
+      "description": "",
+      "weight": 18,
+      "threshold": {
+        "isSyoken": false,
+        "time": {
+          "isEnabled": false,
+          "value1": 0,
+          "value2": 0
+        },
+        "elapsed": {
+          "isEnabled": false,
+          "unit": "hour",
+          "comparison": "max",
+          "value1": 0,
+          "value2": 0
+        },
+        "count": {
+          "isEnabled": false,
+          "unit": "no",
+          "comparison": "max",
+          "value1": 0,
+          "value2": 0
+        },
+        "gift": {
+          "isEnabled": false,
+          "comparison": "max",
+          "value1": 0,
+          "value2": 0
+        }
+      },
+      "post": [
+        {
+          "type": "onecomme",
+          "botKey": "reimu",
+          "iconKey": "Default",
+          "delaySeconds": 1,
+          "content": "<<user>>さんの運勢は【大吉】<<random>>"
+        },
+        {
+          "type": "party",
+          "botKey": "reimu",
+          "iconKey": "Default",
+          "delaySeconds": 1,
+          "content": "!レベルアップ"
+        }
+      ]
+    },
+    "1730186257904-r3vdg": {
+      "id": "1730186257904-r3vdg",
+      "name": "吉",
+      "description": "",
+      "weight": 24,
+      "threshold": {
+        "isSyoken": false,
+        "time": {
+          "isEnabled": false,
+          "value1": 0,
+          "value2": 0
+        },
+        "elapsed": {
+          "isEnabled": false,
+          "unit": "hour",
+          "comparison": "max",
+          "value1": 0,
+          "value2": 0
+        },
+        "count": {
+          "isEnabled": false,
+          "unit": "no",
+          "comparison": "max",
+          "value1": 0,
+          "value2": 0
+        },
+        "gift": {
+          "isEnabled": false,
+          "comparison": "max",
+          "value1": 0,
+          "value2": 0
+        }
+      },
+      "post": [
+        {
+          "type": "onecomme",
+          "botKey": "reimu",
+          "iconKey": "Default",
+          "delaySeconds": 1,
+          "content": "<<user>>さんの運勢は【大吉】"
+        },
+        {
+          "type": "party",
+          "botKey": "reimu",
+          "iconKey": "Default",
+          "delaySeconds": 1,
+          "content": "!シャキーン2"
+        }
+      ]
+    },
+    "1730186417456-m98tz": {
+      "id": "1730186417456-m98tz",
+      "name": "フラワー:青色",
+      "description": "",
+      "weight": 3,
+      "threshold": {
+        "isSyoken": false,
+        "time": {
+          "isEnabled": false,
+          "value1": 0,
+          "value2": 0
+        },
+        "elapsed": {
+          "isEnabled": false,
+          "unit": "hour",
+          "comparison": "max",
+          "value1": 0,
+          "value2": 0
+        },
+        "count": {
+          "isEnabled": false,
+          "unit": "no",
+          "comparison": "max",
+          "value1": 0,
+          "value2": 0
+        },
+        "gift": {
+          "isEnabled": false,
+          "comparison": "max",
+          "value1": 0,
+          "value2": 0
+        }
+      },
+      "post": [
+        {
+          "type": "onecomme",
+          "botKey": "reimu",
+          "iconKey": "Default",
+          "delaySeconds": 0,
+          "content": "<<user>>さんは【青色】<<colorBlue>>"
+        }
+      ]
+    },
+    "1730186488892-o4w6g": {
+      "id": "1730186488892-o4w6g",
+      "name": "フラワー:赤色",
+      "description": "",
+      "weight": 3,
+      "threshold": {
+        "isSyoken": false,
+        "time": {
+          "isEnabled": false,
+          "value1": 0,
+          "value2": 0
+        },
+        "elapsed": {
+          "isEnabled": false,
+          "unit": "hour",
+          "comparison": "max",
+          "value1": 0,
+          "value2": 0
+        },
+        "count": {
+          "isEnabled": false,
+          "unit": "no",
+          "comparison": "max",
+          "value1": 0,
+          "value2": 0
+        },
+        "gift": {
+          "isEnabled": false,
+          "comparison": "max",
+          "value1": 0,
+          "value2": 0
+        }
+      },
+      "post": [
+        {
+          "type": "onecomme",
+          "botKey": "reimu",
+          "iconKey": "Default",
+          "delaySeconds": 1,
+          "content": "<<user>>さんは【赤色】<<colorRed>>"
+        }
+      ]
+    }
+  },
+  "place": {
+    "1730215131236-r0mi5": {
+      "id": "1730215131236-r0mi5",
+      "name": "<<random>>",
+      "description": "",
+      "type": "simple",
+      "values": [
+        {
+          "weight": 1,
+          "value": ""
+        }
+      ]
+    }
+  },
+  "rulesOrder": ["1729669868469-531k4", "1730186223570-nxukm"],
+  "omikujiOrder": [
+    "1729669848759-a4czl",
+    "1730186257904-r3vdg",
+    "1730186417456-m98tz",
+    "1730186488892-o4w6g"
+  ],
+  "placeOrder": ["1730215131236-r0mi5"],
+  "preferences": {
+    "basicDelay": 1,
+    "omikujiCooldown": 2,
+    "commentDuration": 5,
+    "BotUserIDname": "FirstCounter"
+  }
 }

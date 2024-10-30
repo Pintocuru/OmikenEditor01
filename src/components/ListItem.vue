@@ -11,10 +11,10 @@
       <template #item="{ element }">
         <component
           :is="getComponentForCategory"
-          :STATE="STATE"
+          :Omiken="Omiken"
           :item="element"
           :naviCategory="listCategory"
-          @update:STATE="updateSTATE"
+          @update:Omiken="updateOmiken"
           @open-editor="openEditor"
         />
       </template>
@@ -32,21 +32,21 @@ import type {
   ListEntry,
   ListCategory,
   EditerType,
-  STATEEntry,
-  STATEType,
-  STATECategory,
+  OmikenEntry,
+  OmiEditType,
+  OmikenCategory,
 } from "@/types";
 
 // Props Emits
 const props = defineProps<{
-  STATE: STATEType;
+  Omiken: OmiEditType;
   items: Record<string, EditerType>;
   itemOrder: string[];
   listCategory: ListCategory;
 }>();
 
 const emit = defineEmits<{
-  (e: "update:STATE", payload: STATEEntry<STATECategory>): void;
+  (e: "update:Omiken", payload: OmikenEntry<OmikenCategory>): void;
   (e: "open-editor", editorItem: ListEntry<ListCategory>): void;
 }>();
 
@@ -75,7 +75,7 @@ const sortedItems = computed(() => {
 function handleReorder(newOrder: EditerType[]) {
   try {
     const newItemOrder = newOrder.map((item) => item.id);
-    emit("update:STATE", {
+    emit("update:Omiken", {
       type: props.listCategory,
       reorder: newItemOrder,
     });
@@ -84,7 +84,7 @@ function handleReorder(newOrder: EditerType[]) {
   }
 }
 
-// 各種操作関数(エディターを開く/STATE更新)
-const updateSTATE = (payload: STATEEntry<STATECategory>) => emit("update:STATE", payload);
+// 各種操作関数(エディターを開く/Omiken更新)
+const updateOmiken = (payload: OmikenEntry<OmikenCategory>) => emit("update:Omiken", payload);
 const openEditor = (editorItem: ListEntry<ListCategory>) => emit("open-editor", editorItem);
 </script>

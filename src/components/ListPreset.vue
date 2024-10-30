@@ -6,7 +6,7 @@
         <v-row>
           <v-col cols="12">
             <v-text-field
-              :model-value="STATE.preferences.basicDelay"
+              :model-value="Omiken.preferences.basicDelay"
               @update:model-value="updatePreference('basicDelay', $event)"
               label="BOTの基本遅延時間(秒)"
               type="number"
@@ -16,7 +16,7 @@
           </v-col>
           <v-col cols="12">
             <v-text-field
-              :model-value="STATE.preferences.omikujiCooldown"
+              :model-value="Omiken.preferences.omikujiCooldown"
               @update:model-value="updatePreference('omikujiCooldown', $event)"
               label="おみくじクールダウン(秒)"
               type="number"
@@ -26,7 +26,7 @@
           </v-col>
           <v-col cols="12">
             <v-text-field
-              :model-value="STATE.preferences.commentDuration"
+              :model-value="Omiken.preferences.commentDuration"
               @update:model-value="updatePreference('commentDuration', $event)"
               label="コメントしてからおみくじを有効とする時間(秒)"
               type="number"
@@ -36,7 +36,7 @@
           </v-col>
           <v-col cols="12">
             <v-text-field
-              :model-value="STATE.preferences.BotUserIDname"
+              :model-value="Omiken.preferences.BotUserIDname"
               @update:model-value="updatePreference('BotUserIDname', $event)"
               label="BOTのUserID"
               :rules="[v => !!v || 'BOTのユーザーIDは必須です']"
@@ -49,14 +49,14 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import type { STATEType, STATEEntry, STATECategory } from '@/types';
+import type { OmiEditType, OmikenEntry, OmikenCategory } from '@/types';
 
 const props = defineProps<{
-  STATE: STATEType;
+  Omiken: OmiEditType;
 }>();
 
 const emit = defineEmits<{
-  (e: "update:STATE", payload: STATEEntry<STATECategory>): void;
+  (e: "update:Omiken", payload: OmikenEntry<OmikenCategory>): void;
 }>();
 
 const valid = ref(true);
@@ -73,16 +73,16 @@ const validateForm = (isValid: boolean) => {
 };
 
 // 各フィールドの更新処理
-const updatePreference = (key: keyof STATEType['preferences'], value: number | string) => {
+const updatePreference = (key: keyof OmiEditType['preferences'], value: number | string) => {
   const newValue = typeof value === 'string' && key !== 'BotUserIDname' 
     ? Number(value) 
     : value;
 
   if (valid.value) {
-    emit('update:STATE', {
+    emit('update:Omiken', {
       type: 'preferences',
       preferences: {
-        ...props.STATE.preferences,
+        ...props.Omiken.preferences,
         [key]: newValue
       }
     });

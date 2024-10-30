@@ -12,7 +12,7 @@
             :selectCategory="naviCategory"
             :item="item"
             @edit="openEditor"
-            @update:STATE="updateSTATE"
+            @update:Omiken="updateOmiken"
           />
         </template>
       </v-toolbar>
@@ -32,21 +32,21 @@ import {
   ListEntry,
   ListCategory,
   PlaceType,
-  STATEEntry,
-  STATEType,
-  STATECategory,
+  OmikenEntry,
+  OmiEditType,
+  OmikenCategory,
 } from "@/types";
 import ListItemPartsAction from "./common/ListItemPartsAction.vue";
 
 // Props Emits
 const props = defineProps<{
-  STATE: STATEType;
+  Omiken: OmiEditType;
   item: PlaceType;
   naviCategory: ListCategory;
 }>();
 
 const emit = defineEmits<{
-  (e: "update:STATE", payload: STATEEntry<STATECategory>): void;
+  (e: "update:Omiken", payload: OmikenEntry<OmikenCategory>): void;
   (e: "open-editor", editorItem: ListEntry<ListCategory>): void;
 }>();
 
@@ -76,6 +76,6 @@ function openEditor() {
   });
 }
 
-// STATE更新
-const updateSTATE = (payload: STATEEntry<STATECategory>) => emit("update:STATE", payload);
+// Omiken更新
+const updateOmiken = (payload: OmikenEntry<OmikenCategory>) => emit("update:Omiken", payload);
 </script>

@@ -1,7 +1,7 @@
 <!-- src/components/ListItemRules.vue -->
 <template>
   <v-col cols="12">
-    <v-card @click.stop="openEditor">
+    <v-card @click.stop="openEditorRules">
       <v-toolbar :color="getSwitchColor(item.switch)" density="compact">
         <v-toolbar-title>
           {{ item.name }}
@@ -13,8 +13,8 @@
           <ListItemPartsAction
             :selectCategory="naviCategory"
             :item="item"
-            @edit="openEditor"
-            @update:STATE="updateSTATE"
+            @edit="openEditorRules"
+            @update:Omiken="updateOmiken"
           />
         </template>
       </v-toolbar>
@@ -74,45 +74,41 @@ import {
   ListEntry,
   ListCategory,
   RulesType,
-  STATEEntry,
-  STATEType,
-  STATECategory,
-  EditerType,
+  OmikenEntry,
+  OmiEditType,
+  OmikenCategory,
 } from "@/types";
 import ListItemPartsAction from "./common/ListItemPartsAction.vue";
-import { useSwitchStyles } from "../composables/useSwitchStyles";
+import { funkRules } from "../composables/funkRules";
 import _ from "lodash";
 // Props Emits
 const props = defineProps<{
-  STATE: STATEType;
+  Omiken: OmiEditType;
   item: RulesType;
-  naviCategory: EditerType;
+  naviCategory: ListCategory;
 }>();
 
 const emit = defineEmits<{
-  (e: "update:STATE", payload: STATEEntry<STATECategory>): void;
+  (e: "update:Omiken", payload: OmikenEntry<OmikenCategory>): void;
   (e: "open-editor", editorItem: ListEntry<ListCategory>): void;
 }>();
 
 // 0～4のswitchによって色を変える
-const { chipColors, getSwitchLabel, getSwitchColor, getWeightColor } =
-  useSwitchStyles(props.STATE.omikuji, props.item);
+const { getSwitchLabel, getSwitchColor, getWeightColor } =
+  funkRules(props.Omiken.omikuji, props.item);
 
 // コンポーザブルを使うとcomputedがインポテンツなので直接書く
 const validOmikujiOptions = computed(() => {
-  const omikujiOptions = Object.entries(props.STATE.omikuji).map(
+  const omikujiOptions = Object.entries(props.Omiken.omikuji).map(
     ([id, data]) => ({
       id,
       name: data.name,
       weight: data.weight,
     })
   );
-
   // disabledIdsが存在しないか、Arrayでない場合はすべてのオプションを返す
-  if (!Array.isArray(props.item?.enabledIds)) {
-    return omikujiOptions;
-  }
-
+  if (!Array.isArray(props.item?.enabledIds))     return omikujiOptions;
+  
   // disabledIdsに含まれていないオプションのみを返す
   return omikujiOptions.filter(
     (option) => !props.item.enabledIds.includes(option.id)
@@ -122,12 +118,12 @@ const validOmikujiOptions = computed(() => {
 // すべてのおみくじが無効かどうかを確認
 const isAllDisabled = computed(() => {
   return (
-    props.item?.enabledIds?.length === Object.keys(props.STATE.omikuji).length
+    props.item?.enabledIds?.length === Object.keys(props.Omiken.omikuji).length
   );
 });
 
 // エディターを開く
-function openEditor() {
+function openEditorRules() {
   const item = { [props.item.id]: props.item };
   emit("open-editor", {
     isOpen: true,
@@ -138,7 +134,7 @@ function openEditor() {
 
 // おみくじのエディターを開く
 const openEditorOmikuji = (option: { id: string; name: string }) => {
-  const omikuji = props.STATE.omikuji?.[option.id];
+  const omikuji = props.Omiken.omikuji?.[option.id];
   if (omikuji) {
     emit("open-editor", {
       isOpen: true,
@@ -148,8 +144,8 @@ const openEditorOmikuji = (option: { id: string; name: string }) => {
   }
 };
 
-// STATEの更新をemit
-function updateSTATE(payload: STATEEntry<STATECategory>) {
-  emit("update:STATE", payload);
+// Omikenの更新をemit
+function updateOmiken(payload: OmikenEntry<OmikenCategory>) {
+  emit("update:Omiken", payload);
 }
 </script>

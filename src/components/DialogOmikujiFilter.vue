@@ -267,8 +267,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from "vue";
-import type { OmikujiType, STATECategory, STATEEntry } from "../types";
+import { ref, watch } from "vue";
+import type { OmikujiType, OmikenCategory, OmikenEntry } from "../types";
 import _ from "lodash";
 
 const props = defineProps<{
@@ -276,7 +276,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: "update:STATE", payload: STATEEntry<STATECategory>): void;
+  (e: "update:Omiken", payload: OmikenEntry<OmikenCategory>): void;
 }>();
 
 // 配列の型定義
@@ -381,14 +381,10 @@ const timeRules = (value: number) => {
   );
 };
 
-const timeError = (value: number) => {
-  return !timeRules(value) ? "入力は0～23の間です" : "";
-};
-
 // 更新処理
 const updateOmikuji = () => {
   if (props.currentItem) {
-    emit("update:STATE", {
+    emit("update:Omiken", {
       type: "omikuji",
       update: { [props.currentItem.id]: props.currentItem },
     });

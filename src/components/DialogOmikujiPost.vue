@@ -166,8 +166,8 @@ import type {
   ListEntry,
   OmikujiType,
   OmikujiPostType,
-  STATECategory,
-  STATEEntry,
+  OmikenCategory,
+  OmikenEntry,
 } from "../types";
 import _ from "lodash";
 const props = defineProps<{
@@ -175,14 +175,14 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: "update:STATE", payload: STATEEntry<STATECategory>): void;
+  (e: "update:Omiken", payload: OmikenEntry<OmikenCategory>): void;
   (e: "open-editor", editorItem: ListEntry<ListCategory>): void;
 }>();
 
 // inject
 const AppState = inject<Ref<AppStateType>>("AppStateKey");
 const CHARA = AppState?.value.CHARA;
-const place = AppState?.value.STATE.place;
+const place = AppState?.value.Omiken.place;
 
 // メッセージが存在しないかどうかをチェック
 const hasNoMessages = computed(() => props.currentItem.post.length === 0);
@@ -201,9 +201,9 @@ const addPost = () => {
     content: "<<user>>さんの運勢は【大吉】",
   });
   // 状態を更新
-  emit("update:STATE", {
+  emit("update:Omiken", {
     type: "omikuji",
-    update: { [item.id]: item },
+    update: { [item.id]: { ...item } },
   });
 };
 
@@ -212,7 +212,7 @@ const removePost = (index: number) => {
   // ポストを削除
   (item.post as OmikujiPostType[])?.splice(index, 1);
   // 状態を更新
-  emit("update:STATE", {
+  emit("update:Omiken", {
     type: "omikuji",
     update: { [item.id]: item },
   });
@@ -221,7 +221,7 @@ const removePost = (index: number) => {
 // 更新アップデート
 const updateOmikuji = () => {
   if (props.currentItem) {
-    emit("update:STATE", {
+    emit("update:Omiken", {
       type: "omikuji",
       update: { [props.currentItem.id]: props.currentItem },
     });

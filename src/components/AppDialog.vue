@@ -11,7 +11,7 @@
       <component
         :is="getEditComponent(key, entry.mode)"
         :entry="entry"
-        @update:STATE="updateSTATE"
+        @update:Omiken="updateOmiken"
         @open-editor="openEditor"
       />
       <v-card-actions>
@@ -26,14 +26,14 @@
 
 <script setup lang="ts">
 import { onMounted } from "vue";
-import DialogRule from "./DialogRule.vue";
+import DialogRules from "./DialogRules.vue";
 import DialogOmikuji from "./DialogOmikuji.vue";
 import DialogPlace from "./DialogPlace.vue";
 import {
   ListEntry,
   ListCategory,
-  STATEEntry,
-  STATECategory,
+  OmikenEntry,
+  OmikenCategory,
   ListEntries,
 } from "@/types";
 
@@ -44,25 +44,25 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: "update:listEntry", newEntry: ListEntries): void;
-  (e: "update:STATE", payload: STATEEntry<STATECategory>): void;
+  (e: "update:Omiken", payload: OmikenEntry<OmikenCategory>): void;
   (e: "open-editor", editorItem: ListEntry<ListCategory>): void;
 }>();
 
 // エディターコンポーネントを取得する関数
 const getEditComponent = (type: ListCategory, mode: string | null) => {
   const editorMap: Record<ListCategory, any> = {
-    rules: DialogRule,
+    rules: DialogRules,
     omikuji: mode === 'special'
-     ? DialogSpecialOmikuji // 仮
+     ? DialogOmikujiWeight // 仮DialogOmikujiWeight
       : DialogOmikuji,
     place: DialogPlace,
   };
   return editorMap[type] || null;
 };
 
-// 各種操作関数(エディターを開く/STATE更新)
-const updateSTATE = (payload: STATEEntry<STATECategory>) =>
-  emit("update:STATE", payload);
+// 各種操作関数(エディターを開く/Omiken更新)
+const updateOmiken = (payload: OmikenEntry<OmikenCategory>) =>
+  emit("update:Omiken", payload);
 const openEditor = (editorItem: ListEntry<ListCategory>) =>
   emit("open-editor", editorItem);
 

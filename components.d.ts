@@ -27,6 +27,7 @@ declare module 'vue' {
     DialogOmikujiPost: typeof import('./src/components/DialogOmikujiPost.vue')['default']
     DialogPlace: typeof import('./src/components/DialogPlace.vue')['default']
     DialogRule: typeof import('./src/components/DialogRule.vue')['default']
+    DialogRules: typeof import('./src/components/DialogRules.vue')['default']
     EditorDialog: typeof import('./src/components/EditorDialog.vue')['default']
     ListFilter: typeof import('./src/components/ListFilter.vue')['default']
     ListItem: typeof import('./src/components/ListItem.vue')['default']

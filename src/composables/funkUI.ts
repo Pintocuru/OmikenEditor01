@@ -41,7 +41,21 @@ export function funkUI() {
     uiDark,
     uiDrawer,
     naviCategory,
-     listEntry,
+    listEntry,
     openEditor,
   };
+}
+
+
+export function funkList(emit:any) {
+  const openEditor = (item: { id: any; }, type = "rules") => {
+    const payload = { [item.id]: item };
+    emit("open-editor", {
+      isOpen: true,
+      type: type,
+      item: payload,
+    });
+  };
+
+  return { openEditor };
 }

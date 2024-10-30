@@ -16,7 +16,7 @@
 </template>
 
 <script setup lang="ts">
-import { ListCategory, EditerType, STATEEntry, STATECategory } from '@/types';
+import { ListCategory, EditerType, OmikenEntry, OmikenCategory } from '@/types';
 import { cloneDeep } from 'lodash';
 import Swal from 'sweetalert2';
 
@@ -29,7 +29,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: "edit"): void;
-  (e: "update:STATE", payload: STATEEntry<STATECategory>): void;
+  (e: "update:Omiken", payload: OmikenEntry<OmikenCategory>): void;
 }>();
 
 // 
@@ -66,7 +66,7 @@ function duplicateItem() {
     return newItem;
   });
 
-  emit("update:STATE", {
+  emit("update:Omiken", {
     type: props.selectCategory,
     addKeys: duplicatedItems,
   });
@@ -97,7 +97,7 @@ function deleteItem() {
     if (result.isConfirmed) {
       const delKeys = itemsToDelete.map((item) => item.id);
 
-      emit("update:STATE", {
+      emit("update:Omiken", {
         type: props.selectCategory,
         delKeys: delKeys,
       });

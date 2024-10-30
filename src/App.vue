@@ -7,15 +7,15 @@
     />
     <AppNavigation
       v-model:naviCategory="naviCategory"
-      :STATE="AppState.STATE"
+      :Omiken="AppState.Omiken"
       @update:category="naviCategory = $event"
     />
     <v-main>
       <v-container>
         <AppList
-          :STATE="AppState.STATE"
+          :Omiken="AppState.Omiken"
           :naviCategory="naviCategory"
-          @update:STATE="updateSTATE"
+          @update:Omiken="updateOmiken"
           @open-editor="openEditor"
         />
       </v-container>
@@ -23,34 +23,28 @@
 
     <AppDialog
        v-model:listEntry="listEntry"
-      @update:STATE="updateSTATE"
+      @update:Omiken="updateOmiken"
       @open-editor="openEditor"
     />
   </v-app>
 </template>
 
 <script setup lang="ts">
-import { onMounted, provide, ref } from "vue";
 import AppHeader from "./components/AppHeader.vue";
 import AppNavigation from "./components/AppNavigation.vue";
 import AppList from "./components/AppList.vue";
 import AppDialog from "./components/AppDialog.vue";
-import { funkSTATE } from "./composables/funkOmikenSTATE";
-import { funkUI } from "./composables/funkOmikenUI";
-
-// コンポーザブルの使用
-const { AppState,  initializeAppState, updateSTATE } = funkSTATE();
+import { funkOmiken as funkOmiken } from "./composables/funkOmiken";
+import { funkUI } from "./composables/funkUI";
 
 const {
   uiDark,
-  uiDrawer,
   naviCategory,
   listEntry,
   openEditor,
 } = funkUI();
 
-// コンポーネントのマウント時にデータを取得
-onMounted(async () => {
-  await initializeAppState();
-});
+// コンポーザブルの使用
+const { AppState, updateOmiken: updateOmiken } = funkOmiken(listEntry);
+
 </script>
