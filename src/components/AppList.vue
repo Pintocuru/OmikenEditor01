@@ -53,7 +53,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, ref } from "vue";
 import ListFilter from "./ListFilter.vue";
 import ListItem from "./ListItem.vue";
 import ListPreset from "./ListPreset.vue"; // 追加

@@ -25,7 +25,7 @@
         <v-chip-group v-else>
           <v-hover v-slot="{ isHovering, props }">
             <v-card
-              v-for="option in validOmikujiOptions"
+              v-for="option in enabledOmikujiLists"
               :key="option.id"
               class="ma-1 d-inline-block"
               min-width="100"
@@ -94,11 +94,13 @@ const emit = defineEmits<{
 }>();
 
 // 0～4のswitchによって色を変える
-const { getSwitchLabel, getSwitchColor, getWeightColor } =
-  funkRules(props.Omiken.omikuji, props.item);
+const { getSwitchLabel, getSwitchColor, getWeightColor } = funkRules(
+  props.Omiken.omikuji,
+  props.item
+);
 
 // コンポーザブルを使うとcomputedがインポテンツなので直接書く
-const validOmikujiOptions = computed(() => {
+const enabledOmikujiLists = computed(() => {
   const omikujiOptions = Object.entries(props.Omiken.omikuji).map(
     ([id, data]) => ({
       id,
@@ -106,12 +108,12 @@ const validOmikujiOptions = computed(() => {
       weight: data.weight,
     })
   );
-  // disabledIdsが存在しないか、Arrayでない場合はすべてのオプションを返す
-  if (!Array.isArray(props.item?.enabledIds))     return omikujiOptions;
-  
-  // disabledIdsに含まれていないオプションのみを返す
-  return omikujiOptions.filter(
-    (option) => !props.item.enabledIds.includes(option.id)
+  // enabledIdsが空なら、すべてのオプションを返す
+  if (!Array.isArray(props.item?.enabledIds)) return omikujiOptions;
+
+  // enabledIdsに含まれているオプションを返す
+  return omikujiOptions.filter((option) =>
+    props.item.enabledIds.includes(option.id)
   );
 });
 

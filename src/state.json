@@ -6,8 +6,8 @@
       "description": "",
       "switch": 1,
       "enabledIds": ["1729669848759-a4czl", "1730186257904-r3vdg"],
-      "matchExact": [],
-      "matchStartsWith": [],
+      "matchExact": ["🥠"],
+      "matchStartsWith": ["おみくじ", "omikuji", "omikuzi", "御神籤"],
       "matchIncludes": []
     },
     "1730186223570-nxukm": {
@@ -16,15 +16,15 @@
       "description": "",
       "switch": 1,
       "enabledIds": ["1730186417456-m98tz", "1730186488892-o4w6g"],
-      "matchExact": [],
-      "matchStartsWith": [],
+      "matchExact": ["🌷"],
+      "matchStartsWith": ["フラワー", "ふらわー", "flower"],
       "matchIncludes": []
     }
   },
   "omikuji": {
     "1729669848759-a4czl": {
       "id": "1729669848759-a4czl",
-      "name": "大吉",
+      "name": "おみくじ:大吉",
       "description": "",
       "weight": 18,
       "threshold": {
@@ -57,11 +57,25 @@
       },
       "post": [
         {
+          "type": "party",
+          "botKey": "reimu",
+          "iconKey": "Default",
+          "delaySeconds": -1,
+          "content": "!omikuji_huru"
+        },
+        {
+          "type": "party",
+          "botKey": "reimu",
+          "iconKey": "Default",
+          "delaySeconds": 0,
+          "content": "!omikuji_01"
+        },
+        {
           "type": "onecomme",
           "botKey": "reimu",
           "iconKey": "Default",
           "delaySeconds": 1,
-          "content": "<<user>>さんの運勢は【大吉】<<random>>"
+          "content": "<<user>>さんの運勢は【大吉】<<omikuji01>>"
         },
         {
           "type": "party",
@@ -74,7 +88,7 @@
     },
     "1730186257904-r3vdg": {
       "id": "1730186257904-r3vdg",
-      "name": "吉",
+      "name": "おみくじ:吉",
       "description": "",
       "weight": 24,
       "threshold": {
@@ -107,11 +121,25 @@
       },
       "post": [
         {
+          "type": "party",
+          "botKey": "reimu",
+          "iconKey": "Default",
+          "delaySeconds": -1,
+          "content": "!omikuji_huru"
+        },
+        {
+          "type": "party",
+          "botKey": "reimu",
+          "iconKey": "Default",
+          "delaySeconds": 0,
+          "content": "!omikuji_02"
+        },
+        {
           "type": "onecomme",
           "botKey": "reimu",
           "iconKey": "Default",
           "delaySeconds": 1,
-          "content": "<<user>>さんの運勢は【大吉】"
+          "content": "<<user>>さんの運勢は【吉】<<omikuji02>>"
         },
         {
           "type": "party",
@@ -161,7 +189,7 @@
           "botKey": "reimu",
           "iconKey": "Default",
           "delaySeconds": 0,
-          "content": "<<user>>さんは【青色】<<colorBlue>>"
+          "content": "<<user>>さんは【青色】<<flowerBlue>>"
         }
       ]
     },
@@ -204,7 +232,7 @@
           "botKey": "reimu",
           "iconKey": "Default",
           "delaySeconds": 1,
-          "content": "<<user>>さんは【赤色】<<colorRed>>"
+          "content": "<<user>>さんは【赤色】<<flowerRed>>"
         }
       ]
     }
@@ -212,13 +240,137 @@
   "place": {
     "1730215131236-r0mi5": {
       "id": "1730215131236-r0mi5",
-      "name": "<<random>>",
-      "description": "",
-      "type": "simple",
+      "name": "omikuji01",
+      "description": "おみくじ:大吉",
+      "isWeight": false,
       "values": [
         {
           "weight": 1,
-          "value": ""
+          "value": "人との縁が幸運を呼び込みそう。感謝の気持ちを忘れないことが大事よ。"
+        },
+        {
+          "weight": 1,
+          "value": "健康運が特に好調ね。心身ともに充実した日々になるわ。"
+        },
+        {
+          "weight": 1,
+          "value": "努力が実を結び、幸運が訪れるって。積極的に行動すると良いことがあるわ。"
+        },
+        {
+          "weight": 1,
+          "value": "新しい挑戦が成功をもたらす予感。勇気を出して一歩踏み出してみて。"
+        },
+        {
+          "weight": 1,
+          "value": "良い知らせが届くかも。ポジティブな気持ちを持ち続けてね。"
+        },
+        {
+          "weight": 1,
+          "value": "困難な状況も乗り越えられるわ。自信を持って進んで大丈夫よ。"
+        }
+      ]
+    },
+    "1730255242642-ltoka": {
+      "id": "1730255242642-ltoka",
+      "name": "omikuji02",
+      "description": "おみくじ:吉",
+      "isWeight": false,
+      "values": [
+        {
+          "weight": 1,
+          "value": "積極的に行動すると運気は上がるわ。新しい挑戦はチャンスよ。"
+        },
+        {
+          "weight": 1,
+          "value": "周囲の人々に感謝の気持ちを忘れずにね。"
+        },
+        {
+          "weight": 1,
+          "value": "今後の展望は明るめね。夢に向かって突き進めばいいことがあるわ。"
+        },
+        {
+          "weight": 1,
+          "value": "仲間との協力が成功への鍵よ。チームワークを大切にしてね。"
+        },
+        {
+          "weight": 1,
+          "value": "小さな努力が大きな成果を生むわ。コツコツと続けることが大事よ。"
+        },
+        {
+          "weight": 1,
+          "value": "ポジティブな考えが良い結果を招くわ。前向きに考え続けてね。"
+        }
+      ]
+    },
+    "1730255471547-50761": {
+      "id": "1730255471547-50761",
+      "name": "flowerRed",
+      "description": "フラワー:赤色",
+      "isWeight": false,
+      "values": [
+        {
+          "weight": 1,
+          "value": "赤いバラは情熱と愛の象徴だぜ。あなたの中にある熱い思いを大切にして欲しいぜ。"
+        },
+        {
+          "weight": 1,
+          "value": "赤いポインセチアは、冬の寒さの中でも鮮やかに咲く強さがあるぜ。あなただって、困難を乗り越える力があるんだぜ。"
+        },
+        {
+          "weight": 1,
+          "value": "赤いカーネーションは、深い愛情と尊敬の気持ちを表すぜ。大切な人への感謝を忘れずにな。"
+        },
+        {
+          "weight": 1,
+          "value": "赤いチューリップは、愛の告白を意味するぜ。自分の気持ちを素直に伝えることも大切だぜ。"
+        },
+        {
+          "weight": 1,
+          "value": "赤いゼラニウムは、元気と活力の象徴だぜ。新しいことに挑戦する勇気を与えてくれるぜ。"
+        },
+        {
+          "weight": 1,
+          "value": "赤いコスモスは、秋の空の下、風に揺られて咲いているぜ。あなたの心も、自由で穏やかな気持ちで満たされて欲しいぜ。"
+        },
+        {
+          "weight": 1,
+          "value": "赤いポピーは、感謝の気持ちを伝える花だぜ。いつもありがとうだぜ。"
+        }
+      ]
+    },
+    "1730255480352-f1t5h": {
+      "id": "1730255480352-f1t5h",
+      "name": "flowerBlue",
+      "description": "フラワー:青色",
+      "isWeight": false,
+      "values": [
+        {
+          "weight": 1,
+          "value": "青い朝顔は、夏の朝を美しく彩るぜ。清々しい一日の始まりを感じさせてくれるんだぜ。"
+        },
+        {
+          "weight": 1,
+          "value": "青いデルフィニウムは、高貴さと優雅さの象徴だぜ。あなたの中にも、そんな魅力が隠れているかもしれないぜ。"
+        },
+        {
+          "weight": 1,
+          "value": "青いアジサイは、移り気な心を表すと言われているぜ。でも、それは柔軟性があるということだぜ。"
+        },
+        {
+          "weight": 1,
+          "value": "青いルピナスは、想像力と創造性を刺激してくれるぜ。新しいアイデアが湧いてくるかもだぜ。"
+        },
+        {
+          "weight": 1,
+          "value": "青いコーンフラワーは、希望と幸福を象徴するぜ。明るい未来が待っているはずだぜ。"
+        },
+        {
+          "weight": 1,
+          "value": "青いスミレは、春の息吹を感じさせてくれる、可憐な花だぜ。あなたの心も、きっと温かくて優しいはずだぜ。"
+        },
+        {
+          "weight": 1,
+          "value": "青いリンドウは、厳しい冬を乗り越えて咲く花だぜ。あなたは、どんな困難にも立ち向かえる、強い心の持ち主なんだぜ。"
         }
       ]
     }
@@ -230,7 +382,12 @@
     "1730186417456-m98tz",
     "1730186488892-o4w6g"
   ],
-  "placeOrder": ["1730215131236-r0mi5"],
+  "placeOrder": [
+    "1730215131236-r0mi5",
+    "1730255242642-ltoka",
+    "1730255471547-50761",
+    "1730255480352-f1t5h"
+  ],
   "preferences": {
     "basicDelay": 1,
     "omikujiCooldown": 2,

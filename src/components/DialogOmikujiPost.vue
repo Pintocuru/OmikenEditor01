@@ -168,6 +168,7 @@ import type {
   OmikujiPostType,
   OmikenCategory,
   OmikenEntry,
+  PlaceType,
 } from "../types";
 import _ from "lodash";
 const props = defineProps<{
@@ -349,25 +350,40 @@ const onecommeTypeItems = [
 ];
 
 // place を使ってプレースホルダーを置き換え
-const replacePlaceholder = (content: string): string => {
+const replacePlaceholder = (content: string,): string => {
   if (!place) return content;
 
   // プレースホルダーの形式を <<...>> に変更
   return content.replace(/<<(.*?)>>/g, (_, name) => {
-    // 新しいplace構造に基づいてフィルタリング
-    const matchedPlaceholders = Object.values(place).filter(
-      (ph) => ph.name === `<<${name}>>`
-    );
-
-    if (matchedPlaceholders.length > 0) {
-      const randomPlaceholder =
-        matchedPlaceholders[
-          Math.floor(Math.random() * matchedPlaceholders.length)
-        ];
-      return randomPlaceholder.content;
+    // 名前に一致するプレースホルダーを検索
+    const matchedPlaceholder = Object.values(place).find(ph => ph.name === name);
+      console.log(Object.values(place));
+    if (!matchedPlaceholder) {
+      return `<<${name}>>`; // プレースホルダーが見つからなかった場合はそのまま表示
     }
 
-    return `<<${name}>>`; // プレースホルダーが見つからなかった場合はそのまま表示
+    // values配列から値を選択
+    const values = matchedPlaceholder.values;
+    
+    if (matchedPlaceholder.isWeight) {
+      // 重み付けモードの場合
+      const totalWeight = values.reduce((sum, v) => sum + v.weight, 0);
+      let random = Math.random() * totalWeight;
+      
+      for (const val of values) {
+        random -= val.weight;
+        if (random <= 0) {
+          // 選択された値に他のプレースホルダーが含まれている場合は再帰的に置換
+          return replacePlaceholder(val.value);
+        }
+      }
+      // 万が一どの値も選択されなかった場合は最後の値を使用
+      return replacePlaceholder(values[values.length - 1].value);
+    } else {
+      // 重み付けなしの場合はランダムに選択
+      const randomIndex = Math.floor(Math.random() * values.length);
+      return replacePlaceholder(values[randomIndex].value);
+    }
   });
 };
 </script>

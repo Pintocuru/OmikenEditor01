@@ -1,4 +1,4 @@
-// src/composables/funkOmikenJSON.ts
+// src/composables/funkJSON.ts
 import { ref } from 'vue';
 import type { OmiEditType, ListCategory, CHARAType, EditerTypeMap } from '../types';
 import { z } from 'zod';
@@ -76,7 +76,7 @@ export function funkJSON() {
     }
     // テストモード:保存できたことをログに表示
     if (!canUpdateJSON.value) {
-      console.warn('saveDataまで届きました:',Omiken);
+      console.warn('saveDataまで届きました:', Omiken);
       return;
     }
     // ロード中ならreturn(書き込みONの表示も兼ねて)
@@ -162,7 +162,7 @@ const rulesSchema = z.record(z.object({
   // おみくじルール名
   name: z.string().default('おみくじ'),
   // 説明文
-  description: z.string().default(''), 
+  description: z.string().default(''),
   // ルールの有効/無効 0:OFF/1:だれでも/2:メンバー以上/3:モデレーター/4:管理者
   switch: z.union([z.literal(0), z.literal(1), z.literal(2), z.literal(3), z.literal(4)]).default(1),
   // omikujiの適用しないIDリスト
@@ -181,7 +181,7 @@ const thresholdValueTransform = z.number().transform(val => {
 });
 
 // value1とvalue2のチェック関数
-const thresholdValueRangeSwap = (schema:any) => schema.transform((data: any) => {
+const thresholdValueRangeSwap = (schema: any) => schema.transform((data: any) => {
   if (data.comparison === 'range' && data.value1 > data.value2) {
     [data.value1, data.value2] = [data.value2, data.value1];
   }
@@ -231,11 +231,11 @@ const omikujiThresholdSchema = z.object({
 });
 
 // omikuji.postスキーマ
-const omikujiPostSchema = z.array(z.object({
+export const omikujiPostSchema = z.array(z.object({
   type: z.enum(['onecomme', 'party', 'toast', 'speech']).default('onecomme'),
   botKey: z.string().default('mamono'),
   iconKey: z.string().default('Default'),
-  delaySeconds: z.number().nonnegative().default(0),
+  delaySeconds: z.number().default(0),
   content: z.string().default('<<user>>さんの運勢は【大吉】<<random>>')
 }))
   .transform((posts) =>
@@ -266,9 +266,9 @@ const placeSchema = z.record(z.object({
   // ID
   id: z.string(),
   // プレースホルダー名
-  name: z.string().default('<<random>>'),
+  name: z.string().default('random'),
   // 説明文
-  description: z.string().default(''),  
+  description: z.string().default(''),
   // タイプ(出現割合の有無)
   isWeight: z.boolean().default(false),
 
@@ -305,7 +305,7 @@ const schemas = {
 const defaultValues = {
   rules: {
     name: 'おみくじ',
-    description:'',
+    description: '',
     switch: 1,
     enabledIds: [],
     matchExact: [],
@@ -353,10 +353,10 @@ const defaultValues = {
     }]
   },
   place: {
-    name: '<<random>>',
+    name: 'random',
     description: '',
-    isWeight:false,
-    values:[{
+    isWeight: false,
+    values: [{
       weight: 1,
       value: '',
     }],

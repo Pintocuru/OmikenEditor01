@@ -36,6 +36,7 @@ import {
   OmikenCategory,
   ListEntries,
 } from "@/types";
+import { validateData } from "@/composables/funkJSON";
 
 // Props / emit
 const props = defineProps<{
@@ -91,6 +92,9 @@ const closeClickOutside = (event: MouseEvent) => {
     });
   }
 };
-// クリック時に起動
-onMounted(() => document.addEventListener("mousedown", closeClickOutside));
+
+onMounted(() => {
+  // 外部クリック時に起動
+  document.addEventListener("mousedown", closeClickOutside)
+});
 </script>
