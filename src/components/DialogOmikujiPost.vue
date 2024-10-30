@@ -188,7 +188,7 @@ const place = AppState?.value.Omiken.place;
 // メッセージが存在しないかどうかをチェック
 const hasNoMessages = computed(() => props.currentItem.post.length === 0);
 
-// postに追加
+// postに追加 // TODO Barに追加ボタンを押す(一番トップ)、削除ボタンは時間のほうへ
 const addPost = () => {
   const item = props.currentItem;
   // キャラクターキーを取得
@@ -199,7 +199,7 @@ const addPost = () => {
     botKey: botKey,
     iconKey: "Default",
     delaySeconds: 0,
-    content: "<<user>>さんの運勢は【大吉】",
+    content: "<<user>>の新しいメッセージ",
   });
   // 状態を更新
   emit("update:Omiken", {

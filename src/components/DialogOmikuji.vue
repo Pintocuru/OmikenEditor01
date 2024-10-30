@@ -44,11 +44,7 @@
                   class="mr-2"
                 >
                   {{ selectedRuleName }}
-                  <v-chip
-                    size="x-small"
-                    class="ml-2"
-                    color="primary"
-                  >
+                  <v-chip size="x-small" class="ml-2" color="primary">
                     {{ selectedRuleWeight }}%
                   </v-chip>
                 </v-btn>
@@ -86,20 +82,18 @@
               <v-icon size="small">mdi-message-text</v-icon>
             </v-badge>
           </v-tab>
-          <v-tab
-            value="filter"
-            class="d-flex align-center w-50"
-            :class="{ 'bg-primary': activeFilters && activeFilters.length > 0 }"
-          >
+          <v-tab value="filter" class="d-flex align-center w-50">
             フィルタリング
-            <v-chip
-              v-for="filter in activeFilters"
-              :key="filter.type"
-              size="x-small"
-              class="ms-1"
+            <v-badge
+              v-if="activeFilters && activeFilters.length > 0"
+              :content="
+                currentItem?.threshold.isSyoken ? 1 : activeFilters.length
+              "
+              color="primary"
+              class="ms-2"
             >
-              <v-icon size="small">{{ filter.icon }}</v-icon>
-            </v-chip>
+              <v-icon size="small">mdi-filter-variant</v-icon>
+            </v-badge>
           </v-tab>
         </v-tabs>
 
@@ -113,9 +107,7 @@
           <v-window-item value="filter">
             <DialogOmikujiFilter
               :currentItem="currentItem"
-              :thresholdTypes="thresholdTypes"
-              :comparisonItems="comparisonItems"
-              @update="updateOmiken"
+              @update:Omiken="updateOmiken"
             />
           </v-window-item>
         </v-window>
@@ -156,8 +148,7 @@ const omikuji = AppState?.value.Omiken.omikuji;
 const CHARA = AppState?.value.CHARA;
 
 // コンポーザブルの使用
-const {  thresholdTypes, comparisonItems } =
-  funkOmikuji(CHARA);
+const { thresholdTypes, comparisonItems } = funkOmikuji(CHARA);
 const { validOmikujiOptions } = funkRules(omikuji, null);
 
 // ref
@@ -170,13 +161,13 @@ const currentItem = computed(() => {
   return item ? Object.values(item)[0] : null;
 });
 
-// 投稿数
+// postのアイテム数
 const postCount = computed(() => {
   if (!currentItem.value) return;
   return currentItem.value.post.length;
 });
 
-// アクティブなフィルター
+// アクティブなフィルタリング
 const activeFilters = computed(() => {
   if (!currentItem.value) return;
   const threshold = currentItem.value.threshold;
@@ -261,7 +252,7 @@ const calculateWeight = (ruleId: string): number => {
   );
 
   const totalWeight = validOmikuji.reduce((sum, omi) => sum + omi.weight, 0);
-  
+
   return totalWeight > 0
     ? Math.round((currentItem.value.weight / totalWeight) * 100)
     : 0;

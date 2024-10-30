@@ -1,6 +1,6 @@
 <!-- src/components/ListItemPlace.vue -->
 <template>
-  <v-col cols="12">
+  <v-col cols="12" sm="6" md="4">
     <v-card @click="openEditor">
       <v-toolbar density="compact">
         <v-toolbar-title>
