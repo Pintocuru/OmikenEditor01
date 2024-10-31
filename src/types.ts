@@ -7,7 +7,6 @@ export interface AppStateType {
   Omiken: OmiEditType;
   CHARA: CHARAType;
   preset: Record<string, PresetOmiBotType>; // プリセットデータ
-  activePresetId: string | null;
 }
 
 // Omiken:おみくじエディター用型定義
@@ -54,6 +53,15 @@ export type OmikenEntry<T extends OmikenCategory> = {
   preferences?: T extends 'preferences' ? PreferencesType : never; // 設定用
 } | null;
 
+// プリセット用
+export interface PresetType {
+  id: string;
+  name: string;
+  description: string;
+  type: 'Omiken' | 'CHARA'; 
+  path: string;
+  banner: string;
+}
 
 
 // ---------------------------------------------------

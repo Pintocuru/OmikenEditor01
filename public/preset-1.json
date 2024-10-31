@@ -1,0 +1,121 @@
+{
+  "Omiken": {
+    "rules": {
+      "rule1": {
+        "id": "rule1",
+        "name": "Basic Rule",
+        "description": "A simple rule to apply omikuji messages",
+        "switch": 1,
+        "enabledIds": ["omikuji1", "omikuji2"],
+        "matchExact": ["おみくじ"],
+        "matchStartsWith": ["おみくじを"],
+        "matchIncludes": ["ひく"]
+      }
+    },
+    "omikuji": {
+      "omikuji1": {
+        "id": "omikuji1",
+        "name": "Good Luck",
+        "description": "A positive omikuji message",
+        "weight": 60,
+        "threshold": {
+          "isSyoken": false,
+          "time": {
+            "isEnabled": false,
+            "value1": 0,
+            "value2": 23
+          },
+          "elapsed": {
+            "isEnabled": false,
+            "unit": "second",
+            "value1": 0,
+            "value2": 3600,
+            "comparison": "min"
+          },
+          "count": {
+            "isEnabled": false,
+            "unit": "lc",
+            "value1": 1,
+            "value2": 10,
+            "comparison": "range"
+          },
+          "gift": {
+            "isEnabled": false,
+            "value1": 0,
+            "value2": 1,
+            "comparison": "min"
+          }
+        },
+        "post": [
+          {
+            "type": "onecomme",
+            "botKey": "Omiken",
+            "iconKey": "default",
+            "delaySeconds": 1,
+            "content": "おめでとうございます!今日のあなたの運勢は良いですね。"
+          }
+        ]
+      },
+      "omikuji2": {
+        "id": "omikuji2",
+        "name": "Bad Luck",
+        "description": "A negative omikuji message",
+        "weight": 40,
+        "threshold": {
+          "isSyoken": false,
+          "time": {
+            "isEnabled": false,
+            "value1": 0,
+            "value2": 23
+          },
+          "elapsed": {
+            "isEnabled": false,
+            "unit": "second",
+            "value1": 0,
+            "value2": 3600,
+            "comparison": "min"
+          },
+          "count": {
+            "isEnabled": false,
+            "unit": "lc",
+            "value1": 1,
+            "value2": 10,
+            "comparison": "range"
+          },
+          "gift": {
+            "isEnabled": false,
+            "value1": 0,
+            "value2": 1,
+            "comparison": "min"
+          }
+        },
+        "post": [
+          {
+            "type": "onecomme",
+            "botKey": "Omiken",
+            "iconKey": "default",
+            "delaySeconds": 1,
+            "content": "今日の運勢は良くないみたいですね。頑張りましょう!"
+          }
+        ]
+      }
+    },
+    "place": {
+      "place1": {
+        "id": "place1",
+        "name": "Name Placeholder",
+        "description": "Placeholder for user's name",
+        "isWeight": false,
+        "values": [
+          {
+            "weight": 100,
+            "value": "<<user>>"
+          }
+        ]
+      }
+    },
+    "rulesOrder": ["rule1"],
+    "omikujiOrder": ["omikuji1", "omikuji2"],
+    "placeOrder": ["place1"]
+  }
+}

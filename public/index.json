@@ -1,0 +1,26 @@
+[
+  {
+    "id": "preset-1",
+    "name": "Default Preset",
+    "description": "A default preset with basic settings",
+    "type": "Omiken",
+    "path": "/preset-1.json",
+    "banner": "/images/preset-1-banner.jpg"
+  },
+  {
+    "id": "reimu",
+    "name": "ゆっくり霊夢",
+    "description": "アイコンの配布先とか書いておきたいね",
+    "type": "CHARA",
+    "path": "/img/reimu.json",
+    "banner": "/images/preset-3-banner.jpg"
+  },
+  {
+    "id": "marisa",
+    "name": "ゆっくり魔理沙",
+    "description": "アイコンの配布先とか書いておきたいね",
+    "type": "CHARA",
+    "path": "/img/marisa.json",
+    "banner": "/images/preset-3-banner.jpg"
+  }
+]

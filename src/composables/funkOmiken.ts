@@ -1,4 +1,5 @@
 // src/composables/funkOmiken.ts
+
 import { computed, onMounted, provide, Ref, ref } from 'vue';
 import type {
   OmiEditType,
@@ -7,10 +8,9 @@ import type {
   AppStateType,
   OrderKey,
   OmikenCategory,
-  ListEntries
-} from '../types';
-import { funkJSON, validateData } from "./funkJSON";
-
+  ListEntries} from '../types';
+import { funkJSON,  } from "./funkJSON";
+import { validateData } from "./funkValidate";
 
 export function funkOmiken(listEntry: Ref<ListEntries>) {
   const AppState = ref<AppStateType>({
@@ -30,58 +30,55 @@ export function funkOmiken(listEntry: Ref<ListEntries>) {
     },
     CHARA: {},
     preset: {},
-    activePresetId: null,
   });
+  const isOmikenChanged = ref(false); // 保存フラグ
 
-  // 保存フラグ
-  const isOmikenChanged = ref(false);
   // ダイアログがすべて閉じている+保存フラグならtrue
   const isOmikenSave = computed(() => {
-    const isAllDialogsClosed = !Object.values(listEntry.value).some(entry => entry.isOpen);
-    return isAllDialogsClosed && isOmikenChanged.value;
+    const isDialogsClosed = !Object.values(listEntry.value).some(entry => entry.isOpen);
+    return isDialogsClosed && isOmikenChanged.value;
   });
-  let saveInterval: ReturnType<typeof setInterval> | null = null;
 
   // provide
   provide("AppStateKey", AppState);
 
-  const { fetchOmiken: fetchOmiken, saveOmiken: saveOmiken, fetchCHARA } = funkJSON();
+  const { fetchOmiken, fetchPreset, saveOmiken, } = funkJSON();
 
-  // 初期読み込み // TODO プリセット読み込みを実装
-  const AppStateInitialize = async () => {
-    // CHARA読み込み
-    const charaFileNames = ['reimu.json', 'marisa.json',];
-    const CHARAData = await fetchCHARA(charaFileNames);
-    if (CHARAData) AppState.value.CHARA = CHARAData;
+  // アプリケーションの初期化を一元管理
+  const initializeApp = async () => {
+    try {
+      // 外部データの読み込み
+      const { charaData, presetData } = await fetchPreset();
+      AppState.value.CHARA = charaData;
+      AppState.value.preset = presetData;
 
-    // Omiken読み込み
-    const OmikenData = await fetchOmiken();
-    if (OmikenData) AppState.value.Omiken = OmikenData;
+      // 使用しているOmikenデータの読み込み
+      const omikenData = await fetchOmiken();
+      if (omikenData) AppState.value.Omiken = omikenData;
+
+      // 自動保存の開始
+      startOmikenSave();
+    } catch (error) {
+      console.error('Failed to initialize app:', error);
+      throw error;
+    }
   };
 
-  // コンポーネントのマウント時にデータを取得
-  onMounted(async () => {
-    await AppStateInitialize();
-  });
-
-  // 保存フラグがあり、ダイアログがすべて閉じているなら、APIを飛ばす
+  // 自動保存の処理 // TODO 別にsetInterval使わなくてもいいのでは…
   const startOmikenSave = () => {
-    // 既存のインターバルをクリア
-    if (saveInterval) clearInterval(saveInterval);
-
-    // 2秒ごとにチェック
-    saveInterval = setInterval(() => {
+    const autoSaveInterval = 2000;
+    const interval = setInterval(() => {
       if (isOmikenSave.value) {
         saveOmiken(AppState.value.Omiken);
         isOmikenChanged.value = false;
-
       }
-    }, 2000);
+    }, autoSaveInterval);
+
   };
-  // コンポーネントのマウント時に自動保存を開始
-  onMounted(() => {
-    startOmikenSave();
-  });
+
+  // 初期化処理の実行
+  onMounted(initializeApp);
+
 
   const updateOmiken = (payload: OmikenEntry<OmikenCategory>) => {
     if (!payload) return;
@@ -90,8 +87,8 @@ export function funkOmiken(listEntry: Ref<ListEntries>) {
     // 現在のステートのディープコピーを作成
     const newState: OmiEditType = JSON.parse(JSON.stringify(AppState.value.Omiken));
 
+    // preferences の更新
     if (type === 'preferences' && preferences) {
-      // preferences の更新
       newState.preferences = {
         ...newState.preferences,
         ...preferences
@@ -124,19 +121,16 @@ export function funkOmiken(listEntry: Ref<ListEntries>) {
       }
 
       // 順序の更新
-      if (reorder) {
-        newState[orderKey] = reorder;
-      }
-    }
+      if (reorder) newState[orderKey] = reorder;
 
+    }
     // ステートの一括更新
     AppState.value.Omiken = newState;
     console.log('保存フラグが立ったよ');
-    isOmikenChanged.value = true; // 保存フラグ
-    // saveOmiken(newState);
+    isOmikenChanged.value = true;
   };
 
-  // 強制保存用
+  // 強制保存用 // TODO これは閉じた時のみ使うのでreturnしなくてもいいかも
   const forceSave = () => {
     if (isOmikenChanged.value) {
       saveOmiken(AppState.value.Omiken);
@@ -144,11 +138,8 @@ export function funkOmiken(listEntry: Ref<ListEntries>) {
     }
   };
 
-
   return {
     AppState,
-    isOmikenChanged: isOmikenChanged,
-    updateOmiken: updateOmiken,
-    forceSave
+    updateOmiken,
   };
 }
