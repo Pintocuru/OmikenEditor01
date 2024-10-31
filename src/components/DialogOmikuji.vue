@@ -147,9 +147,6 @@ const rules = AppState?.value.Omiken.rules;
 const omikuji = AppState?.value.Omiken.omikuji;
 const CHARA = AppState?.value.CHARA;
 
-// コンポーザブルの使用
-const { thresholdTypes, comparisonItems } = funkOmikuji(CHARA);
-const { validOmikujiOptions } = funkRules(omikuji, null);
 
 // ref
 const tab = ref("post"); // タブの状態管理

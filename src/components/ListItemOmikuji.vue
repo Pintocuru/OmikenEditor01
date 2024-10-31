@@ -27,13 +27,13 @@ import {
   ListCategory,
   OmikujiType,
   OmikenEntry,
-  OmiEditType,
+  OmikenEditType,
   OmikenCategory,
 } from "@/types";
 import { computed } from "vue";
 import _ from "lodash";
 const props = defineProps<{
-  Omiken: OmiEditType;
+  Omiken: OmikenEditType;
   item: OmikujiType;
   naviCategory: ListCategory;
 }>();

@@ -1,10 +1,10 @@
 // src/composables/FunkPreset.ts
 import { ref, Ref } from 'vue';
-import { AppStateType, PresetType, } from "@/types";
+import { AppStateType, fetchJSONType, } from "@/types";
 
 
 export function usePresetManager(appState: Ref<AppStateType> | undefined) {
-  const availablePresets = ref<PresetType[]>([]);
+  const availablePresets = ref<fetchJSONType[]>([]);
   const isLoading = ref(false);
 
   // プリセット一覧の読み込み - omikujiのみを取得
@@ -14,7 +14,7 @@ export function usePresetManager(appState: Ref<AppStateType> | undefined) {
       const response = await fetch('/presets/index.json');
       const presets = await response.json();
       // Omikenタイプのプリセットのみをフィルタリング
-      availablePresets.value = presets.filter((preset: PresetType) =>
+      availablePresets.value = presets.filter((preset: fetchJSONType) =>
         preset.type === 'Omiken'
       );
     } catch (error) {

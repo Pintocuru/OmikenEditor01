@@ -33,14 +33,14 @@ import {
   ListCategory,
   PlaceType,
   OmikenEntry,
-  OmiEditType,
+  OmikenEditType,
   OmikenCategory,
 } from "@/types";
 import ListItemPartsAction from "./common/ListItemPartsAction.vue";
 
 // Props Emits
 const props = defineProps<{
-  Omiken: OmiEditType;
+  Omiken: OmikenEditType;
   item: PlaceType;
   naviCategory: ListCategory;
 }>();

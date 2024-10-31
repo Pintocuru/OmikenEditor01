@@ -262,7 +262,7 @@ const getIconKeyItems = (botKey: string | undefined) => {
       console.warn("無効なボットキーまたはCHARA:", { botKey, CHARA });
       return [];
     }
-    return Object.keys(CHARA[botKey].image).map((key) => ({
+    return Object.keys(CHARA[botKey].item.image).map((key) => ({
       text: key,
       value: key,
     }));
@@ -277,7 +277,7 @@ const getCharaColor = (botKey: string | undefined): string => {
   try {
     // CHARAが存在し、値が取得できるかを確認
     if (botKey && CHARA && CHARA[botKey]) {
-      return CHARA[botKey].color["--lcv-background-color"];
+      return CHARA[botKey].item.color["--lcv-background-color"];
     }
     console.warn("無効なボットキーまたはCHARA:", { botKey, CHARA });
     return "";
@@ -296,7 +296,7 @@ const getCharaImage = (
     // CHARA.valueを使用してアクセス
     if (botKey && CHARA && CHARA[botKey] && iconKey) {
       // 画像パスを明示的に指定
-      return `/img/${CHARA[botKey].image[iconKey]}`;
+      return `/img/${CHARA[botKey].item.image[iconKey]}`;
     }
     console.warn("無効なボットキーまたはアイコンキー:", {
       botKey,

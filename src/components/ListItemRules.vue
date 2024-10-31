@@ -75,7 +75,7 @@ import {
   ListCategory,
   RulesType,
   OmikenEntry,
-  OmiEditType,
+  OmikenEditType,
   OmikenCategory,
 } from "@/types";
 import ListItemPartsAction from "./common/ListItemPartsAction.vue";
@@ -83,7 +83,7 @@ import { funkRules } from "../composables/funkRules";
 import _ from "lodash";
 // Props Emits
 const props = defineProps<{
-  Omiken: OmiEditType;
+  Omiken: OmikenEditType;
   item: RulesType;
   naviCategory: ListCategory;
 }>();

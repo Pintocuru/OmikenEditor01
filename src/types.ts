@@ -4,19 +4,17 @@
 
 // AppState
 export interface AppStateType {
-  Omiken: OmiEditType;
-  CHARA: CHARAType;
-  preset: Record<string, PresetOmiBotType>; // プリセットデータ
+  Omiken: OmikenEditType;
+  CHARA: Record<string, CHARAEditType>;
+  Preset: Record<string, PresetOmikenEditType>; // プリセットデータ
 }
 
 // Omiken:おみくじエディター用型定義
-export interface OmiEditType extends OmiBotType {
+export interface OmikenEditType extends OmikenType {
   rulesOrder: string[]; // ルールの順序
   omikujiOrder: string[]; // おみくじの順序
   placeOrder: string[]; // プレースホルダーの順序
 }
-// preset には preferences は不要
-type PresetOmiBotType = Omit<OmiBotType, 'preferences'>;
 
 // 基本となるカテゴリー
 type BaseCategory = 'rules' | 'omikuji' | 'place';
@@ -49,18 +47,26 @@ export type OmikenEntry<T extends OmikenCategory> = {
   addKeys?: T extends BaseCategory ? Partial<EditerTypeMap[T]>[] : never // 新規追加アイテム(部分入力可)
   delKeys?: string[]; // 削除するアイテムのキー名
   reorder?: T extends BaseCategory ? string[] : never; // 順番の指定
-  preset?: T extends 'preset' ? Record<string, PresetOmiBotType> : never; // プリセット用
+  preset?: T extends 'preset' ? Record<string, PresetOmikenEditType> : never; // プリセット用
   preferences?: T extends 'preferences' ? PreferencesType : never; // 設定用
 } | null;
 
-// プリセット用
-export interface PresetType {
+// JSON読み込み用
+export interface fetchJSONType {
   id: string;
   name: string;
   description: string;
-  type: 'Omiken' | 'CHARA'; 
+  type: 'Omiken' | 'CHARA';
   path: string;
   banner: string;
+}
+
+// Edit用キャラデータ
+export interface CHARAEditType extends fetchJSONType {
+  item: CHARAType; // キャラデータ
+}
+export interface PresetOmikenEditType extends fetchJSONType {
+  item: Omit<OmikenEditType, 'preferences'>; // キャラデータ(preferences抜き)
 }
 
 
@@ -68,7 +74,7 @@ export interface PresetType {
 
 
 // Omibot:おみくじボット用型定義
-export interface OmiBotType {
+export interface OmikenType {
   rules: Record<string, EditerTypeMap['rules']>; // おみくじのルールを管理
   omikuji: Record<string, EditerTypeMap['omikuji']>; // おみくじ関連のメッセージ
   place: Record<string, EditerTypeMap['place']>; // プレースホルダー
@@ -114,7 +120,7 @@ export interface OmikujiType extends BaseType {
   post: OmikujiPostType[];
 }
 
-export interface thresholdType{
+export interface thresholdType {
   isSyoken: boolean; // isSyoken:初見かどうか。これがONなら、下記は設定不可
   time: { // time:時間指定(0-23時)
     isEnabled: boolean;
@@ -182,13 +188,13 @@ export interface PlaceType extends BaseType {
 }
 
 // プレースホルダーの値
-export type PlaceValueType =  {
+export type PlaceValueType = {
   weight: number; // 出現割合
   value: string; // 値（他のプレースホルダーへの参照可能: <<place_name>>）
 }
 
 // 設定の型定義
-export interface  PreferencesType{
+export interface PreferencesType {
   basicDelay: number; // コメントしてからBotが反応するまでの遅延(秒)
   omikujiCooldown: number; // おみくじ機能のクールダウン時間（秒)
   commentDuration: number; // コメントしてからおみくじを有効とする時間(秒)
@@ -199,20 +205,18 @@ export interface  PreferencesType{
 
 // CHARA:キャラクターJSONの型定義
 export interface CHARAType {
-  [key: string]: {
-    id: string; // キー名
-    name: string; // キャラクターの名前
-    frameId?: string; // わんコメの枠
-    color: {
-      "--lcv-name-color": string; // 名前の色
-      "--lcv-text-color": string; // コメントの色
-      "--lcv-background-color": string; // 背景色
-    },
-    image: {
-      Default: string; // defaultは必須
-      [key: string]: string; // 追加のキーに対応
-    }
-  };
+  id: string; // キー名
+  name: string; // キャラクターの名前
+  frameId?: string; // わんコメの枠
+  color: {
+    "--lcv-name-color": string; // 名前の色
+    "--lcv-text-color": string; // コメントの色
+    "--lcv-background-color": string; // 背景色
+  },
+  image: {
+    Default: string; // defaultは必須
+    [key: string]: string; // 追加のキーに対応
+  }
 }
 
 // キャラクターJSON（編集時）

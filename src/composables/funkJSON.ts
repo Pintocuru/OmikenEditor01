@@ -1,17 +1,26 @@
 // src/composables/funkJSON.ts
 import { ref } from 'vue';
 import { validateData, generateOrder } from "./funkValidate";
-import type { OmiEditType, CHARAType, PresetType } from '../types';
+import type { OmikenEditType, fetchJSONType, CHARAEditType, PresetOmikenEditType } from '../types';
 import _ from 'lodash';
 import Swal from 'sweetalert2';
 import { useToast } from 'vue-toastification';
+
+
+// ! /////////////////////////////////////////
+// !
+// ! すべてのJSON読み込み・更新 は、代わりに「APIで通信をする」に変わります。
+// ! Editer自身では、fetchを使ったJSON読み込みも更新も行えません!
+// !
+// ! /////////////////////////////////////////
+
 
 // JSONデータの読み込み・書き込み
 export function funkJSON() {
   const canUpdateJSON = ref(false); // テストモード:JSONを書き込みするか
   const isLoading = ref(false); // 読み込み中かどうか、読み込み失敗ならずっとtrue
   const noAppBoot = ref(false); // 起動できたか
-  const lastSavedState = ref<OmiEditType | null>(null); // 1つ前へ戻る機能
+  const lastSavedState = ref<OmikenEditType | null>(null); // 1つ前へ戻る機能
   const toast = useToast(); // vue-toastification
 
 
@@ -25,8 +34,8 @@ export function funkJSON() {
 
       // 型ごとにデータ取得と整形
       const [charaData, presetData] = await Promise.all([
-        fetchCHARA(presets.filter((p: PresetType) => p.type === 'CHARA')),
-        fetchPreOmiken(presets.filter((p: PresetType) => p.type === 'Omiken'))
+        fetchCHARA(presets.filter((p: fetchJSONType) => p.type === 'CHARA')),
+        fetchPreOmiken(presets.filter((p: fetchJSONType) => p.type === 'Omiken'))
       ]);
 
       return { charaData, presetData };
@@ -38,30 +47,37 @@ export function funkJSON() {
     }
   };
 
-  // preset.CHARAの読み込み
-  const fetchCHARA = async (charaPaths: PresetType[]) => {
+  // Preset.CHARAの読み込み
+  const fetchCHARA = async (charaPaths: fetchJSONType[]) => {
     const responses = await Promise.all(
-      charaPaths.map(p => fetch(p.path).then(r => r.json()))
+      charaPaths.map(async p => {
+        const item = await fetch(p.path).then(r => r.json());
+        return { ...p, item } as CHARAEditType;
+      })
     );
-    return responses.reduce<CHARAType>((acc, chara) => {
+    return responses.reduce<Record<string, CHARAEditType>>((acc, chara) => {
       acc[chara.id] = chara;
       return acc;
     }, {});
   };
 
-  // preset.Omikenの読み込み
-  const fetchPreOmiken = async (presetPaths: PresetType[]) => {
+  // Preset.Omikenの読み込み
+  const fetchPreOmiken = async (presetPaths: fetchJSONType[]) => {
     const responses = await Promise.all(
-      presetPaths.map(p => fetch(p.path).then(r => r.json()))
+      presetPaths.map(async p => {
+        const item = await fetch(p.path).then(r => r.json());
+        return { ...p, item } as PresetOmikenEditType;
+      })
     );
-    return responses.reduce((acc, data) => ({
-      ...acc,
-      ...data.preset
-    }), {});
+    console.log(responses);
+    return responses.reduce<Record<string, PresetOmikenEditType>>((acc, data) => {
+      acc[data.id] = data;
+      return acc;
+    }, {});
   };
 
-
-  const fetchOmiken = async (): Promise<OmiEditType | null> => {
+  // 現在のOmiken読み込み
+  const fetchOmiken = async (): Promise<OmikenEditType | null> => {
     // 取得中ならreturn
     if (isLoading.value) {
       console.warn('データの取得が既に進行中です');
@@ -78,7 +94,7 @@ export function funkJSON() {
       const data = await response.json();
 
       // データの検証と正規化
-      const validatedData: OmiEditType = {
+      const validatedData: OmikenEditType = {
         rules: validateData('rules', data.rules),
         omikuji: validateData('omikuji', data.omikuji),
         place: validateData('place', data.place),
@@ -109,7 +125,7 @@ export function funkJSON() {
     }
   };
 
-  const saveOmiken = async (Omiken: OmiEditType): Promise<void> => {
+  const saveOmiken = async (Omiken: OmikenEditType): Promise<void> => {
 
 
     if (noAppBoot.value) {

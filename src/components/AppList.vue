@@ -61,7 +61,7 @@ import ListPreferences from "./ListPreferences.vue"; // 追加
 import { z } from "zod";
 import _ from "lodash";
 import type {
-  OmiEditType,
+  OmikenEditType,
   ListCategory,
   OmikenEntry,
   OmikujiType,
@@ -75,7 +75,7 @@ import type {
 
 // Props Emits
 const props = defineProps<{
-  Omiken: OmiEditType;
+  Omiken: OmikenEditType;
   naviCategory: NaviCategory;
 }>();
 

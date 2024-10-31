@@ -2,7 +2,7 @@
 
 import { computed, onMounted, provide, Ref, ref } from 'vue';
 import type {
-  OmiEditType,
+  OmikenEditType,
   OmikenEntry,
   EditerType,
   AppStateType,
@@ -29,7 +29,7 @@ export function funkOmiken(listEntry: Ref<ListEntries>) {
       },
     },
     CHARA: {},
-    preset: {},
+    Preset: {},
   });
   const isOmikenChanged = ref(false); // 保存フラグ
 
@@ -50,7 +50,9 @@ export function funkOmiken(listEntry: Ref<ListEntries>) {
       // 外部データの読み込み
       const { charaData, presetData } = await fetchPreset();
       AppState.value.CHARA = charaData;
-      AppState.value.preset = presetData;
+      console.log(charaData);
+      AppState.value.Preset = presetData;
+      console.log(presetData);
 
       // 使用しているOmikenデータの読み込み
       const omikenData = await fetchOmiken();
@@ -85,7 +87,7 @@ export function funkOmiken(listEntry: Ref<ListEntries>) {
     const { type, update, addKeys, delKeys, reorder, preferences } = payload;
 
     // 現在のステートのディープコピーを作成
-    const newState: OmiEditType = JSON.parse(JSON.stringify(AppState.value.Omiken));
+    const newState: OmikenEditType = JSON.parse(JSON.stringify(AppState.value.Omiken));
 
     // preferences の更新
     if (type === 'preferences' && preferences) {
