@@ -2,91 +2,93 @@
 <template>
   <v-card v-if="currentItem" style="max-height: 80vh; overflow-y: auto">
     <v-card-text>
-      <!-- 基本情報 -->
       <v-row>
-        <v-col cols="12" sm="6">
+        <v-col cols="12" sm="3">
           <v-text-field
             v-model="currentItem.name"
             label="プレースホルダー名"
-            density="compact"
-            @update:model-value="updateBasicInfo('name', $event)"
-          />
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col cols="12" sm="6">
-          <v-text-field
-            v-model="currentItem.description"
-            label="説明文"
-            density="compact"
-            @update:model-value="updateBasicInfo('description', $event)"
-          />
-        </v-col>
-        <v-col cols="12" sm="6">
-          <v-switch
-            v-model="currentItem.isWeight"
-            label="重み付けモード"
-            density="compact"
-            @update:model-value="updateBasicInfo('isWeight', $event)"
-            :true-value="true"
-            :false-value="false"
+            @update:model-value="updateItem('name', $event)"
           />
         </v-col>
       </v-row>
 
-      <!-- 値のリスト -->
-      <v-list>
-        <v-list-item v-for="(value, index) in currentItem.values" :key="index">
-          <v-row align="center">
-            <v-col cols="3" v-if="currentItem.isWeight">
-              <v-text-field
-                v-model.number="value.weight"
-                label="重み"
-                type="number"
-                density="compact"
-                @update:model-value="updateValue(index, 'weight', $event)"
-              />
-            </v-col>
-            <v-col cols="8">
-              <v-text-field
-                v-model="value.value"
-                label="値"
-                density="compact"
-                @update:model-value="updateValue(index, 'value', $event)"
-              />
-            </v-col>
-            <v-col cols="1">
-              <v-btn
-                icon
-                @click="removeValue(index)"
-                color="error"
-                density="compact"
+      <!-- おみくじワード -->
+      <v-card>
+        <v-toolbar color="primary" density="compact">
+          <v-toolbar-title>おみくじワード</v-toolbar-title>
+          <v-spacer></v-spacer>
+          <v-btn-toggle
+            v-model="isWeightMode"
+            density="compact"
+            color="primary"
+            mandatory
+             class="me-2"
+          >
+            <v-btn :value="false">
+              <v-icon>mdi-format-list-bulleted</v-icon>
+            </v-btn>
+            <v-btn :value="true">
+              <v-icon>mdi-scale-balance</v-icon>
+              <v-tooltip activator="parent" location="bottom"
+                >重み付けモード</v-tooltip
               >
-                <v-icon>mdi-delete</v-icon>
-              </v-btn>
-            </v-col>
-          </v-row>
-        </v-list-item>
-      </v-list>
-
-      <!-- 値の追加ボタン -->
-      <v-row class="mt-2">
-        <v-col cols="12">
-          <v-btn color="secondary" @click="addValue">
-            <v-icon start>mdi-plus</v-icon>
-            追加
-          </v-btn>
-        </v-col>
-      </v-row>
+            </v-btn>
+          </v-btn-toggle>
+          <v-btn variant="outlined" @click="addValue">＋追加</v-btn>
+        </v-toolbar>
+        <v-list density="compact">
+          <draggable
+            v-model="currentItem.values"
+            item-key="id"
+            handle=".handle"
+            @end="handleDragEnd"
+          >
+            <template #item="{ element: value, index }">
+              <v-list-item>
+                <v-row align="center" no-gutters>
+                  <v-col cols="auto" class="me-1">
+                    <v-icon class="handle" color="grey">mdi-drag</v-icon>
+                  </v-col>
+                  <v-col
+                    :cols="isWeightMode ? 2 : 0"
+                    v-if="isWeightMode"
+                    class="me-2"
+                  >
+                    <v-text-field
+                      v-model.number="value.weight"
+                      label="重み"
+                      type="number"
+                      @update:model-value="updateValue(index, 'weight', $event)"
+                    />
+                  </v-col>
+                  <v-col :cols="isWeightMode ? 8 : 10">
+                    <v-text-field
+                      v-model="value.value"
+                      label="値"
+                      @update:model-value="updateValue(index, 'value', $event)"
+                    />
+                  </v-col>
+                  <v-col cols="auto">
+                    <v-btn color="error" @click="removeValue(index)">
+                      <v-icon>mdi-delete</v-icon>
+                    </v-btn>
+                  </v-col>
+                </v-row>
+              </v-list-item>
+            </template>
+          </draggable>
+        </v-list>
+      </v-card>
     </v-card-text>
   </v-card>
-  <v-alert v-else type="warning">
-    プレースホルダーが選択されていません。
-  </v-alert>
+  <v-alert v-else type="warning"
+    >プレースホルダーが選択されていません。</v-alert
+  >
 </template>
 
 <script setup lang="ts">
 import { computed, inject, Ref } from "vue";
+import draggable from "vuedraggable";
 import type {
   PlaceType,
   PlaceValueType,
@@ -109,28 +111,28 @@ const AppState = inject<Ref<AppStateType>>("AppStateKey");
 const place = AppState?.value.Omiken.place;
 
 // propsからデータを解読
-const currentItem = computed(() => {
-  const key = props.entry?.key;
-  if (typeof key === "string" && place) return place[key];
-  return null;
+const currentItem = computed(() =>
+  props.entry?.key && place ? place[props.entry.key as string] : null
+);
+const isWeightMode = computed({
+  get: () => currentItem.value?.isWeight ?? false,
+  set: (value) => updateItem("isWeight", value),
 });
 
-const currentValues = computed(() => currentItem.value?.values || []);
-
-// 基本情報の更新
-const updateBasicInfo = (field: keyof PlaceType, value: any) => {
-  if (!currentItem.value || !props.entry?.item) return;
-
-  const firstKey = Object.keys(props.entry.item)[0];
+// 基本情報とvaluesの更新を統合
+const emitUpdate = (updatedItem: PlaceType) => {
+  if (!currentItem.value || !props.entry?.key) return;
+  const key = props.entry.key as string;
   emit("update:Omiken", {
     type: "place",
-    update: {
-      [firstKey]: {
-        ...currentItem.value,
-        [field]: value,
-      },
-    },
+    update: { [key]: updatedItem },
   });
+};
+
+// これはなに？
+const updateItem = (field: keyof PlaceType, value: any) => {
+  if (!currentItem.value) return;
+  emitUpdate({ ...currentItem.value, [field]: value });
 };
 
 // 値の更新
@@ -139,56 +141,35 @@ const updateValue = (
   field: keyof PlaceValueType,
   value: any
 ) => {
-  if (!currentItem.value || !props.entry?.item) return;
-
-  const firstKey = Object.keys(props.entry.item)[0];
+  if (!currentItem.value) return;
   const newValues = [...currentItem.value.values];
   newValues[index] = { ...newValues[index], [field]: value };
-
-  emit("update:Omiken", {
-    type: "place",
-    update: {
-      [firstKey]: {
-        ...currentItem.value,
-        values: newValues,
-      },
-    },
-  });
+  emitUpdate({ ...currentItem.value, values: newValues });
 };
 
 // 値の追加
 const addValue = () => {
-  if (!currentItem.value || !props.entry?.item) return;
-
-  const firstKey = Object.keys(props.entry.item)[0];
-  currentValues.value.push({ weight: 1, value: "" });
-
-  emit("update:Omiken", {
-    type: "place",
-    update: {
-      [firstKey]: {
-        ...currentItem.value,
-        values: currentValues.value,
-      },
-    },
-  });
+  if (!currentItem.value) return;
+  const newValues = [...currentItem.value.values, { weight: 1, value: "" }];
+  emitUpdate({ ...currentItem.value, values: newValues });
 };
 
 // 値の削除
 const removeValue = (index: number) => {
-  if (!currentItem.value || !props.entry?.item) return;
+  if (!currentItem.value) return;
+  const newValues = [...currentItem.value.values];
+  newValues.splice(index, 1);
+  emitUpdate({ ...currentItem.value, values: newValues });
+};
 
-  const firstKey = Object.keys(props.entry.item)[0];
-  currentValues.value.splice(index, 1);
-
-  emit("update:Omiken", {
-    type: "place",
-    update: {
-      [firstKey]: {
-        ...currentItem.value,
-        values: currentValues.value,
-      },
-    },
-  });
+const handleDragEnd = () => {
+  if (!currentItem.value) return;
+  emitUpdate({ ...currentItem.value, values: [...currentItem.value.values] });
 };
 </script>
+
+<style scoped>
+.handle {
+  cursor: move;
+}
+</style>

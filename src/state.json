@@ -498,6 +498,70 @@
           "content": "!呪いの旋律"
         }
       ]
+    },
+    "1730435587723-zj28l": {
+      "id": "1730435587723-zj28l",
+      "name": "おみくじ:残念賞",
+      "description": "",
+      "weight": 7,
+      "threshold": {
+        "isSyoken": false,
+        "time": {
+          "isEnabled": false,
+          "value1": 0,
+          "value2": 0
+        },
+        "elapsed": {
+          "isEnabled": false,
+          "unit": "hour",
+          "comparison": "max",
+          "value1": 0,
+          "value2": 0
+        },
+        "count": {
+          "isEnabled": false,
+          "unit": "no",
+          "comparison": "max",
+          "value1": 0,
+          "value2": 0
+        },
+        "gift": {
+          "isEnabled": false,
+          "comparison": "max",
+          "value1": 0,
+          "value2": 0
+        }
+      },
+      "post": [
+        {
+          "type": "party",
+          "botKey": "reimu",
+          "iconKey": "Default",
+          "delaySeconds": -1,
+          "content": "!omikuji_huru"
+        },
+        {
+          "type": "party",
+          "botKey": "reimu",
+          "iconKey": "Default",
+          "delaySeconds": 0,
+          "content": "!omikuji_07"
+        },
+        {
+          "type": "onecomme",
+          "botKey": "marisa",
+          "iconKey": "surprise02",
+          "delaySeconds": 1,
+          "content": "<<user>>さんの運勢は【末吉】<<omikuji07>>"
+        },
+        {
+          "type": "party",
+          "botKey": "reimu",
+          "iconKey": "Default",
+          "delaySeconds": 1,
+          "content": "!ビシッとツッコミ1"
+        }
+      ]
     }
   },
   "place": {
@@ -668,6 +732,50 @@
           "value": "計画をしっかり立てることで、成功への道が開けるわ。"
         }
       ]
+    },
+    "1730435669786-qfdm3": {
+      "id": "1730435669786-qfdm3",
+      "name": "omikuji04",
+      "description": "",
+      "isWeight": false,
+      "values": [
+        {
+          "weight": 1,
+          "value": "いまは焦らず、一歩ずつ進むことね。努力すれば、願いは叶うと出ているわ。"
+        },
+        {
+          "weight": 1,
+          "value": "いまは慎重に行動が必要な時。きっと吉へと導かれるわ。慌てない事が大切よ。"
+        },
+        {
+          "weight": 1,
+          "value": "健康面に注意して。規則正しい生活が運気を呼び込むわ。"
+        },
+        {
+          "weight": 1,
+          "value": "周囲のサポートを受け入れることで、運気が上昇するわ。"
+        },
+        {
+          "weight": 1,
+          "value": "小さな喜びを大切にね。それが大きな幸せに繋がるわ。"
+        },
+        {
+          "weight": 1,
+          "value": "ゆっくりとした進展があるわ。焦らずに自分のペースで進んでね。"
+        }
+      ]
+    },
+    "1730435718519-odqvl": {
+      "id": "1730435718519-odqvl",
+      "name": "omikuji05",
+      "description": "",
+      "isWeight": false,
+      "values": [
+        {
+          "weight": 1,
+          "value": "油断が思わぬ結果に繋がるわ。慎重に行動して。"
+        }
+      ]
     }
   },
   "rulesOrder": ["1729669868469-531k4", "1730186223570-nxukm"],
@@ -678,6 +786,7 @@
     "1730380299548-w1lfc",
     "1730380464680-k9tcy",
     "1730380504277-yfv1r",
+    "1730435587723-zj28l",
     "1730186417456-m98tz",
     "1730186488892-o4w6g"
   ],
@@ -685,6 +794,8 @@
     "1730215131236-r0mi5",
     "1730255242642-ltoka",
     "1730380366155-m3sdz",
+    "1730435669786-qfdm3",
+    "1730435718519-odqvl",
     "1730255471547-50761",
     "1730255480352-f1t5h"
   ],

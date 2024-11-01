@@ -82,7 +82,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, Ref } from "vue";
+import { computed, inject, ref, Ref } from "vue";
 import {
   ListEntry,
   ListCategory,
@@ -112,6 +112,9 @@ const AppState = inject<Ref<AppStateType>>("AppStateKey");
 const omikuji = AppState?.value.Omiken.omikuji;
 const omikujiOrder = AppState?.value.Omiken.omikujiOrder;
 
+// props.itemをrefでラップ
+const currentItem = ref(props.item);
+
 // コンポーザブル:funkRules
 const {
   totalWeight,
@@ -121,7 +124,7 @@ const {
   weightColor,
   omikujiLists,
   enabledOmikujiLists,
-} = funkRules(omikuji, omikujiOrder, props.item);
+} = funkRules(omikuji, omikujiOrder, currentItem);
 
 // すべてのおみくじが無効かどうかを確認
 const isAllDisabled = computed(() => {
@@ -132,28 +135,13 @@ const isAllDisabled = computed(() => {
 
 // Rulesのエディターを開く
 function openEditorRules() {
-  const item = { [props.item.id]: props.item };
   const key = props.item.id;
   emit("open-editor", {
     isOpen: true,
     type: "rules",
     key,
-    item: item,
   });
 }
-
-// omikujiのエディターを開く
-const openEditorOmikuji = (option: { id: string; name: string }) => {
-  const omikujiKey = props.Omiken.omikuji?.[option.id];
-  if (omikujiKey) {
-    emit("open-editor", {
-      isOpen: true,
-      type: "omikuji",
-      key: option.id,
-      item: { [option.id]: omikujiKey },
-    });
-  }
-};
 
 // Omikenの更新をemit
 function updateOmiken(payload: OmikenEntry<OmikenCategory>) {
