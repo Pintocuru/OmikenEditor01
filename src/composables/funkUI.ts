@@ -1,4 +1,4 @@
-// src/composables/funkOmikenUI.ts
+// src/composables/funkUI.ts
 import { Ref, ref } from "vue";
 import type {
   ListCategory,
@@ -19,19 +19,19 @@ export function funkUI() {
 
   // ダイアログで表示させるアイテム 
   const listEntry: Ref<ListEntries> = ref({
-    rules: { isOpen: false, type: 'rules', item: null, mode: null },
-    omikuji: { isOpen: false, type: 'omikuji', item: null, mode: null },
-    place: { isOpen: false, type: 'place', item: null, mode: null },
+    rules: { isOpen: false, type: 'rules', key: null, item: null, mode: null },
+    omikuji: { isOpen: false, type: 'omikuji', key: null, item: null, mode: null },
+    place: { isOpen: false, type: 'place', key: null, item: null, mode: null },
   });
 
   // ダイアログを開く
   const openEditor = <T extends ListCategory>(editorItem: ListEntry<T>) => {
     console.log(editorItem);
-    const { type, item, mode } = editorItem;
+    const { type, key, mode } = editorItem;
 
     if (listEntry.value && listEntry.value[type]) {
       const entry = listEntry.value[type] as ListEntry<T>;
-      entry.item = item as Record<string, EditerTypeMap[T]> | null;
+      entry.key = key
       entry.mode = mode || null;
       entry.isOpen = true;
     }

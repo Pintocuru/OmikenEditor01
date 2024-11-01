@@ -2,7 +2,7 @@
 <template>
   <v-row dense>
     <draggable
-      :model-value="sortedItems"
+      :model-value="itemsSort"
       item-key="name"
       tag="div"
       class="d-flex flex-wrap w-100"
@@ -65,8 +65,7 @@ const getComponentForCategory = computed(() => {
 });
 
 // draggable用に配列にする
-const sortedItems = computed(() => {
-  console.log(props.itemOrder);
+const itemsSort = computed(() => {
   return props.itemOrder.map((id) => ({
     ...props.items[id],
   }));

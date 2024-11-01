@@ -21,6 +21,7 @@
 
     <AppDialog
       v-model:listEntry="listEntry"
+        :Omiken="AppState.Omiken"
       @update:Omiken="updateOmiken"
       @open-editor="openEditor"
     />

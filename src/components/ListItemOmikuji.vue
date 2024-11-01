@@ -8,20 +8,20 @@
           <ListItemPartsAction
             :selectCategory="naviCategory"
             :item="item"
-              @edit="openEditor"
+            @edit="openEditor"
             @update:Omiken="updateOmiken"
           />
         </template>
       </v-toolbar>
       <!-- リストに載せる内容(v-col:6の縦長) -->
-      <v-card-text>
-     
-      </v-card-text>
+      <v-card-text> </v-card-text>
     </v-card>
   </v-col>
 </template>
 
 <script setup lang="ts">
+import { computed } from "vue";
+import ListItemPartsAction from "./common/ListItemPartsAction.vue";
 import {
   ListEntry,
   ListCategory,
@@ -30,7 +30,6 @@ import {
   OmikenEditType,
   OmikenCategory,
 } from "@/types";
-import { computed } from "vue";
 import _ from "lodash";
 const props = defineProps<{
   Omiken: OmikenEditType;
@@ -53,7 +52,6 @@ const getWeightColor = (weight: number) => {
   return "info";
 };
 
-
 const getComparisonLabel = (comparison: string) => {
   const labels: Record<string, string> = {
     min: "以下",
@@ -68,12 +66,16 @@ const getComparisonLabel = (comparison: string) => {
 // エディターを開く
 function openEditor() {
   const item = { [props.item.id]: props.item };
+  const key = props.item.id;
   emit("open-editor", {
+    isOpen: true,
     type: props.naviCategory,
+    key,
     item: item,
   });
 }
 
 // Omikenの更新をemit
-const updateOmiken = (payload: OmikenEntry<OmikenCategory>) => emit("update:Omiken", payload);
+const updateOmiken = (payload: OmikenEntry<OmikenCategory>) =>
+  emit("update:Omiken", payload);
 </script>

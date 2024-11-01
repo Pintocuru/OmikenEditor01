@@ -100,25 +100,27 @@ const emit = defineEmits<{
 
 // inject
 const AppState = inject<Ref<AppStateType>>("AppStateKey");
+const rules = AppState?.value.Omiken.rules;
 const omikuji = AppState?.value.Omiken.omikuji;
 const omikujiOrder = AppState?.value.Omiken.omikujiOrder;
 
 // propsからデータを解読
 const currentItem = computed(() => {
-  const item = props.entry?.item;
-  return item ? Object.values(item)[0] : null;
+  const key = props.entry?.key;
+  if (typeof key === "string" && rules) return rules[key];
+  return null;
 });
 
 // コンポーザブル:funkRules
 const {
   switchLabels,
-    totalWeight,
-    totalWeightPercentage,
-    getSwitchLabel,
-    getSwitchColor,
-    omikujiLists,
-    enabledOmikujiLists,
-    weightColor,
+  totalWeight,
+  totalWeightPercentage,
+  getSwitchLabel,
+  getSwitchColor,
+  omikujiLists,
+  enabledOmikujiLists,
+  weightColor,
 } = funkRules(
   omikuji,
   omikujiOrder,
@@ -145,11 +147,11 @@ const updateItem = () => {
 // omikujiのエディターを開く
 const openEditorOmikuji = (option: { id: string; name: string }) => {
   const omi = omikuji?.[option.id];
-  console.log(omi);
   if (omi) {
     emit("open-editor", {
       isOpen: true,
       type: "omikuji",
+      key: option.id,
       item: { [option.id]: omi },
     });
   }

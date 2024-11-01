@@ -9,14 +9,12 @@
         </v-chip>
       </v-toolbar-title>
       <template #append>
-        <v-btn 
+        <v-btn
           v-if="naviCategory !== 'preferences'"
-          variant="outlined" 
-          @click="addItem" 
-          prepend-icon="mdi-plus"
-        >
-          追加
-        </v-btn>
+          variant="outlined"
+          @click="addItem"
+          icon="mdi-plus"
+        ></v-btn>
       </template>
     </v-toolbar>
 
@@ -24,23 +22,13 @@
       <ListPreset
         :Omiken="Omiken"
         @update:Omiken="updateOmiken"
-            @update:OmikenPreset="updateOmikenPreset"
+        @update:OmikenPreset="updateOmikenPreset"
       />
     </template>
     <template v-else-if="naviCategory === 'preferences'">
-      <ListPreferences
-        :Omiken="Omiken"
-        @update:Omiken="updateOmiken"
-      />
+      <ListPreferences :Omiken="Omiken" @update:Omiken="updateOmiken" />
     </template>
     <template v-else>
-      <ListFilter
-        v-model:filterRef="filterRef"
-        :Omiken="Omiken"
-        :listCategory="naviCategory"
-        @update:Omiken="updateOmiken"
-      />
-
       <ListItem
         :Omiken="Omiken"
         :items="filterItems"
@@ -83,7 +71,11 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: "update:Omiken", payload: OmikenEntry<OmikenCategory>): void;
-  (e: "update:OmikenPreset", preset: PresetOmikenEditType,mode:'overwrite' | 'append'): void;
+  (
+    e: "update:OmikenPreset",
+    preset: PresetOmikenEditType,
+    mode: "overwrite" | "append"
+  ): void;
   (e: "open-editor", editorItem: ListEntry<ListCategory>): void;
 }>();
 
@@ -113,40 +105,58 @@ const filterRef = ref(
 // アイテムカウント
 const filterItemsCount = computed(() => Object.keys(filterItems.value).length);
 
-
 // フィルターオプションに合わせて表示を変更
 const filterItems = computed(() => {
-  if (props.naviCategory === 'preset') return {};
-    if (props.naviCategory === 'preferences') return {};
+  if (props.naviCategory === "preset") return {};
+  if (props.naviCategory === "preferences") return {};
 
   const items = props.Omiken[props.naviCategory];
   const filters = {
-    rules: () => _.pickBy(items as Record<string, RulesType>, item => 
-      filterRef.value.rulesFilterSwitch.length === 0 || 
-      filterRef.value.rulesFilterSwitch.includes(item.switch.toString())),
-    omikuji: () => _.pickBy(items as Record<string, OmikujiType>, item => 
-      filterRef.value.omikujiFilterThreshold.length === 0 || 
-      filterRef.value.omikujiFilterThreshold.includes(item.threshold.type)),
-    place: () => filterRef.value.placeSortName === "none" ? items : 
-      _.fromPairs(_.sortBy(Object.entries(items as Record<string, PlaceType>), 
-        ([, item]) => filterRef.value.placeSortName === "name" ? item.name : item.group)),
+    rules: () =>
+      _.pickBy(
+        items as Record<string, RulesType>,
+        (item) =>
+          filterRef.value.rulesFilterSwitch.length === 0 ||
+          filterRef.value.rulesFilterSwitch.includes(item.switch.toString())
+      ),
+    omikuji: () =>
+      _.pickBy(
+        items as Record<string, OmikujiType>,
+        (item) =>
+          filterRef.value.omikujiFilterThreshold.length === 0 ||
+          filterRef.value.omikujiFilterThreshold.includes(item.threshold.type)
+      ),
+    place: () =>
+      filterRef.value.placeSortName === "none"
+        ? items
+        : _.fromPairs(
+            _.sortBy(
+              Object.entries(items as Record<string, PlaceType>),
+              ([, item]) =>
+                filterRef.value.placeSortName === "name"
+                  ? item.name
+                  : item.group
+            )
+          ),
     default: () => items,
   };
 
-  return (filters[props.naviCategory as keyof typeof filters] || filters.default)();
+  return (
+    filters[props.naviCategory as keyof typeof filters] || filters.default
+  )();
 });
 
 // アイテムを追加
 const addItem = () => {
-  if (props.naviCategory !== 'preferences') {
+  if (props.naviCategory !== "preferences") {
     emit("update:Omiken", { type: props.naviCategory, addKeys: [{}] });
   }
 };
 
 // 各種操作関数(エディターを開く/Omiken更新)
-const updateOmiken = (payload: OmikenEntry<OmikenCategory>) => emit("update:Omiken", payload);
+const updateOmiken = (payload: OmikenEntry<OmikenCategory>) =>
+  emit("update:Omiken", payload);
 // TODO updateOmikenPresetを作る
-  const openEditor = (editorItem: ListEntry<ListCategory>) => emit("open-editor", editorItem);
-
-
+const openEditor = (editorItem: ListEntry<ListCategory>) =>
+  emit("open-editor", editorItem);
 </script>

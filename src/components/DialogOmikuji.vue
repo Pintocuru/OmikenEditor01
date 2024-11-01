@@ -152,10 +152,11 @@ const CHARA = AppState?.value.CHARA;
 const tab = ref("post"); // タブの状態管理
 const selectRuleId = ref<string | null>(null); // 選択中のルールID
 
-// propsからデータを解読 // TODO 共通コンポーザブルfunkDialogAll でcurrentItemを制定したいな?
+// propsからデータを解読
 const currentItem = computed(() => {
-  const item = props.entry?.item;
-  return item ? Object.values(item)[0] : null;
+  const key = props.entry?.key;
+  if (typeof key === "string" && omikuji) return omikuji[key];
+  return null;
 });
 
 // postのアイテム数

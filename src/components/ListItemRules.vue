@@ -27,12 +27,16 @@
             <v-col
               v-for="option in enabledOmikujiLists"
               :key="option.id"
-              cols="12" sm="6" md="4" lg="3"
+              cols="12"
+              sm="6"
+              md="4"
+              lg="3"
               class="pa-1"
             >
               <v-card
                 class="d-flex justify-space-between align-center px-2 py-1"
-                variant="outlined" color="grey"
+                variant="outlined"
+                color="grey"
               >
                 <span class="font-weight-bold">
                   {{ option.name }}
@@ -129,21 +133,24 @@ const isAllDisabled = computed(() => {
 // Rulesのエディターを開く
 function openEditorRules() {
   const item = { [props.item.id]: props.item };
+  const key = props.item.id;
   emit("open-editor", {
     isOpen: true,
     type: "rules",
+    key,
     item: item,
   });
 }
 
 // omikujiのエディターを開く
 const openEditorOmikuji = (option: { id: string; name: string }) => {
-  const omikuji = props.Omiken.omikuji?.[option.id];
-  if (omikuji) {
+  const omikujiKey = props.Omiken.omikuji?.[option.id];
+  if (omikujiKey) {
     emit("open-editor", {
       isOpen: true,
       type: "omikuji",
-      item: { [option.id]: omikuji },
+      key: option.id,
+      item: { [option.id]: omikujiKey },
     });
   }
 };

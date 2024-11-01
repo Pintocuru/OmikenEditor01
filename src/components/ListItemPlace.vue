@@ -18,7 +18,7 @@
       </v-toolbar>
       <v-card-text>
         <div class="text-body-2">
-          Values: 
+          Values:
           {{ displayValues }}
         </div>
       </v-card-text>
@@ -52,30 +52,33 @@ const emit = defineEmits<{
 
 // 値の表示用に整形
 const displayValues = computed(() => {
-  const values = props.item.values.map(value => {
-    if (typeof value === 'string') {
+  const values = props.item.values.map((value) => {
+    if (typeof value === "string") {
       return value;
     } else {
       return `${value.value} (${value.weight}%)`;
     }
   });
-  
+
   // 3つ以上ある場合は最初の2つだけ表示して省略
   if (values.length > 3) {
-    return `${values.slice(0, 2).join(', ')} ... and ${values.length - 2} more`;
+    return `${values.slice(0, 2).join(", ")} ... and ${values.length - 2} more`;
   }
-  return values.join(', ');
+  return values.join(", ");
 });
 
 // エディターを開く
 function openEditor() {
+  const key = props.item.id;
   emit("open-editor", {
+    isOpen: true,
     type: props.naviCategory,
+    key,
     item: { [props.item.id]: props.item },
-    isOpen: false
   });
 }
 
 // Omiken更新
-const updateOmiken = (payload: OmikenEntry<OmikenCategory>) => emit("update:Omiken", payload);
+const updateOmiken = (payload: OmikenEntry<OmikenCategory>) =>
+  emit("update:Omiken", payload);
 </script>

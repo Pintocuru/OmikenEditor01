@@ -31,7 +31,7 @@ export type ListCategory = BaseCategory;
 export type ListEntry<T extends ListCategory> = {
   isOpen: boolean; // ダイアログの開閉状態
   type: T;
-  item: Record<string, EditerTypeMap[T]> | null; // 表示するアイテム(単独または複数)
+  key: string | string[] | null;
   mode?: string | null; // 複数の際の表示モード(omikujiで出現割合を複数調整する時に使う)
 };
 // listEntry全体の型 

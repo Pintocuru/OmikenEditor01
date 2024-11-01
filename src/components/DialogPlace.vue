@@ -86,13 +86,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, inject, Ref } from "vue";
 import type {
   PlaceType,
   PlaceValueType,
   OmikenEntry,
   OmikenCategory,
   ListEntry,
+  AppStateType,
 } from "../types";
 
 const props = defineProps<{
@@ -103,11 +104,17 @@ const emit = defineEmits<{
   (e: "update:Omiken", payload: OmikenEntry<OmikenCategory>): void;
 }>();
 
+// inject
+const AppState = inject<Ref<AppStateType>>("AppStateKey");
+const place = AppState?.value.Omiken.place;
+
 // propsからデータを解読
 const currentItem = computed(() => {
-  const item = props.entry?.item;
-  return item ? Object.values(item)[0] : null;
+  const key = props.entry?.key;
+  if (typeof key === "string" && place) return place[key];
+  return null;
 });
+
 const currentValues = computed(() => currentItem.value?.values || []);
 
 // 基本情報の更新
