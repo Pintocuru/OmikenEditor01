@@ -96,13 +96,81 @@ interface BaseType {
   description: string; // 説明文
 }
 
+/*
+
+export interface thresholdType {
+  conditionType: ConditionType;
+  accessLevel?: AccessLevel; // switchからaccessLevelに変更
+  syoken?: SyokenType; // isSyokenからSyokenTypeに変更
+  matchIncludes?: string[];
+  condition?: 
+    | { type: 'time', ...TimeCondition }
+    | { type: 'elapsed', ...ElapsedCondition }
+    | { type: 'count', ...CountCondition }
+    | { type: 'gift', ...GiftCondition };
+}
+
+
+// condition選択用
+export enum ConditionType {
+  NONE = 'none', // 制限なし
+  TIME = 'time',
+  ELAPSED = 'elapsed',
+  COUNT = 'count',
+  GIFT = 'gift'
+}
+
+// 初見・コメント履歴の種別
+export enum SyokenType {
+  NONE = 'none',     // 設定しない
+  SYOKEN = 'syoken', // 初見
+  HI = 'hi',         // その配信枠で1回目のコメント
+  AGAIN = 'again'    // 前回のコメントから7日以上経過
+}
+
+// ルールの有効/無効 0:OFF/1:だれでも/2:メンバー/3:モデレーター/4:管理者
+export enum AccessLevel {
+  OFF = 0,
+  ANYONE = 1,
+  MEMBER = 2,
+  MODERATOR = 3,
+  ADMIN = 4,
+}
+
+interface BaseCondition {
+  isEnabled: boolean;
+  value1: number;
+  value2?: number;
+}
+
+interface TimeCondition extends BaseCondition {
+  comparison: 'min' | 'max' | 'range';
+}
+
+interface ElapsedCondition extends BaseCondition {
+  unit: 'second' | 'minute' | 'hour' | 'day';
+  comparison: 'min' | 'max' | 'range' | 'nearEqual'; // nearEqualを追加
+}
+
+interface CountCondition extends BaseCondition {
+  unit: 'lc' | 'no' | 'tc';
+  comparison: 'min' | 'max' | 'range' | 'loop' | 'equal';
+}
+
+interface GiftCondition extends BaseCondition {
+  comparison: 'min' | 'max' | 'range' | 'equal';
+}
+
+*/
+
 // rules:おみくじルールの型定義
 export interface RulesType extends BaseType {
-  switch: AccessLevel; // ルールの有効/無効レベル
+  switch: AccessLevel; // ルールの有効/無効レベル // TODO 削除
   enabledIds: string[]; // omikujiの適用するIDリスト
-  matchExact: string[]; // 完全一致するキーワードの配列（省略可）
+  matchExact: string[]; // 完全一致するキーワードの配列 // TODO 削除
   matchStartsWith: string[]; // 特定のフレーズで始まるキーワード（省略可）
-  matchIncludes: string[]; // 部分一致するキーワード（省略可）
+  matchIncludes: string[]; // 部分一致するキーワード（省略可） // TODO 削除
+  // TODO 新しくthresholdを入れる
 }
 
 // ルールの有効/無効 0:OFF/1:だれでも/2:メンバー/3:モデレーター/4:管理者

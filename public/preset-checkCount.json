@@ -1,0 +1,327 @@
+{
+  "rules": {
+    "1730455954261-hi5sb": {
+      "id": "1730455954261-hi5sb",
+      "name": "コメント数チェック",
+      "description": "",
+      "switch": 1,
+      "enabledIds": [
+        "1730456057476-pw29g",
+        "1730456230208-vqklr",
+        "1730456354800-4sj0v"
+      ],
+      "matchExact": [],
+      "matchStartsWith": [],
+      "matchIncludes": []
+    }
+  },
+  "omikuji": {
+    "1730456057476-pw29g": {
+      "id": "1730456057476-pw29g",
+      "name": "配信枠:100回",
+      "description": "",
+      "weight": 3,
+      "threshold": {
+        "isSyoken": false,
+        "time": {
+          "isEnabled": false,
+          "value1": 0,
+          "value2": 0
+        },
+        "elapsed": {
+          "isEnabled": false,
+          "unit": "hour",
+          "comparison": "max",
+          "value1": 0,
+          "value2": 0
+        },
+        "count": {
+          "isEnabled": true,
+          "unit": "no",
+          "comparison": "loop",
+          "value1": 100,
+          "value2": 0
+        },
+        "gift": {
+          "isEnabled": false,
+          "comparison": "max",
+          "value1": 0,
+          "value2": 0
+        }
+      },
+      "post": [
+        {
+          "type": "onecomme",
+          "botKey": "reimu",
+          "iconKey": "joy01",
+          "delaySeconds": 0,
+          "content": "この配信の<<lc>>回目のコメントは、<<user>>さんだよ。"
+        },
+        {
+          "type": "party",
+          "botKey": "reimu",
+          "iconKey": "Default",
+          "delaySeconds": 0,
+          "content": "!ニュースタイトル表示3"
+        }
+      ]
+    },
+    "1730456230208-vqklr": {
+      "id": "1730456230208-vqklr",
+      "name": "配信枠:200回",
+      "description": "",
+      "weight": 2,
+      "threshold": {
+        "isSyoken": false,
+        "time": {
+          "isEnabled": false,
+          "value1": 0,
+          "value2": 0
+        },
+        "elapsed": {
+          "isEnabled": false,
+          "unit": "hour",
+          "comparison": "max",
+          "value1": 0,
+          "value2": 0
+        },
+        "count": {
+          "isEnabled": true,
+          "unit": "no",
+          "comparison": "loop",
+          "value1": 200,
+          "value2": 0
+        },
+        "gift": {
+          "isEnabled": false,
+          "comparison": "max",
+          "value1": 0,
+          "value2": 0
+        }
+      },
+      "post": [
+        {
+          "type": "onecomme",
+          "botKey": "marisa",
+          "iconKey": "fun03",
+          "delaySeconds": 0,
+          "content": "この配信の<<lc>>回目のコメントは、<<user>>さんだぜ。"
+        },
+        {
+          "type": "party",
+          "botKey": "reimu",
+          "iconKey": "Default",
+          "delaySeconds": 0,
+          "content": "!ニュースタイトル表示3"
+        }
+      ]
+    },
+    "1730456354800-4sj0v": {
+      "id": "1730456354800-4sj0v",
+      "name": "個人総合:100",
+      "description": "",
+      "weight": 8,
+      "threshold": {
+        "isSyoken": false,
+        "time": {
+          "isEnabled": false,
+          "value1": 0,
+          "value2": 0
+        },
+        "elapsed": {
+          "isEnabled": false,
+          "unit": "hour",
+          "comparison": "max",
+          "value1": 0,
+          "value2": 0
+        },
+        "count": {
+          "isEnabled": true,
+          "unit": "tc",
+          "comparison": "loop",
+          "value1": 100,
+          "value2": 0
+        },
+        "gift": {
+          "isEnabled": false,
+          "comparison": "max",
+          "value1": 0,
+          "value2": 0
+        }
+      },
+      "post": [
+        {
+          "type": "onecomme",
+          "botKey": "reimu",
+          "iconKey": "joy02",
+          "delaySeconds": 0,
+          "content": "<<user>>さんのコメントが、<<tc>>回になったわ。たくさんのコメント、ありがとう！"
+        },
+        {
+          "type": "party",
+          "botKey": "reimu",
+          "iconKey": "Default",
+          "delaySeconds": 0,
+          "content": "!ニュースタイトル表示3"
+        }
+      ]
+    },
+    "1730456695760-5zb8i": {
+      "id": "1730456695760-5zb8i",
+      "name": "久しぶり1",
+      "description": "",
+      "weight": 3,
+      "threshold": {
+        "isSyoken": false,
+        "time": {
+          "isEnabled": false,
+          "value1": 0,
+          "value2": 0
+        },
+        "elapsed": {
+          "isEnabled": true,
+          "unit": "day",
+          "comparison": "max",
+          "value1": 7,
+          "value2": 0
+        },
+        "count": {
+          "isEnabled": false,
+          "unit": "no",
+          "comparison": "max",
+          "value1": 0,
+          "value2": 0
+        },
+        "gift": {
+          "isEnabled": false,
+          "comparison": "max",
+          "value1": 0,
+          "value2": 0
+        }
+      },
+      "post": [
+        {
+          "type": "onecomme",
+          "botKey": "reimu",
+          "iconKey": "joy01",
+          "delaySeconds": 0,
+          "content": "<<WelcomeAgain01>>"
+        },
+        {
+          "type": "party",
+          "botKey": "reimu",
+          "iconKey": "Default",
+          "delaySeconds": 0,
+          "content": "!シーン切り替え1"
+        }
+      ]
+    },
+    "1730456872841-c9gwr": {
+      "id": "1730456872841-c9gwr",
+      "name": "久しぶり2",
+      "description": "",
+      "weight": 1,
+      "threshold": {
+        "isSyoken": false,
+        "time": {
+          "isEnabled": false,
+          "value1": 0,
+          "value2": 0
+        },
+        "elapsed": {
+          "isEnabled": true,
+          "unit": "day",
+          "comparison": "max",
+          "value1": 7,
+          "value2": 0
+        },
+        "count": {
+          "isEnabled": false,
+          "unit": "no",
+          "comparison": "max",
+          "value1": 0,
+          "value2": 0
+        },
+        "gift": {
+          "isEnabled": false,
+          "comparison": "max",
+          "value1": 0,
+          "value2": 0
+        }
+      },
+      "post": [
+        {
+          "type": "onecomme",
+          "botKey": "marisa",
+          "iconKey": "joy01",
+          "delaySeconds": 0,
+          "content": "<<WelcomeAgain02>>"
+        },
+        {
+          "type": "party",
+          "botKey": "reimu",
+          "iconKey": "Default",
+          "delaySeconds": 0,
+          "content": "!シーン切り替え1"
+        }
+      ]
+    }
+  },
+  "place": {
+    "1730456801704-8lpzk": {
+      "id": "1730456801704-8lpzk",
+      "name": "WelcomeAgain01",
+      "description": "",
+      "isWeight": true,
+      "values": [
+        {
+          "weight": 9,
+          "value": "<<user>>さん、久しぶり!また会えたね。"
+        },
+        {
+          "weight": 7,
+          "value": "<<user>>さん、お久しぶりね!また会えたことを嬉しく思うわ。"
+        },
+        {
+          "weight": 5,
+          "value": "<<user>>さんが久々に来たよ。挨拶しなきゃ!"
+        }
+      ]
+    },
+    "1730456953853-2kr1z": {
+      "id": "1730456953853-2kr1z",
+      "name": "WelcomeAgain02",
+      "description": "",
+      "isWeight": true,
+      "values": [
+        {
+          "weight": 7,
+          "value": "おっ、<<user>>さんだぜ。久しぶり!ゆっくりしていってね!"
+        },
+        {
+          "weight": 7,
+          "value": "<<user>>さん、お久しぶりね!また会えたことを嬉しく思うわ。"
+        },
+        {
+          "weight": 5,
+          "value": "<<user>>さん! また来てくれたんだぜ、会いたかったと配信者は嬉し涙だぜ。"
+        }
+      ]
+    }
+  },
+  "rulesOrder": ["1730455954261-hi5sb"],
+  "omikujiOrder": [
+    "1730456057476-pw29g",
+    "1730456230208-vqklr",
+    "1730456354800-4sj0v",
+    "1730456695760-5zb8i",
+    "1730456872841-c9gwr"
+  ],
+  "placeOrder": ["1730456801704-8lpzk", "1730456953853-2kr1z"],
+  "preferences": {
+    "basicDelay": 1,
+    "omikujiCooldown": 2,
+    "commentDuration": 5,
+    "BotUserIDname": "FirstCounter"
+  }
+}
