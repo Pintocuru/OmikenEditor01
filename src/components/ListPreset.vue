@@ -124,21 +124,17 @@ import Swal from "sweetalert2";
 import {
   AppStateType,
   OmikenCategory,
+  OmikenEditType,
   OmikenEntry,
   PresetOmikenEditType,
   fetchJSONType,
 } from "@/types";
 
 // props/emits
-const props = defineProps<{}>();
 
 const emit = defineEmits<{
   (e: "update:Omiken", payload: OmikenEntry<OmikenCategory>): void;
-  (
-    e: "update:OmikenPreset",
-    preset: PresetOmikenEditType,
-    mode: "overwrite" | "append"
-  ): void;
+  (e: "update:OmikenPreset", preset: PresetOmikenEditType): void;
 }>();
 
 // これはなに?
@@ -164,7 +160,7 @@ const presetList = computed(() => {
 
 const charaList = computed(() => AppState?.value.CHARA || {});
 
-const handlePresetSelect = async (preset: fetchJSONType) => {
+const handlePresetSelect = async (preset: fetchJSONType & { item: any }) => {
   try {
     const result = await Swal.fire({
       title: preset.name,
@@ -191,7 +187,7 @@ const handlePresetSelect = async (preset: fetchJSONType) => {
 
     if (result.isConfirmed || result.isDenied) {
       const mode = result.isConfirmed ? "overwrite" : "append";
-      // TODO emitsでOmikenを更新する
+      emit("update:OmikenPreset", { ...preset, mode ,item: preset.item }); 
 
       await Swal.fire({
         icon: "success",

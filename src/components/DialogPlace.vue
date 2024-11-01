@@ -17,13 +17,13 @@
         <v-toolbar color="primary" density="compact">
           <v-toolbar-title>おみくじワード</v-toolbar-title>
           <v-spacer></v-spacer>
-          <v-btn-toggle
-            v-model="isWeightMode"
-            density="compact"
-            color="primary"
-            mandatory
-             class="me-2"
-          >
+<v-btn-toggle
+  v-model="currentItem.isWeight"
+  density="compact"
+  color="primary"
+  mandatory
+  class="me-2"
+>
             <v-btn :value="false">
               <v-icon>mdi-format-list-bulleted</v-icon>
             </v-btn>
@@ -68,7 +68,7 @@
                       @update:model-value="updateValue(index, 'value', $event)"
                     />
                   </v-col>
-                  <v-col cols="auto">
+                  <v-col cols="1">
                     <v-btn color="error" @click="removeValue(index)">
                       <v-icon>mdi-delete</v-icon>
                     </v-btn>
@@ -150,16 +150,13 @@ const updateValue = (
 // 値の追加
 const addValue = () => {
   if (!currentItem.value) return;
-  const newValues = [...currentItem.value.values, { weight: 1, value: "" }];
-  emitUpdate({ ...currentItem.value, values: newValues });
+  currentItem.value.values.push({ weight: 1, value: "" });
 };
 
 // 値の削除
 const removeValue = (index: number) => {
   if (!currentItem.value) return;
-  const newValues = [...currentItem.value.values];
-  newValues.splice(index, 1);
-  emitUpdate({ ...currentItem.value, values: newValues });
+  currentItem.value.values.splice(index, 1);
 };
 
 const handleDragEnd = () => {

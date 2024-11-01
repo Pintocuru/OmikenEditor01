@@ -1,8 +1,8 @@
 [
   {
     "id": "preset-1",
-    "name": "Default Preset",
-    "description": "A default preset with basic settings",
+    "name": "おみくじ",
+    "description": "霊夢のおみくじ・魔理沙のフラワーおみくじセット",
     "type": "Omiken",
     "path": "/preset-1.json",
     "banner": "/images/preset-1-banner.jpg"

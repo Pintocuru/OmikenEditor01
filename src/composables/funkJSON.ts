@@ -1,7 +1,7 @@
 // src/composables/funkJSON.ts
 import { ref } from 'vue';
 import { validateData, generateOrder } from "./funkValidate";
-import type { OmikenEditType, fetchJSONType, CHARAEditType, PresetOmikenEditType } from '../types';
+import type { OmikenEditType, fetchJSONType, CHARAEditType, PresetOmikenEditType, ListCategory, EditerTypeMap, RulesType, OmikujiType, PlaceType } from '../types';
 import _ from 'lodash';
 import Swal from 'sweetalert2';
 import { useToast } from 'vue-toastification';
@@ -126,8 +126,42 @@ export function funkJSON() {
     }
   };
 
+  // Objectを指定された順序で並び替える関数
+  function reorderObject<T>(obj: Record<string, T>, order: string[]): Record<string, T> {
+    // 順序配列の検証
+    const validOrder = order.filter(key => key in obj);
+    // オブジェクトのキーと順序配列の整合性チェック
+    const objKeys = Object.keys(obj);
+    if (validOrder.length !== objKeys.length ||
+      !objKeys.every(key => validOrder.includes(key))) {
+      console.warn(`順序配列とオブジェクトのキーが一致しません: ${validOrder.length} != ${objKeys.length}`);
+      // 不足しているキーを順序配列に追加
+      objKeys.forEach(key => {
+        if (!validOrder.includes(key)) validOrder.push(key);
+      });
+    }
+    // 順序に従って新しいオブジェクトを構築
+    return validOrder.reduce((acc, key) => {
+      if (key in obj) {
+        acc[key] = obj[key];
+      }
+      return acc;
+    }, {} as Record<string, T>);
+  }
+
+  // Omikenの保存
   const saveOmiken = async (Omiken: OmikenEditType): Promise<void> => {
 
+    // 各ObjectをOrderの順番に直す
+    const newOmiken: OmikenEditType = {
+      rules: reorderObject(Omiken.rules, Omiken.rulesOrder ?? Object.keys(Omiken.rules)),
+      omikuji: reorderObject(Omiken.omikuji, Omiken.omikujiOrder ?? Object.keys(Omiken.omikuji)),
+      place: reorderObject(Omiken.place, Omiken.placeOrder ?? Object.keys(Omiken.place)),
+      rulesOrder: Omiken.rulesOrder ?? Object.keys(Omiken.rules),
+      omikujiOrder: Omiken.omikujiOrder ?? Object.keys(Omiken.omikuji),
+      placeOrder: Omiken.placeOrder ?? Object.keys(Omiken.place),
+      preferences: Omiken.preferences
+    };
 
     if (noAppBoot.value) {
       toast('🚫データ保存はできません');
@@ -136,7 +170,7 @@ export function funkJSON() {
     // テストモード:保存できたことをログに表示
     if (!canUpdateJSON.value) {
       toast('💾saveDataまで届きました');
-      console.warn('saveDataまで届きました:', Omiken);
+      console.warn('saveDataまで届きました:', newOmiken);
       return;
     }
     // ロード中ならreturn

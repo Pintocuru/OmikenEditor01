@@ -13,7 +13,7 @@
           :Omiken="AppState.Omiken"
           :naviCategory="naviCategory"
           @update:Omiken="updateOmiken"
-            @update:OmikenPreset="updateOmikenPreset"
+          @update:OmikenPreset="updateOmikenPreset"
           @open-editor="openEditor"
         />
       </v-container>
@@ -21,7 +21,7 @@
 
     <AppDialog
       v-model:listEntry="listEntry"
-        :Omiken="AppState.Omiken"
+      :Omiken="AppState.Omiken"
       @update:Omiken="updateOmiken"
       @open-editor="openEditor"
     />

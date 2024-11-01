@@ -20,7 +20,6 @@
 
     <template v-if="naviCategory === 'preset'">
       <ListPreset
-        :Omiken="Omiken"
         @update:Omiken="updateOmiken"
         @update:OmikenPreset="updateOmikenPreset"
       />
@@ -71,11 +70,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: "update:Omiken", payload: OmikenEntry<OmikenCategory>): void;
-  (
-    e: "update:OmikenPreset",
-    preset: PresetOmikenEditType,
-    mode: "overwrite" | "append"
-  ): void;
+  (e: "update:OmikenPreset", preset: PresetOmikenEditType): void;
   (e: "open-editor", editorItem: ListEntry<ListCategory>): void;
 }>();
 
@@ -157,6 +152,8 @@ const addItem = () => {
 const updateOmiken = (payload: OmikenEntry<OmikenCategory>) =>
   emit("update:Omiken", payload);
 // TODO updateOmikenPresetを作る
+const updateOmikenPreset = (preset: PresetOmikenEditType) =>
+  emit("update:OmikenPreset", preset);
 const openEditor = (editorItem: ListEntry<ListCategory>) =>
   emit("open-editor", editorItem);
 </script>

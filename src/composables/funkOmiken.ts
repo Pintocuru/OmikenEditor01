@@ -57,7 +57,6 @@ export function funkOmiken(listEntry: Ref<ListEntries>) {
       // 使用しているOmikenデータの読み込み
       const omikenData = await fetchOmiken();
       if (omikenData) AppState.value.Omiken = omikenData;
-      console.log(omikenData);
 
       // 自動保存の開始
       startOmikenSave();
@@ -135,17 +134,17 @@ export function funkOmiken(listEntry: Ref<ListEntries>) {
   };
 
   // Presetからの上書き・追加
-  const updateOmikenPreset = (preset: PresetOmikenEditType, mode: 'overwrite' | 'append') => {
+  const updateOmikenPreset = (preset: PresetOmikenEditType) => {
     // 現在のpreferencesとステートのコピーを保持
     const currentPreferences = AppState.value.Omiken.preferences;
     const newState: OmikenEditType = JSON.parse(JSON.stringify(AppState.value.Omiken));
 
-    if (mode === 'overwrite') {
+    if (preset.mode === 'overwrite') {
       // 上書きモード：プリセットの内容で完全に置き換え（preferences除く）
       const categories: ListCategory[] = ['rules', 'omikuji', 'place'];
       categories.forEach(type => {
         // 各カテゴリーのデータをバリデーション
-        newState[type] = validateData(type, preset[type]);
+        newState[type] = validateData(type, preset.item[type]);
         // OrderArrayの再生成
         newState[`${type}Order`] = generateOrder(newState[type]);
       });
@@ -154,19 +153,36 @@ export function funkOmiken(listEntry: Ref<ListEntries>) {
       const categories: ListCategory[] = ['rules', 'omikuji', 'place'];
       categories.forEach(type => {
         const orderKey = `${type}Order` as const;
-        // 新規データのバリデーション
-        const validatedNewData = validateData(type, preset[type]);
+        const validatedNewData = validateData(type, preset.item[type]);
+
+        // 重複するIDを検出し、新しいIDを生成
+        const existingIds = new Set(Object.keys(newState[type]));
+        const renamedData: Record<string, any> = {};
+
+        Object.entries(validatedNewData).forEach(([key, value]) => {
+          let newKey = key;
+          let counter = 1;
+          // 重複するIDがある場合、新しいIDを生成
+          while (existingIds.has(newKey)) {
+            newKey = `${key}_${counter}`;
+            counter++;
+          }
+          renamedData[newKey] = {
+            ...value,
+            id: newKey, // IDも更新
+            name: `${value.name}${counter > 1 ? ` (${counter - 1})` : ''}` // 名前も区別
+          };
+          existingIds.add(newKey);
+        });
 
         // データの結合
         newState[type] = {
           ...newState[type],
-          ...validatedNewData
+          ...renamedData
         };
 
         // OrderArrayの更新（既存の順序を保持しつつ、新規キーを追加）
-        const newKeys = Object.keys(validatedNewData).filter(
-          key => !newState[orderKey].includes(key)
-        );
+        const newKeys = Object.keys(renamedData);
         newState[orderKey] = [...newState[orderKey], ...newKeys];
       });
     }
@@ -176,7 +192,7 @@ export function funkOmiken(listEntry: Ref<ListEntries>) {
 
     // ステートの更新
     AppState.value.Omiken = newState;
-    console.log(`プリセットを${mode === 'overwrite' ? '上書き' : '追加'}で適用しました`);
+    console.log(`プリセットを${preset.mode === 'overwrite' ? '上書き' : '追加'}で適用しました`);
     isOmikenChanged.value = true;
   };
 
