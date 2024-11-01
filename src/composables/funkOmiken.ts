@@ -8,9 +8,11 @@ import type {
   AppStateType,
   OrderKey,
   OmikenCategory,
-  ListEntries} from '../types';
+  ListEntries,
+  ListCategory,
+  PresetOmikenEditType} from '../types';
 import { funkJSON,  } from "./funkJSON";
-import { validateData } from "./funkValidate";
+import { generateOrder, validateData } from "./funkValidate";
 
 export function funkOmiken(listEntry: Ref<ListEntries>) {
   const AppState = ref<AppStateType>({
@@ -50,13 +52,12 @@ export function funkOmiken(listEntry: Ref<ListEntries>) {
       // 外部データの読み込み
       const { charaData, presetData } = await fetchPreset();
       AppState.value.CHARA = charaData;
-      console.log(charaData);
       AppState.value.Preset = presetData;
-      console.log(presetData);
 
       // 使用しているOmikenデータの読み込み
       const omikenData = await fetchOmiken();
       if (omikenData) AppState.value.Omiken = omikenData;
+      console.log(omikenData);
 
       // 自動保存の開始
       startOmikenSave();
@@ -82,6 +83,7 @@ export function funkOmiken(listEntry: Ref<ListEntries>) {
   onMounted(initializeApp);
 
 
+  // Omikenの更新
   const updateOmiken = (payload: OmikenEntry<OmikenCategory>) => {
     if (!payload) return;
     const { type, update, addKeys, delKeys, reorder, preferences } = payload;
@@ -132,6 +134,54 @@ export function funkOmiken(listEntry: Ref<ListEntries>) {
     isOmikenChanged.value = true;
   };
 
+  // Presetからの上書き・追加
+  const updateOmikenPreset = (preset: PresetOmikenEditType, mode: 'overwrite' | 'append') => {
+    // 現在のpreferencesとステートのコピーを保持
+    const currentPreferences = AppState.value.Omiken.preferences;
+    const newState: OmikenEditType = JSON.parse(JSON.stringify(AppState.value.Omiken));
+
+    if (mode === 'overwrite') {
+      // 上書きモード：プリセットの内容で完全に置き換え（preferences除く）
+      const categories: ListCategory[] = ['rules', 'omikuji', 'place'];
+      categories.forEach(type => {
+        // 各カテゴリーのデータをバリデーション
+        newState[type] = validateData(type, preset[type]);
+        // OrderArrayの再生成
+        newState[`${type}Order`] = generateOrder(newState[type]);
+      });
+    } else {
+      // 追加モード：既存のデータを保持しながら新しいデータを追加
+      const categories: ListCategory[] = ['rules', 'omikuji', 'place'];
+      categories.forEach(type => {
+        const orderKey = `${type}Order` as const;
+        // 新規データのバリデーション
+        const validatedNewData = validateData(type, preset[type]);
+
+        // データの結合
+        newState[type] = {
+          ...newState[type],
+          ...validatedNewData
+        };
+
+        // OrderArrayの更新（既存の順序を保持しつつ、新規キーを追加）
+        const newKeys = Object.keys(validatedNewData).filter(
+          key => !newState[orderKey].includes(key)
+        );
+        newState[orderKey] = [...newState[orderKey], ...newKeys];
+      });
+    }
+
+    // preferencesを復元
+    newState.preferences = currentPreferences;
+
+    // ステートの更新
+    AppState.value.Omiken = newState;
+    console.log(`プリセットを${mode === 'overwrite' ? '上書き' : '追加'}で適用しました`);
+    isOmikenChanged.value = true;
+  };
+
+
+
   // 強制保存用 // TODO これは閉じた時のみ使うのでreturnしなくてもいいかも
   const forceSave = () => {
     if (isOmikenChanged.value) {
@@ -143,5 +193,6 @@ export function funkOmiken(listEntry: Ref<ListEntries>) {
   return {
     AppState,
     updateOmiken,
+    updateOmikenPreset,
   };
 }

@@ -93,14 +93,15 @@ export function funkJSON() {
       }
       const data = await response.json();
 
-      // データの検証と正規化
+      // データの検証と正規化 // TODO 並び順のバリデーションも行いたい
+      // TODO 例えば、Objectのキーと配列が合わない可能性もあるので。
       const validatedData: OmikenEditType = {
         rules: validateData('rules', data.rules),
         omikuji: validateData('omikuji', data.omikuji),
         place: validateData('place', data.place),
-        rulesOrder: generateOrder(data.rules),
-        omikujiOrder: generateOrder(data.omikuji),
-        placeOrder: generateOrder(data.place),
+        rulesOrder: data.rulesOrder,
+        omikujiOrder: data.omikujiOrder,
+        placeOrder: data.placeOrder,
         preferences: data.preferences
       };
 

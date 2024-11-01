@@ -6,8 +6,8 @@
         <v-toolbar-title>
           {{ item.name }}
           <v-chip class="ml-4" label variant="outlined">
-            {{ getSwitchLabel(item.switch) }}</v-chip
-          >
+            {{ getSwitchLabel(item.switch) }}
+          </v-chip>
         </v-toolbar-title>
         <template v-slot:append>
           <ListItemPartsAction
@@ -22,24 +22,33 @@
         <v-alert v-if="isAllDisabled" type="warning">
           おみくじが選択されていません
         </v-alert>
-        <v-chip-group v-else>
-          <v-hover v-slot="{ isHovering, props }">
-            <v-card
+        <v-sheet v-else>
+          <v-row no-gutters>
+            <v-col
               v-for="option in enabledOmikujiLists"
               :key="option.id"
-              class="ma-1 d-inline-block"
-              min-width="100"
-              :color="getWeightColor(option.id)"
-              variant="outlined"
-              v-bind="props"
-              @click.stop="openEditorOmikuji(option)"
+              cols="12" sm="6" md="4" lg="3"
+              class="pa-1"
             >
-              <v-card-text class="text-center">
-                {{ option.name }}
-              </v-card-text>
-            </v-card>
-          </v-hover>
-        </v-chip-group>
+              <v-card
+                class="d-flex justify-space-between align-center px-2 py-1"
+                variant="outlined" color="grey"
+              >
+                <span class="font-weight-bold">
+                  {{ option.name }}
+                </span>
+                <span>
+                  <span :style="{ color: weightColor(option.id) }">
+                    {{ option.weight }}/{{ totalWeight() }}
+                  </span>
+                  <span class="ml-2">
+                    ({{ totalWeightPercentage(option.id) }}%)
+                  </span>
+                </span>
+              </v-card>
+            </v-col>
+          </v-row>
+        </v-sheet>
         <v-sheet class="mt-2">
           <span
             v-if="item.matchExact && item.matchExact.length > 0"
@@ -69,7 +78,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, inject, Ref } from "vue";
 import {
   ListEntry,
   ListCategory,
@@ -77,6 +86,7 @@ import {
   OmikenEntry,
   OmikenEditType,
   OmikenCategory,
+  AppStateType,
 } from "@/types";
 import ListItemPartsAction from "./common/ListItemPartsAction.vue";
 import { funkRules } from "../composables/funkRules";
@@ -93,29 +103,21 @@ const emit = defineEmits<{
   (e: "open-editor", editorItem: ListEntry<ListCategory>): void;
 }>();
 
-// 0～4のswitchによって色を変える
-const { getSwitchLabel, getSwitchColor, getWeightColor } = funkRules(
-  props.Omiken.omikuji,
-  props.item
-);
+// inject
+const AppState = inject<Ref<AppStateType>>("AppStateKey");
+const omikuji = AppState?.value.Omiken.omikuji;
+const omikujiOrder = AppState?.value.Omiken.omikujiOrder;
 
-// コンポーザブルを使うとcomputedがインポテンツなので直接書く
-const enabledOmikujiLists = computed(() => {
-  const omikujiOptions = Object.entries(props.Omiken.omikuji).map(
-    ([id, data]) => ({
-      id,
-      name: data.name,
-      weight: data.weight,
-    })
-  );
-  // enabledIdsが空なら、すべてのオプションを返す
-  if (!Array.isArray(props.item?.enabledIds)) return omikujiOptions;
-
-  // enabledIdsに含まれているオプションを返す
-  return omikujiOptions.filter((option) =>
-    props.item.enabledIds.includes(option.id)
-  );
-});
+// コンポーザブル:funkRules
+const {
+  totalWeight,
+  totalWeightPercentage,
+  getSwitchLabel,
+  getSwitchColor,
+  weightColor,
+  omikujiLists,
+  enabledOmikujiLists,
+} = funkRules(omikuji, omikujiOrder, props.item);
 
 // すべてのおみくじが無効かどうかを確認
 const isAllDisabled = computed(() => {
@@ -124,7 +126,7 @@ const isAllDisabled = computed(() => {
   );
 });
 
-// エディターを開く
+// Rulesのエディターを開く
 function openEditorRules() {
   const item = { [props.item.id]: props.item };
   emit("open-editor", {
@@ -134,7 +136,7 @@ function openEditorRules() {
   });
 }
 
-// おみくじのエディターを開く
+// omikujiのエディターを開く
 const openEditorOmikuji = (option: { id: string; name: string }) => {
   const omikuji = props.Omiken.omikuji?.[option.id];
   if (omikuji) {

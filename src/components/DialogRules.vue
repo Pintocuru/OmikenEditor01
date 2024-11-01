@@ -27,7 +27,7 @@
         <v-col cols="12" sm="6">
           <v-select
             v-model="currentItem.enabledIds"
-            :items="omikujiOptions"
+            :items="omikujiLists"
             label="有効にするID"
             chips
             multiple
@@ -35,17 +35,17 @@
             item-value="id"
             @update:modelValue="updateItem"
           />
-          <v-alert v-if="validOmikujiOptions.length === 0" type="warning">
+          <v-alert v-if="enabledOmikujiLists.length === 0" type="warning">
             少なくとも1つのおみくじを有効にしてください
           </v-alert>
           <v-chip-group v-else>
             <v-hover v-slot="{ props }">
               <v-card
-                v-for="option in validOmikujiOptions"
+                v-for="option in enabledOmikujiLists"
                 :key="option.id"
                 class="ma-1 d-inline-block"
                 min-width="100"
-                :color="getWeightColor(option.id)"
+                :color="weightColor(option.id)"
                 variant="outlined"
                 v-bind="props"
                 @click.stop="openEditorOmikuji(option)"
@@ -101,6 +101,7 @@ const emit = defineEmits<{
 // inject
 const AppState = inject<Ref<AppStateType>>("AppStateKey");
 const omikuji = AppState?.value.Omiken.omikuji;
+const omikujiOrder = AppState?.value.Omiken.omikujiOrder;
 
 // propsからデータを解読
 const currentItem = computed(() => {
@@ -108,15 +109,19 @@ const currentItem = computed(() => {
   return item ? Object.values(item)[0] : null;
 });
 
-// コンポーザブルの使用
+// コンポーザブル:funkRules
 const {
   switchLabels,
-  getSwitchColor,
-  omikujiOptions,
-  validOmikujiOptions,
-  getWeightColor,
+    totalWeight,
+    totalWeightPercentage,
+    getSwitchLabel,
+    getSwitchColor,
+    omikujiLists,
+    enabledOmikujiLists,
+    weightColor,
 } = funkRules(
   omikuji,
+  omikujiOrder,
   props.entry?.item && Object.values(props.entry.item)[0]
 );
 
@@ -137,7 +142,7 @@ const updateItem = () => {
   }
 };
 
-// おみくじのエディターを開く
+// omikujiのエディターを開く
 const openEditorOmikuji = (option: { id: string; name: string }) => {
   const omi = omikuji?.[option.id];
   console.log(omi);

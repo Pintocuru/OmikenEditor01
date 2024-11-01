@@ -1,10 +1,7 @@
 <!-- src/App.vue -->
 <template>
   <v-app :theme="uiDark">
-    <AppHeader
-      v-model:uiDark="uiDark"
-      @update:uidark="uiDark = $event"
-    />
+    <AppHeader v-model:uiDark="uiDark" @update:uidark="uiDark = $event" />
     <AppNavigation
       v-model:naviCategory="naviCategory"
       :Omiken="AppState.Omiken"
@@ -16,13 +13,14 @@
           :Omiken="AppState.Omiken"
           :naviCategory="naviCategory"
           @update:Omiken="updateOmiken"
+            @update:OmikenPreset="updateOmikenPreset"
           @open-editor="openEditor"
         />
       </v-container>
     </v-main>
 
     <AppDialog
-       v-model:listEntry="listEntry"
+      v-model:listEntry="listEntry"
       @update:Omiken="updateOmiken"
       @open-editor="openEditor"
     />
@@ -37,14 +35,8 @@ import AppDialog from "./components/AppDialog.vue";
 import { funkOmiken as funkOmiken } from "./composables/funkOmiken";
 import { funkUI } from "./composables/funkUI";
 
-const {
-  uiDark,
-  naviCategory,
-  listEntry,
-  openEditor,
-} = funkUI();
+const { uiDark, naviCategory, listEntry, openEditor } = funkUI();
 
 // コンポーザブルの使用
-const { AppState, updateOmiken: updateOmiken } = funkOmiken(listEntry);
-
+const { AppState, updateOmiken, updateOmikenPreset } = funkOmiken(listEntry);
 </script>

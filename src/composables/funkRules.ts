@@ -5,6 +5,7 @@ import { OmikujiType, RulesType } from "@/types";
 
 export function funkRules(
   omikuji: Record<string, OmikujiType> | undefined = {},
+  omikujiOrder: string[] | undefined = [],
   item?: RulesType |null
 ) {
 
@@ -30,45 +31,64 @@ export function funkRules(
   const getSwitchColor = (switchValue: number) =>
     SWITCH_CONFIG.colors[switchValue] || "";
 
-  // おみくじのオプションを定義
-  const omikujiOptions = computed(() =>
-    Object.entries(omikuji).map(([id, omikuji]) => ({
+  // omikujiのリスト
+  const omikujiLists = computed(() => {
+    // omikujiOrderが存在する場合はそれに従って並び替え
+    if (omikujiOrder && omikujiOrder.length > 0) {
+      return omikujiOrder
+        .map(id => {
+          const omikujiItem = omikuji[id];
+          return omikujiItem ? { id, name: omikujiItem.name, weight: omikujiItem.weight } : null;
+        })
+        .filter((option): option is { id: string, name: string, weight: number } => option !== null);
+    }
+
+    // omikujiOrderがない場合は従来の方法で並び替え
+    return Object.entries(omikuji).map(([id, omikuji]) => ({
       id,
       name: omikuji.name,
       weight: omikuji.weight,
-    }))
-  );
+    }));
+  });
 
-  // 有効なおみくじオプションを計算
-  const validOmikujiOptions = computed(() => {
+  // 有効なomikujiのリスト
+  const enabledOmikujiLists = computed(() => {
     // enabledIdsが空なら、すべてのおみくじが有効
     const isAllEnabled = item?.enabledIds.length === 0;
-    if (!item || isAllEnabled) return omikujiOptions.value;
-    return omikujiOptions.value.filter((option) =>
+    if (!item || isAllEnabled) return omikujiLists.value;
+    return omikujiLists.value.filter((option) =>
       item.enabledIds.includes(option.id)
     );
   });
 
   const chipColors = computed(() => {
-    return validOmikujiOptions.value.map((option) => ({
+    return enabledOmikujiLists.value.map((option) => ({
       id: option.id,
-      color: getWeightColor(option.id),
+      color: weightColor(option.id),
     }));
   });
 
-  // v-chipに色を付与
-  const getWeightColor = (optionId: string): string => {
-    const option = omikuji[optionId];
-    if (!option?.weight) return "";
-
-    // 有効なおみくじの合計重みを計算
-    const validOmikujiIds = validOmikujiOptions.value.map((o) => o.id);
-    const totalWeight = validOmikujiIds.reduce(
+  // totalWeight関数で合計を計算
+  const totalWeight = (): number => {
+    const validOmikujiIds = enabledOmikujiLists.value.map((o) => o.id);
+    return validOmikujiIds.reduce(
       (sum, id) => sum + (omikuji[id]?.weight || 0),
       0
     );
+  };
 
-    const percentage = (option.weight / totalWeight) * 100;
+  // totalWeightPercentage関数で割合を計算
+  const totalWeightPercentage = (optionId: string): number => {
+    const option = omikuji[optionId];
+    if (!option?.weight) return 0;
+
+    const total = totalWeight();
+    return parseFloat(((option.weight / total) * 100).toFixed(1));
+  };
+
+  // v-chipに色を付与
+  const weightColor = (optionId: string): string => {
+    const percentage = totalWeightPercentage(optionId);
 
     return (
       WEIGHT_THRESHOLDS.find(({ threshold }) => percentage >= threshold)
@@ -81,10 +101,12 @@ export function funkRules(
     switchLabels: Object.fromEntries(
       SWITCH_CONFIG.labels.map((label, i) => [i, label])
     ),
+    totalWeight,
+    totalWeightPercentage,
     getSwitchLabel,
     getSwitchColor,
-    omikujiOptions,
-    validOmikujiOptions,
-    getWeightColor,
+    omikujiLists,
+    enabledOmikujiLists,
+    weightColor,
   };
 }

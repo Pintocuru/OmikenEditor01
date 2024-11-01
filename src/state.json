@@ -5,7 +5,14 @@
       "name": "おみくじ",
       "description": "",
       "switch": 1,
-      "enabledIds": ["1729669848759-a4czl", "1730186257904-r3vdg"],
+      "enabledIds": [
+        "1729669848759-a4czl",
+        "1730186257904-r3vdg",
+        "1730380299548-w1lfc",
+        "1730380661023-714m5",
+        "1730380504277-yfv1r",
+        "1730380464680-k9tcy"
+      ],
       "matchExact": ["🥠"],
       "matchStartsWith": ["おみくじ", "omikuji", "omikuzi", "御神籤"],
       "matchIncludes": []
@@ -73,7 +80,7 @@
         {
           "type": "onecomme",
           "botKey": "reimu",
-          "iconKey": "Default",
+          "iconKey": "joy02",
           "delaySeconds": 1,
           "content": "<<user>>さんの運勢は【大吉】<<omikuji01>>"
         },
@@ -137,7 +144,7 @@
         {
           "type": "onecomme",
           "botKey": "reimu",
-          "iconKey": "Default",
+          "iconKey": "joy01",
           "delaySeconds": 1,
           "content": "<<user>>さんの運勢は【吉】<<omikuji02>>"
         },
@@ -233,6 +240,262 @@
           "iconKey": "Default",
           "delaySeconds": 1,
           "content": "<<user>>さんは【赤色】<<flowerRed>>"
+        }
+      ]
+    },
+    "1730380299548-w1lfc": {
+      "id": "1730380299548-w1lfc",
+      "name": "おみくじ:中吉",
+      "description": "",
+      "weight": 21,
+      "threshold": {
+        "isSyoken": false,
+        "time": {
+          "isEnabled": false,
+          "value1": 0,
+          "value2": 0
+        },
+        "elapsed": {
+          "isEnabled": false,
+          "unit": "hour",
+          "comparison": "max",
+          "value1": 0,
+          "value2": 0
+        },
+        "count": {
+          "isEnabled": false,
+          "unit": "no",
+          "comparison": "max",
+          "value1": 0,
+          "value2": 0
+        },
+        "gift": {
+          "isEnabled": false,
+          "comparison": "max",
+          "value1": 0,
+          "value2": 0
+        }
+      },
+      "post": [
+        {
+          "type": "party",
+          "botKey": "reimu",
+          "iconKey": "Default",
+          "delaySeconds": -1,
+          "content": "!omikuji_huru"
+        },
+        {
+          "type": "party",
+          "botKey": "reimu",
+          "iconKey": "Default",
+          "delaySeconds": 0,
+          "content": "!omikuji_03"
+        },
+        {
+          "type": "onecomme",
+          "botKey": "reimu",
+          "iconKey": "fun03",
+          "delaySeconds": 1,
+          "content": "<<user>>さんの運勢は【吉】<<omikuji03>>"
+        },
+        {
+          "type": "party",
+          "botKey": "reimu",
+          "iconKey": "Default",
+          "delaySeconds": 1,
+          "content": "!シーン切り替え1"
+        }
+      ]
+    },
+    "1730380464680-k9tcy": {
+      "id": "1730380464680-k9tcy",
+      "name": "おみくじ:小吉",
+      "description": "",
+      "weight": 15,
+      "threshold": {
+        "isSyoken": false,
+        "time": {
+          "isEnabled": false,
+          "value1": 0,
+          "value2": 0
+        },
+        "elapsed": {
+          "isEnabled": false,
+          "unit": "hour",
+          "comparison": "max",
+          "value1": 0,
+          "value2": 0
+        },
+        "count": {
+          "isEnabled": false,
+          "unit": "no",
+          "comparison": "max",
+          "value1": 0,
+          "value2": 0
+        },
+        "gift": {
+          "isEnabled": false,
+          "comparison": "max",
+          "value1": 0,
+          "value2": 0
+        }
+      },
+      "post": [
+        {
+          "type": "party",
+          "botKey": "reimu",
+          "iconKey": "Default",
+          "delaySeconds": -1,
+          "content": "!omikuji_huru"
+        },
+        {
+          "type": "party",
+          "botKey": "reimu",
+          "iconKey": "Default",
+          "delaySeconds": 0,
+          "content": "!omikuji_04"
+        },
+        {
+          "type": "onecomme",
+          "botKey": "reimu",
+          "iconKey": "fun02",
+          "delaySeconds": 1,
+          "content": "<<user>>さんの運勢は【小吉】<<omikuji04>>"
+        },
+        {
+          "type": "party",
+          "botKey": "reimu",
+          "iconKey": "Default",
+          "delaySeconds": 1,
+          "content": "!シーン切り替え1"
+        }
+      ]
+    },
+    "1730380504277-yfv1r": {
+      "id": "1730380504277-yfv1r",
+      "name": "おみくじ:末吉",
+      "description": "",
+      "weight": 12,
+      "threshold": {
+        "isSyoken": false,
+        "time": {
+          "isEnabled": false,
+          "value1": 0,
+          "value2": 0
+        },
+        "elapsed": {
+          "isEnabled": false,
+          "unit": "hour",
+          "comparison": "max",
+          "value1": 0,
+          "value2": 0
+        },
+        "count": {
+          "isEnabled": false,
+          "unit": "no",
+          "comparison": "max",
+          "value1": 0,
+          "value2": 0
+        },
+        "gift": {
+          "isEnabled": false,
+          "comparison": "max",
+          "value1": 0,
+          "value2": 0
+        }
+      },
+      "post": [
+        {
+          "type": "party",
+          "botKey": "reimu",
+          "iconKey": "Default",
+          "delaySeconds": -1,
+          "content": "!omikuji_huru"
+        },
+        {
+          "type": "party",
+          "botKey": "reimu",
+          "iconKey": "Default",
+          "delaySeconds": 0,
+          "content": "!omikuji_05"
+        },
+        {
+          "type": "onecomme",
+          "botKey": "reimu",
+          "iconKey": "sad01",
+          "delaySeconds": 1,
+          "content": "<<user>>さんの運勢は【末吉】<<omikuji05>>"
+        },
+        {
+          "type": "party",
+          "botKey": "reimu",
+          "iconKey": "Default",
+          "delaySeconds": 1,
+          "content": "!間抜け1"
+        }
+      ]
+    },
+    "1730380661023-714m5": {
+      "id": "1730380661023-714m5",
+      "name": "おみくじ:凶",
+      "description": "",
+      "weight": 9,
+      "threshold": {
+        "isSyoken": false,
+        "time": {
+          "isEnabled": false,
+          "value1": 0,
+          "value2": 0
+        },
+        "elapsed": {
+          "isEnabled": false,
+          "unit": "hour",
+          "comparison": "max",
+          "value1": 0,
+          "value2": 0
+        },
+        "count": {
+          "isEnabled": false,
+          "unit": "no",
+          "comparison": "max",
+          "value1": 0,
+          "value2": 0
+        },
+        "gift": {
+          "isEnabled": false,
+          "comparison": "max",
+          "value1": 0,
+          "value2": 0
+        }
+      },
+      "post": [
+        {
+          "type": "party",
+          "botKey": "reimu",
+          "iconKey": "Default",
+          "delaySeconds": -1,
+          "content": "!omikuji_huru"
+        },
+        {
+          "type": "party",
+          "botKey": "reimu",
+          "iconKey": "Default",
+          "delaySeconds": 0,
+          "content": "!omikuji_06"
+        },
+        {
+          "type": "onecomme",
+          "botKey": "reimu",
+          "iconKey": "sorry01",
+          "delaySeconds": 1,
+          "content": "<<user>>さんの運勢は【凶】<<omikuji06>>"
+        },
+        {
+          "type": "party",
+          "botKey": "reimu",
+          "iconKey": "Default",
+          "delaySeconds": 1,
+          "content": "!呪いの旋律"
         }
       ]
     }
@@ -373,18 +636,55 @@
           "value": "青いリンドウは、厳しい冬を乗り越えて咲く花だぜ。あなたは、どんな困難にも立ち向かえる、強い心の持ち主なんだぜ。"
         }
       ]
+    },
+    "1730380366155-m3sdz": {
+      "id": "1730380366155-m3sdz",
+      "name": "omikuji03",
+      "description": "",
+      "isWeight": false,
+      "values": [
+        {
+          "weight": 1,
+          "value": "思いがけない幸運があるかも。チャンスを逃さないようにね。"
+        },
+        {
+          "weight": 1,
+          "value": "周囲の人との協力が大切よ。助けを求めることを恐れないで。"
+        },
+        {
+          "weight": 1,
+          "value": "自分の直感を信じていいわ。大きな成長が待ってるそうよ。"
+        },
+        {
+          "weight": 1,
+          "value": "新しいスキルを学ぶと良いわ。自分を磨くチャンスが来てるわよ。"
+        },
+        {
+          "weight": 1,
+          "value": "楽しい出来事が増えるわ。笑顔を忘れずにね。"
+        },
+        {
+          "weight": 1,
+          "value": "計画をしっかり立てることで、成功への道が開けるわ。"
+        }
+      ]
     }
   },
   "rulesOrder": ["1729669868469-531k4", "1730186223570-nxukm"],
   "omikujiOrder": [
     "1729669848759-a4czl",
+    "1730380661023-714m5",
     "1730186257904-r3vdg",
+    "1730380299548-w1lfc",
+    "1730380464680-k9tcy",
+    "1730380504277-yfv1r",
     "1730186417456-m98tz",
     "1730186488892-o4w6g"
   ],
   "placeOrder": [
     "1730215131236-r0mi5",
     "1730255242642-ltoka",
+    "1730380366155-m3sdz",
     "1730255471547-50761",
     "1730255480352-f1t5h"
   ],

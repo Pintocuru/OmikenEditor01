@@ -24,6 +24,7 @@
       <ListPreset
         :Omiken="Omiken"
         @update:Omiken="updateOmiken"
+            @update:OmikenPreset="updateOmikenPreset"
       />
     </template>
     <template v-else-if="naviCategory === 'preferences'">
@@ -71,6 +72,7 @@ import type {
   NaviCategory,
   OmikenCategory,
   ListEntry,
+  PresetOmikenEditType,
 } from "@/types";
 
 // Props Emits
@@ -81,6 +83,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: "update:Omiken", payload: OmikenEntry<OmikenCategory>): void;
+  (e: "update:OmikenPreset", preset: PresetOmikenEditType,mode:'overwrite' | 'append'): void;
   (e: "open-editor", editorItem: ListEntry<ListCategory>): void;
 }>();
 
@@ -142,6 +145,8 @@ const addItem = () => {
 
 // 各種操作関数(エディターを開く/Omiken更新)
 const updateOmiken = (payload: OmikenEntry<OmikenCategory>) => emit("update:Omiken", payload);
-const openEditor = (editorItem: ListEntry<ListCategory>) => emit("open-editor", editorItem);
+// TODO updateOmikenPresetを作る
+  const openEditor = (editorItem: ListEntry<ListCategory>) => emit("open-editor", editorItem);
+
 
 </script>

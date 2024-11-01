@@ -66,6 +66,7 @@ const getComponentForCategory = computed(() => {
 
 // draggable用に配列にする
 const sortedItems = computed(() => {
+  console.log(props.itemOrder);
   return props.itemOrder.map((id) => ({
     ...props.items[id],
   }));
