@@ -73,8 +73,8 @@ function openEditor() {
   emit("open-editor", {
     isOpen: true,
     type: props.naviCategory,
+    mode:null,
     key,
-    item: { [props.item.id]: props.item },
   });
 }
 

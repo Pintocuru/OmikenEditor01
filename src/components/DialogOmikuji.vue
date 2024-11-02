@@ -6,7 +6,11 @@
         <!-- 基本情報 -->
         <v-row dense>
           <v-col cols="12" sm="4">
-            <v-text-field v-model="currentItem.name" label="結果名" density="compact" @input="updateItem">
+            <v-text-field
+              v-model="currentItem.name"
+              label="結果名"
+              @input="updateItem"
+            >
               <v-tooltip activator="parent" location="bottom">
                 おみくじの結果の名称（ラベル）を入力してください。<br />
                 例: 「大吉」「中吉」「小吉」など。
@@ -14,15 +18,25 @@
             </v-text-field>
           </v-col>
           <v-col cols="12" sm="2">
-            <v-text-field v-model.number="currentItem.weight" label="出現比" type="number" min="0" max="100"
-              density="compact" @input="updateItem">
+            <v-text-field
+              v-model.number="currentItem.weight"
+              label="出現比"
+              type="number"
+              min="0"
+              max="100"
+              @input="updateItem"
+            >
               <v-tooltip activator="parent" location="bottom">
                 ランダムに偏りをつける
               </v-tooltip>
             </v-text-field>
           </v-col>
           <v-col cols="12" sm="6">
-            <v-text-field v-model="currentItem.description" label="説明文" @input="updateItem" />
+            <v-text-field
+              v-model="currentItem.description"
+              label="説明文"
+              @input="updateItem"
+            />
           </v-col>
         </v-row>
 
@@ -30,13 +44,23 @@
         <v-tabs v-model="tab" class="w-100">
           <v-tab value="post" class="d-flex align-center w-50">
             メッセージ
-            <v-badge v-if="postCount ? postCount > 0 : 0" :content="postCount" color="primary" class="ms-2">
+            <v-badge
+              v-if="postCount ? postCount > 0 : 0"
+              :content="postCount"
+              color="primary"
+              class="ms-2"
+            >
               <v-icon size="small">mdi-message-text</v-icon>
             </v-badge>
           </v-tab>
           <v-tab value="filter" class="d-flex align-center w-50">
             フィルタリング
-            <v-badge v-if="activeFilters" content="1" color="primary" class="ms-2"><!-- //TODO 数値の代わりに、有効であれば何らかのアイコンを表示する -->
+            <v-badge
+              v-if="activeFilters"
+              content="1"
+              color="primary"
+              class="ms-2"
+              ><!-- //TODO 数値の代わりに、有効であれば何らかのアイコンを表示する -->
               <v-icon size="small">mdi-filter-variant</v-icon>
             </v-badge>
           </v-tab>
@@ -44,10 +68,17 @@
 
         <v-window v-model="tab">
           <v-window-item value="post">
-            <DialogOmikujiPost :currentItem="currentItem" @update:Omiken="updateOmiken" />
+            <DialogOmikujiPost
+              :currentItem="currentItem"
+              @update:Omiken="updateOmiken"
+                @open-editor="openEditor"
+            />
           </v-window-item>
           <v-window-item value="filter">
-            <DialogThreshold :currentItem="currentItem" @update:Omiken="updateOmiken" />
+            <DialogThreshold
+              :currentItem="currentItem"
+              @update:Omiken="updateOmiken"
+            />
           </v-window-item>
         </v-window>
       </v-form>
@@ -100,9 +131,11 @@ const activeFilters = computed(() => {
   if (!currentItem.value) return;
   const conditionType = currentItem.value.threshold.conditionType;
 
-  if(conditionType !=='none'){
-    return true
-  } else {return false}
+  if (conditionType !== "none") {
+    return true;
+  } else {
+    return false;
+  }
 });
 
 // 更新アップデート
@@ -117,4 +150,6 @@ const updateItem = () => {
 // 子コンポーネントのOmiken更新
 const updateOmiken = (payload: OmikenEntry<OmikenCategory>) =>
   emit("update:Omiken", payload);
+  const openEditor = (editorItem: ListEntry<ListCategory>) => emit("open-editor", editorItem);
+
 </script>
