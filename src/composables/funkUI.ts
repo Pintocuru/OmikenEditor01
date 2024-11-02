@@ -3,7 +3,7 @@ import { Ref, ref } from "vue";
 import type {
   ListCategory,
   ListEntry,
-  ListEntries,
+  ListEntryCollect,
   NaviCategory,
   EditerTypeMap,
 } from "../types";
@@ -18,7 +18,7 @@ export function funkUI() {
   const naviCategory = ref<NaviCategory>("rules");
 
   // ダイアログで表示させるアイテム 
-  const listEntry: Ref<ListEntries> = ref({
+  const listEntry: Ref<ListEntryCollect> = ref({
     rules: { isOpen: false, type: 'rules', key: null, item: null, mode: null },
     omikuji: { isOpen: false, type: 'omikuji', key: null, item: null, mode: null },
     place: { isOpen: false, type: 'place', key: null, item: null, mode: null },

@@ -16,39 +16,36 @@ export interface OmikenEditType extends OmikenType {
   placeOrder: string[]; // プレースホルダーの順序
 }
 
-// 基本となるカテゴリー
-type BaseCategory = 'rules' | 'omikuji' | 'place';
-export type EditerType = RulesType | OmikujiType | PlaceType;
-
 // xxxOrder用の型
-export type OrderKey<T extends BaseCategory> = `${T}Order`;
+export type OrderKey<T extends ListCategory> = `${T}Order`;
 
 // ナビゲーション用カテゴリー
-export type NaviCategory = BaseCategory | 'preset' | 'preferences';
+export type NaviCategory = ListCategory | "preset" | "preferences";
 
 // リスト用カテゴリー
-export type ListCategory = BaseCategory;
+export type ListCategory = "rules" | "omikuji" | "place";
+export type ListType = RulesType | OmikujiType | PlaceType;
 export type ListEntry<T extends ListCategory> = {
   isOpen: boolean; // ダイアログの開閉状態
   type: T;
+  mode: string | null; // 表示モード
   key: string | string[] | null;
-  mode?: string | null; // 複数の際の表示モード(omikujiで出現割合を複数調整する時に使う)
 };
-// listEntry全体の型 
-export type ListEntries = {
+// listEntry全体の型
+export type ListEntryCollect = {
   [K in ListCategory]: ListEntry<K>;
 };
 
 // ファイル操作用
-export type OmikenCategory = BaseCategory | 'preset' | 'preferences';
+export type OmikenCategory = ListCategory | "preset" | "preferences";
 export type OmikenEntry<T extends OmikenCategory> = {
   type: T;
-  update?: T extends BaseCategory ? Record<string, EditerTypeMap[T]> : never; // 更新アイテム
-  addKeys?: T extends BaseCategory ? Partial<EditerTypeMap[T]>[] : never // 新規追加アイテム(部分入力可)
+  update?: T extends ListCategory ? EditerEntryTypeMap[T] : never; // 更新アイテム
+  addKeys?: T extends ListCategory ? Partial<EditerTypeMap[T]>[] : never; // 新規追加アイテム(部分入力可)
   delKeys?: string[]; // 削除するアイテムのキー名
-  reorder?: T extends BaseCategory ? string[] : never; // 順番の指定
-  preset?: T extends 'preset' ? Record<string, PresetOmikenEditType> : never; // プリセット用
-  preferences?: T extends 'preferences' ? PreferencesType : never; // 設定用
+  reorder?: T extends ListCategory ? string[] : never; // 順番の指定
+  preset?: T extends "preset" ? Record<string, PresetOmikenEditType> : never; // プリセット用
+  preferences?: T extends "preferences" ? PreferencesType : never; // 設定用
 } | null;
 
 // JSON読み込み用
@@ -56,7 +53,7 @@ export interface fetchJSONType {
   id: string;
   name: string;
   description: string;
-  type: 'Omiken' | 'CHARA';
+  type: "Omiken" | "CHARA";
   path: string;
   banner: string;
 }
@@ -66,19 +63,17 @@ export interface CHARAEditType extends fetchJSONType {
   item: CHARAType; // キャラデータ
 }
 export interface PresetOmikenEditType extends fetchJSONType {
-  item: Omit<OmikenEditType, 'preferences'>; // キャラデータ(preferences抜き)
+  item: Omit<OmikenEditType, "preferences">; // キャラデータ(preferences抜き)
   mode: "overwrite" | "append"; // 追加豊富(上書き/追加)
 }
 
-
 // ---------------------------------------------------
-
 
 // Omibot:おみくじボット用型定義
 export interface OmikenType {
-  rules: Record<string, EditerTypeMap['rules']>; // おみくじのルールを管理
-  omikuji: Record<string, EditerTypeMap['omikuji']>; // おみくじ関連のメッセージ
-  place: Record<string, EditerTypeMap['place']>; // プレースホルダー
+  rules: Record<string, EditerTypeMap["rules"]>; // おみくじのルールを管理
+  omikuji: Record<string, EditerTypeMap["omikuji"]>; // おみくじ関連のメッセージ
+  place: Record<string, EditerTypeMap["place"]>; // プレースホルダー
   preferences: PreferencesType;
 }
 
@@ -87,7 +82,12 @@ export type EditerTypeMap = {
   rules: RulesType;
   omikuji: OmikujiType;
   place: PlaceType;
-}
+};
+export type EditerEntryTypeMap = {
+  rules: Record<string, RulesType>;
+  omikuji: Record<string, OmikujiType>;
+  place: Record<string, PlaceType>;
+};
 
 // 基本となる項目のインターフェース
 interface BaseType {
@@ -96,154 +96,101 @@ interface BaseType {
   description: string; // 説明文
 }
 
-/*
-
-export interface thresholdType {
-  conditionType: ConditionType;
-  accessLevel?: AccessLevel; // switchからaccessLevelに変更
-  syoken?: SyokenType; // isSyokenからSyokenTypeに変更
-  matchIncludes?: string[];
-  condition?: 
-    | { type: 'time', ...TimeCondition }
-    | { type: 'elapsed', ...ElapsedCondition }
-    | { type: 'count', ...CountCondition }
-    | { type: 'gift', ...GiftCondition };
-}
-
-
-// condition選択用
-export enum ConditionType {
-  NONE = 'none', // 制限なし
-  TIME = 'time',
-  ELAPSED = 'elapsed',
-  COUNT = 'count',
-  GIFT = 'gift'
-}
-
-// 初見・コメント履歴の種別
-export enum SyokenType {
-  NONE = 'none',     // 設定しない
-  SYOKEN = 'syoken', // 初見
-  HI = 'hi',         // その配信枠で1回目のコメント
-  AGAIN = 'again'    // 前回のコメントから7日以上経過
-}
-
-// ルールの有効/無効 0:OFF/1:だれでも/2:メンバー/3:モデレーター/4:管理者
-export enum AccessLevel {
-  OFF = 0,
-  ANYONE = 1,
-  MEMBER = 2,
-  MODERATOR = 3,
-  ADMIN = 4,
-}
-
-interface BaseCondition {
-  isEnabled: boolean;
-  value1: number;
-  value2?: number;
-}
-
-interface TimeCondition extends BaseCondition {
-  comparison: 'min' | 'max' | 'range';
-}
-
-interface ElapsedCondition extends BaseCondition {
-  unit: 'second' | 'minute' | 'hour' | 'day';
-  comparison: 'min' | 'max' | 'range' | 'nearEqual'; // nearEqualを追加
-}
-
-interface CountCondition extends BaseCondition {
-  unit: 'lc' | 'no' | 'tc';
-  comparison: 'min' | 'max' | 'range' | 'loop' | 'equal';
-}
-
-interface GiftCondition extends BaseCondition {
-  comparison: 'min' | 'max' | 'range' | 'equal';
-}
-
-*/
-
 // rules:おみくじルールの型定義
 export interface RulesType extends BaseType {
-  switch: AccessLevel; // ルールの有効/無効レベル // TODO 削除
   enabledIds: string[]; // omikujiの適用するIDリスト
-  matchExact: string[]; // 完全一致するキーワードの配列 // TODO 削除
   matchStartsWith: string[]; // 特定のフレーズで始まるキーワード（省略可）
-  matchIncludes: string[]; // 部分一致するキーワード（省略可） // TODO 削除
-  // TODO 新しくthresholdを入れる
-}
-
-// ルールの有効/無効 0:OFF/1:だれでも/2:メンバー/3:モデレーター/4:管理者
-export enum AccessLevel {
-  OFF = 0,
-  ANYONE = 1,
-  MEMBER = 2,
-  MODERATOR = 3,
-  ADMIN = 4,
+  threshold: ThresholdType; // 発動条件
 }
 
 // おみくじメッセージの型定義
 export interface OmikujiType extends BaseType {
   weight: number; // 出現割合
-  threshold: thresholdType;
+  threshold: ThresholdType; // 発動条件
   post: OmikujiPostType[];
 }
 
-export interface thresholdType {
-  isSyoken: boolean; // isSyoken:初見かどうか。これがONなら、下記は設定不可
-  time: { // time:時間指定(0-23時)
-    isEnabled: boolean;
-    value1: number;
-    value2: number;
-  }
-  elapsed: {
-    isEnabled: boolean;
-    unit:
-    | 'second' // second: 投稿してからの秒(interval*1000)
-    | 'minute' // minute: 投稿してからの分(interval*1000*60)
-    | 'hour' // hour:投稿してからの時間(interval*1000*60*60)
-    | 'day' // day: 投稿してからの日数(interval*1000*60*60*24)
-    value1: number;
-    value2: number;
-    comparison: // 比較方法
-    | 'min' // min:以下
-    | 'max' // max:以上
-    | 'range'; // range:範囲
-  }
-  count: {
-    isEnabled: boolean;
-    unit:
-    | 'lc' // lc:配信枠のコメント番号
-    | 'no' // no:配信枠の個人コメント数
-    | 'tc' // tc:総数の個人コメント数
-    value1: number;
-    value2: number;
-    comparison: // 比較方法
-    | 'min' // min:以下
-    | 'equal' // equal:等しい
-    | 'max' // max:以上
-    | 'loop' // loop:ループ
-    | 'range'; // range:範囲
-  }
-  gift: {
-    isEnabled: boolean;
-    value1: number;
-    value2: number;
-    comparison: // 比較方法
-    | 'min' // min:以下
-    | 'equal' // equal:等しい
-    | 'max' // max:以上
-    | 'range'; // range:範囲
-  }
+// 発動条件を設定する型定義
+export interface ThresholdType {
+  conditionType: ConditionType; // condition選択用
+  access?: AccessLevel; // ユーザーの役職
+  syoken?: SyokenType; // 初見・久しぶり
+  match?: string[]; // 追加キーワード
+  time?: TimeCondition;
+  elapsed?: ElapsedCondition;
+  count?: CountCondition;
+  gift?: GiftCondition;
+}
+
+// condition選択用
+export enum ConditionType {
+  NONE = "none", // 制限なし
+  ACCESS = 'access', // 
+  SYOKEN = 'syoken',
+  MATCH = 'match',
+  TIME = "time",
+  ELAPSED = "elapsed",
+  COUNT = "count",
+  GIFT = "gift",
+}
+
+// 初見・コメント履歴の種別
+export enum SyokenType {
+  SYOKEN = "syoken", // 初見
+  HI = "hi", // その配信枠で1回目のコメント
+  AGAIN = "again", // 前回のコメントから7日以上経過
+}
+
+// ルールの有効/無効 0:OFF/1:だれでも/2:メンバー/3:モデレーター/4:管理者
+export enum AccessLevel {
+  OFF = 0,
+  ANYONE = 1,
+  MEMBER = 2,
+  MODERATOR = 3,
+  ADMIN = 4,
+}
+
+// 共通の定義
+export type ComparisonType = "min" | "max" | "range" | "equal" | "loop";
+export interface BaseCondition {
+  isEnabled: boolean;
+  value1: number;
+  value2?: number;
+}
+
+// time:時間指定(0-23時)
+export interface TimeCondition extends BaseCondition {
+  type: ConditionType.TIME;
+  comparison: Extract<ComparisonType, "range">;
+}
+
+// second: 投稿してからの時間(interval:ミリ秒)
+export interface ElapsedCondition extends BaseCondition {
+  type: ConditionType.ELAPSED;
+  comparison: Extract<ComparisonType, "min" | "max" | "range">;
+  unit: "second" | "minute" | "hour" | "day";
+}
+
+// lc:配信枠の全体コメ数 / no:配信枠の個人コメ数 / tc:総数の個人コメ数
+export interface CountCondition extends BaseCondition {
+  type: ConditionType.COUNT;
+  comparison: ComparisonType;
+  unit: "lc" | "no" | "tc";
+}
+
+// ギフト金額
+export interface GiftCondition extends BaseCondition {
+  type: ConditionType.GIFT;
+  comparison: Extract<ComparisonType, "min" | "max" | "range" | "equal">;
 }
 
 // メッセージの投稿情報を管理する型
 export interface OmikujiPostType {
   type:
-  | 'onecomme' // わんコメへの投稿
-  | 'party' // WordPartyの投稿
-  | 'toast' // トースト投稿
-  | 'speech'; // わんコメのスピーチ機能
+    | "onecomme" // わんコメへの投稿
+    | "party" // WordPartyの投稿
+    | "toast" // トースト投稿
+    | "speech"; // わんコメのスピーチ機能
   botKey: string; // ボットキー
   iconKey: string; // アイコンキー
   delaySeconds: number; // メッセージを送信するまでの遅延時間
@@ -253,14 +200,14 @@ export interface OmikujiPostType {
 // プレースホルダー項目の型定義
 export interface PlaceType extends BaseType {
   isWeight: boolean; // モード
-  values: PlaceValueType[];  // 値の配列
+  values: PlaceValueType[]; // 値の配列
 }
 
 // プレースホルダーの値
 export type PlaceValueType = {
   weight: number; // 出現割合
   value: string; // 値（他のプレースホルダーへの参照可能: <<place_name>>）
-}
+};
 
 // 設定の型定義
 export interface PreferencesType {
@@ -281,27 +228,10 @@ export interface CHARAType {
     "--lcv-name-color": string; // 名前の色
     "--lcv-text-color": string; // コメントの色
     "--lcv-background-color": string; // 背景色
-  },
+  };
   image: {
     Default: string; // defaultは必須
     [key: string]: string; // 追加のキーに対応
-  }
+  };
 }
-
-// キャラクターJSON（編集時）
-export interface CharaStyleType {
-  id: string; // キー名（編集時に変更可能）
-  name: string; // キャラクターの名前
-  frameId?: string; // わんコメの枠を指定
-  color: {
-    "--lcv-name-color": string; // 名前の色
-    "--lcv-text-color": string; // コメントの色
-    "--lcv-background-color": string; // 背景色
-  },
-  images: Array<{ // 画像は配列で管理
-    key: string; // 画像のキー名
-    path: string; // 画像のパス
-  }>;
-}
-
 // ---------------------------------------------------

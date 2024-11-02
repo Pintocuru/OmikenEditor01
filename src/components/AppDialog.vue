@@ -65,18 +65,18 @@ import {
   ListCategory,
   OmikenEntry,
   OmikenCategory,
-  ListEntries,
+  ListEntryCollect,
   OmikenEditType,
 } from "@/types";
 
 // Props / emit
 const props = defineProps<{
-  listEntry: ListEntries;
+  listEntry: ListEntryCollect;
   Omiken: OmikenEditType;
 }>();
 
 const emit = defineEmits<{
-  (e: "update:listEntry", newEntry: ListEntries): void;
+  (e: "update:listEntry", newEntry: ListEntryCollect): void;
   (e: "update:Omiken", payload: OmikenEntry<OmikenCategory>): void;
   (e: "open-editor", editorItem: ListEntry<ListCategory>): void;
 }>();

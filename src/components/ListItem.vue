@@ -31,7 +31,7 @@ import ListItemPlace from "./ListItemPlace.vue";
 import type {
   ListEntry,
   ListCategory,
-  EditerType,
+  ListType,
   OmikenEntry,
   OmikenEditType,
   OmikenCategory,
@@ -40,7 +40,7 @@ import type {
 // Props Emits
 const props = defineProps<{
   Omiken: OmikenEditType;
-  items: Record<string, EditerType>;
+  items: Record<string, ListType>;
   itemOrder: string[];
   listCategory: ListCategory;
 }>();
@@ -72,7 +72,7 @@ const itemsSort = computed(() => {
 });
 
 // 配列データxxxOrderの更新
-function handleReorder(newOrder: EditerType[]) {
+function handleReorder(newOrder: ListType[]) {
   try {
     const newItemOrder = newOrder.map((item) => item.id);
     emit("update:Omiken", {

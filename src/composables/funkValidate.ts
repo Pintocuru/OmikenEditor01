@@ -4,27 +4,10 @@ import { z } from 'zod';
 import _ from 'lodash';
 
 
-// rulesのZodスキーマ
-const rulesSchema = z.record(z.object({
-  // ID
-  id: z.string(),
-  // おみくじルール名
-  name: z.string().default('おみくじ'),
-  // 説明文
-  description: z.string().default(''),
-  // ルールの有効/無効 0:OFF/1:だれでも/2:メンバー以上/3:モデレーター/4:管理者
-  switch: z.union([z.literal(0), z.literal(1), z.literal(2), z.literal(3), z.literal(4)]).default(1),
-  // omikujiの適用しないIDリスト
-  enabledIds: z.array(z.string()).default([]),
-  // キーワード(完全一致/前方一致/部分一致)
-  matchExact: z.array(z.string()).default([]),
-  matchStartsWith: z.array(z.string()).default([]),
-  matchIncludes: z.array(z.string()).default([])
-}));
 
 
-// omikujiのZodスキーマ
-// 共通の数値変換
+
+// threshold共通の数値変換
 const thresholdValueTransform = z.number().transform(val => {
   return typeof val !== 'number' || val < 0 ? 0 : val;
 });
@@ -70,14 +53,53 @@ const thresholdGiftSchema = thresholdValueRangeSwap(z.object({
   value2: thresholdValueTransform
 }));
 
-// omikuji.thresholdスキーマ
-const omikujiThresholdSchema = z.object({
-  isSyoken: z.boolean().default(false),
-  time: thresholdTimeSchema,
-  elapsed: thresholdElapsedSchema,
-  count: thresholdCountSchema,
-  gift: thresholdGiftSchema,
+// thresholdスキーマ
+const thresholdSchema = z.object({
+  conditionType: z.enum(['none', 'access', 'syoken', 'match', 'time', 'elapsed', 'count', 'gift']).default('none'),
+  access: z.enum(['0', '1', '2', '3', '4']).optional(),
+  syoken: z.enum(['syoken', 'hi', 'again']).optional(),
+  match: z.array(z.string()).optional(),
+  time: thresholdTimeSchema.optional(),
+  elapsed: thresholdElapsedSchema.optional(),
+  count: thresholdCountSchema.optional(),
+  gift: thresholdGiftSchema.optional()
+}).transform(data => {
+  const result = { conditionType: data.conditionType };
+  // conditionTypeに応じて必要なキーのみを残す
+  switch (data.conditionType) {
+    case 'none':
+      return result;
+    case 'access':
+      return { ...result, access: data.access };
+    case 'syoken':
+      return { ...result, syoken: data.syoken };
+    case 'match':
+      return { ...result, match: data.match };
+    case 'time':
+      return { ...result, time: data.time };
+    case 'elapsed':
+      return { ...result, elapsed: data.elapsed };
+    case 'count':
+      return { ...result, count: data.count };
+    case 'gift':
+      return { ...result, gift: data.gift };
+    default:
+      return result;
+  }
 });
+
+
+// rulesのZodスキーマ
+const rulesSchema = z.record(z.object({
+  id: z.string(),
+  name: z.string().default('おみくじ'),
+  description: z.string().default(''),
+  enabledIds: z.array(z.string()).default([]),
+  matchStartsWith: z.array(z.string()).default([]),
+  threshold: thresholdSchema,
+}));
+
+
 
 // omikuji.postスキーマ
 export const omikujiPostSchema = z.array(z.object({
@@ -99,13 +121,14 @@ export const omikujiPostSchema = z.array(z.object({
     })
   );
 
+
 // omikujiのZodスキーマ
 const omikujiSchema = z.record(z.object({
   id: z.string(),
   name: z.string().default('大吉'),
   description: z.string().default(''),
   weight: z.number().int().positive().default(1),
-  threshold: omikujiThresholdSchema,
+  threshold: thresholdSchema,
   post: omikujiPostSchema.default([])
 }));
 
@@ -155,44 +178,15 @@ const defaultValues = {
   rules: {
     name: 'おみくじ',
     description: '',
-    switch: 1,
     enabledIds: [],
-    matchExact: [],
     matchStartsWith: [],
-    matchIncludes: []
+    threshold: {},
   },
   omikuji: {
     name: '大吉',
     description: '',
     weight: 1,
-    threshold: {
-      isSyoken: false,
-      time: {
-        isEnabled: false, // 時間指定が無効
-        value1: 0, // 開始時間
-        value2: 0, // 終了時間
-      },
-      elapsed: {
-        isEnabled: false, // 経過時間が無効
-        unit: 'hour', // デフォルトの単位
-        value1: 0, // 開始値
-        value2: 0, // 終了値
-        comparison: 'max', // デフォルトの比較方法
-      },
-      count: {
-        isEnabled: false, // コメント数が無効
-        unit: 'no', // デフォルトの単位
-        value1: 0, // 開始値
-        value2: 0, // 終了値
-        comparison: 'max', // デフォルトの比較方法
-      },
-      gift: {
-        isEnabled: false, // ギフトが無効
-        value1: 0, // 開始値
-        value2: 0, // 終了値
-        comparison: 'max', // デフォルトの比較方法
-      },
-    },
+    threshold: {},
     post: [{
       type: 'onecomme',
       botKey: 'mamono',
@@ -241,6 +235,7 @@ export function validateData<T extends ListCategory>(
     }
   }
 
+  console.log(validatedData);
   return validatedData;
 }
 

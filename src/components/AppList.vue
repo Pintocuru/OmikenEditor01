@@ -18,44 +18,38 @@
       </template>
     </v-toolbar>
 
-    <template v-if="naviCategory === 'preset'">
+    <v-sheet v-if="naviCategory === 'preset'">
       <ListPreset
         @update:Omiken="updateOmiken"
         @update:OmikenPreset="updateOmikenPreset"
       />
-    </template>
-    <template v-else-if="naviCategory === 'preferences'">
+    </v-sheet>
+    <v-sheet v-else-if="naviCategory === 'preferences'">
       <ListPreferences :Omiken="Omiken" @update:Omiken="updateOmiken" />
-    </template>
-    <template v-else>
+    </v-sheet>
+    <v-sheet v-else>
       <ListItem
         :Omiken="Omiken"
-        :items="filterItems"
+        :items="currentItems"
         :itemOrder="Omiken[`${naviCategory}Order`]"
         :listCategory="naviCategory"
         @update:Omiken="updateOmiken"
         @open-editor="openEditor"
       />
-    </template>
+    </v-sheet>
   </v-card>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
-import ListFilter from "./ListFilter.vue";
+import { computed } from "vue";
 import ListItem from "./ListItem.vue";
 import ListPreset from "./ListPreset.vue"; // 追加
 import ListPreferences from "./ListPreferences.vue"; // 追加
-import { z } from "zod";
 import _ from "lodash";
 import type {
   OmikenEditType,
   ListCategory,
   OmikenEntry,
-  OmikujiType,
-  PlaceType,
-  RulesType,
-  thresholdType,
   NaviCategory,
   OmikenCategory,
   ListEntry,
@@ -74,71 +68,14 @@ const emit = defineEmits<{
   (e: "open-editor", editorItem: ListEntry<ListCategory>): void;
 }>();
 
-// フィルタリングを管理するref
-const FilterRefSchema = z.object({
-  rulesSortName: z.enum(["none", "highFreq", "lowFreq"]),
-  rulesFilterSwitch: z.array(z.string()),
-  omikujiSortName: z.enum(["none", "highFreq", "lowFreq"]),
-  omikujiFilterThreshold: z.array(z.custom<thresholdType>()),
-  omikujiSortWeight: z.enum(["none", "highFreq", "lowFreq"]),
-  placeSortName: z.enum(["none", "name", "group"]),
-  placeSortWeight: z.enum(["none", "highFreq", "lowFreq"]),
-});
-
-const filterRef = ref(
-  FilterRefSchema.parse({
-    rulesSortName: "highFreq",
-    rulesFilterSwitch: [],
-    omikujiSortName: "highFreq",
-    omikujiFilterThreshold: [],
-    omikujiSortWeight: "highFreq",
-    placeSortName: "name",
-    placeSortWeight: "highFreq",
-  })
-);
-
 // アイテムカウント
-const filterItemsCount = computed(() => Object.keys(filterItems.value).length);
+const filterItemsCount = computed(() => Object.keys(currentItems.value).length);
 
 // フィルターオプションに合わせて表示を変更
-const filterItems = computed(() => {
+const currentItems = computed(() => {
   if (props.naviCategory === "preset") return {};
   if (props.naviCategory === "preferences") return {};
-
-  const items = props.Omiken[props.naviCategory];
-  const filters = {
-    rules: () =>
-      _.pickBy(
-        items as Record<string, RulesType>,
-        (item) =>
-          filterRef.value.rulesFilterSwitch.length === 0 ||
-          filterRef.value.rulesFilterSwitch.includes(item.switch.toString())
-      ),
-    omikuji: () =>
-      _.pickBy(
-        items as Record<string, OmikujiType>,
-        (item) =>
-          filterRef.value.omikujiFilterThreshold.length === 0 ||
-          filterRef.value.omikujiFilterThreshold.includes(item.threshold.type)
-      ),
-    place: () =>
-      filterRef.value.placeSortName === "none"
-        ? items
-        : _.fromPairs(
-            _.sortBy(
-              Object.entries(items as Record<string, PlaceType>),
-              ([, item]) =>
-                filterRef.value.placeSortName === "name"
-                  ? item.name
-                  : item.group
-            )
-          ),
-    default: () => items,
-  };
-
-  return (
-    filters[props.naviCategory as keyof typeof filters] || filters.default
-  )();
+  return props.Omiken[props.naviCategory];
 });
 
 // アイテムを追加

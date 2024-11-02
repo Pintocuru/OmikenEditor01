@@ -3,7 +3,7 @@
   <v-card v-if="currentItem" style="max-height: 80vh; overflow-y: auto">
     <v-card-text>
       <v-row>
-        <v-col cols="12" sm="3">
+        <v-col cols="12" sm="4">
           <v-text-field
             v-model="currentItem.name"
             label="プレースホルダー名"
@@ -12,18 +12,18 @@
         </v-col>
       </v-row>
 
-      <!-- おみくじワード -->
+      <!-- プレースホルダー -->
       <v-card>
         <v-toolbar color="primary" density="compact">
-          <v-toolbar-title>おみくじワード</v-toolbar-title>
+          <v-toolbar-title>プレースホルダー</v-toolbar-title>
           <v-spacer></v-spacer>
-<v-btn-toggle
-  v-model="currentItem.isWeight"
-  density="compact"
-  color="primary"
-  mandatory
-  class="me-2"
->
+          <v-btn-toggle
+            v-model="currentItem.isWeight"
+            density="compact"
+            color="primary"
+            mandatory
+            class="me-2"
+          >
             <v-btn :value="false">
               <v-icon>mdi-format-list-bulleted</v-icon>
             </v-btn>

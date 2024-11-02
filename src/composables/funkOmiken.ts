@@ -4,17 +4,17 @@ import { computed, onMounted, provide, Ref, ref } from 'vue';
 import type {
   OmikenEditType,
   OmikenEntry,
-  EditerType,
+  ListType,
   AppStateType,
   OrderKey,
   OmikenCategory,
-  ListEntries,
+  ListEntryCollect,
   ListCategory,
   PresetOmikenEditType} from '../types';
 import { funkJSON,  } from "./funkJSON";
 import { generateOrder, validateData } from "./funkValidate";
 
-export function funkOmiken(listEntry: Ref<ListEntries>) {
+export function funkOmiken(listEntry: Ref<ListEntryCollect>) {
   const AppState = ref<AppStateType>({
     Omiken: {
       rules: {},
@@ -109,7 +109,7 @@ export function funkOmiken(listEntry: Ref<ListEntries>) {
       if (addKeys?.length) {
         addKeys.forEach(item => {
           const newKey = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-          const validatedItem = validateData(type, { [newKey]: item as EditerType });
+          const validatedItem = validateData(type, { [newKey]: item as ListType });
           Object.assign(newState[type], validatedItem);
           newState[orderKey].push(newKey);
         });

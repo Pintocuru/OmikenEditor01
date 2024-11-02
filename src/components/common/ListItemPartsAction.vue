@@ -16,11 +16,11 @@
 </template>
 
 <script setup lang="ts">
-import { ListCategory, EditerType, OmikenEntry, OmikenCategory } from '@/types';
+import { ListCategory, ListType, OmikenEntry, OmikenCategory } from '@/types';
 import { cloneDeep } from 'lodash';
 import Swal from 'sweetalert2';
 
-type ItemOrGroup = EditerType | { name: string; items: EditerType[] };
+type ItemOrGroup = ListType | { name: string; items: ListType[] };
 
 const props = defineProps<{
   selectCategory: ListCategory;
@@ -57,7 +57,7 @@ const actions = [
 function duplicateItem() {
   const item = props.item;
   const isGroup = "items" in item;
-  const itemsToDuplicate = isGroup ? item.items : [item as EditerType];
+  const itemsToDuplicate = isGroup ? item.items : [item as ListType];
 
   const duplicatedItems = itemsToDuplicate.map(originalItem => {
     const newItem = cloneDeep(originalItem);
@@ -80,7 +80,7 @@ function deleteItem() {
   const itemsToDelete = isGroup ? item.items : [item];
   const itemNames = isGroup
     ? `${item.name} グループ`
-    : (item as EditerType).name;
+    : (item as ListType).name;
 
   Swal.fire({
     title: `${itemNames} を削除する`,
