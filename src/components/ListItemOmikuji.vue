@@ -65,13 +65,12 @@ const getComparisonLabel = (comparison: string) => {
 
 // エディターを開く
 function openEditor() {
-  const item = { [props.item.id]: props.item };
   const key = props.item.id;
   emit("open-editor", {
     isOpen: true,
     type: props.naviCategory,
+    mode:null,
     key,
-    item: item,
   });
 }
 

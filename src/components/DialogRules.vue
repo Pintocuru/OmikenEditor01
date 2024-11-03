@@ -3,33 +3,35 @@
   <v-card v-if="currentItem" style="max-height: 80vh; overflow-y: auto">
     <v-card-text>
       <v-row dense>
-        <v-col cols="12" sm="4">
+        <v-col cols="8" sm="3">
           <v-text-field v-model="currentItem.name" label="おみくじ名" @input="updateItem">
             <v-tooltip activator="parent" location="bottom">
               わかりやすいおみくじの名称（ラベル）を入力してください
             </v-tooltip>
           </v-text-field>
         </v-col>
-        <v-col cols="12" sm="8">
+     <v-col cols="4" sm="auto">
+  <DialogRulesColor
+    v-model="currentItem.color"
+    @update:model-value="updateItem"
+  />
+</v-col>
+        <v-col>
           <v-text-field v-model="currentItem.description" label="説明文" @input="updateItem" />
         </v-col>
       </v-row>
       <!-- おみくじワード -->
       <v-card>
-        <v-toolbar color="primary" density="compact">
+        <v-toolbar :color="currentItem.color" density="compact">
           <v-toolbar-title> おみくじワード </v-toolbar-title>
         </v-toolbar>
-<v-card-text class="d-flex ga-2">
   <v-combobox
     v-model="currentItem.matchStartsWith"
     label="前方一致"
-    clearable
     chips
     multiple
     @update:modelValue="updateItem"
-    style="flex: 1"
-  /><!-- //TODO 見た目調整して -->
-</v-card-text>
+  />
       </v-card>
 
       <!-- タブ -->
@@ -53,7 +55,7 @@
         <v-window-item value="post">
           <!-- 該当するおみくじ🥠 -->
           <v-card>
-            <v-toolbar color="primary" density="compact">
+            <v-toolbar :color="currentItem.color" density="compact">
               <v-toolbar-title> 該当するおみくじ🥠 </v-toolbar-title>
             </v-toolbar>
             <v-card-text>
@@ -97,6 +99,7 @@
 <script setup lang="ts">
 import { computed, inject, ref, Ref } from "vue";
 import DialogThreshold from "./DialogThreshold.vue";
+import DialogRulesColor from "./DialogRulesColor.vue";
 import type {
   ListEntry,
   OmikenEntry,

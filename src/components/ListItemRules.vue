@@ -2,11 +2,11 @@
 <template>
   <v-col cols="12">
     <v-card @click.stop="openEditorRules">
-      <v-toolbar :color="getSwitchColor(item.switch)" density="compact">
+      <v-toolbar :color="item.color" density="compact">
         <v-toolbar-title>
           {{ item.name }}
           <v-chip class="ml-4" label variant="outlined">
-            {{ getSwitchLabel(item.switch) }}
+            {{ enabledOmikujiLists.length }} items <!-- おみくじの個数に変更 -->
           </v-chip>
         </v-toolbar-title>
         <template v-slot:append>
@@ -28,39 +28,30 @@
               v-for="option in enabledOmikujiLists"
               :key="option.id"
               cols="12"
-              sm="6"
-              md="4"
-              lg="3"
+              sm="4"
+              md="3"
               class="pa-1"
             >
-              <v-card
+              <v-sheet
                 class="d-flex justify-space-between align-center px-2 py-1"
-                variant="outlined"
-                color="grey"
+                
               >
                 <span class="font-weight-bold">
                   {{ option.name }}
                 </span>
                 <span>
-                  <span :style="{ color: weightColor(option.id) }">
+                  <span  >
                     {{ option.weight }}/{{ totalWeight() }}
                   </span>
-                  <span class="ml-2">
+                  <span class="ml-1">
                     ({{ totalWeightPercentage(option.id) }}%)
                   </span>
                 </span>
-              </v-card>
+              </v-sheet>
             </v-col>
           </v-row>
         </v-sheet>
         <v-sheet class="mt-2">
-          <span
-            v-if="item.matchExact && item.matchExact.length > 0"
-            class="mr-4"
-          >
-            <v-icon color="primary">mdi-equal-box</v-icon>
-            {{ item.matchExact.join(", ") }}
-          </span>
           <span
             v-if="item.matchStartsWith && item.matchStartsWith.length > 0"
             class="mr-4"
@@ -68,12 +59,9 @@
             <v-icon color="primary">mdi-arrow-right-bold-box</v-icon>
             {{ item.matchStartsWith.join(", ") }}
           </span>
-          <span
-            v-if="item.matchIncludes && item.matchIncludes.length > 0"
-            class="mr-4"
-          >
-            <v-icon color="primary">mdi-contain</v-icon>
-            {{ item.matchIncludes.join(", ") }}
+                    <span            v-else            class="mr-4"          >
+            <v-icon color="primary">mdi-arrow-right-bold-box</v-icon>
+            (すべてのコメントが対象)
           </span>
         </v-sheet>
       </v-card-text>
@@ -94,7 +82,7 @@ import {
 } from "@/types";
 import ListItemPartsAction from "./common/ListItemPartsAction.vue";
 import { funkRules } from "../composables/funkRules";
-import _ from "lodash";
+
 // Props Emits
 const props = defineProps<{
   Omiken: OmikenEditType;
@@ -139,6 +127,7 @@ function openEditorRules() {
   emit("open-editor", {
     isOpen: true,
     type: "rules",
+    mode:null,
     key,
   });
 }

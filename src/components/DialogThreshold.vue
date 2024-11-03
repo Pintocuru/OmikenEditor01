@@ -127,8 +127,6 @@ const {
   accessTicks,
   syokenTicks,
   conditionTypeItems,
-  accessLevelItems,
-  syokenTypeItems,
   getExampleText,
 } = funkThreshold(props.currentItem.threshold);
 

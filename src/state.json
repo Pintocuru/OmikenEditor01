@@ -3,6 +3,7 @@
     "1729669868469-531k4": {
       "id": "1729669868469-531k4",
       "name": "おみくじ",
+      "color":"#ff0000",
       "description": "",
       "switch": 1,
       "enabledIds": [

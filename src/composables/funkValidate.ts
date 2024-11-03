@@ -93,6 +93,7 @@ const thresholdSchema = z.object({
 const rulesSchema = z.record(z.object({
   id: z.string(),
   name: z.string().default('おみくじ'),
+  color: z.string().default(''),
   description: z.string().default(''),
   enabledIds: z.array(z.string()).default([]),
   matchStartsWith: z.array(z.string()).default([]),
@@ -178,6 +179,7 @@ const defaultValues = {
   rules: {
     name: 'おみくじ',
     description: '',
+    color: '',
     enabledIds: [],
     matchStartsWith: [],
     threshold: {},

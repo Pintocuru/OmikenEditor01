@@ -98,6 +98,7 @@ interface BaseType {
 
 // rules:おみくじルールの型定義
 export interface RulesType extends BaseType {
+  color: string; // edit時、識別する際に付ける色
   enabledIds: string[]; // omikujiの適用するIDリスト
   matchStartsWith: string[]; // 特定のフレーズで始まるキーワード（省略可）
   threshold: ThresholdType; // 発動条件
