@@ -5,7 +5,6 @@ import type {
   ListEntry,
   ListEntryCollect,
   NaviCategory,
-  EditerTypeMap,
 } from "../types";
 import _ from 'lodash';
 
@@ -26,7 +25,6 @@ export function funkUI() {
 
   // ダイアログを開く
   const openEditor = <T extends ListCategory>(editorItem: ListEntry<T>) => {
-    console.log(editorItem);
     const { type, key, mode } = editorItem;
 
     if (listEntry.value && listEntry.value[type]) {
