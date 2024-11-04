@@ -1,52 +1,64 @@
 <!-- src/components/ListEntryOmikuji.vue -->
 <template>
-  <v-card-text><!--  :class="getTypeColor(Omiken.omikuji[omikujiId].post.type)" -->
+  <v-card-text>
+        <v-toolbar density="compact" >
+                <v-toolbar-title
+                  class="ml-2"
+                >
+                <v-icon icon="mdi-crystal-ball"></v-icon>
+                  おみくじリスト
+                </v-toolbar-title>
+                          <template #append>
+       ＋追加
+                </template>
+              </v-toolbar>
     <v-row no-gutters>
-      <draggable v-model="localEnabledIds" item-key="id" class="list-group d-flex flex-wrap" @end="updateEnabledIds">
+      <draggable
+        v-model="localEnabledIds"
+        item-key="id"
+        class="list-group d-flex flex-wrap"
+        @end="updateEnabledIds"
+      >
         <template #item="{ element: omikujiId }">
           <v-col cols="12" sm="6" md="4" lg="3" class="pa-1">
-            <v-card variant="outlined" :color="weightColor(omikujiId, enabledIds)">
+            <v-card variant="tonal" :color="weightColor(omikujiId, enabledIds)">
               <!-- タイトルバーと操作ボタン -->
-              <v-card-title class="d-flex justify-space-between align-center pa-2">
-                <span class="text-subtitle-1">{{ Omiken.omikuji[omikujiId]?.name }}</span>
-                <div class="d-flex align-center">
-                  <v-btn
-                    icon="mdi-pencil"
-                    density="comfortable"
-                    variant="text"
-                    size="small"
-                    class="mr-1"
-                    @click.stop="openEditorOmikuji(Omiken.omikuji[omikujiId])"
-                  >
-                    <v-tooltip activator="parent" location="top">編集</v-tooltip>
-                  </v-btn>
-                  <v-btn
-                    icon="mdi-content-copy"
-                    density="comfortable"
-                    variant="text"
-                    size="small"
-                    class="mr-1"
-                    @click.stop="duplicateOmikuji(omikujiId)"
-                  >
-                    <v-tooltip activator="parent" location="top">複製</v-tooltip>
-                  </v-btn>
-                  <v-btn
-                    icon="mdi-delete"
-                    density="comfortable"
-                    variant="text"
-                    size="small"
-                    color="error"
-                    @click.stop="deleteOmikuji(omikujiId)"
-                  >
-                    <v-tooltip activator="parent" location="top">削除</v-tooltip>
-                  </v-btn>
-                </div>
+              <v-toolbar density="compact" :color="getTypeColor(Omiken.omikuji[omikujiId].post)"
+                ><!--   -->
+                <v-icon class="mx-2">mdi-drag-horizontal-variant</v-icon>
+                <v-toolbar-title
+                  class="ml-2"
+                  @click="openEditorItem('omikuji', omikujiId)"
+                >
+                  {{ Omiken.omikuji[omikujiId]?.name }}
+                </v-toolbar-title>
+                <template #append>
+          <ListItemPartsAction
+            selectCategory="omikuji"
+            :item="Omiken.omikuji[omikujiId]"
+            @edit="openEditorItem('omikuji',omikujiId)"
+            @update:Omiken="updateOmiken"
+          />
+                </template>
+              </v-toolbar>
+
+              <v-card-title
+                class="d-flex justify-space-between align-center pa-2"
+              >
+                <span class="text-subtitle-1">{{
+                  Omiken.omikuji[omikujiId]?.name
+                }}</span>
+                <div class="d-flex align-center"></div>
               </v-card-title>
 
               <!-- 重みの表示 -->
               <v-card-text class="text-center pt-2">
-                {{ Omiken.omikuji[omikujiId]?.weight }}/{{ weightTotal(enabledIds) }}
-                <span class="ml-2">({{ weightPercentage(omikujiId, enabledIds) }}%)</span>
+                {{ Omiken.omikuji[omikujiId]?.weight }}/{{
+                  weightTotal(enabledIds)
+                }}
+                <span class="ml-2"
+                  >({{ weightPercentage(omikujiId, enabledIds) }}%)</span
+                >
               </v-card-text>
             </v-card>
           </v-col>
@@ -58,9 +70,19 @@
 
 <script setup lang="ts">
 import { computed, inject, Ref } from "vue";
+import ListItemPartsAction from "./common/ListItemPartsAction.vue";
 import { funkRules } from "@/composables/funkRules";
 import draggable from "vuedraggable";
-import type { AppStateType, ListEntry, OmikenType, OmikujiType } from "@/types";
+import type {
+  AppStateType,
+  ListCategory,
+  ListEntry,
+  OmikenCategory,
+  OmikenEntry,
+  OmikenType,
+  OmikujiPostType,
+  OmikujiType,
+} from "@/types";
 
 const props = defineProps<{
   Omiken: OmikenType;
@@ -70,7 +92,8 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: "update:enabledIds", ids: string[]): void;
-  (e: "open-editor", item: ListEntry<"omikuji">): void;
+  (e: "update:Omiken", payload: OmikenEntry<OmikenCategory>): void;
+  (e: "open-editor", editorItem: ListEntry<ListCategory>): void;
 }>();
 
 // コンポーザブル
@@ -78,31 +101,19 @@ const { weightTotal, weightPercentage, weightColor } = funkRules(
   props.Omiken.omikuji
 );
 
-// 複製ハンドラー //TODO 書いて
-const duplicateOmikuji = (id: string) => {
-  emit("duplicate", id);
-};
-
-// 削除ハンドラー //TODO 書いて
-const deleteOmikuji = (id: string) => {
-  emit("delete", id);
-};
-
-// omikujiのエディターを開く
-const openEditorOmikuji = (omikuji: OmikujiType) => {
-  emit("open-editor", {
-    isOpen: true,
-    type: "omikuji",
-    mode: null,
-    key: omikuji.id,
-  });
-};
-
 // タイプによる色分け
-const getTypeColor = (type: string): string => {
-  switch (type) {
-    case 'onecomme':
-      return getCharaColor(); // 既存の関数を使用
+// getTypeColor関数の実装
+const getTypeColor = (post: OmikujiPostType[]): string => {
+  // まず、postの中でtype属性が'onecomme'のものがあるかチェックする
+  const onecommePost = post.find((p) => p.type === 'onecomme');
+  if (onecommePost) {
+    // 'onecomme'タイプがあれば、getCharaColorを呼び出して返す
+    return getCharaColor(onecommePost.botKey);
+  }
+
+  // 'onecomme'がなければ、最初のtypeを判断して色を返す
+  const firstPost = post[0];
+  switch (firstPost.type) {
     case 'party':
       return 'bg-purple-lighten-5';
     case 'toast':
@@ -119,10 +130,13 @@ const AppState = inject<Ref<AppStateType>>("AppStateKey");
 const CHARA = AppState?.value.CHARA;
 
 // CHARA の背景色を取得
-const getCharaColor = (botKey: string | undefined) => {
-  if (!botKey || !CHARA?.[botKey]) return undefined;
-  return CHARA[botKey].color["--lcv-background-color"];
-};
+const getCharaColor = (botKey: string | undefined): string | undefined => {
+  // AppStateからCHARAデータを取得
+  if (!botKey || !CHARA?.[botKey] || !CHARA[botKey].item) return undefined;
+
+  // CHARA[botKey].item.colorから背景色を取得して返す
+  return CHARA[botKey].item?.color["--lcv-background-color"];
+}
 
 // ドラッグ&ドロップでの更新も同様に
 const localEnabledIds = computed({
@@ -132,8 +146,33 @@ const localEnabledIds = computed({
   },
 });
 
+// omikujiのエディターを開く
+const openEditorItem = (type: ListCategory, id: string) => {
+  // typeは'rules'か'omikuji'か'place'のいずれか
+  const item =
+    type === "omikuji"
+      ? props.Omiken.omikuji?.[id]
+      : type === "place"
+      ? props.Omiken.place?.[id]
+      : props.Omiken.rules?.[id];
+
+  if (item) {
+    emit("open-editor", {
+      isOpen: true,
+      type,
+      mode: null,
+      key: id,
+    });
+  }
+};
+
 // update:enabledIdsのみを発火
 const updateEnabledIds = () => {
   emit("update:enabledIds", localEnabledIds.value);
 };
+// ダイアログを開く
+const openEditor = (editorItem: ListEntry<ListCategory>) =>
+  emit("open-editor", editorItem);
+const updateOmiken = (payload: OmikenEntry<OmikenCategory>) =>
+  emit("update:Omiken", payload);
 </script>

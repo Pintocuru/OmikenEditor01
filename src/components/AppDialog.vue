@@ -95,8 +95,14 @@ const getEditComponent = (type: ListCategory, mode?: string | null) => {
 
 // 同じ種類のアイテムリストを取得
 const getSiblingItems = (category: ListCategory, currentKey: string) => {
-  const orderKey = `${category}Order` as `${ListCategory}Order`;
-  return props.Omiken[orderKey];
+  if (category === 'rules') {
+    return props.Omiken.rulesOrder;
+  } else {
+    const items = Object.keys(props.Omiken[category]).sort((a, b) =>
+      props.Omiken[category][a].name.localeCompare(props.Omiken[category][b].name)
+    );
+    return items;
+  }
 };
 
 // 前または次のアイテムのキーを取得（循環）

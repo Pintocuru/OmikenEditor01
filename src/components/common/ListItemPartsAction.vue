@@ -3,13 +3,14 @@
   <v-btn
     v-for="(action, index) in actions"
     :key="index"
+      size="small"
     height="30"
     width="30"
     icon
     @click.stop="action.handler"
   >
     <v-icon>{{ action.icon }}</v-icon>
-    <v-tooltip activator="parent" location="bottom">
+    <v-tooltip activator="parent" location="top">
       {{ action.tooltip }}
     </v-tooltip>
   </v-btn>

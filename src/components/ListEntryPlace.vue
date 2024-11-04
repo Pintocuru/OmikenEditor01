@@ -1,6 +1,19 @@
 <!-- src/components/ListEntryPlace.vue -->
 <template>
   <v-card-text>
+    <v-toolbar density="compact">
+      <v-toolbar-title class="ml-2">
+        <v-icon icon="mdi-tag"></v-icon>
+        プレースホルダーリスト
+      </v-toolbar-title>
+      <template #append>
+        <v-icon icon="mdi-tag"
+          ></v-icon
+        ><v-tooltip activator="parent" location="top">
+            プレースホルダーを作成するには、
+          </v-tooltip>
+      </template>
+    </v-toolbar>
     <v-row>
       <v-col
         v-for="place in displayPlaces"

@@ -5,52 +5,93 @@
       <v-toolbar-title>Entry View</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-checkbox v-model="showRules" label="Rules" class="mr-2"></v-checkbox>
-      <v-checkbox v-model="showOmikuji" label="Omikuji" class="mr-2"></v-checkbox>
+      <v-checkbox
+        v-model="showOmikuji"
+        label="Omikuji"
+        class="mr-2"
+      ></v-checkbox>
       <v-checkbox v-model="showPlace" label="Place" class="mr-2"></v-checkbox>
     </v-toolbar>
+    <v-card-text>
+      <!-- Rules View -->
+      <template v-if="showRules">
+        <draggable
+          v-model="localRulesOrder"
+          item-key="id"
+          class="list-group"
+          @end="updateRulesOrder"
+        >
+          <template #item="{ element: ruleId }">
+            <v-card class="mb-2">
+              <v-toolbar :color="Omiken.rules[ruleId]?.color">
+                <v-icon class="mx-2">mdi-drag-horizontal-variant</v-icon>
+                <v-toolbar-title
+                  class="ml-2"
+                  @click="openEditorItem('rules', ruleId)"
+                >
+                  {{ Omiken.rules[ruleId]?.name }}
+                </v-toolbar-title>
+                <template #append>
+                  <ListItemPartsAction
+                    selectCategory="omikuji"
+                    :item="Omiken.rules[ruleId]"
+                    @edit="openEditorItem('rules', ruleId)"
+                    @update:Omiken="updateOmiken"
+                  />
+                </template>
+              </v-toolbar>
 
-    <!-- Rules View -->
-    <template v-if="showRules">
-      <draggable v-model="localRulesOrder" item-key="id" class="list-group" @end="updateRulesOrder">
-        <template #item="{ element: ruleId }">
-          <v-card class="mb-2">
-            <v-toolbar :color="Omiken.rules[ruleId]?.color">
-              <v-icon class="mx-2">mdi-drag-horizontal-variant</v-icon>
-              <v-toolbar-title class="ml-2" @click="openEditorOmikuji('rules', ruleId)">
-                {{ Omiken.rules[ruleId]?.name }}
-              </v-toolbar-title>
-            </v-toolbar>
+              <!-- Omikuji View -->
 
-            <!-- Omikuji View -->
-            <ListEntryOmikuji v-if="showOmikuji" :Omiken="Omiken" :ruleId="ruleId"
-              :enabledIds="Omiken.rules[ruleId].enabledIds" 
-              @update:enabledIds="(newEnabledIds) => updateEnabledIds(newEnabledIds, ruleId)"
-              @open-editor="openEditor" />
 
-            <!-- Place View -->
-            <ListEntryPlace v-if="showPlace" :Omiken="Omiken" :enabledIds="Omiken.rules[ruleId].enabledIds" />
-          </v-card>
-        </template>
-      </draggable>
-    </template>
+              <ListEntryOmikuji
+                v-if="showOmikuji"
+                :Omiken="Omiken"
+                :ruleId="ruleId"
+                :enabledIds="Omiken.rules[ruleId].enabledIds"
+                @update:enabledIds="
+                  (newEnabledIds) => updateEnabledIds(newEnabledIds, ruleId)
+                "
+                @open-editor="openEditor"
+                @update:Omiken="updateOmiken"
+              />
 
-   <!-- Flat View (Rules非表示時) -->
-<v-card-text v-else>
-  <!-- Omikuji View -->
-  <div v-if="showOmikuji" class="flat-view">
-    <ListEntryOmikuji 
-      :Omiken="Omiken"
-      :enabled-ids="Object.keys(Omiken.omikuji)"
-      @update:enabled-ids="updateFlatEnabledIds"
-      @open-editor="openEditor"
-    />
-  </div>
+              <!-- Place View -->
+              <ListEntryPlace
+                v-if="showPlace"
+                :Omiken="Omiken"
+                :enabledIds="Omiken.rules[ruleId].enabledIds"
+                @open-editor="openEditor"
+                @update:Omiken="updateOmiken"
+              />
+            </v-card>
+          </template>
+        </draggable>
+      </template>
 
-  <!-- Place View -->
-  <div v-if="showPlace" class="flat-view">
-    <ListEntryPlace :Omiken="Omiken" />
-  </div>
-</v-card-text>
+      <!-- Flat View (Rules非表示時) -->
+      <v-card-text v-else>
+        <!-- Omikuji View -->
+        <div v-if="showOmikuji" class="flat-view">
+          <ListEntryOmikuji
+            :Omiken="Omiken"
+            :enabled-ids="Object.keys(Omiken.omikuji)"
+            @update:enabled-ids="updateFlatEnabledIds"
+            @open-editor="openEditor"
+            @update:Omiken="updateOmiken"
+          />
+        </div>
+
+        <!-- Place View -->
+        <div v-if="showPlace" class="flat-view">
+          <ListEntryPlace
+            :Omiken="Omiken"
+            @open-editor="openEditor"
+            @update:Omiken="updateOmiken"
+          />
+        </div>
+      </v-card-text>
+    </v-card-text>
   </v-card>
 </template>
 
@@ -58,21 +99,24 @@
 import { ref, computed, Ref, inject } from "vue";
 import ListEntryOmikuji from "./ListEntryOmikuji.vue";
 import ListEntryPlace from "./ListEntryPlace.vue";
+import ListItemPartsAction from "./common/ListItemPartsAction.vue";
 import draggable from "vuedraggable";
-import type { OmikenType, OmikenEntry, ListCategory, ListEntry, AppStateType } from "@/types";
+import type {
+  OmikenType,
+  OmikenEntry,
+  ListCategory,
+  ListEntry,
+  OmikenCategory,
+} from "@/types";
 
 const props = defineProps<{
   Omiken: OmikenType;
 }>();
 
 const emit = defineEmits<{
-  (e: "update:Omiken", payload: OmikenEntry<"rules">): void;
+  (e: "update:Omiken", payload: OmikenEntry<OmikenCategory>): void;
   (e: "open-editor", editorItem: ListEntry<ListCategory>): void;
 }>();
-
-// inject
-const AppState = inject<Ref<AppStateType>>("AppStateKey");
-const CHARA = AppState?.value.CHARA;
 
 // 表示制御
 const showRules = ref(true);
@@ -81,15 +125,9 @@ const showPlace = ref(true);
 
 const updateFlatEnabledIds = (newEnabledIds: string[]) => {
   // フラットビューでの並び順の更新
-  Object.keys(props.Omiken.rules).forEach(ruleId => {
+  Object.keys(props.Omiken.rules).forEach((ruleId) => {
     updateEnabledIds(newEnabledIds, ruleId);
   });
-};
-
-// CHARA の背景色を取得
-const getCharaColor = (botKey: string | undefined) => {
-  if (!botKey || !CHARA?.[botKey]) return undefined;
-  return CHARA[botKey].color["--lcv-background-color"];
 };
 
 // ドラッグ&ドロップ用のローカルデータ
@@ -126,23 +164,18 @@ const updateEnabledIds = (enabledIds: string[], ruleId: string) => {
 };
 
 // omikujiのエディターを開く
-const openEditorOmikuji = (type: ListCategory, id: string) => {
-  // typeは'rules'か'omikuji'か'place'のいずれか
-  const item = type === 'omikuji' ? props.Omiken.omikuji?.[id] :
-               type === 'place' ? props.Omiken.place?.[id] :
-               props.Omiken.rules?.[id];
-               
-  if (item) {
-    emit("open-editor", {
-      isOpen: true,
-      type,
-      mode: null,
-      key: id,
-    });
-  }
+const openEditorItem = (type: ListCategory, id: string) => {
+  emit("open-editor", {
+    isOpen: true,
+    type,
+    mode: null,
+    key: id,
+  });
 };
 
 // ダイアログを開く
 const openEditor = (editorItem: ListEntry<ListCategory>) =>
   emit("open-editor", editorItem);
+const updateOmiken = (payload: OmikenEntry<OmikenCategory>) =>
+  emit("update:Omiken", payload);
 </script>
