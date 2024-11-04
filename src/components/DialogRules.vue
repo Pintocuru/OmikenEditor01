@@ -135,8 +135,8 @@ const currentItem = computed(() =>
 
 // コンポーザブル:funkRules
 const {
-  totalWeight,
-  totalWeightPercentage,
+  weightTotal: totalWeight,
+  weightPercentage: totalWeightPercentage,
   omikujiLists,
   enabledOmikujiLists,
   weightColor,

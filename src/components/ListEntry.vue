@@ -34,46 +34,32 @@
       </draggable>
     </template>
 
-    <!-- Flat View (Rules非表示時) -->
-    <v-card-text v-else>
-      <div v-if="showOmikuji" class="flat-view">
-        <template v-for="omikujiId in Object.keys(Omiken.omikuji)" :key="omikujiId">
-          <v-card class="mb-2">
-            <v-card-title class="text-body-1" @click="openEditorOmikuji('omikuji', omikujiId)">
-              {{ Omiken.omikuji[omikujiId]?.name }}
-            </v-card-title>
-            <v-card-text v-if="showPlace">
-              <div v-for="(post, index) in Omiken.omikuji[omikujiId]?.post" :key="index" class="text-body-2 ml-4">
-                {{ post.content }}
-              </div>
-            </v-card-text>
-          </v-card>
-        </template>
-      </div>
-    </v-card-text>
+   <!-- Flat View (Rules非表示時) -->
+<v-card-text v-else>
+  <!-- Omikuji View -->
+  <div v-if="showOmikuji" class="flat-view">
+    <ListEntryOmikuji 
+      :Omiken="Omiken"
+      :enabled-ids="Object.keys(Omiken.omikuji)"
+      @update:enabled-ids="updateFlatEnabledIds"
+      @open-editor="openEditor"
+    />
+  </div>
 
-    <!-- ダミーダイアログ -->
-    <v-dialog v-model="dialogOpen" max-width="500px">
-      <v-card>
-        <v-card-title> Edit {{ dialogType }}: {{ dialogKey }} </v-card-title>
-        <v-card-text>
-          This is a dummy dialog for demonstration purposes.
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="primary" @click="dialogOpen = false">Close</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+  <!-- Place View -->
+  <div v-if="showPlace" class="flat-view">
+    <ListEntryPlace :Omiken="Omiken" />
+  </div>
+</v-card-text>
   </v-card>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, Ref, inject } from "vue";
 import ListEntryOmikuji from "./ListEntryOmikuji.vue";
 import ListEntryPlace from "./ListEntryPlace.vue";
 import draggable from "vuedraggable";
-import type { OmikenType, OmikenEntry, ListCategory, ListEntry } from "@/types";
+import type { OmikenType, OmikenEntry, ListCategory, ListEntry, AppStateType } from "@/types";
 
 const props = defineProps<{
   Omiken: OmikenType;
@@ -84,15 +70,27 @@ const emit = defineEmits<{
   (e: "open-editor", editorItem: ListEntry<ListCategory>): void;
 }>();
 
+// inject
+const AppState = inject<Ref<AppStateType>>("AppStateKey");
+const CHARA = AppState?.value.CHARA;
+
 // 表示制御
 const showRules = ref(true);
 const showOmikuji = ref(true);
 const showPlace = ref(true);
 
-// ダイアログ制御
-const dialogOpen = ref(false);
-const dialogType = ref<ListCategory>("rules");
-const dialogKey = ref("");
+const updateFlatEnabledIds = (newEnabledIds: string[]) => {
+  // フラットビューでの並び順の更新
+  Object.keys(props.Omiken.rules).forEach(ruleId => {
+    updateEnabledIds(newEnabledIds, ruleId);
+  });
+};
+
+// CHARA の背景色を取得
+const getCharaColor = (botKey: string | undefined) => {
+  if (!botKey || !CHARA?.[botKey]) return undefined;
+  return CHARA[botKey].color["--lcv-background-color"];
+};
 
 // ドラッグ&ドロップ用のローカルデータ
 const localRulesOrder = computed({
@@ -103,14 +101,6 @@ const localRulesOrder = computed({
       reorder: value,
     });
   },
-});
-
-const localEnabledIds = computed(() => {
-  const result: Record<string, string[]> = {};
-  Object.keys(props.Omiken.rules).forEach((ruleId) => {
-    result[ruleId] = [...(props.Omiken.rules[ruleId]?.enabledIds || [])];
-  });
-  return result;
 });
 
 // 各種更新関数
@@ -136,14 +126,18 @@ const updateEnabledIds = (enabledIds: string[], ruleId: string) => {
 };
 
 // omikujiのエディターを開く
-const openEditorOmikuji = (option: { id: string; name: string }) => {
-  const omi = props.Omiken.omikuji?.[option.id];
-  if (omi) {
+const openEditorOmikuji = (type: ListCategory, id: string) => {
+  // typeは'rules'か'omikuji'か'place'のいずれか
+  const item = type === 'omikuji' ? props.Omiken.omikuji?.[id] :
+               type === 'place' ? props.Omiken.place?.[id] :
+               props.Omiken.rules?.[id];
+               
+  if (item) {
     emit("open-editor", {
       isOpen: true,
-      type: "omikuji",
+      type,
       mode: null,
-      key: option.id,
+      key: id,
     });
   }
 };

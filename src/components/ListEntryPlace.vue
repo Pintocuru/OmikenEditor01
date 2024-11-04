@@ -1,15 +1,33 @@
 <!-- src/components/ListEntryPlace.vue -->
 <template>
   <v-card-text>
-    <v-toolbar density="compact">
-      <v-toolbar-title class="ml-2">
-        <v-icon>mdi-crystal-ball</v-icon>
-        使用しているプレースホルダー
-      </v-toolbar-title>
-    </v-toolbar>
-<div v-for="(placeholder, index) in placeholderObjects" :key="index">
-  {{ placeholder.name }}
-</div>
+    <v-row>
+      <v-col
+        v-for="place in displayPlaces"
+        :key="place.id"
+        cols="12"
+        sm="6"
+        lg="4"
+      >
+        <v-card class="mb-2">
+          <v-card-title class="text-body-1">
+            {{ place.name }}
+          </v-card-title>
+          <v-card-text>
+            <v-chip-group>
+              <v-chip
+                v-for="(value, index) in place.values.slice(0, 3)"
+                :key="index"
+                small
+              >
+                {{ value.value }}
+              </v-chip>
+              <v-chip v-if="place.values.length > 3" small> ... </v-chip>
+            </v-chip-group>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
   </v-card-text>
 </template>
 
@@ -19,30 +37,20 @@ import { computed } from "vue";
 
 const props = defineProps<{
   Omiken: OmikenType;
-  enabledIds: string[];
+  enabledIds?: string[];
 }>();
 
-const placeholderObjects = computed(() => {
-  const results: PlaceType[] = [];
-  for (const omikujiId of props.enabledIds) {
-    const posts = props.Omiken.omikuji[omikujiId]?.post;
-    if (posts) {
-      posts.forEach((post: OmikujiPostType) => {
-        if (post.content) {
-          const placeholders = post.content.match(/<<([^>>]+)>>/g) || [];
-          placeholders.forEach((p) => {
-            const placeName = p.replace(/<<|>>/g, "");
-            const place = Object.values(props.Omiken.place).find(
-              (pl) => pl.name === placeName
-            );
-            if (place) {
-              results.push(place); // プレースホルダーに対応するオブジェクトを追加
-            }
-          });
-        }
-      });
-    }
-  }
-  return results;
+//
+const displayPlaces = computed(() => {
+  if (!props.enabledIds) return Object.values(props.Omiken.place);
+  const usedPlaceNames = props.enabledIds
+    .flatMap((id) => props.Omiken.omikuji[id]?.post ?? [])
+    .flatMap((post) => {
+      const matches = post.content?.match(/<<([^>>]+)>>/g) ?? [];
+      return matches.map((m) => m.replace(/<<|>>/g, ""));
+    });
+  return Object.values(props.Omiken.place).filter((place) =>
+    usedPlaceNames.includes(place.name)
+  );
 });
 </script>

@@ -3,9 +3,7 @@
 import { computed, Ref } from "vue";
 import { OmikujiType, RulesType } from "@/types";
 
-export function funkRules(
-  omikuji: Record<string, OmikujiType> | undefined = {},
-) {
+export function funkRules(omikuji: Record<string, OmikujiType>) {
   // 定数
   const SWITCH_CONFIG = {
     labels: ["無効", "だれでも", "メンバー", "モデレーター", "管理者"],
@@ -39,7 +37,7 @@ export function funkRules(
 
   // 有効なomikujiのリスト
   const enabledOmikujiLists = computed(() => {
-    const enabledIds: string | string[] =  [];
+    const enabledIds: string | string[] = [];
     const isAllEnabled = enabledIds.length === 0;
 
     if (isAllEnabled) {
@@ -48,39 +46,29 @@ export function funkRules(
     return omikujiLists.value.filter((option) => enabledIds.includes(option.id));
   });
 
-  const chipColors = computed(() => {
-    return enabledOmikujiLists.value.map((option) => ({
-      id: option.id,
-      color: weightColor(option.id),
+  const chipColors = (enabledIds: string[]) => {
+    return Object.keys(omikuji).map((id) => ({
+      id,
+      color: weightColor(id, enabledIds),
     }));
-  });
-
-  // totalWeight関数で合計を計算
-  const totalWeight = (): number => {
-    const validOmikujiIds = enabledOmikujiLists.value.map((o) => o.id);
-    return validOmikujiIds.reduce(
-      (sum, id) => sum + (omikuji?.[id]?.weight || 0), 0);
   };
 
-  // totalWeightPercentage関数で割合を計算
-  const totalWeightPercentage = (optionId: string): number => {
-    const option = omikuji?.[optionId];
-    if (!option?.weight) return 0;
+  // weight合計を計算
+  const weightTotal = (enabledIds: string[]): number => {
+    return enabledIds.reduce((sum, id) => sum + (omikuji[id]?.weight ?? 0), 0);
+  };
 
-    const total = totalWeight();
-    if (total === 0) return 0;
-
-    return parseFloat(((option.weight / total) * 100).toFixed(1));
+  // totalWeightの割合を計算
+  const weightPercentage = (optionId: string, enabledIds: string[]): number => {
+    const weight = omikuji[optionId]?.weight ?? 0;
+    const total = weightTotal(enabledIds);
+    return total > 0 ? parseFloat(((weight / total) * 100).toFixed(1)) : 0;
   };
 
   // v-chipに色を付与
-  const weightColor = (optionId: string): string => {
-    const percentage = totalWeightPercentage(optionId);
-
-    return (
-      WEIGHT_THRESHOLDS.find(({ threshold }) => percentage >= threshold)
-        ?.color || ""
-    );
+  const weightColor = (optionId: string, enabledIds: string[]): string => {
+    const percentage = weightPercentage(optionId, enabledIds);
+    return WEIGHT_THRESHOLDS.find(({ threshold }) => percentage >= threshold)?.color ?? '';
   };
 
   return {
@@ -88,8 +76,8 @@ export function funkRules(
     switchLabels: Object.fromEntries(
       SWITCH_CONFIG.labels.map((label, i) => [i, label])
     ),
-    totalWeight,
-    totalWeightPercentage,
+    weightTotal: weightTotal,
+    weightPercentage: weightPercentage,
     getSwitchLabel,
     getSwitchColor,
     omikujiLists,

@@ -105,8 +105,8 @@ const currentItem = ref(props.item);
 
 // コンポーザブル:funkRules
 const {
-  totalWeight,
-  totalWeightPercentage,
+  weightTotal: totalWeight,
+  weightPercentage: totalWeightPercentage,
   getSwitchLabel,
   getSwitchColor,
   weightColor,
