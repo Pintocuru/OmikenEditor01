@@ -5,7 +5,7 @@
       <v-toolbar-title>
         {{ naviCategory }}
         <v-chip v-if="naviCategory !== 'preferences'" label class="ml-4">
-          {{ filterItemsCount }} items
+          {{ itemsCount }} items
         </v-chip>
       </v-toolbar-title>
       <template #append>
@@ -28,14 +28,11 @@
       <ListPreferences :Omiken="Omiken" @update:Omiken="updateOmiken" />
     </v-sheet>
     <v-sheet v-else>
-      <ListItem
-        :Omiken="Omiken"
-        :items="currentItems"
-        :itemOrder="Omiken[`${naviCategory}Order`]"
-        :listCategory="naviCategory"
-        @update:Omiken="updateOmiken"
-        @open-editor="openEditor"
-      />
+  <ListEntrys
+      :Omiken="Omiken"
+      @update:Omiken="updateOmiken"
+         @open-editor="openEditor"
+    />
     </v-sheet>
   </v-card>
 </template>
@@ -43,11 +40,11 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import ListItem from "./ListItem.vue";
-import ListPreset from "./ListPreset.vue"; // 追加
-import ListPreferences from "./ListPreferences.vue"; // 追加
-import _ from "lodash";
+import ListEntrys from "./ListEntry.vue";
+import ListPreset from "./ListPreset.vue"; 
+import ListPreferences from "./ListPreferences.vue"; 
 import type {
-  OmikenEditType,
+  OmikenType,
   ListCategory,
   OmikenEntry,
   NaviCategory,
@@ -58,7 +55,7 @@ import type {
 
 // Props Emits
 const props = defineProps<{
-  Omiken: OmikenEditType;
+  Omiken: OmikenType;
   naviCategory: NaviCategory;
 }>();
 
@@ -69,7 +66,7 @@ const emit = defineEmits<{
 }>();
 
 // アイテムカウント
-const filterItemsCount = computed(() => Object.keys(currentItems.value).length);
+const itemsCount = computed(() => Object.keys(currentItems.value).length);
 
 // フィルターオプションに合わせて表示を変更
 const currentItems = computed(() => {

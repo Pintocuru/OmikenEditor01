@@ -33,13 +33,13 @@ import type {
   ListCategory,
   ListType,
   OmikenEntry,
-  OmikenEditType,
+  OmikenType,
   OmikenCategory,
 } from "@/types";
 
 // Props Emits
 const props = defineProps<{
-  Omiken: OmikenEditType;
+  Omiken: OmikenType;
   items: Record<string, ListType>;
   itemOrder: string[];
   listCategory: ListCategory;

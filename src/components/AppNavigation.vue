@@ -44,11 +44,11 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { OmikenEditType, ListCategory, NaviCategory } from "@/types";
+import { OmikenType, ListCategory, NaviCategory } from "@/types";
 
 // Props / Emit
 const props = defineProps<{
-  Omiken: OmikenEditType;
+  Omiken: OmikenType;
   naviCategory: NaviCategory;
 }>();
 

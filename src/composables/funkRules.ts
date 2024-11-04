@@ -5,8 +5,6 @@ import { OmikujiType, RulesType } from "@/types";
 
 export function funkRules(
   omikuji: Record<string, OmikujiType> | undefined = {},
-  omikujiOrder: string[] | undefined = [],
-  currentItem: Ref<RulesType | null>
 ) {
   // 定数
   const SWITCH_CONFIG = {
@@ -30,15 +28,6 @@ export function funkRules(
 
   // omikujiのリスト
   const omikujiLists = computed(() => {
-    // omikujiOrderが存在する場合はそれに従って並び替え
-    if (omikujiOrder && omikujiOrder.length > 0) {
-      return omikujiOrder
-        .map(id => {
-          const omikujiItem = omikuji?.[id];
-          return omikujiItem ? { id, name: omikujiItem.name, weight: omikujiItem.weight } : null;
-        })
-        .filter((option): option is { id: string, name: string, weight: number } => option !== null);
-    }
 
     // omikujiOrderがない場合は従来の方法で並び替え
     return Object.entries(omikuji || {}).map(([id, omikuji]) => ({
@@ -50,7 +39,7 @@ export function funkRules(
 
   // 有効なomikujiのリスト
   const enabledOmikujiLists = computed(() => {
-    const enabledIds = currentItem.value?.enabledIds || [];
+    const enabledIds: string | string[] =  [];
     const isAllEnabled = enabledIds.length === 0;
 
     if (isAllEnabled) {

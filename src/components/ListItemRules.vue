@@ -76,7 +76,7 @@ import {
   ListCategory,
   RulesType,
   OmikenEntry,
-  OmikenEditType,
+  OmikenType,
   OmikenCategory,
   AppStateType,
 } from "@/types";
@@ -85,7 +85,7 @@ import { funkRules } from "../composables/funkRules";
 
 // Props Emits
 const props = defineProps<{
-  Omiken: OmikenEditType;
+  Omiken: OmikenType;
   item: RulesType;
   naviCategory: ListCategory;
 }>();

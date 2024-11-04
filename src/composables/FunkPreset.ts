@@ -51,6 +51,7 @@ export function usePresetManager(appState: Ref<AppStateType> | undefined) {
             ...appState.value.Omiken.rules,
             ...presetData.Omiken.rules
           },
+          rulesOrder: [...new Set([...appState.value.Omiken.rulesOrder, ...presetData.Omiken.rulesOrder])],
           omikuji: {
             ...appState.value.Omiken.omikuji,
             ...presetData.Omiken.omikuji
@@ -59,10 +60,6 @@ export function usePresetManager(appState: Ref<AppStateType> | undefined) {
             ...appState.value.Omiken.place,
             ...presetData.Omiken.place
           },
-          // OrderArraysの更新
-          rulesOrder: [...new Set([...appState.value.Omiken.rulesOrder, ...presetData.Omiken.rulesOrder])],
-          omikujiOrder: [...new Set([...appState.value.Omiken.omikujiOrder, ...presetData.Omiken.omikujiOrder])],
-          placeOrder: [...new Set([...appState.value.Omiken.placeOrder, ...presetData.Omiken.placeOrder])]
         };
       }
 

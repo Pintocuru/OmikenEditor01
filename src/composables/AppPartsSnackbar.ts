@@ -1,6 +1,6 @@
 // src/composables/AppPartsSnackbar.ts
 
-import { App, ref, createApp, h } from 'vue'
+import { App, ref, createApp, h, PropType } from 'vue'
 import { createVuetify } from 'vuetify'
 import 'vuetify/styles'
 
@@ -15,11 +15,20 @@ interface SnackbarOptions {
 const SnackbarComponent = {
   name: 'SnackbarComponent',
   props: {
-    message: String,
-    color: String,
-    timeout: Number,
+    message: {
+      type: String as PropType<string>,
+      required: true
+    },
+    color: {
+      type: String as PropType<SnackbarColor>,
+      default: 'success'
+    },
+    timeout: {
+      type: Number,
+      default: 3000
+    }
   },
-  setup(props: SnackbarOptions) {
+  setup(props:any) {
     const isVisible = ref(true)
 
     return () =>

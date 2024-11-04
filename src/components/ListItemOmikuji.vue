@@ -27,12 +27,12 @@ import {
   ListCategory,
   OmikujiType,
   OmikenEntry,
-  OmikenEditType,
+  OmikenType,
   OmikenCategory,
 } from "@/types";
 import _ from "lodash";
 const props = defineProps<{
-  Omiken: OmikenEditType;
+  Omiken: OmikenType;
   item: OmikujiType;
   naviCategory: ListCategory;
 }>();

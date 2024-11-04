@@ -84,7 +84,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from "vue";
-import { ListCategory, OmikenCategory, OmikenEntry, OmikenEditType, ThresholdType } from "@/types";
+import { ListCategory, OmikenCategory, OmikenEntry, OmikenType, ThresholdType } from "@/types";
 import _ from 'lodash';
 
 const props = defineProps<{
@@ -97,7 +97,7 @@ const props = defineProps<{
     placeSortName: "none" | "name" | "group";
     placeSortWeight: "none" | "highFreq" | "lowFreq";
   };
-  Omiken: OmikenEditType;
+  Omiken: OmikenType;
   listCategory: ListCategory;
 }>();
 

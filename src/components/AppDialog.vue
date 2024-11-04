@@ -66,13 +66,13 @@ import {
   OmikenEntry,
   OmikenCategory,
   ListEntryCollect,
-  OmikenEditType,
+  OmikenType,
 } from "@/types";
 
 // Props / emit
 const props = defineProps<{
   listEntry: ListEntryCollect;
-  Omiken: OmikenEditType;
+  Omiken: OmikenType;
 }>();
 
 const emit = defineEmits<{

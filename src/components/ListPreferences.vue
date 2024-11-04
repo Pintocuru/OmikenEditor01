@@ -49,10 +49,10 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import type { OmikenEditType, OmikenEntry, OmikenCategory } from '@/types';
+import type { OmikenType, OmikenEntry, OmikenCategory } from '@/types';
 
 const props = defineProps<{
-  Omiken: OmikenEditType;
+  Omiken: OmikenType;
 }>();
 
 const emit = defineEmits<{
@@ -73,7 +73,7 @@ const validateForm = (isValid: boolean) => {
 };
 
 // 各フィールドの更新処理
-const updatePreference = (key: keyof OmikenEditType['preferences'], value: number | string) => {
+const updatePreference = (key: keyof OmikenType['preferences'], value: number | string) => {
   const newValue = typeof value === 'string' && key !== 'BotUserIDname' 
     ? Number(value) 
     : value;

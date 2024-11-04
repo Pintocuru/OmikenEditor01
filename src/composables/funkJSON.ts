@@ -1,7 +1,7 @@
 // src/composables/funkJSON.ts
 import { ref } from 'vue';
 import { validateData, generateOrder } from "./funkValidate";
-import type { OmikenEditType, fetchJSONType, CHARAEditType, PresetOmikenEditType, ListCategory, EditerTypeMap, RulesType, OmikujiType, PlaceType } from '../types';
+import type { OmikenType, fetchJSONType, CHARAEditType, PresetOmikenEditType, ListCategory, EditerTypeMap, RulesType, OmikujiType, PlaceType } from '../types';
 import _ from 'lodash';
 import Swal from 'sweetalert2';
 import { useToast } from 'vue-toastification';
@@ -20,7 +20,7 @@ export function funkJSON() {
   const canUpdateJSON = ref(false); // テストモード:JSONを書き込みするか
   const isLoading = ref(false); // 読み込み中かどうか、読み込み失敗ならずっとtrue
   const noAppBoot = ref(false); // 起動できたか
-  const lastSavedState = ref<OmikenEditType | null>(null); // 1つ前へ戻る機能
+  const lastSavedState = ref<OmikenType | null>(null); // 1つ前へ戻る機能
   const toast = useToast(); // vue-toastification
 
 
@@ -77,7 +77,7 @@ export function funkJSON() {
   };
 
   // 現在のOmiken読み込み
-  const fetchOmiken = async (): Promise<OmikenEditType | null> => {
+  const fetchOmiken = async (): Promise<OmikenType | null> => {
     // 取得中ならreturn
     if (isLoading.value) {
       console.warn('データの取得が既に進行中です');
@@ -95,13 +95,11 @@ export function funkJSON() {
 
       // データの検証と正規化 // TODO 並び順のバリデーションも行いたい
       // TODO 例えば、Objectのキーと配列が合わない可能性もあるので。
-      const validatedData: OmikenEditType = {
+      const validatedData: OmikenType = {
         rules: validateData('rules', data.rules),
+        rulesOrder: data.rulesOrder,
         omikuji: validateData('omikuji', data.omikuji),
         place: validateData('place', data.place),
-        rulesOrder: data.rulesOrder,
-        omikujiOrder: data.omikujiOrder,
-        placeOrder: data.placeOrder,
         preferences: data.preferences
       };
 
@@ -126,7 +124,7 @@ export function funkJSON() {
     }
   };
 
-  // Objectを指定された順序で並び替える関数
+  // Objectを指定された順序で並び替える関数 // TODO reorderはrulesのみ
   function reorderObject<T>(obj: Record<string, T>, order: string[]): Record<string, T> {
     // 順序配列の検証
     const validOrder = order.filter(key => key in obj);
@@ -150,16 +148,14 @@ export function funkJSON() {
   }
 
   // Omikenの保存
-  const saveOmiken = async (Omiken: OmikenEditType): Promise<void> => {
+  const saveOmiken = async (Omiken: OmikenType): Promise<void> => {
 
     // 各ObjectをOrderの順番に直す
-    const newOmiken: OmikenEditType = {
+    const newOmiken: OmikenType = {
       rules: reorderObject(Omiken.rules, Omiken.rulesOrder ?? Object.keys(Omiken.rules)),
-      omikuji: reorderObject(Omiken.omikuji, Omiken.omikujiOrder ?? Object.keys(Omiken.omikuji)),
-      place: reorderObject(Omiken.place, Omiken.placeOrder ?? Object.keys(Omiken.place)),
+      omikuji: Omiken.omikuji,
+      place: Omiken.place,
       rulesOrder: Omiken.rulesOrder ?? Object.keys(Omiken.rules),
-      omikujiOrder: Omiken.omikujiOrder ?? Object.keys(Omiken.omikuji),
-      placeOrder: Omiken.placeOrder ?? Object.keys(Omiken.place),
       preferences: Omiken.preferences
     };
 

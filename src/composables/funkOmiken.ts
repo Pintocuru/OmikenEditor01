@@ -2,7 +2,7 @@
 
 import { computed, onMounted, provide, Ref, ref } from 'vue';
 import type {
-  OmikenEditType,
+  OmikenType,
   OmikenEntry,
   ListType,
   AppStateType,
@@ -18,11 +18,9 @@ export function funkOmiken(listEntry: Ref<ListEntryCollect>) {
   const AppState = ref<AppStateType>({
     Omiken: {
       rules: {},
+      rulesOrder: [],
       omikuji: {},
       place: {},
-      rulesOrder: [],
-      omikujiOrder: [],
-      placeOrder: [],
       preferences: {
         basicDelay: 1,
         omikujiCooldown: 2,
@@ -88,7 +86,7 @@ export function funkOmiken(listEntry: Ref<ListEntryCollect>) {
     const { type, update, addKeys, delKeys, reorder, preferences } = payload;
 
     // 現在のステートのディープコピーを作成
-    const newState: OmikenEditType = JSON.parse(JSON.stringify(AppState.value.Omiken));
+    const newState: OmikenType = JSON.parse(JSON.stringify(AppState.value.Omiken));
 
     // preferences の更新
     if (type === 'preferences' && preferences) {
@@ -111,7 +109,7 @@ export function funkOmiken(listEntry: Ref<ListEntryCollect>) {
           const newKey = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
           const validatedItem = validateData(type, { [newKey]: item as ListType });
           Object.assign(newState[type], validatedItem);
-          newState[orderKey].push(newKey);
+          if (orderKey === 'rulesOrder') newState[orderKey].push(newKey);
         });
       }
 
@@ -119,12 +117,12 @@ export function funkOmiken(listEntry: Ref<ListEntryCollect>) {
       if (delKeys?.length) {
         delKeys.forEach(key => {
           delete newState[type][key];
-          newState[orderKey] = newState[orderKey].filter(id => id !== key);
+          if (orderKey === 'rulesOrder') newState[orderKey] = newState[orderKey].filter(id => id !== key);
         });
       }
 
       // 順序の更新
-      if (reorder) newState[orderKey] = reorder;
+      if (reorder && orderKey === 'rulesOrder') newState[orderKey] = reorder;
 
     }
     // ステートの一括更新
@@ -137,7 +135,7 @@ export function funkOmiken(listEntry: Ref<ListEntryCollect>) {
   const updateOmikenPreset = (preset: PresetOmikenEditType) => {
     // 現在のpreferencesとステートのコピーを保持
     const currentPreferences = AppState.value.Omiken.preferences;
-    const newState: OmikenEditType = JSON.parse(JSON.stringify(AppState.value.Omiken));
+    const newState: OmikenType = JSON.parse(JSON.stringify(AppState.value.Omiken));
 
     if (preset.mode === 'overwrite') {
       // 上書きモード：プリセットの内容で完全に置き換え（preferences除く）
@@ -146,7 +144,7 @@ export function funkOmiken(listEntry: Ref<ListEntryCollect>) {
         // 各カテゴリーのデータをバリデーション
         newState[type] = validateData(type, preset.item[type]);
         // OrderArrayの再生成
-        newState[`${type}Order`] = generateOrder(newState[type]);
+        if (type === 'rules') newState[`${type}Order`] = generateOrder(newState[type]);
       });
     } else {
       // 追加モード：既存のデータを保持しながら新しいデータを追加
@@ -183,7 +181,7 @@ export function funkOmiken(listEntry: Ref<ListEntryCollect>) {
 
         // OrderArrayの更新（既存の順序を保持しつつ、新規キーを追加）
         const newKeys = Object.keys(renamedData);
-        newState[orderKey] = [...newState[orderKey], ...newKeys];
+        if (orderKey === 'rulesOrder') newState[orderKey] = [...newState[orderKey], ...newKeys];
       });
     }
 

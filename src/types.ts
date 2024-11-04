@@ -4,16 +4,9 @@
 
 // AppState
 export interface AppStateType {
-  Omiken: OmikenEditType;
+  Omiken: OmikenType;
   CHARA: Record<string, CHARAEditType>;
   Preset: Record<string, PresetOmikenEditType>; // プリセットデータ
-}
-
-// Omiken:おみくじエディター用型定義
-export interface OmikenEditType extends OmikenType {
-  rulesOrder: string[]; // ルールの順序
-  omikujiOrder: string[]; // おみくじの順序
-  placeOrder: string[]; // プレースホルダーの順序
 }
 
 // xxxOrder用の型
@@ -63,7 +56,7 @@ export interface CHARAEditType extends fetchJSONType {
   item: CHARAType; // キャラデータ
 }
 export interface PresetOmikenEditType extends fetchJSONType {
-  item: Omit<OmikenEditType, "preferences">; // キャラデータ(preferences抜き)
+  item: Omit<OmikenType, "preferences">; // キャラデータ(preferences抜き)
   mode: "overwrite" | "append"; // 追加豊富(上書き/追加)
 }
 
@@ -72,6 +65,7 @@ export interface PresetOmikenEditType extends fetchJSONType {
 // Omibot:おみくじボット用型定義
 export interface OmikenType {
   rules: Record<string, EditerTypeMap["rules"]>; // おみくじのルールを管理
+  rulesOrder: string[]; // ルールの順序
   omikuji: Record<string, EditerTypeMap["omikuji"]>; // おみくじ関連のメッセージ
   place: Record<string, EditerTypeMap["place"]>; // プレースホルダー
   preferences: PreferencesType;
