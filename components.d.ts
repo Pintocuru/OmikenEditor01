@@ -58,6 +58,7 @@ declare module 'vue' {
     PekeDialogThresholdComparison: typeof import('./src/components/peke-DialogThresholdComparison.vue')['default']
     PekeDialogThresholdValue: typeof import('./src/components/peke-DialogThresholdValue.vue')['default']
     PekeListFilter: typeof import('./src/components/peke-ListFilter.vue')['default']
+    PekeListItemRules: typeof import('./src/components/peke-ListItemRules.vue')['default']
     PlaceEditor: typeof import('./src/components/PlaceEditor.vue')['default']
     RandomEditor: typeof import('./src/components/RandomEditor.vue')['default']
     RuleEditor: typeof import('./src/components/RuleEditor.vue')['default']

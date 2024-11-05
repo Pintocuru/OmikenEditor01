@@ -66,7 +66,7 @@ import type {
   OmikenCategory,
   AppStateType,
 } from "../types";
-import { funkRules } from "../composables/funkRules";
+import { funkRules } from "../composables/FunkRules";
 
 // props/emits
 const props = defineProps<{

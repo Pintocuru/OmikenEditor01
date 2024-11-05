@@ -72,7 +72,7 @@
                     :ruleId="ruleId"
                     :enabledIds="Omiken.rules[ruleId].enabledIds"
                     @update:enabledIds="
-                      (newEnabledIds) => updateEnabledIds(newEnabledIds, ruleId)
+                      (newEnabledIds) => updateRulesEnabledIds(newEnabledIds, ruleId)
                     "
                     @open-editor="openEditor"
                     @update:Omiken="updateOmiken"
@@ -133,12 +133,6 @@ const showRules = ref(true);
 const showOmikuji = ref(true);
 const showPlace = ref(true);
 
-const updateFlatEnabledIds = (newEnabledIds: string[]) => {
-  // フラットビューでの並び順の更新
-  Object.keys(props.Omiken.rules).forEach((ruleId) => {
-    updateEnabledIds(newEnabledIds, ruleId);
-  });
-};
 
 // ドラッグ&ドロップ用のローカルデータ
 const localRulesOrder = computed({
@@ -159,7 +153,7 @@ const updateRulesOrder = () => {
   });
 };
 
-const updateEnabledIds = (enabledIds: string[], ruleId: string) => {
+const updateRulesEnabledIds = (enabledIds: string[], ruleId: string) => {
   const updatedRule = {
     ...props.Omiken.rules[ruleId],
     enabledIds, // 直接受け取ったenabledIdsを使用

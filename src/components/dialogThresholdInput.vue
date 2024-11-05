@@ -117,9 +117,8 @@ const getDefaultValue = (type: ConditionType): ModelValueType => {
   }
 };
 
-defineExpose({
-  getDefaultValue,
-});
+// 外部から利用可能な関数を公開
+defineExpose({ getDefaultValue });
 
 // computedプロパティで型安全な値を提供
 const currentItem = computed({

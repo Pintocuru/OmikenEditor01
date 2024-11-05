@@ -79,7 +79,7 @@ import {
   AppStateType,
 } from "@/types";
 import ListItemPartsAction from "./common/ListItemPartsAction.vue";
-import { funkRules } from "../composables/funkRules";
+import { funkRules } from "../composables/FunkRules";
 
 // Props Emits
 const props = defineProps<{

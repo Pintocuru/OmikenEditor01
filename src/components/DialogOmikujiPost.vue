@@ -21,7 +21,7 @@
     <v-expansion-panels multiple>
       <v-expansion-panel v-for="(post, index) in currentItem.post" :key="index">
         <v-expansion-panel-title hide-actions :color="getPostColor(post)">
-          <v-toolbar flat color="transparent">
+          <v-toolbar density="compact" color="transparent">
             <v-chip
               variant="flat"
               :color="getTypeColor(post.type)"

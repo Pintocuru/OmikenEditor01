@@ -18,6 +18,7 @@ export function FunkOmikuji() {
     toast: { color: "blue", label: "トースト" },
     speech: { color: "green", label: "スピーチ" }
   };
+
   // 投稿タイプに応じた色を取得する関数
   type PostTypeKey = 'onecomme' | 'party' | 'toast' | 'speech';
   const getTypeColor = (type: PostTypeKey): string => POST_TYPES[type]?.color || "grey";
@@ -105,6 +106,33 @@ export function FunkOmikuji() {
     };
   };
 
+  // postからonecommeを探し色を取得する
+  const getTypeColor2 = (post: OmikujiPostType[], isBotcolor?: boolean): string => {
+    const onecommePost = post.find((p) => p.type === "onecomme");
+    if (onecommePost?.botKey && isBotcolor) {
+      return getCharaColor(onecommePost.botKey) ?? "grey";
+    }
+
+    // 'onecomme'がなければ、最初のtypeを判断して色を返す
+    const firstPost = post[0];
+    switch (firstPost.type) {
+      case "party":
+        return "deep-orange";
+      case "toast":
+        return "blue";
+      case "speech":
+        return "green";
+      default:
+        return "";
+    }
+  };
+
+  // onecommeのcontentを取得
+  const getOnecommeContent = (posts: OmikujiPostType[]): string => {
+    const onecommePost = posts.find((p) => p.type === "onecomme");
+    return onecommePost?.content ?? "";
+  };
+
   return {
     // Post type utilities
     getTypeColor,
@@ -121,5 +149,19 @@ export function FunkOmikuji() {
 
     // Placeholder utilities
     extractValidPlaceholders,
+
+
+    getOnecommeContent,
   };
+}
+
+
+export function FunkOmikujiHoge() {
+
+
+
+
+  return {
+
+  }
 }
