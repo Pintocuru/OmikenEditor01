@@ -148,7 +148,6 @@ export enum AccessLevel {
 // 共通の定義
 export type ComparisonType = "min" | "max" | "range" | "equal" | "loop";
 export interface BaseCondition {
-  isEnabled: boolean;
   value1: number;
   value2?: number;
 }

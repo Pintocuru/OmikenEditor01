@@ -139,10 +139,10 @@ export function funkThreshold() {
       ],
     } as Partial<Record<ConditionType, UnitItem[]>>,
     syoken: {
-      0: "初見さん",
-      1: "配信枠初コメント",
-      2: "7日以上ぶり",
-    } as unknown as Record<SyokenType, string>,
+      [SyokenType.SYOKEN]: "初見さん",
+      [SyokenType.HI]: "配信枠初コメント",
+      [SyokenType.AGAIN]: "7日以上ぶり",
+    } as Record<SyokenType, string>,
     access: {
       [AccessLevel.OFF]: "無効",
       [AccessLevel.ANYONE]: "制限なし",
@@ -180,10 +180,8 @@ export function funkThreshold() {
     if (!threshold) return "";
 
     const handlers: Partial<Record<ConditionType, () => string>> = {
-      // TODO 動作は正常だが型エラー 
       [ConditionType.SYOKEN]: () =>
-        // @ts-ignore
-        `${MAPPINGS.syoken[threshold.syoken || 0]}の場合`,
+        `${MAPPINGS.syoken[threshold.syoken || SyokenType.SYOKEN]}の場合`,
 
       [ConditionType.ACCESS]: () =>
         MAPPINGS.access[threshold.access || AccessLevel.OFF],

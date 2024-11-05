@@ -45,6 +45,7 @@
       <!-- フィルタリング -->
       <DialogThreshold
         :currentItem="currentItem"
+        :themeColor = "currentItem.color"
         @update:Omiken="updateOmiken"
       />
     </v-card-text>

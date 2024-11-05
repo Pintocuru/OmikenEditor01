@@ -1,7 +1,7 @@
 <!-- src/components/DialogThreshold.vue -->
 <template>
   <v-card>
-    <v-toolbar color="primary" density="compact">
+    <v-toolbar :color="themeColor" density="compact">
       <v-toolbar-title>フィルタリング設定🔐</v-toolbar-title>
     </v-toolbar>
     <v-card-text>
@@ -10,43 +10,43 @@
       </div>
 
       <!-- アイコン -->
-    <v-row justify="space-around">
-      <v-col v-for="item in items.threshold" :key="item.value" cols="auto">
-        <v-tooltip location="top">
-          <template v-slot:activator="{ props }">
-            <v-btn
-              icon
-              :class="{
-                'active-button':
-                  currentItem.threshold.conditionType === item.value,
-              }"
-              v-bind="props"
-              @click="currentItem.threshold.conditionType = item.value"
-            >
-              <v-icon>{{ item.icon }}</v-icon>
-            </v-btn>
-          </template>
-          <span>{{ item.label }}: {{ item.description }}</span>
-        </v-tooltip>
-      </v-col>
-    </v-row>
+      <v-row justify="space-around">
+        <v-col v-for="item in items.threshold" :key="item.value" cols="auto">
+          <v-tooltip location="top">
+            <template v-slot:activator="{ props }">
+              <v-btn
+                icon
+                :variant="
+                  currentItem.threshold.conditionType === item.value
+                    ? 'elevated'
+                    : 'flat'
+                "
+                :color="
+                  currentItem.threshold.conditionType === item.value
+                    ? themeColor
+                    : ''
+                "
+                v-bind="props"
+                @click="currentItem.threshold.conditionType = item.value"
+              >
+                <v-icon>{{ item.icon }}</v-icon>
+              </v-btn>
+            </template>
+            <span>{{ item.label }}: {{ item.description }}</span>
+          </v-tooltip>
+        </v-col>
+      </v-row>
       <!-- 各設定群 -->
       <v-sheet class="pt-8">
-        <v-slider
+        <v-radio-group
           v-if="currentItem.threshold.conditionType === ConditionType.SYOKEN"
           v-model="currentItem.threshold.syoken"
-          :min="0"
-          :max="2"
-          :step="1"
-          show-ticks="always"
-          tick-size="4"
-          :ticks="[0, 1, 2]"
-          @update:modelValue="updateThreshold"
+          inline
         >
-          <template #tick-label="{ tick }">
-            {{ items.syoken[tick.value]?.title }}
-          </template>
-        </v-slider>
+          <v-radio class="pr-8" label="初見さん" value="syoken" />
+          <v-radio class="pr-8" label="枠初コメ" value="hi" />
+          <v-radio label="久しぶり" value="again" />
+        </v-radio-group>
 
         <v-slider
           v-if="currentItem.threshold.conditionType === ConditionType.ACCESS"
@@ -102,6 +102,7 @@
         >
           <v-card-text>
             <dialogThresholdInput
+              ref="childRef"
               v-model="currentItem.threshold.count"
               :conditionType="ConditionType.COUNT"
               @update:modelValue="updateThreshold"
@@ -127,7 +128,7 @@
 
 <script setup lang="ts">
 import dialogThresholdInput from "./dialogThresholdInput.vue";
-import { funkThreshold  } from "../composables/funkThreshold";
+import { funkThreshold } from "../composables/funkThreshold";
 import {
   OmikenCategory,
   OmikenEntry,
@@ -139,10 +140,11 @@ import {
   SyokenType,
   ThresholdType,
 } from "../types";
-import { onMounted } from "vue";
+import { onMounted, ref } from "vue";
 
 const props = defineProps<{
   currentItem: OmikujiType | RulesType;
+  themeColor: string;
 }>();
 
 const emit = defineEmits<{
@@ -152,40 +154,25 @@ const emit = defineEmits<{
 // コンポーザブル:funkThreshold
 const { items, getExampleText } = funkThreshold();
 
-// 条件タイプごとの初期値を生成
-const defaultThreshold = (type: ConditionType): Partial<ThresholdType> => {
-  switch (type) {
-    case ConditionType.ACCESS:
-      return { access: AccessLevel.ANYONE };
-    case ConditionType.SYOKEN:
-      return { syoken: SyokenType.SYOKEN };
-    case ConditionType.MATCH:
-      return { match: [] };
-    case ConditionType.TIME:
-      return { time: { type, isEnabled: true, comparison: 'range', value1: 0, value2: 23 } };
-    case ConditionType.ELAPSED:
-      return { elapsed: { type, isEnabled: true, comparison: 'min', unit: 'minute', value1: 0 } };
-    case ConditionType.COUNT:
-      return { count: { type, isEnabled: true, comparison: 'min', unit: 'lc', value1: 0 } };
-    case ConditionType.GIFT:
-      return { gift: { type, isEnabled: true, comparison: 'min', value1: 0 } };
-    case ConditionType.NONE:
-    default:
-      return {};
-  }
-};
+// dialogThresholdInput用のrefを追加
+const childRef = ref<InstanceType<typeof dialogThresholdInput>>();
 
-// 初期化関数
+// 選択以外のすべての値にデフォルト値を入れる
 const initializeThreshold = () => {
   if (!props.currentItem?.threshold) return;
-  
-  const type = props.currentItem.threshold.conditionType;
-  const defaults = defaultThreshold(type);
-  
-  // 各プロパティについて、未設定の場合のみデフォルト値を設定
+   const base = {  value1: 0 };
+  const defaults :Partial<ThresholdType>= {
+    access: AccessLevel.ANYONE,
+    syoken: SyokenType.SYOKEN,
+    match: [],
+    time:{ ...base, type:ConditionType.TIME, comparison: 'range' as const, value2: 23 },
+    elapsed:{ ...base, type:ConditionType.ELAPSED, comparison: 'max' as const, unit: 'minute' as const },
+    count:{ ...base, type:ConditionType.COUNT, comparison: 'max' as const, unit: 'lc' as const},
+    gift: { ...base, type:ConditionType.GIFT, comparison: 'max' as const },
+  };
   props.currentItem.threshold = {
     ...defaults,
-    ...props.currentItem.threshold
+    ...props.currentItem.threshold,
   };
 };
 
@@ -194,27 +181,19 @@ onMounted(() => {
   initializeThreshold();
 });
 
-
-// 更新関数
+// 更新処理
 const updateThreshold = () => {
   if (!props.currentItem) return;
 
-  if ("weight" in props.currentItem) {
-    // OmikujiType
-    emit("update:Omiken", {
-      type: "omikuji",
-      update: {
-        [props.currentItem.id]: props.currentItem,
-      } as EditerEntryTypeMap["omikuji"],
-    });
-  } else {
-    // RulesType
-    emit("update:Omiken", {
-      type: "rules",
-      update: {
-        [props.currentItem.id]: props.currentItem,
-      } as EditerEntryTypeMap["rules"],
-    });
-  }
+  const type =
+    "weight" in props.currentItem ? ("omikuji" as const) : ("rules" as const);
+  const update = {
+    [props.currentItem.id]: props.currentItem,
+  } as EditerEntryTypeMap[typeof type];
+
+  emit("update:Omiken", {
+    type,
+    update,
+  });
 };
 </script>
