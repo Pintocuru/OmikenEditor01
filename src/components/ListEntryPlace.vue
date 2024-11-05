@@ -1,26 +1,11 @@
 <!-- src/components/ListEntryPlace.vue -->
 <template>
-  <v-card-text>
-    <v-toolbar density="compact">
-      <v-toolbar-title class="ml-2">
-        <v-icon icon="mdi-tag"></v-icon>
-        プレースホルダーリスト
-      </v-toolbar-title>
-      <template #append>
-        <v-icon icon="mdi-tag"
-          ></v-icon
-        ><v-tooltip activator="parent" location="top">
-            プレースホルダーを作成するには、
-          </v-tooltip>
-      </template>
-    </v-toolbar>
     <v-row>
       <v-col
         v-for="place in displayPlaces"
         :key="place.id"
         cols="12"
-        sm="6"
-        lg="4"
+        md="6"
       >
         <v-card class="mb-2">
           <v-card-title class="text-body-1">
@@ -41,7 +26,6 @@
         </v-card>
       </v-col>
     </v-row>
-  </v-card-text>
 </template>
 
 <script setup lang="ts">

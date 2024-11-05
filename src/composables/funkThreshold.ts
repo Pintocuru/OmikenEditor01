@@ -1,24 +1,92 @@
 // src/composables/funkThreshold.ts
 
-import { AccessLevel, BaseCondition, ComparisonType, ConditionType, SyokenType, ThresholdType } from "@/types";
+import {
+  AccessLevel,
+  BaseCondition,
+  ComparisonType,
+  ConditionType,
+  SyokenType,
+  ThresholdType,
+} from "@/types";
 
-export function funkThreshold(
-  threshold: ThresholdType
-) {
+// 型定義
+type ThresholdItem = {
+  label: string;
+  value: ConditionType;
+  icon: string;
+  description: string;
+};
 
-  // 定数
-  const conditionTypeItems = [
-    { label: "制限なし", value: ConditionType.NONE },
-    { label: "メンバー・モデ判定", value: ConditionType.ACCESS },
-    { label: "初見・久しぶり", value: ConditionType.SYOKEN },
-    { label: "キーワード一致", value: ConditionType.MATCH },
-    { label: "時間指定", value: ConditionType.TIME },
-    { label: "経過時間", value: ConditionType.ELAPSED },
-    { label: "コメント数", value: ConditionType.COUNT },
-    { label: "ギフト", value: ConditionType.GIFT },
+type ComparisonItem = {
+  title: string;
+  value: ComparisonType;
+};
+
+type ValueLabel = {
+  value1: string;
+  value2: string;
+};
+
+type UnitItem = {
+  title: string;
+  value: string;
+};
+
+// しきい値の設定に関する関数群を提供
+export function funkThreshold() {
+  // 定数定義
+  const THRESHOLD_ITEMS: ThresholdItem[] = [
+    {
+      label: "制限なし",
+      value: ConditionType.NONE,
+      icon: "mdi-block-helper",
+      description: "条件による制限を設定しません",
+    },
+    {
+      label: "メンバー・モデ判定",
+      value: ConditionType.ACCESS,
+      icon: "mdi-account-check",
+      description: "メンバーシップやモデレーター権限を判定",
+    },
+    {
+      label: "初見・久しぶり",
+      value: ConditionType.SYOKEN,
+      icon: "mdi-account-clock",
+      description: "視聴者の初見や復帰を判定",
+    },
+    {
+      label: "キーワード一致",
+      value: ConditionType.MATCH,
+      icon: "mdi-text-search",
+      description: "特定のキーワードを含むコメントを判定",
+    },
+    {
+      label: "時間指定",
+      value: ConditionType.TIME,
+      icon: "mdi-clock-time-four",
+      description: "指定した時間帯のみ有効",
+    },
+    {
+      label: "経過時間",
+      value: ConditionType.ELAPSED,
+      icon: "mdi-timer",
+      description: "配信開始からの経過時間で判定",
+    },
+    {
+      label: "コメント数",
+      value: ConditionType.COUNT,
+      icon: "mdi-comment-multiple",
+      description: "コメント投稿回数による判定",
+    },
+    {
+      label: "ギフト",
+      value: ConditionType.GIFT,
+      icon: "mdi-gift",
+      description: "ギフト送信による判定",
+    },
   ];
 
-  const accessLevelItems = [
+  const ACCESS_ITEMS = [
     { title: "OFF", value: AccessLevel.OFF },
     { title: "だれでも", value: AccessLevel.ANYONE },
     { title: "メンバー", value: AccessLevel.MEMBER },
@@ -26,110 +94,176 @@ export function funkThreshold(
     { title: "管理者", value: AccessLevel.ADMIN },
   ];
 
-  // AccessLevel用のticks (数値enum用)
-  const accessTicks = {
-    [AccessLevel.OFF]: "OFF",
-    [AccessLevel.ANYONE]: "だれでも",
-    [AccessLevel.MEMBER]: "メンバー",
-    [AccessLevel.MODERATOR]: "モデレーター",
-    [AccessLevel.ADMIN]: "管理者"
-  };
-
-  // TODO 後でまとめられないかなあ
-  const syokenTypeItems = [
+  const SYOKEN_ITEMS = [
     { title: "初見さん", value: SyokenType.SYOKEN },
     { title: "枠初コメ", value: SyokenType.HI },
     { title: "久しぶり", value: SyokenType.AGAIN },
   ];
 
-  const syokenTicks = {
-    0: "初見さん",
-    1: "枠初コメ",
-    2: "久しぶり"
+  // マッピング定義
+  const MAPPINGS = {
+    comparison: {
+      base: [
+        { title: "以下", value: "min" },
+        { title: "以上", value: "max" },
+        { title: "範囲", value: "range" },
+      ] as ComparisonItem[],
+      additional: {
+        [ConditionType.COUNT]: [
+          { title: "等しい", value: "equal" },
+          { title: "繰り返し", value: "loop" },
+        ],
+        [ConditionType.GIFT]: [{ title: "等しい", value: "equal" }],
+      } as Partial<Record<ConditionType, ComparisonItem[]>>,
+    },
+    value: {
+      [ConditionType.TIME]: { value1: "時刻", value2: "終了時刻" },
+      [ConditionType.ELAPSED]: { value1: "経過時間", value2: "経過時間(終了)" },
+      [ConditionType.COUNT]: {
+        value1: "コメント数",
+        value2: "コメント数(終了)",
+      },
+      [ConditionType.GIFT]: { value1: "ポイント", value2: "ポイント(終了)" },
+    } as Partial<Record<ConditionType, ValueLabel>>,
+    unit: {
+      [ConditionType.ELAPSED]: [
+        { title: "秒", value: "second" },
+        { title: "分", value: "minute" },
+        { title: "時間", value: "hour" },
+        { title: "日", value: "day" },
+      ],
+      [ConditionType.COUNT]: [
+        { title: "配信枠のコメント番号", value: "lc" },
+        { title: "個人コメント数", value: "no" },
+        { title: "総個人コメント数", value: "tc" },
+      ],
+    } as Partial<Record<ConditionType, UnitItem[]>>,
+    syoken: {
+      0: "初見さん",
+      1: "配信枠初コメント",
+      2: "7日以上ぶり",
+    } as unknown as Record<SyokenType, string>,
+    access: {
+      [AccessLevel.OFF]: "無効",
+      [AccessLevel.ANYONE]: "制限なし",
+      [AccessLevel.MEMBER]: "メンバー以上",
+      [AccessLevel.MODERATOR]: "モデレーター以上",
+      [AccessLevel.ADMIN]: "管理者のみ",
+    } as Record<AccessLevel, string>,
   };
 
+  // 条件タイプに応じた比較項目を取得
+  const getComparisonItems = (type: ConditionType): ComparisonItem[] => {
+    const additionalItems = MAPPINGS.comparison.additional[type] || [];
+    return [...MAPPINGS.comparison.base, ...additionalItems];
+  };
 
-  // 表示用の例文生成
-  const getExampleText = () => {
+  // 条件タイプに応じた値ラベルを取得
+  const getValueLabel = (type: ConditionType, isValue2 = false): string => {
+    const labels = MAPPINGS.value[type];
+    return labels
+      ? isValue2
+        ? labels.value2
+        : labels.value1
+      : isValue2
+      ? "値(終了)"
+      : "値";
+  };
+
+  // 条件タイプに応じた単位項目を取得
+  const getUnitItems = (type: ConditionType): UnitItem[] => {
+    return MAPPINGS.unit[type] || [];
+  };
+
+  // しきい値の説明文を生成
+  const getExampleText = (threshold: ThresholdType): string => {
     if (!threshold) return "";
 
-    switch (threshold.conditionType) {
-      case ConditionType.SYOKEN:
-        const syokenValue = threshold.syoken !== undefined ? threshold.syoken : SyokenType.SYOKEN;
-        const syokenMap = {
-          [SyokenType.SYOKEN]: "初見さん",
-          [SyokenType.HI]: "配信枠初コメント",
-          [SyokenType.AGAIN]: "7日以上ぶり",
-        };
-        return `${syokenMap[syokenValue]}の場合`;
+    const handlers: Partial<Record<ConditionType, () => string>> = {
+      // TODO 動作は正常だが型エラー 
+      [ConditionType.SYOKEN]: () =>
+        // @ts-ignore
+        `${MAPPINGS.syoken[threshold.syoken || 0]}の場合`,
 
-      case ConditionType.ACCESS:
-        const accessMap = {
-          [AccessLevel.OFF]: "無効",
-          [AccessLevel.ANYONE]: "制限なし",
-          [AccessLevel.MEMBER]: "メンバー以上",
-          [AccessLevel.MODERATOR]: "モデレーター以上",
-          [AccessLevel.ADMIN]: "管理者のみ"
-        };
-        return `${accessMap[threshold.access || AccessLevel.OFF]}`;
+      [ConditionType.ACCESS]: () =>
+        MAPPINGS.access[threshold.access || AccessLevel.OFF],
 
-      case ConditionType.MATCH:
-        return threshold.match?.length
-          ? `「${threshold.match.join('」「')}」を含む場合`
-          : "キーワード未設定";
+      [ConditionType.MATCH]: () =>
+        threshold.match?.length
+          ? `「${threshold.match.join("」「")}」を含む場合`
+          : "キーワード未設定",
 
-      case ConditionType.TIME:
+      [ConditionType.TIME]: () => {
         if (!threshold.time) return "";
-        const {  value1, value2 } = threshold.time;
+        const { value1, value2 } = threshold.time;
         return `${value1}時～${value2}時の範囲`;
+      },
 
-      case ConditionType.ELAPSED:
+      [ConditionType.ELAPSED]: () => {
         if (!threshold.elapsed) return "";
-        const elapsedUnitMap = {
+        const unitMap = {
           second: "秒",
           minute: "分",
           hour: "時間",
-          day: "日"
+          day: "日",
         };
-        return `最後のコメントから${getComparisonText(threshold.elapsed, elapsedUnitMap[threshold.elapsed.unit])}`;
+        return `最後のコメントから${getComparisonText(
+          threshold.elapsed,
+          unitMap[threshold.elapsed.unit]
+        )}`;
+      },
 
-
-      case ConditionType.COUNT:
+      [ConditionType.COUNT]: () => {
         if (!threshold.count) return "";
-        const countUnitMap = {
+        const unitMap = {
           lc: "配信枠のコメント数",
           no: "個人コメント数",
-          tc: "総個人コメント数"
+          tc: "総個人コメント数",
         };
-        return `${countUnitMap[threshold.count.unit]}が${getComparisonText(threshold.count, "")}`;
+        return `${unitMap[threshold.count.unit]}が${getComparisonText(
+          threshold.count,
+          ""
+        )}`;
+      },
 
-
-      case ConditionType.GIFT:
+      [ConditionType.GIFT]: () => {
         if (!threshold.gift) return "";
         return `ギフト金額が${getComparisonText(threshold.gift, "pt")}`;
+      },
 
-      default:
-        return "制限なし";
-    }
+      [ConditionType.NONE]: () => "制限なし",
+    };
+
+    const handler = handlers[threshold.conditionType];
+    return handler ? handler() : "制限なし";
   };
 
-  // 比較文生成用のヘルパー関数
-  const getComparisonText = (condition: BaseCondition & { comparison: ComparisonType }, unit: string) => {
+  // 比較条件のテキストを生成
+  const getComparisonText = (
+    condition: BaseCondition & { comparison: ComparisonType },
+    unit: string
+  ): string => {
     const { comparison, value1, value2 } = condition;
-    switch (comparison) {
-      case "range": return `${value1}${unit}～${value2}${unit}の範囲`;
-      case "equal": return `${value1}${unit}に等しい`;
-      case "loop": return `${value1}${unit}ごと`;
-      default: return `${value1}${unit}${comparison === "min" ? "以下" : "以上"}`;
-    }
-  };
+    const comparisonMap: Record<ComparisonType, () => string> = {
+      range: () => `${value1}${unit}～${value2}${unit}の範囲`,
+      equal: () => `${value1}${unit}に等しい`,
+      loop: () => `${value1}${unit}ごと`,
+      min: () => `${value1}${unit}以下`,
+      max: () => `${value1}${unit}以上`,
+    };
 
+    return comparisonMap[comparison]();
+  };
 
   return {
-    accessTicks, syokenTicks,
-    conditionTypeItems,
-    accessLevelItems,
-    syokenTypeItems,
+    items: {
+      threshold: THRESHOLD_ITEMS,
+      access: ACCESS_ITEMS,
+      syoken: SYOKEN_ITEMS,
+    },
+    getComparisonItems,
+    getValueLabel,
+    getUnitItems,
     getExampleText,
   };
 }

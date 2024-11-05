@@ -6,7 +6,8 @@
         <v-toolbar-title>
           {{ item.name }}
           <v-chip class="ml-4" label variant="outlined">
-            {{ enabledOmikujiLists.length }} items <!-- おみくじの個数に変更 -->
+            {{ enabledOmikujiLists.length }} items
+            <!-- おみくじの個数に変更 -->
           </v-chip>
         </v-toolbar-title>
         <template v-slot:append>
@@ -34,15 +35,12 @@
             >
               <v-sheet
                 class="d-flex justify-space-between align-center px-2 py-1"
-                
               >
                 <span class="font-weight-bold">
                   {{ option.name }}
                 </span>
                 <span>
-                  <span  >
-                    {{ option.weight }}/{{ totalWeight() }}
-                  </span>
+                  <span> {{ option.weight }}/{{ totalWeight() }} </span>
                   <span class="ml-1">
                     ({{ totalWeightPercentage(option.id) }}%)
                   </span>
@@ -59,7 +57,7 @@
             <v-icon color="primary">mdi-arrow-right-bold-box</v-icon>
             {{ item.matchStartsWith.join(", ") }}
           </span>
-                    <span            v-else            class="mr-4"          >
+          <span v-else class="mr-4">
             <v-icon color="primary">mdi-arrow-right-bold-box</v-icon>
             (すべてのコメントが対象)
           </span>
@@ -127,7 +125,7 @@ function openEditorRules() {
   emit("open-editor", {
     isOpen: true,
     type: "rules",
-    mode:null,
+    mode: null,
     key,
   });
 }
