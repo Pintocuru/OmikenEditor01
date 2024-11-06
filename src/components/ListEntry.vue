@@ -1,116 +1,119 @@
 <!-- src/components/ListEntry.vue -->
 <template>
-  <v-card>
-    <v-toolbar dense>
-      <v-toolbar-title>Entry View</v-toolbar-title>
-      <v-spacer></v-spacer>
-      <v-checkbox v-model="showRules" label="Rules" class="mr-2"></v-checkbox>
-      <v-checkbox
-        v-model="showOmikuji"
-        label="Omikuji"
-        class="mr-2"
-      ></v-checkbox>
-      <v-checkbox v-model="showPlace" label="Place" class="mr-2"></v-checkbox>
+  <!-- Rules View -->
+  <v-card v-for="(ruleId, index) in localRulesOrder" :key="ruleId" class="mb-2">
+    <v-toolbar :color="Omiken.rules[ruleId]?.color">
+      <div class="d-flex">
+        <v-tooltip text="上に移動" location="top">
+          <template v-slot:activator="{ props }">
+            <v-btn
+              v-bind="props"
+              icon="mdi-arrow-up"
+              density="compact"
+              :disabled="index === 0"
+              @click="moveRule(index, 'up')"
+            />
+          </template>
+        </v-tooltip>
+        <v-tooltip text="下に移動" location="top">
+          <template v-slot:activator="{ props }">
+            <v-btn
+              v-bind="props"
+              icon="mdi-arrow-down"
+              density="compact"
+              :disabled="index === localRulesOrder.length - 1"
+              @click="moveRule(index, 'down')"
+            />
+          </template>
+        </v-tooltip>
+      </div>
+      <v-toolbar-title class="ml-2" @click="openEditorItem('rules', ruleId)">
+        <span v-if="isThreshold(Omiken.rules[ruleId]?.threshold)">🔐</span>
+        {{ index + 1 }}. {{ Omiken.rules[ruleId]?.name }}
+      </v-toolbar-title>
+      <template #append>
+        <ListItemPartsAction
+          selectCategory="rules"
+          :item="Omiken.rules[ruleId]"
+          @edit="openEditorItem('rules', ruleId)"
+          @update:Omiken="updateOmiken"
+        />
+      </template>
     </v-toolbar>
-    <v-card-text>
-      <!-- Rules View -->
-      <draggable
-        v-model="localRulesOrder"
-        item-key="id"
-        class="list-group"
-        @end="updateRulesOrder"
+    <v-card-text class="list-group d-flex flex-wrap">
+      <span
+        v-if="
+          Omiken.rules[ruleId]?.matchStartsWith &&
+          Omiken.rules[ruleId]?.matchStartsWith.length > 0
+        "
       >
-        <template #item="{ element: ruleId }">
-          <v-card class="mb-2">
-            <v-toolbar :color="Omiken.rules[ruleId]?.color">
-              <v-icon class="mx-2">mdi-drag-horizontal-variant</v-icon>
-              <v-toolbar-title
-                class="ml-2"
-                @click="openEditorItem('rules', ruleId)"
-              >
-                {{ Omiken.rules[ruleId]?.name }}
-              </v-toolbar-title>
-              <template #append>
-                <ListItemPartsAction
-                  selectCategory="omikuji"
-                  :item="Omiken.rules[ruleId]"
-                  @edit="openEditorItem('rules', ruleId)"
-                  @update:Omiken="updateOmiken"
-                />
-              </template>
-            </v-toolbar>
-            <v-sheet class="mt-2">
-              <span
-                v-if="
-                  Omiken.rules[ruleId]?.matchStartsWith &&
-                  Omiken.rules[ruleId]?.matchStartsWith.length > 0
-                "
-                class="mr-4"
-              >
-                <v-icon color="primary">mdi-arrow-right-bold-box</v-icon>
-                {{ Omiken.rules[ruleId]?.matchStartsWith.join(", ") }}
-              </span>
-              <span v-else class="mr-4">
-                <v-icon color="primary">mdi-arrow-right-bold-box</v-icon>
-                (すべてのコメントが対象)
-              </span>
-            </v-sheet>
+        <v-icon color="primary">mdi-arrow-right-bold-box</v-icon>
+        {{ Omiken.rules[ruleId]?.matchStartsWith.join(", ") }}
+      </span>
+      <span v-else>
+        <v-icon color="primary">mdi-arrow-right-bold-box</v-icon>
+        (すべてのコメントが対象)
+      </span>
+      <!-- 発動条件の表示 -->
+      <span v-if="isThreshold(Omiken.rules[ruleId]?.threshold)" class="ml-4">
+        🔐{{ getExampleText(Omiken.rules[ruleId].threshold) }}
+      </span>
 
-            <!-- Omikuji View -->
-            <v-expansion-panels multiple class="pt-2">
-              <v-expansion-panel>
-                <v-expansion-panel-title>
-                  <span class="text-h6">
-                    <v-icon icon="mdi-crystal-ball"></v-icon>
-                    該当するおみくじ🥠
-                  </span>
-                </v-expansion-panel-title>
-                <v-expansion-panel-text>
-                  <ListEntryOmikuji
-                    v-if="showOmikuji"
-                    :Omiken="Omiken"
-                    :ruleId="ruleId"
-                    :enabledIds="Omiken.rules[ruleId].enabledIds"
-                    @update:enabledIds="
-                      (newEnabledIds) => updateRulesEnabledIds(newEnabledIds, ruleId)
-                    "
-                    @open-editor="openEditor"
-                    @update:Omiken="updateOmiken"
-                  />
-                </v-expansion-panel-text>
-              </v-expansion-panel>
-              <v-expansion-panel>
-                <v-expansion-panel-title>
-                  <span class="text-h6">
-                    <v-icon icon="mdi-crystal-ball"></v-icon>
-                    該当するプレースホルダー🏷️
-                  </span>
-                </v-expansion-panel-title>
-                <v-expansion-panel-text>
-                  <!-- Place View -->
-                  <ListEntryPlace
-                    v-if="showPlace"
-                    :Omiken="Omiken"
-                    :enabledIds="Omiken.rules[ruleId].enabledIds"
-                    @open-editor="openEditor"
-                    @update:Omiken="updateOmiken"
-                  />
-                </v-expansion-panel-text>
-              </v-expansion-panel>
-            </v-expansion-panels>
-          </v-card>
-        </template>
-      </draggable>
+      <!-- Omikuji View -->
+      <v-expansion-panels multiple class="pt-2">
+        <v-expansion-panel>
+          <v-expansion-panel-title color="primary">
+            <span class="text-h6">
+              <v-icon icon="mdi-crystal-ball"></v-icon>
+              該当するおみくじ
+            </span>
+            <v-chip label class="ml-4">
+              {{ Omiken.rules[ruleId]?.enabledIds.length }} items
+            </v-chip>
+          </v-expansion-panel-title>
+          <v-expansion-panel-text>
+            <ListEntryOmikuji
+              ref="childRef"
+              :Omiken="Omiken"
+              :ruleId="ruleId"
+              :enabledIds="Omiken.rules[ruleId].enabledIds"
+              @update:enabledIds="
+                (newEnabledIds) => updateRulesEnabledIds(newEnabledIds, ruleId)
+              "
+              @open-editor="openEditor"
+              @update:Omiken="updateOmiken"
+            />
+          </v-expansion-panel-text>
+        </v-expansion-panel>
+        <v-expansion-panel>
+          <v-expansion-panel-title color="secondary">
+            <span class="text-h6">
+              <v-icon icon="mdi-tag"></v-icon>
+              該当するプレースホルダー
+            </span>
+            <v-chip label class="ml-4"> {{ rulesOfPlaces(Omiken,Omiken.rules[ruleId]?.enabledIds).displayPlaces.value.length }} items </v-chip>
+          </v-expansion-panel-title>
+          <v-expansion-panel-text>
+            <!-- Place View -->
+            <ListEntryPlace
+             ref="childRef"
+              :Omiken="Omiken"
+              :enabledIds="Omiken.rules[ruleId].enabledIds"
+              @open-editor="openEditor"
+              @update:Omiken="updateOmiken"
+            />
+          </v-expansion-panel-text>
+        </v-expansion-panel>
+      </v-expansion-panels>
     </v-card-text>
   </v-card>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, Ref, inject } from "vue";
+import { computed, ComputedRef, nextTick, onMounted, ref, watch } from "vue";
 import ListEntryOmikuji from "./ListEntryOmikuji.vue";
 import ListEntryPlace from "./ListEntryPlace.vue";
 import ListItemPartsAction from "./common/ListItemPartsAction.vue";
-import draggable from "vuedraggable";
 import type {
   OmikenType,
   OmikenEntry,
@@ -118,6 +121,8 @@ import type {
   ListEntry,
   OmikenCategory,
 } from "@/types";
+import { rulesOfPlaces } from "@/composables/funkRules";
+import { funkThreshold } from "@/composables/funkThreshold";
 
 const props = defineProps<{
   Omiken: OmikenType;
@@ -128,11 +133,8 @@ const emit = defineEmits<{
   (e: "open-editor", editorItem: ListEntry<ListCategory>): void;
 }>();
 
-// 表示制御
-const showRules = ref(true);
-const showOmikuji = ref(true);
-const showPlace = ref(true);
-
+// コンポーザブル:funkThreshold
+const { items, isThreshold, getExampleText } = funkThreshold();
 
 // ドラッグ&ドロップ用のローカルデータ
 const localRulesOrder = computed({
@@ -144,6 +146,34 @@ const localRulesOrder = computed({
     });
   },
 });
+
+// ListEntryPlace から displayPlaces を受け取る
+
+// 型を指定して ref を初期化
+const childRef = ref<{ displayPlaces: ComputedRef<any[]> } | null>(null);
+
+onMounted(() => {
+console.log(childRef.value);
+  if (childRef.value) {
+    console.log(childRef.value.displayPlaces); // displayPlaces プロパティにアクセス
+  }
+});
+
+// 配列要素の移動関数
+function moveArrayElement(array: string[], fromIndex: number, toIndex: number) {
+  const element = array[fromIndex];
+  array.splice(fromIndex, 1);
+  array.splice(toIndex, 0, element);
+}
+
+// コンポーネント内のメソッド
+function moveRule(index: number, direction: "up" | "down") {
+  const newIndex = direction === "up" ? index - 1 : index + 1;
+  if (newIndex >= 0 && newIndex < localRulesOrder.value.length) {
+    moveArrayElement(localRulesOrder.value, index, newIndex);
+    updateRulesOrder();
+  }
+}
 
 // 各種更新関数
 const updateRulesOrder = () => {

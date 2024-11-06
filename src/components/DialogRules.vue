@@ -31,7 +31,7 @@
       <!-- おみくじワード -->
       <v-card>
         <v-toolbar :color="currentItem.color" density="compact">
-          <v-toolbar-title> おみくじワード💬 </v-toolbar-title>
+          <v-toolbar-title> 💬 おみくじワード </v-toolbar-title>
         </v-toolbar>
         <v-combobox
           v-model="currentItem.matchStartsWith"
@@ -66,7 +66,6 @@ import type {
   OmikenCategory,
   AppStateType,
 } from "../types";
-import { funkRules } from "../composables/FunkRules";
 
 // props/emits
 const props = defineProps<{

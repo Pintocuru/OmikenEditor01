@@ -10,7 +10,7 @@ export interface AppStateType {
 }
 
 // xxxOrder用の型
-export type OrderKey<T extends ListCategory> = `${T}Order`;
+export type OrderKey = "rulesOrder";
 
 // ナビゲーション用カテゴリー
 export type NaviCategory = ListCategory | "preset" | "preferences";
@@ -34,7 +34,10 @@ export type OmikenCategory = ListCategory | "preset" | "preferences";
 export type OmikenEntry<T extends OmikenCategory> = {
   type: T;
   update?: T extends ListCategory ? EditerEntryTypeMap[T] : never; // 更新アイテム
-  addKeys?: T extends ListCategory ? Partial<EditerTypeMap[T]>[] : never; // 新規追加アイテム(部分入力可)
+  addKeys?:  // 新規追加アイテム(部分入力可)
+  T extends "omikuji"
+  ? (Partial<EditerTypeMap[T]> & { rulesId: string })[] // 新しいキーの追加
+  : T extends ListCategory ? Partial<EditerTypeMap[T]>[] : never;
   delKeys?: string[]; // 削除するアイテムのキー名
   reorder?: T extends ListCategory ? string[] : never; // 順番の指定
   preset?: T extends "preset" ? Record<string, PresetOmikenEditType> : never; // プリセット用
@@ -181,10 +184,10 @@ export interface GiftCondition extends BaseCondition {
 // メッセージの投稿情報を管理する型
 export interface OmikujiPostType {
   type:
-    | "onecomme" // わんコメへの投稿
-    | "party" // WordPartyの投稿
-    | "toast" // トースト投稿
-    | "speech"; // わんコメのスピーチ機能
+  | "onecomme" // わんコメへの投稿
+  | "party" // WordPartyの投稿
+  | "toast" // トースト投稿
+  | "speech"; // わんコメのスピーチ機能
   botKey: string; // ボットキー
   iconKey: string; // アイコンキー
   delaySeconds: number; // メッセージを送信するまでの遅延時間

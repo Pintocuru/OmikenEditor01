@@ -3,7 +3,7 @@
   <v-btn
     v-for="(action, index) in actions"
     :key="index"
-      size="small"
+    size="small"
     height="30"
     width="30"
     icon
@@ -17,14 +17,15 @@
 </template>
 
 <script setup lang="ts">
-import { ListCategory, ListType, OmikenEntry, OmikenCategory } from '@/types';
-import { cloneDeep } from 'lodash';
-import Swal from 'sweetalert2';
+import { ListCategory, ListType, OmikenEntry, OmikenCategory } from "@/types";
+import { cloneDeep } from "lodash";
+import Swal from "sweetalert2";
 
 type ItemOrGroup = ListType | { name: string; items: ListType[] };
 
 const props = defineProps<{
   selectCategory: ListCategory;
+  ruleId?: string;
   item: ItemOrGroup;
 }>();
 
@@ -33,26 +34,25 @@ const emit = defineEmits<{
   (e: "update:Omiken", payload: OmikenEntry<OmikenCategory>): void;
 }>();
 
-// 
-type Action = {  icon: string;  tooltip: string;  handler: () => void;};
+//
+type Action = { icon: string; tooltip: string; handler: () => void };
 const actions = [
   {
-    icon: 'mdi-pencil',
-    tooltip: '編集',
-    handler: () => emit('edit')
+    icon: "mdi-pencil",
+    tooltip: "編集",
+    handler: () => emit("edit"),
   },
   {
-    icon: 'mdi-content-copy',
-    tooltip: '複製',
-    handler: duplicateItem
+    icon: "mdi-content-copy",
+    tooltip: "複製",
+    handler: duplicateItem,
   },
   {
-    icon: 'mdi-close',
-    tooltip: '削除',
-    handler: deleteItem
-  }
+    icon: "mdi-close",
+    tooltip: "削除",
+    handler: deleteItem,
+  },
 ];
-
 
 // アイテムの複製
 function duplicateItem() {
@@ -60,17 +60,30 @@ function duplicateItem() {
   const isGroup = "items" in item;
   const itemsToDuplicate = isGroup ? item.items : [item as ListType];
 
-  const duplicatedItems = itemsToDuplicate.map(originalItem => {
+  const duplicatedItems = itemsToDuplicate.map((originalItem) => {
     const newItem = cloneDeep(originalItem);
     delete (newItem as any).id;
     newItem.name = `${newItem.name} のコピー`;
     return newItem;
   });
 
-  emit("update:Omiken", {
-    type: props.selectCategory,
-    addKeys: duplicatedItems,
-  });
+if (props.selectCategory === "omikuji") {
+  if (props.ruleId) {
+    emit("update:Omiken", {
+      type: "omikuji",
+      addKeys: duplicatedItems.map(item => ({
+        ...item,
+        rulesId: props.ruleId
+      }))
+    });
+  }
+} else {
+    // "omikuji"以外の場合は通常のemit
+    emit("update:Omiken", {
+      type: props.selectCategory,
+      addKeys: duplicatedItems, 
+    });
+  }
 }
 
 // アイテムの削除
@@ -79,9 +92,7 @@ function deleteItem() {
   const item = props.item;
   const isGroup = "items" in item;
   const itemsToDelete = isGroup ? item.items : [item];
-  const itemNames = isGroup
-    ? `${item.name} グループ`
-    : (item as ListType).name;
+  const itemNames = isGroup ? `${item.name} グループ` : (item as ListType).name;
 
   Swal.fire({
     title: `${itemNames} を削除する`,
@@ -105,5 +116,4 @@ function deleteItem() {
     }
   });
 }
-
 </script>

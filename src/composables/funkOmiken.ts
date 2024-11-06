@@ -95,7 +95,7 @@ export function funkOmiken(listEntry: Ref<ListEntryCollect>) {
         ...preferences
       };
     } else if (type === 'rules' || type === 'omikuji' || type === 'place') {
-      const orderKey: OrderKey<typeof type> = `${type}Order`;
+      const orderKey: OrderKey = type === 'rules' ? 'rulesOrder' : undefined;
 
       // 更新処理
       if (update) {
@@ -109,7 +109,13 @@ export function funkOmiken(listEntry: Ref<ListEntryCollect>) {
           const newKey = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
           const validatedItem = validateData(type, { [newKey]: item as ListType });
           Object.assign(newState[type], validatedItem);
-          if (orderKey === 'rulesOrder') newState[orderKey].push(newKey);
+          if (orderKey) newState[orderKey].push(newKey); 
+          if (type === 'omikuji') {
+            if ('rulesId' in item) {
+              const rulesId = item.rulesId;
+              newState.rules[rulesId].enabledIds.push(newKey); 
+            }
+          }
         });
       }
 
@@ -117,7 +123,13 @@ export function funkOmiken(listEntry: Ref<ListEntryCollect>) {
       if (delKeys?.length) {
         delKeys.forEach(key => {
           delete newState[type][key];
-          if (orderKey === 'rulesOrder') newState[orderKey] = newState[orderKey].filter(id => id !== key);
+          if (orderKey) newState[orderKey] = newState[orderKey].filter(id => id !== key);
+          if (type === 'omikuji') {
+            // すべてのrulesのenabledIdsから対象のidを削除
+            Object.values(newState.rules).forEach(rule => {
+              rule.enabledIds = rule.enabledIds.filter(id => id !== key);
+            });
+          }
         });
       }
 

@@ -152,6 +152,16 @@ export function funkThreshold() {
     } as Record<AccessLevel, string>,
   };
 
+  // 発動条件があるか
+  const isThreshold = (threshold: ThresholdType): boolean => {
+    return !(
+      threshold.conditionType === ConditionType.NONE ||
+      (threshold.conditionType === ConditionType.ACCESS && threshold.access === AccessLevel.ANYONE) ||
+      (threshold.conditionType === ConditionType.MATCH && (!threshold.match || threshold.match.length === 0))
+    );
+  };
+
+
   // 条件タイプに応じた比較項目を取得
   const getComparisonItems = (type: ConditionType): ComparisonItem[] => {
     const additionalItems = MAPPINGS.comparison.additional[type] || [];
@@ -259,6 +269,7 @@ export function funkThreshold() {
       access: ACCESS_ITEMS,
       syoken: SYOKEN_ITEMS,
     },
+    isThreshold,
     getComparisonItems,
     getValueLabel,
     getUnitItems,

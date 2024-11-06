@@ -2,7 +2,7 @@
 <template>
   <v-card>
     <v-toolbar :color="themeColor" density="compact">
-      <v-toolbar-title>フィルタリング設定🔐</v-toolbar-title>
+      <v-toolbar-title>🔐 フィルタリング設定</v-toolbar-title>
     </v-toolbar>
     <v-card-text>
       <div class="text-caption">
