@@ -111,7 +111,9 @@ export function funkOmiken(listEntry: Ref<ListEntryCollect>) {
           Object.assign(newState[type], validatedItem);
           if (orderKey) newState[orderKey].push(newKey); 
           if (type === 'omikuji') {
-            if ('rulesId' in item) {
+
+            // item.rulesId があるなら、そのenabledIdsにkeyを入れる
+            if ('rulesId' in item && item.rulesId) {
               const rulesId = item.rulesId;
               newState.rules[rulesId].enabledIds.push(newKey); 
             }

@@ -25,7 +25,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import draggable from "vuedraggable";
-import ListItemRules from "./ListItemRules.vue";
 import ListItemOmikuji from "./ListItemOmikuji.vue";
 import ListItemPlace from "./ListItemPlace.vue";
 import type {

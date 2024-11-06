@@ -27,22 +27,37 @@
     <v-sheet v-else-if="naviCategory === 'preferences'">
       <ListPreferences :Omiken="Omiken" @update:Omiken="updateOmiken" />
     </v-sheet>
-    <v-sheet v-else>
-  <ListEntrys
-      :Omiken="Omiken"
-      @update:Omiken="updateOmiken"
-         @open-editor="openEditor"
-    />
+    <v-sheet v-else-if="naviCategory === 'rules'">
+      <ListEntrys
+        :Omiken="Omiken"
+        @update:Omiken="updateOmiken"
+        @open-editor="openEditor"
+      />
+    </v-sheet>
+    <v-sheet v-else-if="naviCategory === 'omikuji'">
+      <ListOmikuji
+        :Omiken="Omiken"
+        @update:Omiken="updateOmiken"
+        @open-editor="openEditor"
+      />
+    </v-sheet>
+    <v-sheet v-else-if="naviCategory === 'place'">
+      <ListPlace
+        :Omiken="Omiken"
+        @update:Omiken="updateOmiken"
+        @open-editor="openEditor"
+      />
     </v-sheet>
   </v-card>
 </template>
 
 <script setup lang="ts">
 import { computed } from "vue";
-import ListItem from "./ListItem.vue";
 import ListEntrys from "./ListEntry.vue";
-import ListPreset from "./ListPreset.vue"; 
-import ListPreferences from "./ListPreferences.vue"; 
+import ListOmikuji from "./ListOmikuji.vue";
+import ListPlace from "./ListPlace.vue";
+import ListPreset from "./ListPreset.vue";
+import ListPreferences from "./ListPreferences.vue";
 import type {
   OmikenType,
   ListCategory,

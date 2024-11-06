@@ -36,7 +36,7 @@ export type OmikenEntry<T extends OmikenCategory> = {
   update?: T extends ListCategory ? EditerEntryTypeMap[T] : never; // 更新アイテム
   addKeys?:  // 新規追加アイテム(部分入力可)
   T extends "omikuji"
-  ? (Partial<EditerTypeMap[T]> & { rulesId: string })[] // 新しいキーの追加
+  ? (Partial<EditerTypeMap[T]> & { rulesId?: string })[] // 新しいキーの追加
   : T extends ListCategory ? Partial<EditerTypeMap[T]>[] : never;
   delKeys?: string[]; // 削除するアイテムのキー名
   reorder?: T extends ListCategory ? string[] : never; // 順番の指定

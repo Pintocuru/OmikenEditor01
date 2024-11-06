@@ -65,7 +65,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { funkThreshold } from "@/composables/funkThreshold";
+import { funkThreshold } from "../composables/FunkThreshold";
 import {
   TimeCondition,
   ElapsedCondition,

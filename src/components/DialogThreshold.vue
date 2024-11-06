@@ -77,7 +77,7 @@
           v-if="currentItem.threshold.conditionType === ConditionType.TIME"
         >
           <v-card-text>
-            <dialogThresholdInput
+            <DialogThresholdInput
               v-model="currentItem.threshold.time"
               :conditionType="ConditionType.TIME"
               @update:modelValue="updateThreshold"
@@ -89,7 +89,7 @@
           v-if="currentItem.threshold.conditionType === ConditionType.ELAPSED"
         >
           <v-card-text>
-            <dialogThresholdInput
+            <DialogThresholdInput
               v-model="currentItem.threshold.elapsed"
               :conditionType="ConditionType.ELAPSED"
               @update:modelValue="updateThreshold"
@@ -101,7 +101,7 @@
           v-if="currentItem.threshold.conditionType === ConditionType.COUNT"
         >
           <v-card-text>
-            <dialogThresholdInput
+            <DialogThresholdInput
               ref="childRef"
               v-model="currentItem.threshold.count"
               :conditionType="ConditionType.COUNT"
@@ -114,7 +114,7 @@
           v-if="currentItem.threshold.conditionType === ConditionType.GIFT"
         >
           <v-card-text>
-            <dialogThresholdInput
+            <DialogThresholdInput
               v-model="currentItem.threshold.gift"
               :conditionType="ConditionType.GIFT"
               @update:modelValue="updateThreshold"
@@ -127,8 +127,8 @@
 </template>
 
 <script setup lang="ts">
-import dialogThresholdInput from "./dialogThresholdInput.vue";
-import { funkThreshold } from "../composables/funkThreshold";
+import DialogThresholdInput from "./DialogThresholdInput.vue";
+import { funkThreshold } from "../composables/FunkThreshold";
 import {
   OmikenCategory,
   OmikenEntry,
@@ -155,7 +155,7 @@ const emit = defineEmits<{
 const { items, getExampleText } = funkThreshold();
 
 // dialogThresholdInput用のrefを追加
-const childRef = ref<InstanceType<typeof dialogThresholdInput>>();
+const childRef = ref<InstanceType<typeof DialogThresholdInput>>();
 
 // 選択以外のすべての値にデフォルト値を入れる
 const initializeThreshold = () => {

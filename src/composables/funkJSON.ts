@@ -69,7 +69,6 @@ export function funkJSON() {
         return { ...p, item } as PresetOmikenEditType;
       })
     );
-    console.log(responses);
     return responses.reduce<Record<string, PresetOmikenEditType>>((acc, data) => {
       acc[data.id] = data;
       return acc;

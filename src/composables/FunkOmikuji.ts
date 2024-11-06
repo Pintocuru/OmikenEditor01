@@ -46,6 +46,30 @@ export function FunkOmikuji() {
     }));
   });
 
+  // postからonecommeを探し色を取得する
+  const getPostTypeColor = (
+    post: OmikujiPostType[],
+    isBotcolor?: boolean
+  ): string => {
+    const onecommePost = post.find((p) => p.type === "onecomme");
+    if (onecommePost?.botKey && isBotcolor) {
+      return getCharaColor(onecommePost.botKey) ?? "grey";
+    }
+
+    // 'onecomme'がなければ、最初のtypeを判断して色を返す
+    const firstPost = post[0];
+    switch (firstPost.type) {
+      case "party":
+        return "deep-orange";
+      case "toast":
+        return "blue";
+      case "speech":
+        return "green";
+      default:
+        return "";
+    }
+  };
+
   // アイコンキーアイテムの取得
   const getIconKeyItems = (botKey: string | undefined) => {
     if (!botKey || !CHARA || !(botKey in CHARA)) return [];
@@ -136,6 +160,7 @@ export function FunkOmikuji() {
   return {
     // Post type utilities
     getTypeColor,
+    getPostTypeColor,
     getTypeLabel,
     onecommeTypeItems,
     isCharacterPost,
@@ -149,7 +174,6 @@ export function FunkOmikuji() {
 
     // Placeholder utilities
     extractValidPlaceholders,
-
 
     getOnecommeContent,
   };

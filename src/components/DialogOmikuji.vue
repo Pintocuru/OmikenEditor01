@@ -47,7 +47,7 @@
             <v-badge
               v-if="postCount ? postCount > 0 : 0"
               :content="postCount"
-              color="primary"
+              :color="themeColor"
               class="ms-2"
             >
               <v-icon size="small">mdi-message-text</v-icon>
@@ -56,12 +56,11 @@
           <v-tab value="filter" class="d-flex align-center w-50">
             フィルタリング
             <v-badge
-              v-if="activeFilters"
-              content="1"
-              color="primary"
-              class="ms-2"
-              ><!-- //TODO 数値の代わりに、有効であれば何らかのアイコンを表示する -->
-              <v-icon size="small">mdi-filter-variant</v-icon>
+              v-if="isThreshold(currentItem?.threshold)"
+              content="🔐"
+              :color="themeColor"
+              class="ms-5"
+            >
             </v-badge>
           </v-tab>
         </v-tabs>
@@ -70,13 +69,15 @@
           <v-window-item value="post">
             <DialogOmikujiPost
               :currentItem="currentItem"
+              :themeColor="themeColor"
               @update:Omiken="updateOmiken"
-                @open-editor="openEditor"
+              @open-editor="openEditor"
             />
           </v-window-item>
           <v-window-item value="filter">
             <DialogThreshold
               :currentItem="currentItem"
+              :themeColor="themeColor"
               @update:Omiken="updateOmiken"
             />
           </v-window-item>
@@ -98,6 +99,8 @@ import type {
 } from "../types";
 import DialogOmikujiPost from "./DialogOmikujiPost.vue";
 import DialogThreshold from "./DialogThreshold.vue";
+import { funkThreshold } from "@/composables/FunkThreshold";
+import { FunkOmikuji } from "@/composables/FunkOmikuji";
 // props/emits
 const props = defineProps<{
   entry: ListEntry<"omikuji"> | null;
@@ -112,6 +115,10 @@ const emit = defineEmits<{
 const AppState = inject<Ref<AppStateType>>("AppStateKey");
 const omikuji = AppState?.value.Omiken.omikuji;
 
+const { getPostTypeColor } = FunkOmikuji();
+// コンポーザブル:funkThreshold
+const { isThreshold } = funkThreshold();
+
 // ref
 const tab = ref("post"); // タブの状態管理
 
@@ -120,22 +127,19 @@ const currentItem = computed(() =>
   props.entry?.key && omikuji ? omikuji[props.entry.key as string] : null
 );
 
+// postのonecommeで使われているBotKeyの色を取得する
+const key = props.entry?.key;
+let themeColor: string;
+if (omikuji && typeof key === "string" && omikuji[key]) {
+  themeColor = getPostTypeColor(omikuji[key].post, true);
+} else {
+  themeColor = "";
+}
+
 // postのアイテム数
 const postCount = computed(() => {
   if (!currentItem.value) return;
   return currentItem.value.post.length;
-});
-
-// アクティブなフィルタリング
-const activeFilters = computed(() => {
-  if (!currentItem.value) return;
-  const conditionType = currentItem.value.threshold.conditionType;
-
-  if (conditionType !== "none") {
-    return true;
-  } else {
-    return false;
-  }
 });
 
 // 更新アップデート
@@ -150,6 +154,6 @@ const updateItem = () => {
 // 子コンポーネントのOmiken更新
 const updateOmiken = (payload: OmikenEntry<OmikenCategory>) =>
   emit("update:Omiken", payload);
-  const openEditor = (editorItem: ListEntry<ListCategory>) => emit("open-editor", editorItem);
-
+const openEditor = (editorItem: ListEntry<ListCategory>) =>
+  emit("open-editor", editorItem);
 </script>

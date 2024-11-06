@@ -67,28 +67,25 @@ function duplicateItem() {
     return newItem;
   });
 
-if (props.selectCategory === "omikuji") {
-  if (props.ruleId) {
+  if (props.selectCategory === "omikuji" && props.ruleId) {
     emit("update:Omiken", {
       type: "omikuji",
-      addKeys: duplicatedItems.map(item => ({
+      addKeys: duplicatedItems.map((item) => ({
         ...item,
-        rulesId: props.ruleId
-      }))
+        rulesId: props.ruleId,
+      })),
     });
-  }
-} else {
+  } else {
     // "omikuji"以外の場合は通常のemit
     emit("update:Omiken", {
       type: props.selectCategory,
-      addKeys: duplicatedItems, 
+      addKeys: duplicatedItems,
     });
   }
 }
 
 // アイテムの削除
 function deleteItem() {
-  console.log(props.item);
   const item = props.item;
   const isGroup = "items" in item;
   const itemsToDelete = isGroup ? item.items : [item];

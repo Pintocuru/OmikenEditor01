@@ -8,7 +8,7 @@
       sm="4"
       md="3"
     >
-      <v-card class="mb-2">
+      <v-card>
         <v-toolbar density="compact">
           <v-toolbar-title
             class="ml-3"
@@ -52,8 +52,8 @@ import {
   OmikenType,
   PlaceValueType,
 } from "@/types";
-import { computed, onMounted, ref, watchEffect } from "vue";
-import { rulesOfPlaces } from "@/composables/funkRules";
+import { ref, watchEffect } from "vue";
+import { rulesOfPlaces } from "../composables/FunkRules";
 
 const props = defineProps<{
   Omiken: OmikenType;

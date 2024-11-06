@@ -41,23 +41,30 @@
       </template>
     </v-toolbar>
     <v-card-text class="list-group d-flex flex-wrap">
-      <span
+      <v-chip
         v-if="
           Omiken.rules[ruleId]?.matchStartsWith &&
           Omiken.rules[ruleId]?.matchStartsWith.length > 0
         "
+        variant="text"
+        density="compact"
       >
         <v-icon color="primary">mdi-arrow-right-bold-box</v-icon>
         {{ Omiken.rules[ruleId]?.matchStartsWith.join(", ") }}
-      </span>
-      <span v-else>
+      </v-chip>
+      <v-chip v-else variant="text" density="compact">
         <v-icon color="primary">mdi-arrow-right-bold-box</v-icon>
         (すべてのコメントが対象)
-      </span>
+      </v-chip>
       <!-- 発動条件の表示 -->
-      <span v-if="isThreshold(Omiken.rules[ruleId]?.threshold)" class="ml-4">
+      <v-chip
+        v-if="isThreshold(Omiken.rules[ruleId]?.threshold)"
+        density="compact"
+        variant="outlined"
+        color="yellow lighten-3"
+      >
         🔐{{ getExampleText(Omiken.rules[ruleId].threshold) }}
-      </span>
+      </v-chip>
 
       <!-- Omikuji View -->
       <v-expansion-panels multiple class="pt-2">
@@ -73,7 +80,6 @@
           </v-expansion-panel-title>
           <v-expansion-panel-text>
             <ListEntryOmikuji
-              ref="childRef"
               :Omiken="Omiken"
               :ruleId="ruleId"
               :enabledIds="Omiken.rules[ruleId].enabledIds"
@@ -91,12 +97,18 @@
               <v-icon icon="mdi-tag"></v-icon>
               該当するプレースホルダー
             </span>
-            <v-chip label class="ml-4"> {{ rulesOfPlaces(Omiken,Omiken.rules[ruleId]?.enabledIds).displayPlaces.value.length }} items </v-chip>
+            <v-chip label class="ml-4">
+              {{
+                rulesOfPlaces(Omiken, Omiken.rules[ruleId]?.enabledIds)
+                  .displayPlaces.value.length
+              }}
+              items
+            </v-chip>
           </v-expansion-panel-title>
           <v-expansion-panel-text>
             <!-- Place View -->
             <ListEntryPlace
-             ref="childRef"
+              ref="childRef"
               :Omiken="Omiken"
               :enabledIds="Omiken.rules[ruleId].enabledIds"
               @open-editor="openEditor"
@@ -121,8 +133,8 @@ import type {
   ListEntry,
   OmikenCategory,
 } from "@/types";
-import { rulesOfPlaces } from "@/composables/funkRules";
-import { funkThreshold } from "@/composables/funkThreshold";
+import { rulesOfPlaces } from "@/composables/FunkRules";
+import { funkThreshold } from "@/composables/FunkThreshold";
 
 const props = defineProps<{
   Omiken: OmikenType;
@@ -153,7 +165,6 @@ const localRulesOrder = computed({
 const childRef = ref<{ displayPlaces: ComputedRef<any[]> } | null>(null);
 
 onMounted(() => {
-console.log(childRef.value);
   if (childRef.value) {
     console.log(childRef.value.displayPlaces); // displayPlaces プロパティにアクセス
   }

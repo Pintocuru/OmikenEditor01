@@ -2,8 +2,9 @@
 <template>
   <v-card>
     <v-toolbar
-      :color="currentItem.post.length === 0 ? 'error' : 'primary'"
+      :color="currentItem.post.length === 0 ? 'error' : themeColor"
       density="compact"
+      class="mb-2"
     >
       <v-toolbar-title>
         <v-icon v-if="currentItem.post.length === 0">mdi-alert-circle</v-icon>
@@ -190,6 +191,7 @@ import type {
 import { FunkOmikuji } from "../composables/FunkOmikuji";
 const props = defineProps<{
   currentItem: OmikujiType;
+  themeColor: string;
 }>();
 
 const emit = defineEmits<{

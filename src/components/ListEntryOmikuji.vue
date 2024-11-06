@@ -25,7 +25,7 @@
             <!-- タイトルバーと操作ボタン -->
             <v-toolbar
               density="compact"
-              :color="getTypeColor(Omiken.omikuji[omikujiId].post, true)"
+              :color="getPostTypeColor(Omiken.omikuji[omikujiId].post, true)"
             >
               <v-toolbar-title
                 class="ml-4"
@@ -55,40 +55,51 @@
                 {{ getOnecommeContent(Omiken.omikuji[omikujiId].post) }}
               </v-sheet>
 
-              <span class="list-group d-flex flex-wrap">
-                <!-- 既存の出現割合表示 -->
-                🎯 {{ Omiken.omikuji[omikujiId]?.weight }}/{{
-                  weightTotal(enabledIds)
-                }}
-                <span class="ml-2"
-                  >({{ weightPercentage(omikujiId, enabledIds) }}%)</span
-                >
-
+              <v-sheet class="list-group d-flex flex-wrap">
                 <!-- 発動条件の表示 -->
-                <span
-                  v-if="
-                    Omiken.omikuji[omikujiId]?.threshold?.conditionType !==
-                    'none'
-                  "
-                  class="ml-4"
+                <v-chip
+                  v-if="isThreshold(Omiken.omikuji[omikujiId]?.threshold)"
+                  density="compact"
+                  variant="outlined"
+                  color="yellow lighten-3"
                 >
-                  🔐{{ getExampleText(Omiken.omikuji[omikujiId].threshold) }}
-                </span>
-              </span>
+                  🔐 {{ getExampleText(Omiken.omikuji[omikujiId].threshold) }}
+                </v-chip>
+                <!-- 既存の出現割合表示 -->
+                <v-chip density="compact" variant="text">
+                  🎯 {{ Omiken.omikuji[omikujiId]?.weight }}/{{
+                    weightTotal(enabledIds)
+                  }}
+                  <span class="ml-2"
+                    >({{ weightPercentage(omikujiId, enabledIds) }}%)</span
+                  >
+                </v-chip>
+              </v-sheet>
             </v-card-text>
           </v-card>
         </v-col>
       </template>
     </draggable>
   </v-row>
+  <v-sheet>
+    <v-btn
+      block
+      @click="addItemOmikuji"
+      color="primary"
+      variant="flat"
+      class="mt-6"
+    >
+      <v-icon left>mdi-plus</v-icon> 🥠 おみくじの追加
+    </v-btn>
+  </v-sheet>
 </template>
 
 <script setup lang="ts">
 import { computed } from "vue";
 import ListItemPartsAction from "./common/ListItemPartsAction.vue";
-import { funkRules } from "../composables/funkRules";
+import { funkRules } from "../composables/FunkRules";
 import { FunkOmikuji, FunkOmikujiHoge } from "../composables/FunkOmikuji";
-import { funkThreshold } from "../composables/funkThreshold";
+import { funkThreshold } from "../composables/FunkThreshold";
 import draggable from "vuedraggable";
 import type {
   ListCategory,
@@ -96,7 +107,6 @@ import type {
   OmikenCategory,
   OmikenEntry,
   OmikenType,
-  OmikujiPostType,
 } from "@/types";
 
 const props = defineProps<{
@@ -112,39 +122,14 @@ const emit = defineEmits<{
 }>();
 
 // コンポーザブル:funkRules
-const omikuji = computed(() => props.Omiken.omikuji);
 const { weightTotal, weightPercentage, omikujiLists, weightColor } =
   funkRules();
 // コンポーザブル:FunkOmikuji
-const { getCharaColor, getOnecommeContent } = FunkOmikuji();
+const { getOnecommeContent, getPostTypeColor } = FunkOmikuji();
 const {} = FunkOmikujiHoge();
 
 // コンポーザブル:funkThreshold
-const { items, isThreshold, getExampleText } = funkThreshold();
-
-// postからonecommeを探し色を取得する
-const getTypeColor = (
-  post: OmikujiPostType[],
-  isBotcolor?: boolean
-): string => {
-  const onecommePost = post.find((p) => p.type === "onecomme");
-  if (onecommePost?.botKey && isBotcolor) {
-    return getCharaColor(onecommePost.botKey) ?? "grey";
-  }
-
-  // 'onecomme'がなければ、最初のtypeを判断して色を返す
-  const firstPost = post[0];
-  switch (firstPost.type) {
-    case "party":
-      return "deep-orange";
-    case "toast":
-      return "blue";
-    case "speech":
-      return "green";
-    default:
-      return "";
-  }
-};
+const { isThreshold, getExampleText } = funkThreshold();
 
 // ドラッグ&ドロップでの更新も同様に
 const localEnabledIds = computed({
@@ -172,16 +157,11 @@ const openEditorItem = (type: ListCategory, id: string) => {
 };
 
 // アイテムを追加
-const addItem = () => {
+const addItemOmikuji = () => {
   if (props.ruleId) {
     emit("update:Omiken", {
       type: "omikuji",
-      addKeys: [
-        {
-
-          rulesId: props.ruleId,
-        },
-      ],
+      addKeys: [{ rulesId: props.ruleId }],
     });
   }
 };
@@ -190,9 +170,6 @@ const addItem = () => {
 const updateEnabledIds = () => {
   emit("update:enabledIds", localEnabledIds.value);
 };
-// ダイアログを開く
-const openEditor = (editorItem: ListEntry<ListCategory>) =>
-  emit("open-editor", editorItem);
 const updateOmiken = (payload: OmikenEntry<OmikenCategory>) =>
   emit("update:Omiken", payload);
 </script>

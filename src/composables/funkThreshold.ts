@@ -1,4 +1,4 @@
-// src/composables/funkThreshold.ts
+// src/composables/FunkThreshold.ts
 
 import {
   AccessLevel,
