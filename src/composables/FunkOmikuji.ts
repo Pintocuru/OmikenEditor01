@@ -3,34 +3,36 @@
 import { AppStateType, OmikujiPostType } from "@/types";
 import { computed, inject, Ref } from "vue";
 
-
 export function FunkOmikuji() {
-
   // Inject
   const AppState = inject<Ref<AppStateType>>("AppStateKey");
   const CHARA = AppState?.value.CHARA;
   const place = AppState?.value.Omiken.place;
 
-
   const POST_TYPES: Record<PostTypeKey, { color: string; label: string }> = {
     onecomme: { color: "orange", label: "わんコメ" },
     party: { color: "deep-orange", label: "WordParty" },
     toast: { color: "blue", label: "トースト" },
-    speech: { color: "green", label: "スピーチ" }
+    speech: { color: "green", label: "スピーチ" },
   };
 
   // 投稿タイプに応じた色を取得する関数
-  type PostTypeKey = 'onecomme' | 'party' | 'toast' | 'speech';
-  const getTypeColor = (type: PostTypeKey): string => POST_TYPES[type]?.color || "grey";
-  const getTypeLabel = (type: PostTypeKey): string => POST_TYPES[type]?.label || type;
+  type PostTypeKey = "onecomme" | "party" | "toast" | "speech";
+  const getTypeColor = (type: PostTypeKey): string =>
+    POST_TYPES[type]?.color || "grey";
+  const getTypeLabel = (type: PostTypeKey): string =>
+    POST_TYPES[type]?.label || type;
 
-  const onecommeTypeItems = Object.entries(POST_TYPES).map(([value, { label }]) => ({
-    text: label,
-    value
-  }));
+  const onecommeTypeItems = Object.entries(POST_TYPES).map(
+    ([value, { label }]) => ({
+      text: label,
+      value,
+    })
+  );
 
   // キャラクター関連の投稿タイプかどうかを判定
-  const isCharacterPost = (type: string): boolean => ["onecomme", "toast"].includes(type);
+  const isCharacterPost = (type: string): boolean =>
+    ["onecomme", "toast"].includes(type);
 
   // ポストの色を取得
   const getPostColor = (post: OmikujiPostType): string => {
@@ -73,7 +75,7 @@ export function FunkOmikuji() {
   // アイコンキーアイテムの取得
   const getIconKeyItems = (botKey: string | undefined) => {
     if (!botKey || !CHARA || !(botKey in CHARA)) return [];
-    return Object.keys(CHARA[botKey].item.image).map(key => ({
+    return Object.keys(CHARA[botKey].item.image).map((key) => ({
       text: key,
       value: key,
     }));
@@ -87,7 +89,8 @@ export function FunkOmikuji() {
 
   // キャラクターの画像を取得する関数
   const getCharaImage = (post: OmikujiPostType): string => {
-    if (!post.botKey || !post.iconKey || !CHARA || !CHARA[post.botKey]) return "";
+    if (!post.botKey || !post.iconKey || !CHARA || !CHARA[post.botKey])
+      return "";
     return `/img/${CHARA[post.botKey].item.image[post.iconKey]}`;
   };
 
@@ -98,21 +101,23 @@ export function FunkOmikuji() {
     if (!content || !place) {
       return {
         validPlaceholders: [],
-        placeholderIds: []
+        placeholderIds: [],
       };
     }
 
     const matches = content.match(/<<(.*?)>>/g);
     if (!matches) {
       return {
-        validPlaceholders: ["ここに使用している有効なプレースホルダーが表示されます"],
-        placeholderIds: []
+        validPlaceholders: [
+          "ここに使用している有効なプレースホルダーが表示されます",
+        ],
+        placeholderIds: [],
       };
     }
 
-    const placeholderNames = [...new Set(
-      matches.map(match => match.replace(/^<<|>>$/g, ''))
-    )];
+    const placeholderNames = [
+      ...new Set(matches.map((match) => match.replace(/^<<|>>$/g, ""))),
+    ];
 
     const validPlaceholders: string[] = [];
     const placeholderIds: string[] = [];
@@ -125,30 +130,12 @@ export function FunkOmikuji() {
     });
 
     return {
-      validPlaceholders: validPlaceholders.length > 0 ? validPlaceholders : ["ここに使用している有効なプレースホルダーが表示されます"],
-      placeholderIds
+      validPlaceholders:
+        validPlaceholders.length > 0
+          ? validPlaceholders
+          : ["ここに使用している有効なプレースホルダーが表示されます"],
+      placeholderIds,
     };
-  };
-
-  // postからonecommeを探し色を取得する
-  const getTypeColor2 = (post: OmikujiPostType[], isBotcolor?: boolean): string => {
-    const onecommePost = post.find((p) => p.type === "onecomme");
-    if (onecommePost?.botKey && isBotcolor) {
-      return getCharaColor(onecommePost.botKey) ?? "grey";
-    }
-
-    // 'onecomme'がなければ、最初のtypeを判断して色を返す
-    const firstPost = post[0];
-    switch (firstPost.type) {
-      case "party":
-        return "deep-orange";
-      case "toast":
-        return "blue";
-      case "speech":
-        return "green";
-      default:
-        return "";
-    }
   };
 
   // onecommeのcontentを取得
@@ -177,15 +164,4 @@ export function FunkOmikuji() {
 
     getOnecommeContent,
   };
-}
-
-
-export function FunkOmikujiHoge() {
-
-
-
-
-  return {
-
-  }
 }

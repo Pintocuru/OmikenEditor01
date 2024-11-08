@@ -36,7 +36,7 @@ import {
   OmikenType,
   OmikenCategory,
 } from "@/types";
-import ListItemPartsAction from "./common/ListItemPartsAction.vue";
+import ListItemPartsAction from "./common/PartsToolbarAction.vue";
 
 // Props Emits
 const props = defineProps<{

@@ -1,4 +1,4 @@
-<!-- src/components/ListEntryOmikuji.vue -->
+<!-- src/components/ListRulesOmikuji.vue -->
 <template>
   <!-- Omikuji View -->
   <v-select
@@ -11,8 +11,17 @@
     item-value="id"
     @update:modelValue="(value) => emit('update:enabledIds', value)"
   />
+<ListRulesWeight
+  :Omiken="Omiken"
+  :ruleId="ruleId"
+  :enabledIds="localEnabledIds"
+  @update:enabledIds="(value) => emit('update:enabledIds', value)"
+  @open-editor="openEditorItem"
+  @update:Omiken="updateOmiken"
+/>
   <!-- Omikuji View -->
   <v-row>
+    
     <draggable
       v-model="localEnabledIds"
       item-key="id"
@@ -38,10 +47,11 @@
                 {{ Omiken.omikuji[omikujiId]?.name }}
               </v-toolbar-title>
               <template #append>
-                <ListItemPartsAction
+                <PartsToolbarAction
                   selectCategory="omikuji"
                   :rule-id="ruleId"
                   :item="Omiken.omikuji[omikujiId]"
+                  :isSmall="true"
                   @edit="openEditorItem('omikuji', omikujiId)"
                   @update:Omiken="updateOmiken"
                 />
@@ -96,10 +106,11 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import ListItemPartsAction from "./common/ListItemPartsAction.vue";
-import { funkRules } from "../composables/FunkRules";
-import { FunkOmikuji, FunkOmikujiHoge } from "../composables/FunkOmikuji";
-import { funkThreshold } from "../composables/FunkThreshold";
+import ListRulesWeight from "./ListRulesWeight.vue";
+import PartsToolbarAction from "./common/PartsToolbarAction.vue";
+import { FunkRules } from "../composables/FunkRules";
+import { FunkOmikuji } from "../composables/FunkOmikuji";
+import { FunkThreshold } from "../composables/FunkThreshold";
 import draggable from "vuedraggable";
 import type {
   ListCategory,
@@ -123,13 +134,12 @@ const emit = defineEmits<{
 
 // コンポーザブル:funkRules
 const { weightTotal, weightPercentage, omikujiLists, weightColor } =
-  funkRules();
+  FunkRules();
 // コンポーザブル:FunkOmikuji
 const { getOnecommeContent, getPostTypeColor } = FunkOmikuji();
-const {} = FunkOmikujiHoge();
 
 // コンポーザブル:funkThreshold
-const { isThreshold, getExampleText } = funkThreshold();
+const { isThreshold, getExampleText } = FunkThreshold();
 
 // ドラッグ&ドロップでの更新も同様に
 const localEnabledIds = computed({

@@ -62,7 +62,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import ListItemPartsAction from "./common/ListItemPartsAction.vue";
+import ListItemPartsAction from "./common/PartsToolbarAction.vue";
 import type {
   ListCategory,
   ListEntry,

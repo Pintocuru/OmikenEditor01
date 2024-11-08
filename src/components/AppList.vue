@@ -28,7 +28,7 @@
       <ListPreferences :Omiken="Omiken" @update:Omiken="updateOmiken" />
     </v-sheet>
     <v-sheet v-else-if="naviCategory === 'rules'">
-      <ListEntrys
+      <ListRules
         :Omiken="Omiken"
         @update:Omiken="updateOmiken"
         @open-editor="openEditor"
@@ -53,7 +53,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import ListEntrys from "./ListEntry.vue";
+import ListRules from "./ListRules.vue";
 import ListOmikuji from "./ListOmikuji.vue";
 import ListPlace from "./ListPlace.vue";
 import ListPreset from "./ListPreset.vue";

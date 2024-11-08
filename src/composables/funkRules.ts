@@ -3,7 +3,7 @@
 import { computed, inject, Ref } from "vue";
 import { AppStateType, OmikenType } from "@/types";
 
-export function funkRules() {
+export function FunkRules() {
   // inject
   const AppState = inject<Ref<AppStateType>>("AppStateKey");
   const omikuji = computed(() => AppState?.value.Omiken.omikuji ?? {});
@@ -33,7 +33,6 @@ export function funkRules() {
 
   // omikujiのリスト
   const omikujiLists = computed(() => {
-
     // omikujiOrderがない場合は従来の方法で並び替え
     return Object.entries(omikuji.value || {}).map(([id, omikuji]) => ({
       id,
@@ -43,15 +42,11 @@ export function funkRules() {
   });
 
   // 有効なomikujiのリスト
-  const enabledOmikujiLists = computed(() => {
-    const enabledIds: string | string[] = [];
+  const enabledOmikujiLists = (enabledIds: string[] = []) => {
     const isAllEnabled = enabledIds.length === 0;
-
-    if (isAllEnabled) {
-      return omikujiLists.value;
-    }
+    if (isAllEnabled) return omikujiLists.value;
     return omikujiLists.value.filter((option) => enabledIds.includes(option.id));
-  });
+  };
 
   const chipColors = (enabledIds: string[]) => {
     return Object.keys(omikuji).map((id) => ({

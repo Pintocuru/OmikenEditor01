@@ -33,7 +33,7 @@ type UnitItem = {
 };
 
 // しきい値の設定に関する関数群を提供
-export function funkThreshold() {
+export function FunkThreshold() {
   // 定数定義
   const THRESHOLD_ITEMS: ThresholdItem[] = [
     {

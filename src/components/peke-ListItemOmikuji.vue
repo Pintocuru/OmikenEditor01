@@ -14,14 +14,14 @@
         </template>
       </v-toolbar>
       <!-- リストに載せる内容(v-col:6の縦長) -->
-      <v-card-text> </v-card-text>
+      <v-card-text> ssss</v-card-text>
     </v-card>
   </v-col>
 </template>
 
 <script setup lang="ts">
 import { computed } from "vue";
-import ListItemPartsAction from "./common/ListItemPartsAction.vue";
+import ListItemPartsAction from "./common/PartsToolbarAction.vue";
 import {
   ListEntry,
   ListCategory,

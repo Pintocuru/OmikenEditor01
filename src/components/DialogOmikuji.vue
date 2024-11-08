@@ -99,7 +99,7 @@ import type {
 } from "../types";
 import DialogOmikujiPost from "./DialogOmikujiPost.vue";
 import DialogThreshold from "./DialogThreshold.vue";
-import { funkThreshold } from "@/composables/FunkThreshold";
+import { FunkThreshold } from "@/composables/FunkThreshold";
 import { FunkOmikuji } from "@/composables/FunkOmikuji";
 // props/emits
 const props = defineProps<{
@@ -117,7 +117,7 @@ const omikuji = AppState?.value.Omiken.omikuji;
 
 const { getPostTypeColor } = FunkOmikuji();
 // コンポーザブル:funkThreshold
-const { isThreshold } = funkThreshold();
+const { isThreshold } = FunkThreshold();
 
 // ref
 const tab = ref("post"); // タブの状態管理

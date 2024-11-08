@@ -1,11 +1,11 @@
-<!-- src/components/common/ListItemPartsAction.vue -->
+<!-- src/components/common/PartsToolbarAction.vue -->
 <template>
   <v-btn
     v-for="(action, index) in actions"
     :key="index"
-    size="small"
-    height="30"
-    width="30"
+    :size="!isSmall ? 'default':'small'"
+    :height="!isSmall ? '':30"
+    :width="!isSmall ? '':30"
     icon
     @click.stop="action.handler"
   >
@@ -27,6 +27,7 @@ const props = defineProps<{
   selectCategory: ListCategory;
   ruleId?: string;
   item: ItemOrGroup;
+  isSmall?: boolean;
 }>();
 
 const emit = defineEmits<{

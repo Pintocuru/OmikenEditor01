@@ -1,4 +1,4 @@
-<!-- src/components/ListEntryPlace.vue -->
+<!-- src/components/ListRulesPlace.vue -->
 <template>
   <v-row dense>
     <v-col

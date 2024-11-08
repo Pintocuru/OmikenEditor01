@@ -1,38 +1,19 @@
-<!-- src/components/ListEntry.vue -->
+<!-- src/components/ListRules.vue -->
 <template>
   <!-- Rules View -->
-  <v-card v-for="(ruleId, index) in localRulesOrder" :key="ruleId" class="mb-2">
+  <v-card v-for="(ruleId, index) in Omiken.rulesOrder" :key="ruleId" class="mb-2">
     <v-toolbar :color="Omiken.rules[ruleId]?.color">
-      <div class="d-flex">
-        <v-tooltip text="上に移動" location="top">
-          <template v-slot:activator="{ props }">
-            <v-btn
-              v-bind="props"
-              icon="mdi-arrow-up"
-              density="compact"
-              :disabled="index === 0"
-              @click="moveRule(index, 'up')"
-            />
-          </template>
-        </v-tooltip>
-        <v-tooltip text="下に移動" location="top">
-          <template v-slot:activator="{ props }">
-            <v-btn
-              v-bind="props"
-              icon="mdi-arrow-down"
-              density="compact"
-              :disabled="index === localRulesOrder.length - 1"
-              @click="moveRule(index, 'down')"
-            />
-          </template>
-        </v-tooltip>
-      </div>
+      <PartsToolbarMove
+        :index="index"
+        :rulesOrder="Omiken.rulesOrder"
+        @update:Omiken="updateOmiken"
+      />
       <v-toolbar-title class="ml-2" @click="openEditorItem('rules', ruleId)">
         <span v-if="isThreshold(Omiken.rules[ruleId]?.threshold)">🔐</span>
         {{ index + 1 }}. {{ Omiken.rules[ruleId]?.name }}
       </v-toolbar-title>
       <template #append>
-        <ListItemPartsAction
+        <PartsToolbarAction
           selectCategory="rules"
           :item="Omiken.rules[ruleId]"
           @edit="openEditorItem('rules', ruleId)"
@@ -79,7 +60,7 @@
             </v-chip>
           </v-expansion-panel-title>
           <v-expansion-panel-text>
-            <ListEntryOmikuji
+            <ListRulesOmikuji
               :Omiken="Omiken"
               :ruleId="ruleId"
               :enabledIds="Omiken.rules[ruleId].enabledIds"
@@ -107,7 +88,7 @@
           </v-expansion-panel-title>
           <v-expansion-panel-text>
             <!-- Place View -->
-            <ListEntryPlace
+            <ListRulesPlace
               ref="childRef"
               :Omiken="Omiken"
               :enabledIds="Omiken.rules[ruleId].enabledIds"
@@ -122,10 +103,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ComputedRef, nextTick, onMounted, ref, watch } from "vue";
-import ListEntryOmikuji from "./ListEntryOmikuji.vue";
-import ListEntryPlace from "./ListEntryPlace.vue";
-import ListItemPartsAction from "./common/ListItemPartsAction.vue";
+import ListRulesOmikuji from "./ListRulesOmikuji.vue";
+import ListRulesPlace from "./ListRulesPlace.vue";
+import PartsToolbarAction from "./common/PartsToolbarAction.vue";
+import PartsToolbarMove from "./common/PartsToolbarMove.vue";
 import type {
   OmikenType,
   OmikenEntry,
@@ -134,7 +115,7 @@ import type {
   OmikenCategory,
 } from "@/types";
 import { rulesOfPlaces } from "@/composables/FunkRules";
-import { funkThreshold } from "@/composables/FunkThreshold";
+import { FunkThreshold } from "@/composables/FunkThreshold";
 
 const props = defineProps<{
   Omiken: OmikenType;
@@ -146,58 +127,13 @@ const emit = defineEmits<{
 }>();
 
 // コンポーザブル:funkThreshold
-const { items, isThreshold, getExampleText } = funkThreshold();
+const { isThreshold, getExampleText } = FunkThreshold();
 
-// ドラッグ&ドロップ用のローカルデータ
-const localRulesOrder = computed({
-  get: () => [...props.Omiken.rulesOrder],
-  set: (value) => {
-    emit("update:Omiken", {
-      type: "rules",
-      reorder: value,
-    });
-  },
-});
-
-// ListEntryPlace から displayPlaces を受け取る
-
-// 型を指定して ref を初期化
-const childRef = ref<{ displayPlaces: ComputedRef<any[]> } | null>(null);
-
-onMounted(() => {
-  if (childRef.value) {
-    console.log(childRef.value.displayPlaces); // displayPlaces プロパティにアクセス
-  }
-});
-
-// 配列要素の移動関数
-function moveArrayElement(array: string[], fromIndex: number, toIndex: number) {
-  const element = array[fromIndex];
-  array.splice(fromIndex, 1);
-  array.splice(toIndex, 0, element);
-}
-
-// コンポーネント内のメソッド
-function moveRule(index: number, direction: "up" | "down") {
-  const newIndex = direction === "up" ? index - 1 : index + 1;
-  if (newIndex >= 0 && newIndex < localRulesOrder.value.length) {
-    moveArrayElement(localRulesOrder.value, index, newIndex);
-    updateRulesOrder();
-  }
-}
-
-// 各種更新関数
-const updateRulesOrder = () => {
-  emit("update:Omiken", {
-    type: "rules",
-    reorder: localRulesOrder.value,
-  });
-};
-
+// rules.enabledIds の更新
 const updateRulesEnabledIds = (enabledIds: string[], ruleId: string) => {
   const updatedRule = {
     ...props.Omiken.rules[ruleId],
-    enabledIds, // 直接受け取ったenabledIdsを使用
+    enabledIds,
   };
 
   emit("update:Omiken", {

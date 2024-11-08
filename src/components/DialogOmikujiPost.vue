@@ -147,7 +147,7 @@
                 </v-chip>
               </template>
             </v-tooltip>
-<!-- 複製・削除ボタン -->
+            <!-- 複製・削除ボタン -->
             <PartsArrayRemove
               :type="'omikuji'"
               :currentItem="currentItem"
@@ -247,20 +247,6 @@ const addPostTop = () => {
     delaySeconds: 0,
     content: "<<user>>の新しいメッセージ",
   });
-  updateOmikenOmikuji();
-};
-
-// postを複製
-const duplicatePost = (index: number) => {
-  const newPost = JSON.parse(JSON.stringify(props.currentItem.post[index]));
-  newPost.content = `${newPost.content}(コピー)`;
-  props.currentItem.post.splice(index + 1, 0, newPost);
-  updateOmikenOmikuji();
-};
-
-// ポストを削除
-const removePost = (index: number) => {
-  props.currentItem.post.splice(index, 1);
   updateOmikenOmikuji();
 };
 

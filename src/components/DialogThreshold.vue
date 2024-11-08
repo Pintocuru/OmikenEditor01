@@ -128,7 +128,7 @@
 
 <script setup lang="ts">
 import DialogThresholdInput from "./DialogThresholdInput.vue";
-import { funkThreshold } from "../composables/FunkThreshold";
+import { FunkThreshold } from "../composables/FunkThreshold";
 import {
   OmikenCategory,
   OmikenEntry,
@@ -152,7 +152,7 @@ const emit = defineEmits<{
 }>();
 
 // コンポーザブル:funkThreshold
-const { items, getExampleText } = funkThreshold();
+const { items, getExampleText } = FunkThreshold();
 
 // dialogThresholdInput用のrefを追加
 const childRef = ref<InstanceType<typeof DialogThresholdInput>>();

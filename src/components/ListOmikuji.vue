@@ -73,9 +73,9 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import ListItemPartsAction from "./common/ListItemPartsAction.vue";
+import ListItemPartsAction from "./common/PartsToolbarAction.vue";
 import { FunkOmikuji } from "../composables/FunkOmikuji";
-import { funkThreshold } from "../composables/FunkThreshold";
+import { FunkThreshold } from "../composables/FunkThreshold";
 import type {
   ListCategory,
   ListEntry,
@@ -95,7 +95,7 @@ const emit = defineEmits<{
 
 // コンポーザブル
 const { getOnecommeContent, getPostTypeColor } = FunkOmikuji();
-const { isThreshold, getExampleText } = funkThreshold();
+const { isThreshold, getExampleText } = FunkThreshold();
 
 // おみくじIDをソートして取得
 const sortedOmikujiIds = computed(() => {

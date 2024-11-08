@@ -65,7 +65,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { funkThreshold } from "../composables/FunkThreshold";
+import { FunkThreshold } from "../composables/FunkThreshold";
 import {
   TimeCondition,
   ElapsedCondition,
@@ -126,7 +126,7 @@ const currentItem = computed({
   set: (value) => emit("update:modelValue", value),
 });
 
-const { getComparisonItems, getValueLabel, getUnitItems } = funkThreshold();
+const { getComparisonItems, getValueLabel, getUnitItems } = FunkThreshold();
 
 const getValue1Label = (type: ConditionType) => getValueLabel(type);
 const getValue2Label = (type: ConditionType) => getValueLabel(type, true);
