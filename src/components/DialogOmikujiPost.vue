@@ -122,44 +122,39 @@
           </v-sheet>
 
           <v-sheet class="d-flex justify-space-between align-center">
-            <span class="font-weight-bold">
-              <v-tooltip
-                v-for="(name, index) in extractValidPlaceholders(post.content)
-                  .validPlaceholders"
-                :key="index"
-                text="クリックでエディターを開く"
-              >
-                <template v-slot:activator="{ props: tooltipProps }">
-                  <v-chip
-                    v-bind="tooltipProps"
-                    class="me-2"
-                    color="primary"
-                    variant="outlined"
-                    @click="
-                      openEditor(
-                        extractValidPlaceholders(post.content).placeholderIds[
-                          index
-                        ]
-                      )
-                    "
-                  >
-                    {{ name }}
-                  </v-chip>
-                </template>
-              </v-tooltip>
-            </span>
-            <span>
-              <span>
-                <v-btn @click="duplicatePost(index)" color="info">
-                  <v-icon>mdi-content-copy</v-icon>
-                </v-btn>
-              </span>
-              <span class="ml-2">
-                <v-btn @click="removePost(index)" color="error">
-                  <v-icon>mdi-delete</v-icon>
-                </v-btn>
-              </span>
-            </span>
+            <v-tooltip
+              v-for="(name, index) in extractValidPlaceholders(post.content)
+                .validPlaceholders"
+              :key="index"
+              text="クリックでエディターを開く"
+              location="bottom"
+            >
+              <template v-slot:activator="{ props: tooltipProps }">
+                <v-chip
+                  v-bind="tooltipProps"
+                  class="me-2"
+                  color="primary"
+                  variant="outlined"
+                  @click="
+                    openEditor(
+                      extractValidPlaceholders(post.content).placeholderIds[
+                        index
+                      ]
+                    )
+                  "
+                >
+                  {{ name }}
+                </v-chip>
+              </template>
+            </v-tooltip>
+<!-- 複製・削除ボタン -->
+            <PartsArrayRemove
+              :type="'omikuji'"
+              :currentItem="currentItem"
+              :array="currentItem.post"
+              :index="index"
+              @update:Omiken="updateOmiken"
+            />
           </v-sheet>
         </v-expansion-panel-text>
       </v-expansion-panel>
@@ -189,6 +184,7 @@ import type {
   OmikenEntry,
 } from "../types";
 import { FunkOmikuji } from "../composables/FunkOmikuji";
+import PartsArrayRemove from "../components/common/PartsArrayRemove.vue";
 const props = defineProps<{
   currentItem: OmikujiType;
   themeColor: string;
@@ -277,4 +273,6 @@ function openEditor(key: string) {
     key,
   });
 }
+const updateOmiken = (payload: OmikenEntry<OmikenCategory>) =>
+  emit("update:Omiken", payload);
 </script>

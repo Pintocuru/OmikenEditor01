@@ -34,61 +34,42 @@
               >
             </v-btn>
           </v-btn-toggle>
+          <!-- テキストエディター -->
+          <v-btn variant="outlined" class="me-2" @click="showTextEditor = true">
+            <v-icon>mdi-text</v-icon>
+            <v-tooltip activator="parent" location="bottom"
+              >テキストエディター</v-tooltip
+            >
+          </v-btn>
           <v-btn variant="outlined" @click="addValue">＋追加</v-btn>
         </v-toolbar>
-        <v-list density="compact">
-          <draggable
-            v-model="currentItem.values"
-            item-key="id"
-            handle=".handle"
-            @end="handleDragEnd"
-          >
-            <template #item="{ element: value, index }">
-              <v-list-item>
-                <v-row align="center" no-gutters>
-                  <v-col cols="auto" class="me-1">
-                    <v-icon class="handle" color="grey">mdi-drag</v-icon>
-                  </v-col>
-                  <v-col
-                    :cols="isWeightMode ? 2 : 0"
-                    v-if="isWeightMode"
-                    class="me-2"
-                  >
-                    <v-text-field
-                      v-model.number="value.weight"
-                      label="重み"
-                      type="number"
-                      @update:model-value="updateValue(index, 'weight', $event)"
-                    />
-                  </v-col>
-                  <v-col :cols="isWeightMode ? 8 : 10">
-                    <v-text-field
-                      v-model="value.value"
-                      label="値"
-                      @update:model-value="updateValue(index, 'value', $event)"
-                    />
-                  </v-col>
-                  <v-col cols="1">
-                    <v-btn color="error" @click="removeValue(index)">
-                      <v-icon>mdi-delete</v-icon>
-                    </v-btn>
-                  </v-col>
-                </v-row>
-              </v-list-item>
-            </template>
-          </draggable>
-        </v-list>
+        <!-- 複製・削除ボタン -->
+        <DialogPlaceEditor
+          :entry="entry"
+          :currentItem="currentItem"
+          :is-weight-mode="isWeightMode"
+          @update:Omiken="updateOmiken"
+        />
       </v-card>
     </v-card-text>
   </v-card>
   <v-alert v-else type="warning"
     >プレースホルダーが選択されていません。</v-alert
   >
+
+  <!-- テキストエディターダイアログを追加 -->
+  <DialogPlaceTextmode
+    v-if="currentItem"
+    v-model="showTextEditor"
+    :values="currentItem.values"
+    @save="handleTextEditorSave"
+  />
 </template>
 
 <script setup lang="ts">
-import { computed, inject, Ref } from "vue";
-import draggable from "vuedraggable";
+import { computed, inject, ref, Ref } from "vue";
+import DialogPlaceTextmode from "./DialogPlaceTextmode.vue";
+import DialogPlaceEditor from "./DialogPlaceEditor.vue";
 import type {
   PlaceType,
   PlaceValueType,
@@ -96,6 +77,7 @@ import type {
   OmikenCategory,
   ListEntry,
   AppStateType,
+  ListCategory,
 } from "../types";
 
 const props = defineProps<{
@@ -104,6 +86,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: "update:Omiken", payload: OmikenEntry<OmikenCategory>): void;
+  (e: "open-editor", editorItem: ListEntry<ListCategory>): void;
 }>();
 
 // inject
@@ -119,32 +102,19 @@ const isWeightMode = computed({
   set: (value) => updateItem("isWeight", value),
 });
 
-// 基本情報とvaluesの更新を統合
-const emitUpdate = (updatedItem: PlaceType) => {
-  if (!currentItem.value || !props.entry?.key) return;
-  const key = props.entry.key as string;
-  emit("update:Omiken", {
-    type: "place",
-    update: { [key]: updatedItem },
-  });
+// テキストエディター用の状態
+const showTextEditor = ref(false);
+
+// テキストエディターの保存ハンドラー
+const handleTextEditorSave = (values: PlaceValueType[]) => {
+  if (!currentItem.value) return;
+  updateOmikenPlace({ ...currentItem.value, values });
 };
 
 // これはなに？
 const updateItem = (field: keyof PlaceType, value: any) => {
   if (!currentItem.value) return;
-  emitUpdate({ ...currentItem.value, [field]: value });
-};
-
-// 値の更新
-const updateValue = (
-  index: number,
-  field: keyof PlaceValueType,
-  value: any
-) => {
-  if (!currentItem.value) return;
-  const newValues = [...currentItem.value.values];
-  newValues[index] = { ...newValues[index], [field]: value };
-  emitUpdate({ ...currentItem.value, values: newValues });
+  updateOmikenPlace({ ...currentItem.value, [field]: value });
 };
 
 // 値の追加
@@ -153,16 +123,17 @@ const addValue = () => {
   currentItem.value.values.push({ weight: 1, value: "" });
 };
 
-// 値の削除
-const removeValue = (index: number) => {
-  if (!currentItem.value) return;
-  currentItem.value.values.splice(index, 1);
+// Omikenのemit
+const updateOmikenPlace = (updatedItem: PlaceType) => {
+  if (!currentItem.value || !props.entry?.key) return;
+  const key = props.entry.key as string;
+  emit("update:Omiken", {
+    type: "place",
+    update: { [key]: updatedItem },
+  });
 };
-
-const handleDragEnd = () => {
-  if (!currentItem.value) return;
-  emitUpdate({ ...currentItem.value, values: [...currentItem.value.values] });
-};
+const updateOmiken = (payload: OmikenEntry<OmikenCategory>) =>
+  emit("update:Omiken", payload);
 </script>
 
 <style scoped>
