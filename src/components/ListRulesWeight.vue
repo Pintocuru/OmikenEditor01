@@ -1,65 +1,85 @@
 <!-- src/components/ListRulesWeight.vue -->
-
 <template>
   <v-dialog v-model="editorDialog.isOpen" max-width="600px">
-    <v-list density="compact">
-      <draggable
-        :model-value="currentItem"
-        item-key="id"
-        handle=".handle"
-         @end="(newItem) => updateItem(newItem)"
-      >
-        <template #item="{ element, index }">
-          <v-list-item>
-            <v-row align="center" no-gutters>
-              <v-col cols="auto" class="me-1">
-                <v-icon class="handle" color="grey">mdi-drag</v-icon>
-              </v-col>
+    <v-card density="compact" style="max-height: 80vh; overflow-y: auto">
+      <v-toolbar color="red" density="compact" class="mb-2">
+        <v-toolbar-title>
+          出現割合の一斉編集
+          <v-chip label class="ml-4">
+            {{ weightTotal(enabledIds) }}
+          </v-chip>
+        </v-toolbar-title>
+      </v-toolbar>
+      <v-list>
+        <draggable
+          v-model="currentItem"
+          item-key="id"
+          @end="updateEnabledIds"
+        >
+          <template #item="{ element: omikujiId }">
+            <v-list-item>
+              <v-row align="center" no-gutters>
+                <v-col cols="auto" class="me-1">
+                  <v-icon class="handle" color="grey">mdi-drag</v-icon>
+                </v-col>
 
-              <v-col cols="2" class="me-2">
-                <!-- 配列を移動できるツマミ -->
-                <v-sheet
-                  class="font-medium"
-                  @click="openEditorOmikuji(element)"
-                >
-                  {{ element.name }}
-                </v-sheet>
-              </v-col>
-              <v-col>
-                <!-- v-text-field で数値を操作する -->
-<v-text-field
-  v-model.number="Omiken.omikuji[element.id].weight"
-  label="出現割合"
-  min="0"
-  type="number"
-/>
-              </v-col>
-              <v-col cols="12" sm="6">
-                <!-- 出現割合を表示 -->
-                <v-progress-linear
-                  :model-value="weightPercentage(element.id, enabledIds)"
-                  buffer-value="10"
-                  :color="weightColor(element.id,enabledIds,)"
-                  height="35"
-                  striped
-                  >出現割合：{{
-                    weightPercentage(element.id, enabledIds)
-                  }}
-                  %</v-progress-linear
-                >
-              </v-col>
-            </v-row>
-          </v-list-item>
-        </template>
-      </draggable>
-    </v-list>
+                <v-col cols="2" class="me-2">
+                  <!-- 配列を移動できるツマミ -->
+                  <v-sheet
+                    class="font-medium"
+                    @click="openEditorOmikuji(Omiken.omikuji[omikujiId])"
+                  >
+                    {{ Omiken.omikuji[omikujiId].name }}
+                  </v-sheet>
+                </v-col>
+                <v-col>
+                  <!-- v-text-field で数値を操作する -->
+                  <v-text-field
+                    v-model.number="
+                      Omiken.omikuji[Omiken.omikuji[omikujiId].id].weight
+                    "
+                    label="出現割合"
+                    min="0"
+                    type="number"
+                  />
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <!-- 出現割合を表示 -->
+                  <v-progress-linear
+                    :model-value="
+                      weightPercentage(Omiken.omikuji[omikujiId].id, enabledIds)
+                    "
+                    buffer-value="10"
+                    :color="
+                      weightColor(Omiken.omikuji[omikujiId].id, enabledIds)
+                    "
+                    height="35"
+                    striped
+                    >出現割合：{{
+                      weightPercentage(Omiken.omikuji[omikujiId].id, enabledIds)
+                    }}
+                    %</v-progress-linear
+                  >
+                </v-col>
+              </v-row>
+            </v-list-item>
+          </template>
+        </draggable>
+      </v-list>
+    </v-card>
   </v-dialog>
-  <div class="flex justify-end mt-4">
-    <v-btn color="primary" @click="openEditor()">
-      <v-icon>mdi-sort</v-icon>
-      ダイアログを表示
+  <v-sheet>
+    <v-btn
+      block
+      @click="openEditor()"
+      color="primary"
+      variant="flat"
+      class="mb-6"
+    >
+      <v-icon left>mdi-sort</v-icon>
+      出現割合の一斉編集
     </v-btn>
-  </div>
+  </v-sheet>
 </template>
 <script setup lang="ts">
 import { computed, ref } from "vue";
@@ -86,10 +106,14 @@ const emit = defineEmits<{
   (e: "update:Omiken", payload: OmikenEntry<OmikenCategory>): void;
 }>();
 
-const { enabledOmikujiLists, weightColor, weightPercentage } = FunkRules();
+const { weightTotal, weightColor, weightPercentage } =
+  FunkRules();
 
-const currentItem = computed(() => {
-  return props.ruleId ? enabledOmikujiLists(props.enabledIds) : [];
+const currentItem = computed({
+  get: () => [...props.enabledIds],
+  set: (value) => {
+    emit("update:enabledIds", value);
+  },
 });
 
 const editorDialog = ref({
@@ -104,21 +128,9 @@ const openEditor = (omikujiId?: string) => {
   };
 };
 
-// weightだけを更新する
-const updateOmikujiWeight = (index: number, value: number) => {
-  const omikuji = props.Omiken.omikuji[props.enabledIds[index]];
-  if (omikuji) {
-    omikuji.weight = value;
-    emit("update:Omiken", {
-      type: "omikuji",
-      update: { [omikuji.id]: omikuji },
-    });
-  }
-};
-
 // 更新アップデート
-const updateItem = (updatedEnabledIds: string[]) => {
-  emit("update:enabledIds", updatedEnabledIds);
+const updateEnabledIds = () => {
+  emit("update:enabledIds", currentItem.value);
 };
 
 const openEditorOmikuji = (omikuji: OmikujiType) => {

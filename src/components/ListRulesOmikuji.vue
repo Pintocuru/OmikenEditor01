@@ -2,7 +2,7 @@
 <template>
   <!-- Omikuji View -->
   <v-select
-    v-model="localEnabledIds"
+    v-model="currentItem"
     :items="omikujiLists"
     label="有効にするID"
     chips
@@ -11,19 +11,18 @@
     item-value="id"
     @update:modelValue="(value) => emit('update:enabledIds', value)"
   />
-<ListRulesWeight
-  :Omiken="Omiken"
-  :ruleId="ruleId"
-  :enabledIds="localEnabledIds"
-  @update:enabledIds="(value) => emit('update:enabledIds', value)"
-  @open-editor="openEditorItem"
-  @update:Omiken="updateOmiken"
-/>
+  <ListRulesWeight
+    :Omiken="Omiken"
+    :ruleId="ruleId"
+    :enabledIds="currentItem"
+    @update:enabledIds="(value) => emit('update:enabledIds', value)"
+    @open-editor="openEditor"
+    @update:Omiken="updateOmiken"
+  />
   <!-- Omikuji View -->
   <v-row>
-    
     <draggable
-      v-model="localEnabledIds"
+      v-model="currentItem"
       item-key="id"
       class="d-flex flex-wrap"
       @end="updateEnabledIds"
@@ -142,7 +141,7 @@ const { getOnecommeContent, getPostTypeColor } = FunkOmikuji();
 const { isThreshold, getExampleText } = FunkThreshold();
 
 // ドラッグ&ドロップでの更新も同様に
-const localEnabledIds = computed({
+const currentItem = computed({
   get: () => [...props.enabledIds],
   set: (value) => {
     emit("update:enabledIds", value);
@@ -178,8 +177,10 @@ const addItemOmikuji = () => {
 
 // update:enabledIdsのみを発火
 const updateEnabledIds = () => {
-  emit("update:enabledIds", localEnabledIds.value);
+  emit("update:enabledIds", currentItem.value);
 };
+const openEditor = (editorItem: ListEntry<ListCategory>) =>
+  emit("open-editor", editorItem);
 const updateOmiken = (payload: OmikenEntry<OmikenCategory>) =>
   emit("update:Omiken", payload);
 </script>
