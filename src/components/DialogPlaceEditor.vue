@@ -34,13 +34,13 @@
               />
             </v-col>
             <v-col cols="auto">
-              <PartsArrayRemove
+              <PartsArrayRemovePlace
                 type="omikuji"
                 :currentItem="currentItem"
-                :array="currentItem.values"
                 :index="index"
                 size="32"
-                @update:Omiken="updateOmiken"
+                v-model:array="currentItem.values"
+    @update:array="handleArrayUpdate(index, $event)"
               />
             </v-col>
           </v-row>
@@ -52,7 +52,7 @@
 
 <script setup lang="ts">
 import draggable from "vuedraggable";
-import PartsArrayRemove from "./common/PartsArrayRemove.vue";
+import PartsArrayRemovePlace from "./common/PartsArrayRemovePlace.vue";
 import type {
   PlaceValueType,
   PlaceType,
@@ -68,42 +68,26 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: "update:Omiken", payload: OmikenEntry<OmikenCategory>): void;
+  (e: "update:modelValue", value: PlaceValueType[]): void;
 }>();
 
 // 値の更新処理を統合
 const updateItem = (updatedValues: PlaceValueType[]) => {
-  if (!props.currentItem || !props.entry?.key) return;
-
-  // keyがstring型であることを確認
-  if (typeof props.entry.key === 'string') {
-    emit("update:Omiken", {
-      type: "place",
-      update: {
-        [props.entry.key]: {
-          ...props.currentItem,
-          values: updatedValues,
-        },
-      },
-    });
-  }
+  emit("update:modelValue", updatedValues);
 };
 
 // 各種ハンドラー
-const updateValue = (
-  index: number,
-  field: keyof PlaceValueType,
-  value: any
-) => {
+const updateValue = (index: number, field: keyof PlaceValueType, value: any) => {
   const newValues = props.currentItem.values.map((item, i) =>
     i === index ? { ...item, [field]: value } : item
   );
-  updateItem(newValues);
+  emit("update:modelValue", newValues);
 };
 
 const handleDragEnd = () => {
-  updateItem([...props.currentItem.values]);
+  emit("update:modelValue", [...props.currentItem.values]);
 };
-const updateOmiken = (payload: OmikenEntry<OmikenCategory>) =>
-  emit("update:Omiken", payload);
+const handleArrayUpdate = (index: number, newArray: PlaceValueType[]) => {
+  emit("update:modelValue", newArray);
+};
 </script>

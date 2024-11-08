@@ -35,7 +35,7 @@
             </v-btn>
           </v-btn-toggle>
           <!-- テキストエディター -->
-          <v-btn variant="outlined" class="me-2" @click="showTextEditor = true">
+          <v-btn variant="outlined" class="me-2" @click="openTextEditor">
             <v-icon>mdi-text</v-icon>
             <v-tooltip activator="parent" location="bottom"
               >テキストエディター</v-tooltip
@@ -44,12 +44,13 @@
           <v-btn variant="outlined" @click="addValue">＋追加</v-btn>
         </v-toolbar>
         <!-- 複製・削除ボタン -->
-        <DialogPlaceEditor
-          :entry="entry"
-          :currentItem="currentItem"
-          :is-weight-mode="isWeightMode"
-          @update:Omiken="updateOmiken"
-        />
+  <DialogPlaceEditor
+    :entry="entry"
+    :currentItem="currentItem"
+    :is-weight-mode="isWeightMode"
+    v-model="currentItem.values"
+    @update:modelValue="handleValuesUpdate"
+  />
       </v-card>
     </v-card-text>
   </v-card>
@@ -67,7 +68,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, ref, Ref } from "vue";
+import { computed, inject, ref, Ref, watch } from "vue";
 import DialogPlaceTextmode from "./DialogPlaceTextmode.vue";
 import DialogPlaceEditor from "./DialogPlaceEditor.vue";
 import type {
@@ -93,10 +94,36 @@ const emit = defineEmits<{
 const AppState = inject<Ref<AppStateType>>("AppStateKey");
 const place = AppState?.value.Omiken.place;
 
-// propsからデータを解読
-const currentItem = computed(() =>
-  props.entry?.key && place ? place[props.entry.key as string] : null
+const currentItem = ref<PlaceType | null>(null);
+
+// props.entryが変わるたびにcurrentItemを更新
+watch(
+  () => props.entry,
+  (newEntry) => {
+    if (newEntry?.key && place) {
+      currentItem.value = { ...place[newEntry.key as string] };
+    }
+  },
+  { immediate: true }
 );
+// テキストエディターモードを開く前に最新データを反映
+const openTextEditor = () => {
+  if (currentItem.value) {
+    showTextEditor.value = true;
+  }
+};
+
+// テキストエディターモードを閉じた際にデータを更新
+const handleTextEditorSave = (values: PlaceValueType[]) => {
+  if (!currentItem.value) return;
+  currentItem.value.values = values;
+  showTextEditor.value = false;
+
+  // 編集内容を確定させたい場合は、emitや関数で外部にデータを渡す
+  updateOmikenPlace(currentItem.value);
+};
+
+
 const isWeightMode = computed({
   get: () => currentItem.value?.isWeight ?? false,
   set: (value) => updateItem("isWeight", value),
@@ -104,12 +131,6 @@ const isWeightMode = computed({
 
 // テキストエディター用の状態
 const showTextEditor = ref(false);
-
-// テキストエディターの保存ハンドラー
-const handleTextEditorSave = (values: PlaceValueType[]) => {
-  if (!currentItem.value) return;
-  updateOmikenPlace({ ...currentItem.value, values });
-};
 
 // これはなに？
 const updateItem = (field: keyof PlaceType, value: any) => {
@@ -132,6 +153,14 @@ const updateOmikenPlace = (updatedItem: PlaceType) => {
     update: { [key]: updatedItem },
   });
 };
+
+const handleValuesUpdate = (newValues: PlaceValueType[]) => {
+  if (!currentItem.value) return;
+  currentItem.value.values = newValues;
+  // 大元への更新はこちらで行う
+  updateOmikenPlace(currentItem.value);
+};
+
 const updateOmiken = (payload: OmikenEntry<OmikenCategory>) =>
   emit("update:Omiken", payload);
 </script>
