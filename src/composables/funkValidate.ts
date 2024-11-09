@@ -152,7 +152,7 @@ const omikujiSchema = z.record(
     id: z.string(),
     name: z.string().default("大吉"),
     description: z.string().default(""),
-    weight: z.number().int().positive().default(1),
+    weight: z.number().int().nonnegative().default(1),
     threshold: thresholdSchema,
     post: omikujiPostSchema.default([]),
   })
@@ -175,7 +175,7 @@ const placeSchema = z.record(
       .array(
         z.object({
           // 出現割合
-          weight: z.number().positive().default(1),
+          weight: z.number().nonnegative().default(1),
           // 内容(1度だけプレースホルダーを利用可能)
           value: z.string().default(""),
         })
@@ -187,9 +187,9 @@ const placeSchema = z.record(
 const preferencesSchema = z.record(
   z.object({
     // コメントしてからBotが反応するまでの遅延(秒)
-    basicDelay: z.number().default(1),
+    basicDelay: z.number().nonnegative().default(1),
     // おみくじ機能のクールダウン時間（秒)
-    omikujiCooldown: z.number().default(2),
+    omikujiCooldown: z.number().positive().default(2),
     // コメントしてからおみくじを有効とする時間(秒)
     commentDuration: z.number().positive().default(5),
     // このスクリプトBOTのcomment.data.userId

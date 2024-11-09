@@ -37,17 +37,17 @@
           <v-row dense>
             <v-col cols="6" sm="3">
               <v-select v-model="post.type" :items="onecommeTypeItems" label="投稿の種類" item-title="text"
-                item-value="value" density="compact" @change="updateOmikenOmikuji">
+                item-value="value" density="compact" @update:modelValue="updateOmikenOmikuji">
               </v-select>
             </v-col>
             <v-col cols="6" sm="3" v-if="isCharacterPost(post.type)">
               <v-select v-model="post.botKey" :items="botKeyItems" label="ボットキー" item-title="text" item-value="value"
-                density="compact" @change="updateOmikenOmikuji">
+                density="compact" @update:modelValue="updateOmikenOmikuji">
               </v-select>
             </v-col>
             <v-col cols="6" sm="3" v-if="isCharacterPost(post.type)">
               <v-select v-model="post.iconKey" :items="getIconKeyItems(post.botKey)" label="アイコンキー" item-title="text"
-                item-value="value" density="compact" @change="updateOmikenOmikuji">
+                item-value="value" density="compact" @update:modelValue="updateOmikenOmikuji">
               </v-select>
             </v-col>
             <v-col cols="12" sm="3">
@@ -60,7 +60,7 @@
             <v-text-field v-model="post.content" label="内容" rows="2" auto-grow @input="updateOmikenOmikuji" />
 
             <v-slider v-model.number="post.delaySeconds" prepend-icon="mdi-alarm" :thumb-size="24" thumb-label="always"
-              class="pa-2" min="-1" max="10" step="0.1" @change="updateOmikenOmikuji" />
+              class="pa-2" min="-1" max="10" step="0.1" @update:modelValue="updateOmikenOmikuji" />
           </v-sheet>
 
           <v-sheet class="d-flex justify-space-between align-center">
