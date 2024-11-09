@@ -67,11 +67,6 @@ const numberRules = [
   (v: number | null) => v !== null || '値を入力してください'
 ];
 
-// フォームのバリデーション状態が変更されたときの処理
-const validateForm = (isValid: boolean) => {
-  valid.value = isValid;
-};
-
 // 各フィールドの更新処理
 const updatePreference = (key: keyof OmikenType['preferences'], value: number | string) => {
   const newValue = typeof value === 'string' && key !== 'BotUserIDname' 

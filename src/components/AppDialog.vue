@@ -14,7 +14,7 @@
         @update:Omiken="updateOmiken"
         @open-editor="openEditor"
       />
-  <v-card-actions>
+      <v-card-actions>
         <v-tooltip
           v-if="getSiblingItems(key as ListCategory, entry.key as string).length > 1"
           :text="getSiblingName(key as ListCategory, entry.key as string, 'prev')"
@@ -24,7 +24,9 @@
             <v-btn
               color="grey"
               v-bind="props"
-              @click="navigateToItem(key as ListCategory, entry.key as string, 'prev')"
+              @click="
+                navigateToItem(key as ListCategory, entry.key as string, 'prev')
+              "
             >
               <v-icon start>mdi-chevron-left</v-icon>
               前へ
@@ -32,7 +34,9 @@
           </template>
         </v-tooltip>
         <v-spacer></v-spacer>
-        <v-btn color="blue darken-1" @click="() => closeDialog(key)">閉じる</v-btn>
+        <v-btn color="blue darken-1" @click="() => closeDialog(key)"
+          >閉じる</v-btn
+        >
         <v-spacer></v-spacer>
         <v-tooltip
           v-if="getSiblingItems(key as ListCategory, entry.key as string).length > 1"
@@ -43,7 +47,9 @@
             <v-btn
               color="grey"
               v-bind="props"
-              @click="navigateToItem(key as ListCategory, entry.key as string, 'next')"
+              @click="
+                navigateToItem(key as ListCategory, entry.key as string, 'next')
+              "
             >
               次へ
               <v-icon start>mdi-chevron-right</v-icon>
@@ -68,6 +74,7 @@ import {
   ListEntryCollect,
   OmikenType,
 } from "@/types";
+import { FunkEmits } from "@/composables/FunkEmits";
 
 // Props / emit
 const props = defineProps<{
@@ -81,13 +88,14 @@ const emit = defineEmits<{
   (e: "open-editor", editorItem: ListEntry<ListCategory>): void;
 }>();
 
+// コンポーザブル:FunkEmits
+const { updateOmiken, openEditor } = FunkEmits(emit);
+
 // エディターコンポーネントを取得する関数
 const getEditComponent = (type: ListCategory, mode?: string | null) => {
   const editorMap: Record<ListCategory, any> = {
     rules: DialogRules,
-    omikuji: mode === 'special'
-     ? DialogOmikujiWeight // 仮DialogOmikujiWeight
-      : DialogOmikuji,
+    omikuji: DialogOmikuji,
     place: DialogPlace,
   };
   return editorMap[type] || null;
@@ -95,23 +103,29 @@ const getEditComponent = (type: ListCategory, mode?: string | null) => {
 
 // 同じ種類のアイテムリストを取得
 const getSiblingItems = (category: ListCategory, currentKey: string) => {
-  if (category === 'rules') {
+  if (category === "rules") {
     return props.Omiken.rulesOrder;
   } else {
     const items = Object.keys(props.Omiken[category]).sort((a, b) =>
-      props.Omiken[category][a].name.localeCompare(props.Omiken[category][b].name)
+      props.Omiken[category][a].name.localeCompare(
+        props.Omiken[category][b].name
+      )
     );
     return items;
   }
 };
 
 // 前または次のアイテムのキーを取得（循環）
-const getSiblingKey = (category: ListCategory, currentKey: string, direction: 'prev' | 'next') => {
+const getSiblingKey = (
+  category: ListCategory,
+  currentKey: string,
+  direction: "prev" | "next"
+) => {
   const items = getSiblingItems(category, currentKey);
   if (items.length <= 1) return null;
-  
+
   const currentIndex = items.indexOf(currentKey);
-  if (direction === 'prev') {
+  if (direction === "prev") {
     return currentIndex > 0 ? items[currentIndex - 1] : items[items.length - 1];
   } else {
     return currentIndex < items.length - 1 ? items[currentIndex + 1] : items[0];
@@ -119,16 +133,24 @@ const getSiblingKey = (category: ListCategory, currentKey: string, direction: 'p
 };
 
 // アイテムの名前を取得
-const getSiblingName = (category: ListCategory, currentKey: string, direction: 'prev' | 'next') => {
+const getSiblingName = (
+  category: ListCategory,
+  currentKey: string,
+  direction: "prev" | "next"
+) => {
   const nextKey = getSiblingKey(category, currentKey, direction);
-  if (!nextKey) return '';
-  
+  if (!nextKey) return "";
+
   const items = props.Omiken[category];
   return items[nextKey]?.name || nextKey;
 };
 
 // アイテム間移動（修正版）
-const navigateToItem = (category: ListCategory, currentKey: string, direction: 'prev' | 'next') => {
+const navigateToItem = (
+  category: ListCategory,
+  currentKey: string,
+  direction: "prev" | "next"
+) => {
   const nextKey = getSiblingKey(category, currentKey, direction);
   if (nextKey) {
     closeDialog(category);
@@ -136,16 +158,10 @@ const navigateToItem = (category: ListCategory, currentKey: string, direction: '
       isOpen: true,
       type: category,
       key: nextKey,
-      mode: props.listEntry[category].mode
+      mode: props.listEntry[category].mode,
     });
   }
 };
-
-// 各種操作関数(エディターを開く/Omiken更新)
-const updateOmiken = (payload: OmikenEntry<OmikenCategory>) =>
-  emit("update:Omiken", payload);
-const openEditor = (editorItem: ListEntry<ListCategory>) =>
-  emit("open-editor", editorItem);
 
 // ダイアログの状態更新
 const updateDialog = (key: ListCategory, isOpen: boolean) => {
@@ -175,6 +191,6 @@ const closeClickOutside = (event: MouseEvent) => {
 
 onMounted(() => {
   // 外部クリック時に起動
-  document.addEventListener("mousedown", closeClickOutside)
+  document.addEventListener("mousedown", closeClickOutside);
 });
 </script>

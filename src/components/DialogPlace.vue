@@ -44,13 +44,13 @@
           <v-btn variant="outlined" @click="addValue">＋追加</v-btn>
         </v-toolbar>
         <!-- 複製・削除ボタン -->
-  <DialogPlaceEditor
-    :entry="entry"
-    :currentItem="currentItem"
-    :is-weight-mode="isWeightMode"
-    v-model="currentItem.values"
-    @update:modelValue="handleValuesUpdate"
-  />
+        <DialogPlaceEditor
+          :entry="entry"
+          :currentItem="currentItem"
+          :is-weight-mode="isWeightMode"
+          v-model="currentItem.values"
+          @update:modelValue="handleValuesUpdate"
+        />
       </v-card>
     </v-card-text>
   </v-card>
@@ -80,6 +80,7 @@ import type {
   AppStateType,
   ListCategory,
 } from "../types";
+import Swal from "sweetalert2";
 
 const props = defineProps<{
   entry: ListEntry<"place"> | null;
@@ -107,9 +108,33 @@ watch(
   { immediate: true }
 );
 // テキストエディターモードを開く前に最新データを反映
-const openTextEditor = () => {
+const openTextEditor = async () => {
   if (currentItem.value) {
-    showTextEditor.value = true;
+    const result = await Swal.fire({
+      title: "テキストエディターモード",
+        icon: "info",
+      text: "出現割合はすべて1になります。よろしいですか？",
+      didOpen: () => {
+        const popup = Swal.getPopup();
+        const backdrop = Swal.getContainer();
+        if (popup && backdrop) {
+          popup.style.zIndex = "9999";
+          backdrop.style.zIndex = "9998";
+        }
+      },
+      showCancelButton: true,
+      confirmButtonText: "編集する",
+      cancelButtonText: "キャンセル",
+      showDenyButton: true,
+      denyButtonText: "編集しない",
+      denyButtonColor: "#3085d6",
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#6e7881",
+    });
+
+    if (result.isConfirmed ) {
+      showTextEditor.value = true;
+    }
   }
 };
 
@@ -122,7 +147,6 @@ const handleTextEditorSave = (values: PlaceValueType[]) => {
   // 編集内容を確定させたい場合は、emitや関数で外部にデータを渡す
   updateOmikenPlace(currentItem.value);
 };
-
 
 const isWeightMode = computed({
   get: () => currentItem.value?.isWeight ?? false,
@@ -144,6 +168,13 @@ const addValue = () => {
   currentItem.value.values.push({ weight: 1, value: "" });
 };
 
+// これはなに？
+const handleValuesUpdate = (newValues: PlaceValueType[]) => {
+  if (!currentItem.value) return;
+  currentItem.value.values = newValues;
+  updateOmikenPlace(currentItem.value);
+};
+
 // Omikenのemit
 const updateOmikenPlace = (updatedItem: PlaceType) => {
   if (!currentItem.value || !props.entry?.key) return;
@@ -153,20 +184,4 @@ const updateOmikenPlace = (updatedItem: PlaceType) => {
     update: { [key]: updatedItem },
   });
 };
-
-const handleValuesUpdate = (newValues: PlaceValueType[]) => {
-  if (!currentItem.value) return;
-  currentItem.value.values = newValues;
-  // 大元への更新はこちらで行う
-  updateOmikenPlace(currentItem.value);
-};
-
-const updateOmiken = (payload: OmikenEntry<OmikenCategory>) =>
-  emit("update:Omiken", payload);
 </script>
-
-<style scoped>
-.handle {
-  cursor: move;
-}
-</style>

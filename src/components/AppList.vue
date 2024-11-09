@@ -4,13 +4,13 @@
     <v-toolbar>
       <v-toolbar-title>
         {{ naviCategory }}
-        <v-chip v-if="naviCategory !== 'preferences'" label class="ml-4">
+        <v-chip v-if="showItemCount" label class="ml-4">
           {{ itemsCount }} items
         </v-chip>
       </v-toolbar-title>
       <template #append>
         <v-btn
-          v-if="naviCategory !== 'preferences'"
+          v-if="showAddButton"
           variant="outlined"
           @click="addItem"
           icon="mdi-plus"
@@ -18,33 +18,13 @@
       </template>
     </v-toolbar>
 
-    <v-sheet v-if="naviCategory === 'preset'">
-      <ListPreset
+    <!-- 各種リストコンポーネントの条件付きレンダリング -->
+    <v-sheet>
+      <component
+        :is="currentListComponent"
+        :Omiken="Omiken"
         @update:Omiken="updateOmiken"
         @update:OmikenPreset="updateOmikenPreset"
-      />
-    </v-sheet>
-    <v-sheet v-else-if="naviCategory === 'preferences'">
-      <ListPreferences :Omiken="Omiken" @update:Omiken="updateOmiken" />
-    </v-sheet>
-    <v-sheet v-else-if="naviCategory === 'rules'">
-      <ListRules
-        :Omiken="Omiken"
-        @update:Omiken="updateOmiken"
-        @open-editor="openEditor"
-      />
-    </v-sheet>
-    <v-sheet v-else-if="naviCategory === 'omikuji'">
-      <ListOmikuji
-        :Omiken="Omiken"
-        @update:Omiken="updateOmiken"
-        @open-editor="openEditor"
-      />
-    </v-sheet>
-    <v-sheet v-else-if="naviCategory === 'place'">
-      <ListPlace
-        :Omiken="Omiken"
-        @update:Omiken="updateOmiken"
         @open-editor="openEditor"
       />
     </v-sheet>
@@ -67,6 +47,7 @@ import type {
   ListEntry,
   PresetOmikenEditType,
 } from "@/types";
+import { FunkEmits } from "@/composables/FunkEmits";
 
 // Props Emits
 const props = defineProps<{
@@ -80,14 +61,36 @@ const emit = defineEmits<{
   (e: "open-editor", editorItem: ListEntry<ListCategory>): void;
 }>();
 
+// コンポーザブル:FunkEmits
+const { updateOmiken,openEditor ,updateOmikenPreset} = FunkEmits(emit);
+
+// 表示制御用の計算プロパティ
+const showItemCount = computed(() => props.naviCategory !== 'preferences');
+const showAddButton = computed(() => props.naviCategory !== 'preferences');
+
+
+// 現在のカテゴリに応じたアイテム一覧を取得
+const currentItems = computed(() => {
+  const excludedCategories = ['preset', 'preferences'];
+  return excludedCategories.includes(props.naviCategory) 
+    ? {} 
+    : props.Omiken[props.naviCategory];
+});
+
 // アイテムカウント
 const itemsCount = computed(() => Object.keys(currentItems.value).length);
 
-// フィルターオプションに合わせて表示を変更
-const currentItems = computed(() => {
-  if (props.naviCategory === "preset") return {};
-  if (props.naviCategory === "preferences") return {};
-  return props.Omiken[props.naviCategory];
+// これはなに？
+const currentListComponent = computed(() => {
+  const componentMap = {
+    preset: ListPreset,
+    preferences: ListPreferences,
+    rules: ListRules,
+    omikuji: ListOmikuji,
+    place: ListPlace,
+  } as const;
+  
+  return componentMap[props.naviCategory];
 });
 
 // アイテムを追加
@@ -97,12 +100,4 @@ const addItem = () => {
   }
 };
 
-// 各種操作関数(エディターを開く/Omiken更新)
-const updateOmiken = (payload: OmikenEntry<OmikenCategory>) =>
-  emit("update:Omiken", payload);
-// TODO updateOmikenPresetを作る
-const updateOmikenPreset = (preset: PresetOmikenEditType) =>
-  emit("update:OmikenPreset", preset);
-const openEditor = (editorItem: ListEntry<ListCategory>) =>
-  emit("open-editor", editorItem);
 </script>

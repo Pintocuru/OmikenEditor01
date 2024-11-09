@@ -124,7 +124,6 @@ import Swal from "sweetalert2";
 import {
   AppStateType,
   OmikenCategory,
-  OmikenType,
   OmikenEntry,
   PresetOmikenEditType,
   fetchJSONType,

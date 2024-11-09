@@ -2,13 +2,21 @@
 <template>
   <v-card>
     <v-toolbar :color="themeColor" density="compact">
-      <v-toolbar-title>🔐 フィルタリング設定</v-toolbar-title>
+      <v-toolbar-title
+        >🔐 フィルタリング設定
+        <v-chip
+          density="compact"
+          variant="outlined"
+          :color="
+            isThreshold(currentItem.threshold) ? 'yellow lighten-3' : 'grey'
+          "
+          class="ml-4"
+        >
+          🔐 {{ getExampleText(currentItem.threshold) }}
+        </v-chip>
+      </v-toolbar-title>
     </v-toolbar>
     <v-card-text>
-      <div class="text-caption">
-        条件例：{{ getExampleText(currentItem.threshold) }}
-      </div>
-
       <!-- アイコン -->
       <v-row justify="space-around">
         <v-col v-for="item in items.threshold" :key="item.value" cols="auto">
@@ -76,50 +84,42 @@
         <v-card
           v-if="currentItem.threshold.conditionType === ConditionType.TIME"
         >
-          <v-card-text>
-            <DialogThresholdInput
-              v-model="currentItem.threshold.time"
-              :conditionType="ConditionType.TIME"
-              @update:modelValue="updateThreshold"
-            />
-          </v-card-text>
+          <DialogThresholdInput
+            v-model="currentItem.threshold.time"
+            :conditionType="ConditionType.TIME"
+            @update:modelValue="updateThreshold"
+          />
         </v-card>
 
         <v-card
           v-if="currentItem.threshold.conditionType === ConditionType.ELAPSED"
         >
-          <v-card-text>
-            <DialogThresholdInput
-              v-model="currentItem.threshold.elapsed"
-              :conditionType="ConditionType.ELAPSED"
-              @update:modelValue="updateThreshold"
-            />
-          </v-card-text>
+          <DialogThresholdInput
+            v-model="currentItem.threshold.elapsed"
+            :conditionType="ConditionType.ELAPSED"
+            @update:modelValue="updateThreshold"
+          />
         </v-card>
 
         <v-card
           v-if="currentItem.threshold.conditionType === ConditionType.COUNT"
         >
-          <v-card-text>
-            <DialogThresholdInput
-              ref="childRef"
-              v-model="currentItem.threshold.count"
-              :conditionType="ConditionType.COUNT"
-              @update:modelValue="updateThreshold"
-            />
-          </v-card-text>
+          <DialogThresholdInput
+            ref="childRef"
+            v-model="currentItem.threshold.count"
+            :conditionType="ConditionType.COUNT"
+            @update:modelValue="updateThreshold"
+          />
         </v-card>
 
         <v-card
           v-if="currentItem.threshold.conditionType === ConditionType.GIFT"
         >
-          <v-card-text>
-            <DialogThresholdInput
-              v-model="currentItem.threshold.gift"
-              :conditionType="ConditionType.GIFT"
-              @update:modelValue="updateThreshold"
-            />
-          </v-card-text>
+          <DialogThresholdInput
+            v-model="currentItem.threshold.gift"
+            :conditionType="ConditionType.GIFT"
+            @update:modelValue="updateThreshold"
+          />
         </v-card>
       </v-sheet>
     </v-card-text>
@@ -152,7 +152,7 @@ const emit = defineEmits<{
 }>();
 
 // コンポーザブル:funkThreshold
-const { items, getExampleText } = FunkThreshold();
+const { items, isThreshold, getExampleText } = FunkThreshold();
 
 // dialogThresholdInput用のrefを追加
 const childRef = ref<InstanceType<typeof DialogThresholdInput>>();
@@ -160,15 +160,30 @@ const childRef = ref<InstanceType<typeof DialogThresholdInput>>();
 // 選択以外のすべての値にデフォルト値を入れる
 const initializeThreshold = () => {
   if (!props.currentItem?.threshold) return;
-   const base = {  value1: 0 };
-  const defaults :Partial<ThresholdType>= {
+  const base = { value1: 0 };
+  const defaults: Partial<ThresholdType> = {
     access: AccessLevel.ANYONE,
     syoken: SyokenType.SYOKEN,
     match: [],
-    time:{ ...base, type:ConditionType.TIME, comparison: 'range' as const, value2: 23 },
-    elapsed:{ ...base, type:ConditionType.ELAPSED, comparison: 'max' as const, unit: 'minute' as const },
-    count:{ ...base, type:ConditionType.COUNT, comparison: 'max' as const, unit: 'lc' as const},
-    gift: { ...base, type:ConditionType.GIFT, comparison: 'max' as const },
+    time: {
+      ...base,
+      type: ConditionType.TIME,
+      comparison: "range" as const,
+      value2: 23,
+    },
+    elapsed: {
+      ...base,
+      type: ConditionType.ELAPSED,
+      comparison: "max" as const,
+      unit: "minute" as const,
+    },
+    count: {
+      ...base,
+      type: ConditionType.COUNT,
+      comparison: "max" as const,
+      unit: "lc" as const,
+    },
+    gift: { ...base, type: ConditionType.GIFT, comparison: "max" as const },
   };
   props.currentItem.threshold = {
     ...defaults,
@@ -191,9 +206,6 @@ const updateThreshold = () => {
     [props.currentItem.id]: props.currentItem,
   } as EditerEntryTypeMap[typeof type];
 
-  emit("update:Omiken", {
-    type,
-    update,
-  });
+  emit("update:Omiken", { type, update });
 };
 </script>

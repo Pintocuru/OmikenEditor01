@@ -18,9 +18,9 @@
           </v-card-title>
         </v-card>
       </v-list-item>
-      <v-divider  class="my-4" />
+      <v-divider class="my-4" />
 
-            <!-- preset  -->
+      <!-- preset  -->
       <v-list-item>
         <v-card @click="openList('preset')" class="py-4">
           <v-card-title class="d-flex align-center">

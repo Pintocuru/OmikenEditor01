@@ -1,20 +1,14 @@
 <!-- src/components/DialogOmikujiPost.vue -->
 <template>
   <v-card>
-    <v-toolbar
-      :color="currentItem.post.length === 0 ? 'error' : themeColor"
-      density="compact"
-      class="mb-2"
-    >
+    <v-toolbar :color="currentItem.post.length === 0 ? 'error' : themeColor" density="compact" class="mb-2">
       <v-toolbar-title>
         <v-icon v-if="currentItem.post.length === 0">mdi-alert-circle</v-icon>
         メッセージ設定
-        <span v-if="currentItem.post.length === 0"
-          >(何も入力されてません!)</span
-        >
+        <span v-if="currentItem.post.length === 0">(何も入力されてません!)</span>
       </v-toolbar-title>
       <template #append>
-        <v-btn block @click="addPostTop()" variant="outlined">
+        <v-btn block @click="addPost('top')" variant="outlined">
           <v-icon>mdi-plus</v-icon> 追加
         </v-btn>
       </template>
@@ -23,26 +17,17 @@
       <v-expansion-panel v-for="(post, index) in currentItem.post" :key="index">
         <v-expansion-panel-title hide-actions :color="getPostColor(post)">
           <v-toolbar density="compact" color="transparent">
-            <v-chip
-              variant="flat"
-              :color="getTypeColor(post.type)"
-              class="mr-2"
-            >
+            <v-chip variant="flat" :color="getTypeColor(post.type)">
               {{ getTypeLabel(post.type) }}
             </v-chip>
 
-            <v-img
-              v-if="isCharacterPost(post.type)"
-              :src="getCharaImage(post)"
-              max-height="80"
-              max-width="80"
-            />
+            <v-img v-if="isCharacterPost(post.type)" :src="getCharaImage(post)" max-height="80" max-width="80"  class="ml-2" />
 
             <v-toolbar-title>
               {{ post.content }}
             </v-toolbar-title>
 
-            <v-chip variant="flat" color="while" class="mr-2">
+            <v-chip variant="flat" color="while">
               <v-icon class="mr-2">mdi-clock-outline</v-icon>
               <span class="font-weight-bold">{{ post.delaySeconds }}秒</span>
             </v-chip>
@@ -51,122 +36,57 @@
         <v-expansion-panel-text>
           <v-row dense>
             <v-col cols="6" sm="3">
-              <v-select
-                v-model="post.type"
-                :items="onecommeTypeItems"
-                label="投稿の種類"
-                item-title="text"
-                item-value="value"
-                density="compact"
-                @change="updateOmikenOmikuji"
-              >
+              <v-select v-model="post.type" :items="onecommeTypeItems" label="投稿の種類" item-title="text"
+                item-value="value" density="compact" @change="updateOmikenOmikuji">
               </v-select>
             </v-col>
             <v-col cols="6" sm="3" v-if="isCharacterPost(post.type)">
-              <v-select
-                v-model="post.botKey"
-                :items="botKeyItems"
-                label="ボットキー"
-                item-title="text"
-                item-value="value"
-                density="compact"
-                @change="updateOmikenOmikuji"
-              >
+              <v-select v-model="post.botKey" :items="botKeyItems" label="ボットキー" item-title="text" item-value="value"
+                density="compact" @change="updateOmikenOmikuji">
               </v-select>
             </v-col>
             <v-col cols="6" sm="3" v-if="isCharacterPost(post.type)">
-              <v-select
-                v-model="post.iconKey"
-                :items="getIconKeyItems(post.botKey)"
-                label="アイコンキー"
-                item-title="text"
-                item-value="value"
-                density="compact"
-                @change="updateOmikenOmikuji"
-              >
+              <v-select v-model="post.iconKey" :items="getIconKeyItems(post.botKey)" label="アイコンキー" item-title="text"
+                item-value="value" density="compact" @change="updateOmikenOmikuji">
               </v-select>
             </v-col>
             <v-col cols="12" sm="3">
-              <v-text-field
-                v-model.number="post.delaySeconds"
-                label="遅延時間(秒)"
-                type="number"
-                step="0.1"
-                min="-1"
-                density="compact"
-                @input="updateOmikenOmikuji"
-              >
+              <v-text-field v-model.number="post.delaySeconds" label="遅延時間(秒)" type="number" step="0.1" min="-1"
+                density="compact" @input="updateOmikenOmikuji">
               </v-text-field>
             </v-col>
           </v-row>
           <v-sheet>
-            <v-text-field
-              v-model="post.content"
-              label="内容"
-              rows="2"
-              auto-grow
-              @input="updateOmikenOmikuji"
-            />
+            <v-text-field v-model="post.content" label="内容" rows="2" auto-grow @input="updateOmikenOmikuji" />
 
-            <v-slider
-              v-model.number="post.delaySeconds"
-              prepend-icon="mdi-alarm"
-              :thumb-size="24"
-              thumb-label="always"
-              class="pa-2"
-              min="-1"
-              max="10"
-              step="0.1"
-              @change="updateOmikenOmikuji"
-            />
+            <v-slider v-model.number="post.delaySeconds" prepend-icon="mdi-alarm" :thumb-size="24" thumb-label="always"
+              class="pa-2" min="-1" max="10" step="0.1" @change="updateOmikenOmikuji" />
           </v-sheet>
 
           <v-sheet class="d-flex justify-space-between align-center">
-            <v-tooltip
-              v-for="(name, index) in extractValidPlaceholders(post.content)
-                .validPlaceholders"
-              :key="index"
-              text="クリックでエディターを開く"
-              location="bottom"
-            >
+            <v-tooltip v-for="(name, index) in extractValidPlaceholders(post.content)
+              .validPlaceholders" :key="index" text="クリックでエディターを開く" location="bottom">
               <template v-slot:activator="{ props: tooltipProps }">
-                <v-chip
-                  v-bind="tooltipProps"
-                  class="me-2"
-                  color="primary"
-                  variant="outlined"
-                  @click="
-                    openEditor(
-                      extractValidPlaceholders(post.content).placeholderIds[
-                        index
-                      ]
-                    )
-                  "
-                >
+                <v-chip v-bind="tooltipProps" class="me-2" color="primary" variant="outlined" @click="
+                  openEditorItem('place',
+                    extractValidPlaceholders(post.content).placeholderIds[
+                    index
+                    ]
+                  )
+                  ">
                   {{ name }}
                 </v-chip>
               </template>
             </v-tooltip>
             <!-- 複製・削除ボタン -->
-            <PartsArrayRemove
-              :type="'omikuji'"
-              :currentItem="currentItem"
-              :array="currentItem.post"
-              :index="index"
-              @update:Omiken="updateOmiken"
-            />
+            <PartsArrayRemove :type="'omikuji'" :currentItem="currentItem" :array="currentItem.post" :index="index"
+              @update:Omiken="updateOmiken" />
           </v-sheet>
         </v-expansion-panel-text>
       </v-expansion-panel>
     </v-expansion-panels>
     <v-card-actions>
-      <v-btn
-        block
-        @click="addPostBottom()"
-        color="primary"
-        variant="flat"
-        class="mb-2"
-      >
+      <v-btn block @click="addPost()" color="primary" variant="flat" class="mb-2">
         <v-icon left>mdi-plus</v-icon> 追加
       </v-btn>
     </v-card-actions>
@@ -174,7 +94,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, Ref } from "vue";
+import { inject, Ref } from "vue";
 import type {
   AppStateType,
   ListCategory,
@@ -182,9 +102,11 @@ import type {
   OmikujiType,
   OmikenCategory,
   OmikenEntry,
+  OmikujiPostType,
 } from "../types";
 import { FunkOmikuji } from "../composables/FunkOmikuji";
 import PartsArrayRemove from "../components/common/PartsArrayRemove.vue";
+import { FunkEmits } from "@/composables/FunkEmits";
 const props = defineProps<{
   currentItem: OmikujiType;
   themeColor: string;
@@ -198,6 +120,9 @@ const emit = defineEmits<{
 // inject
 const AppState = inject<Ref<AppStateType>>("AppStateKey");
 const CHARA = AppState?.value.CHARA;
+
+// コンポーザブル:FunkEmits
+const { updateOmiken, openEditorItem } = FunkEmits(emit);
 
 const {
   // Post type utilities
@@ -226,39 +151,23 @@ const updateOmikenOmikuji = () => {
 };
 
 // postに追加
-const addPostBottom = () => {
+const addPost = (position = "bottom") => {
   const botKey = CHARA ? Object.keys(CHARA)[0] : "mamono";
-  props.currentItem.post.push({
+  const newPost: OmikujiPostType = {
     type: "onecomme",
     botKey: botKey,
     iconKey: "Default",
     delaySeconds: 0,
     content: "<<user>>の新しいメッセージ",
-  });
-  updateOmikenOmikuji();
-};
-// postに追加
-const addPostTop = () => {
-  const botKey = CHARA ? Object.keys(CHARA)[0] : "mamono";
-  props.currentItem.post.unshift({
-    type: "onecomme",
-    botKey: botKey,
-    iconKey: "Default",
-    delaySeconds: 0,
-    content: "<<user>>の新しいメッセージ",
-  });
+  };
+
+  if (position === "top") {
+    props.currentItem.post.unshift(newPost);
+  } else {
+    props.currentItem.post.push(newPost);
+  }
+
   updateOmikenOmikuji();
 };
 
-// エディターを開く
-function openEditor(key: string) {
-  emit("open-editor", {
-    isOpen: true,
-    type: "place",
-    mode: null,
-    key,
-  });
-}
-const updateOmiken = (payload: OmikenEntry<OmikenCategory>) =>
-  emit("update:Omiken", payload);
 </script>

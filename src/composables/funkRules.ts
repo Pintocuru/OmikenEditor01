@@ -95,6 +95,23 @@ export function FunkRules() {
     }
   );
 
+  // rulesのenabledIds に入っているomikujiのプレースホルダーを探す
+  const rulesOfPlaces = (Omiken: OmikenType, enabledIds?: string[]) =>
+    computed(() => {
+      if (!enabledIds) return Object.values(Omiken.place);
+
+      const usedPlaceNames = enabledIds
+        .flatMap((id) => Omiken.omikuji[id]?.post ?? [])
+        .flatMap((post) => {
+          const matches = post.content?.match(/<<([^>>]+)>>/g) ?? [];
+          return matches.map((m) => m.replace(/<<|>>/g, ""));
+        });
+
+      return Object.values(Omiken.place).filter((place) =>
+        usedPlaceNames.includes(place.name)
+      );
+    });
+
   return {
     chipColors,
     switchLabels: Object.fromEntries(
@@ -107,27 +124,6 @@ export function FunkRules() {
     omikujiLists,
     enabledOmikujiLists,
     weightColor,
+    rulesOfPlaces,
   };
 }
-
-//
-export const rulesOfPlaces = (Omiken: OmikenType, enabledIds?: string[]) => {
-  const displayPlaces = computed(() => {
-    if (!enabledIds) return Object.values(Omiken.place);
-
-    const usedPlaceNames = enabledIds
-      .flatMap((id) => Omiken.omikuji[id]?.post ?? [])
-      .flatMap((post) => {
-        const matches = post.content?.match(/<<([^>>]+)>>/g) ?? [];
-        return matches.map((m) => m.replace(/<<|>>/g, ""));
-      });
-
-    return Object.values(Omiken.place).filter((place) =>
-      usedPlaceNames.includes(place.name)
-    );
-  });
-
-  return {
-    displayPlaces,
-  };
-};

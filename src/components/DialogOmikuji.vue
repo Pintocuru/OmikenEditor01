@@ -101,6 +101,7 @@ import DialogOmikujiPost from "./DialogOmikujiPost.vue";
 import DialogThreshold from "./DialogThreshold.vue";
 import { FunkThreshold } from "@/composables/FunkThreshold";
 import { FunkOmikuji } from "@/composables/FunkOmikuji";
+import { FunkEmits } from "@/composables/FunkEmits";
 // props/emits
 const props = defineProps<{
   entry: ListEntry<"omikuji"> | null;
@@ -115,6 +116,10 @@ const emit = defineEmits<{
 const AppState = inject<Ref<AppStateType>>("AppStateKey");
 const omikuji = AppState?.value.Omiken.omikuji;
 
+// コンポーザブル:FunkEmits
+const { updateOmiken, openEditor } = FunkEmits(emit);
+
+// コンポーザブル:FunkOmikuji
 const { getPostTypeColor } = FunkOmikuji();
 // コンポーザブル:funkThreshold
 const { isThreshold } = FunkThreshold();
@@ -151,9 +156,4 @@ const updateItem = () => {
     });
   }
 };
-// 子コンポーネントのOmiken更新
-const updateOmiken = (payload: OmikenEntry<OmikenCategory>) =>
-  emit("update:Omiken", payload);
-const openEditor = (editorItem: ListEntry<ListCategory>) =>
-  emit("open-editor", editorItem);
 </script>

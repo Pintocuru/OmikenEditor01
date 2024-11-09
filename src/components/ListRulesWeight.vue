@@ -1,6 +1,6 @@
 <!-- src/components/ListRulesWeight.vue -->
 <template>
-  <v-dialog v-model="editorDialog.isOpen" max-width="600px">
+  <v-dialog v-model="dialogWeight.isOpen" max-width="600px">
     <v-card density="compact" style="max-height: 80vh; overflow-y: auto">
       <v-toolbar color="red" density="compact" class="mb-2">
         <v-toolbar-title>
@@ -71,7 +71,7 @@
   <v-sheet>
     <v-btn
       block
-      @click="openEditor()"
+      @click="openDialogWeight()"
       color="primary"
       variant="flat"
       class="mb-6"
@@ -106,6 +106,8 @@ const emit = defineEmits<{
   (e: "update:Omiken", payload: OmikenEntry<OmikenCategory>): void;
 }>();
 
+
+// コンポーザブル:FunkRules
 const { weightTotal, weightColor, weightPercentage } =
   FunkRules();
 
@@ -116,13 +118,13 @@ const currentItem = computed({
   },
 });
 
-const editorDialog = ref({
+const dialogWeight = ref({
   isOpen: false,
   item: null as OmikujiType | null,
 });
 
-const openEditor = (omikujiId?: string) => {
-  editorDialog.value = {
+const openDialogWeight = (omikujiId?: string) => {
+  dialogWeight.value = {
     isOpen: true,
     item: omikujiId ? { ...props.Omiken.omikuji[omikujiId] } : null,
   };

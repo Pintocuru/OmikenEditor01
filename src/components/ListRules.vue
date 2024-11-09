@@ -1,7 +1,11 @@
 <!-- src/components/ListRules.vue -->
 <template>
   <!-- Rules View -->
-  <v-card v-for="(ruleId, index) in Omiken.rulesOrder" :key="ruleId" class="mb-2">
+  <v-card
+    v-for="(ruleId, index) in Omiken.rulesOrder"
+    :key="ruleId"
+    class="mb-2"
+  >
     <v-toolbar :color="Omiken.rules[ruleId]?.color">
       <PartsToolbarMove
         :index="index"
@@ -80,8 +84,8 @@
             </span>
             <v-chip label class="ml-4">
               {{
-                rulesOfPlaces(Omiken, Omiken.rules[ruleId]?.enabledIds)
-                  .displayPlaces.value.length
+                rulesOfPlaces(Omiken, Omiken.rules[ruleId]?.enabledIds).value
+                  .length
               }}
               items
             </v-chip>
@@ -114,8 +118,9 @@ import type {
   ListEntry,
   OmikenCategory,
 } from "@/types";
-import { rulesOfPlaces } from "@/composables/FunkRules";
+import { FunkRules } from "@/composables/FunkRules";
 import { FunkThreshold } from "@/composables/FunkThreshold";
+import { FunkEmits } from "@/composables/FunkEmits";
 
 const props = defineProps<{
   Omiken: OmikenType;
@@ -126,6 +131,10 @@ const emit = defineEmits<{
   (e: "open-editor", editorItem: ListEntry<ListCategory>): void;
 }>();
 
+// コンポーザブル:FunkEmits
+const { updateOmiken, openEditor, openEditorItem } = FunkEmits(emit);
+// コンポーザブル:FunkRules
+const { rulesOfPlaces } = FunkRules();
 // コンポーザブル:funkThreshold
 const { isThreshold, getExampleText } = FunkThreshold();
 
@@ -143,20 +152,4 @@ const updateRulesEnabledIds = (enabledIds: string[], ruleId: string) => {
     },
   });
 };
-
-// omikujiのエディターを開く
-const openEditorItem = (type: ListCategory, id: string) => {
-  emit("open-editor", {
-    isOpen: true,
-    type,
-    mode: null,
-    key: id,
-  });
-};
-
-// ダイアログを開く
-const openEditor = (editorItem: ListEntry<ListCategory>) =>
-  emit("open-editor", editorItem);
-const updateOmiken = (payload: OmikenEntry<OmikenCategory>) =>
-  emit("update:Omiken", payload);
 </script>

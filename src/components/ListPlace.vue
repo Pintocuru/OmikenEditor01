@@ -71,6 +71,7 @@ import type {
   OmikenType,
   PlaceValueType,
 } from "@/types";
+import { FunkEmits } from "@/composables/FunkEmits";
 
 const props = defineProps<{
   Omiken: OmikenType;
@@ -80,6 +81,9 @@ const emit = defineEmits<{
   (e: "update:Omiken", payload: OmikenEntry<OmikenCategory>): void;
   (e: "open-editor", editorItem: ListEntry<ListCategory>): void;
 }>();
+
+// コンポーザブル:FunkEmits
+const { updateOmiken, openEditorItem } = FunkEmits(emit);
 
 // プレースホルダーIDをソートして取得
 const sortedPlaceIds = computed(() => {
@@ -96,22 +100,6 @@ const getRandomValues = (values: PlaceValueType[], count: number) => {
   return shuffledValues.slice(0, count).map((v) => v.value);
 };
 
-// プレースホルダーのエディターを開く
-const openEditorItem = (type: ListCategory, id: string) => {
-  if (
-    (type === "omikuji" && props.Omiken.omikuji?.[id]) ||
-    (type === "place" && props.Omiken.place?.[id]) ||
-    (type === "rules" && props.Omiken.rules?.[id])
-  ) {
-    emit("open-editor", {
-      isOpen: true,
-      type,
-      mode: null,
-      key: id,
-    });
-  }
-};
-
 // アイテムを追加
 const addItemPlace = () => {
   emit("update:Omiken", {
@@ -119,7 +107,4 @@ const addItemPlace = () => {
     addKeys: [{}],
   });
 };
-
-const updateOmiken = (payload: OmikenEntry<OmikenCategory>) =>
-  emit("update:Omiken", payload);
 </script>

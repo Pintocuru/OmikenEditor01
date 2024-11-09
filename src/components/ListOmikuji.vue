@@ -83,6 +83,7 @@ import type {
   OmikenEntry,
   OmikenType,
 } from "@/types";
+import { FunkEmits } from "@/composables/FunkEmits";
 
 const props = defineProps<{
   Omiken: OmikenType;
@@ -93,34 +94,19 @@ const emit = defineEmits<{
   (e: "open-editor", editorItem: ListEntry<ListCategory>): void;
 }>();
 
-// コンポーザブル
+// コンポーザブル:FunkEmits
+const { updateOmiken, openEditorItem } = FunkEmits(emit);
+// コンポーザブル:FunkOmikuji
 const { getOnecommeContent, getPostTypeColor } = FunkOmikuji();
+// コンポーザブル:FunkThreshold
 const { isThreshold, getExampleText } = FunkThreshold();
 
 // おみくじIDをソートして取得
-const sortedOmikujiIds = computed(() => {
-  return Object.keys(props.Omiken.omikuji).sort((a, b) => {
-    const nameA = props.Omiken.omikuji[a]?.name || "";
-    const nameB = props.Omiken.omikuji[b]?.name || "";
-    return nameA.localeCompare(nameB);
-  });
-});
-
-// omikujiのエディターを開く
-const openEditorItem = (type: ListCategory, id: string) => {
-  if (
-    (type === "omikuji" && props.Omiken.omikuji?.[id]) ||
-    (type === "place" && props.Omiken.place?.[id]) ||
-    (type === "rules" && props.Omiken.rules?.[id])
-  ) {
-    emit("open-editor", {
-      isOpen: true,
-      type,
-      mode: null,
-      key: id,
-    });
-  }
-};
+const sortedOmikujiIds = computed(() =>
+  Object.keys(props.Omiken.omikuji).sort((a, b) =>
+    (props.Omiken.omikuji[a]?.name || "").localeCompare(props.Omiken.omikuji[b]?.name || "")
+  )
+);
 
 // アイテムを追加
 const addItemOmikuji = () => {
@@ -130,6 +116,4 @@ const addItemOmikuji = () => {
   });
 };
 
-const updateOmiken = (payload: OmikenEntry<OmikenCategory>) =>
-  emit("update:Omiken", payload);
 </script>

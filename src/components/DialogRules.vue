@@ -45,7 +45,7 @@
       <!-- フィルタリング -->
       <DialogThreshold
         :currentItem="currentItem"
-        :themeColor = "currentItem.color"
+        :themeColor="currentItem.color"
         @update:Omiken="updateOmiken"
       />
     </v-card-text>
@@ -66,6 +66,7 @@ import type {
   OmikenCategory,
   AppStateType,
 } from "../types";
+import { FunkEmits } from "@/composables/FunkEmits";
 
 // props/emits
 const props = defineProps<{
@@ -80,8 +81,9 @@ const emit = defineEmits<{
 // inject
 const AppState = inject<Ref<AppStateType>>("AppStateKey");
 const rules = AppState?.value.Omiken.rules;
-const omikuji = AppState?.value.Omiken.omikuji;
 
+// コンポーザブル:FunkEmits
+const { updateOmiken } = FunkEmits(emit);
 
 // propsからデータを解読
 const currentItem = computed(() =>
@@ -97,21 +99,4 @@ const updateItem = () => {
     });
   }
 };
-
-// omikujiのエディターを開く
-const openEditorOmikuji = (option: { id: string; name: string }) => {
-  const omi = omikuji?.[option.id];
-  if (omi) {
-    emit("open-editor", {
-      isOpen: true,
-      type: "omikuji",
-      mode: null,
-      key: option.id,
-    });
-  }
-};
-
-// 子コンポーネントのOmiken更新
-const updateOmiken = (payload: OmikenEntry<OmikenCategory>) =>
-  emit("update:Omiken", payload);
 </script>

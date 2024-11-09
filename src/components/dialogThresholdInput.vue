@@ -1,5 +1,6 @@
 <!-- src/components/DialogThresholdInput.vue -->
 <template>
+  <v-card-text>
   <v-row dense>
     <v-col
       cols="12"
@@ -61,6 +62,7 @@
       />
     </v-col>
   </v-row>
+  </v-card-text>
 </template>
 
 <script setup lang="ts">

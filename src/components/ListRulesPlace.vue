@@ -2,7 +2,7 @@
 <template>
   <v-row dense>
     <v-col
-      v-for="place in displayPlaces"
+      v-for="place in getRulesOfPlaces"
       :key="place.id"
       cols="12"
       sm="4"
@@ -21,7 +21,7 @@
                 :content="place.values.length"
                 color="primary"
                 class="ml-3"
-                style=" transform: translateY(-8px);"
+                style="transform: translateY(-8px)"
               />
             </span>
             <!-- 長さが0の場合 -->
@@ -53,7 +53,8 @@ import {
   PlaceValueType,
 } from "@/types";
 import { ref, watchEffect } from "vue";
-import { rulesOfPlaces } from "../composables/FunkRules";
+import { FunkRules } from "../composables/FunkRules";
+import { FunkEmits } from "../composables/FunkEmits";
 
 const props = defineProps<{
   Omiken: OmikenType;
@@ -65,8 +66,12 @@ const emit = defineEmits<{
   (e: "open-editor", editorItem: ListEntry<ListCategory>): void;
 }>();
 
-// TODO ここは後で生成AIに書き直してもらう
-const displayPlaces = rulesOfPlaces(props.Omiken,props.enabledIds).displayPlaces;
+// コンポーザブル:FunkEmits
+const { openEditorItem } = FunkEmits(emit);
+
+// コンポーザブル:FunkRules
+const { rulesOfPlaces } = FunkRules();
+const getRulesOfPlaces = rulesOfPlaces(props.Omiken, props.enabledIds);
 
 // ランダムでvaluesの内容を表示させる
 const randomValues = ref<Record<string, string>>({});
@@ -77,27 +82,10 @@ const getRandomValue = (values: PlaceValueType[]) => {
   return values[Math.floor(Math.random() * values.length)].value;
 };
 watchEffect(() => {
-  displayPlaces.value.forEach((place) => {
+  getRulesOfPlaces.value.forEach((place) => {
     if (!randomValues.value[place.id]) {
       shuffleValue(place.id, place.values);
     }
   });
 });
-
-// omikujiのエディターを開く
-const openEditorItem = (type: ListCategory, id: string) => {
-  // typeは'rules'か'omikuji'か'place'のいずれか
-  if (
-    (type === "omikuji" && props.Omiken.omikuji?.[id]) ||
-    (type === "place" && props.Omiken.place?.[id]) ||
-    (type === "rules" && props.Omiken.rules?.[id])
-  ) {
-    emit("open-editor", {
-      isOpen: true,
-      type,
-      mode: null,
-      key: id,
-    });
-  }
-};
 </script>

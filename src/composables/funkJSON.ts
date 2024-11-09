@@ -1,6 +1,6 @@
 // src/composables/funkJSON.ts
 import { ref } from 'vue';
-import { validateData, generateOrder } from "./funkValidate";
+import { validateData } from "./FunkValidate";
 import type { OmikenType, fetchJSONType, CHARAEditType, PresetOmikenEditType, ListCategory, EditerTypeMap, RulesType, OmikujiType, PlaceType } from '../types';
 import _ from 'lodash';
 import Swal from 'sweetalert2';
@@ -21,7 +21,7 @@ export function funkJSON() {
   const isLoading = ref(false); // 読み込み中かどうか、読み込み失敗ならずっとtrue
   const noAppBoot = ref(false); // 起動できたか
   const lastSavedState = ref<OmikenType | null>(null); // 1つ前へ戻る機能
-  const toast = useToast(); // vue-toastification
+  const toast = useToast(); // vue-toastification // TODO sweetalert2 に変更
 
 
   // OmikenとCHARAデータの読み込み

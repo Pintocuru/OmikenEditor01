@@ -40,7 +40,7 @@
                 :index="index"
                 size="32"
                 v-model:array="currentItem.values"
-    @update:array="handleArrayUpdate(index, $event)"
+                @update:array="handleArrayUpdate(index, $event)"
               />
             </v-col>
           </v-row>
@@ -53,13 +53,7 @@
 <script setup lang="ts">
 import draggable from "vuedraggable";
 import PartsArrayRemovePlace from "./common/PartsArrayRemovePlace.vue";
-import type {
-  PlaceValueType,
-  PlaceType,
-  OmikenEntry,
-  OmikenCategory,
-  ListEntry,
-} from "../types";
+import type { PlaceValueType, PlaceType, ListEntry } from "../types";
 
 const props = defineProps<{
   entry: ListEntry<"place"> | null;
@@ -77,7 +71,11 @@ const updateItem = (updatedValues: PlaceValueType[]) => {
 };
 
 // 各種ハンドラー
-const updateValue = (index: number, field: keyof PlaceValueType, value: any) => {
+const updateValue = (
+  index: number,
+  field: keyof PlaceValueType,
+  value: any
+) => {
   const newValues = props.currentItem.values.map((item, i) =>
     i === index ? { ...item, [field]: value } : item
   );

@@ -10,9 +10,12 @@ import type {
   OmikenCategory,
   ListEntryCollect,
   ListCategory,
-  PresetOmikenEditType} from '../types';
-import { funkJSON,  } from "./funkJSON";
-import { generateOrder, validateData } from "./funkValidate";
+  PresetOmikenEditType,
+  RulesType,
+  OmikujiType,
+  PlaceType} from '../types';
+import { funkJSON,  } from "./FunkJSON";
+import { generateOrder, validateData } from "./FunkValidate";
 
 export function funkOmiken(listEntry: Ref<ListEntryCollect>) {
   const AppState = ref<AppStateType>({
@@ -95,7 +98,7 @@ export function funkOmiken(listEntry: Ref<ListEntryCollect>) {
         ...preferences
       };
     } else if (type === 'rules' || type === 'omikuji' || type === 'place') {
-      const orderKey: OrderKey = type === 'rules' ? 'rulesOrder' : undefined;
+      const orderKey: OrderKey | undefined = type === 'rules' ? 'rulesOrder' : undefined;
 
       // 更新処理
       if (update) {
@@ -109,14 +112,11 @@ export function funkOmiken(listEntry: Ref<ListEntryCollect>) {
           const newKey = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
           const validatedItem = validateData(type, { [newKey]: item as ListType });
           Object.assign(newState[type], validatedItem);
-          if (orderKey) newState[orderKey].push(newKey); 
-          if (type === 'omikuji') {
+          if (orderKey) newState[orderKey].push(newKey); // orderKey が存在する場合のみ push
 
-            // item.rulesId があるなら、そのenabledIdsにkeyを入れる
-            if ('rulesId' in item && item.rulesId) {
-              const rulesId = item.rulesId;
-              newState.rules[rulesId].enabledIds.push(newKey); 
-            }
+          if (type === 'omikuji' && 'rulesId' in item && item.rulesId) {
+            const rulesId = item.rulesId;
+            newState.rules[rulesId].enabledIds.push(newKey);
           }
         });
       }
@@ -127,7 +127,6 @@ export function funkOmiken(listEntry: Ref<ListEntryCollect>) {
           delete newState[type][key];
           if (orderKey) newState[orderKey] = newState[orderKey].filter(id => id !== key);
           if (type === 'omikuji') {
-            // すべてのrulesのenabledIdsから対象のidを削除
             Object.values(newState.rules).forEach(rule => {
               rule.enabledIds = rule.enabledIds.filter(id => id !== key);
             });
@@ -151,18 +150,26 @@ export function funkOmiken(listEntry: Ref<ListEntryCollect>) {
     const currentPreferences = AppState.value.Omiken.preferences;
     const newState: OmikenType = JSON.parse(JSON.stringify(AppState.value.Omiken));
 
+    const categories: ListCategory[] = ['rules', 'omikuji', 'place'];
+
     if (preset.mode === 'overwrite') {
       // 上書きモード：プリセットの内容で完全に置き換え（preferences除く）
-      const categories: ListCategory[] = ['rules', 'omikuji', 'place'];
       categories.forEach(type => {
-        // 各カテゴリーのデータをバリデーション
-        newState[type] = validateData(type, preset.item[type]);
-        // OrderArrayの再生成
-        if (type === 'rules') newState[`${type}Order`] = generateOrder(newState[type]);
+        switch (type) {
+          case 'rules':
+            newState[type] = validateData(type, preset.item[type]) as Record<string, RulesType>;
+            newState[`${type}Order`] = generateOrder(newState[type]);
+            break;
+          case 'omikuji':
+            newState[type] = validateData(type, preset.item[type]) as Record<string, OmikujiType>;
+            break;
+          case 'place':
+            newState[type] = validateData(type, preset.item[type]) as Record<string, PlaceType>;
+            break;
+        }
       });
     } else {
       // 追加モード：既存のデータを保持しながら新しいデータを追加
-      const categories: ListCategory[] = ['rules', 'omikuji', 'place'];
       categories.forEach(type => {
         const orderKey = `${type}Order` as const;
         const validatedNewData = validateData(type, preset.item[type]);

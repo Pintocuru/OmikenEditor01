@@ -118,6 +118,7 @@ import type {
   OmikenEntry,
   OmikenType,
 } from "@/types";
+import { FunkEmits } from "@/composables/FunkEmits";
 
 const props = defineProps<{
   Omiken: OmikenType;
@@ -131,12 +132,13 @@ const emit = defineEmits<{
   (e: "open-editor", editorItem: ListEntry<ListCategory>): void;
 }>();
 
+// コンポーザブル:FunkEmits
+const { updateOmiken, openEditor, openEditorItem } = FunkEmits(emit);
 // コンポーザブル:funkRules
 const { weightTotal, weightPercentage, omikujiLists, weightColor } =
   FunkRules();
 // コンポーザブル:FunkOmikuji
 const { getOnecommeContent, getPostTypeColor } = FunkOmikuji();
-
 // コンポーザブル:funkThreshold
 const { isThreshold, getExampleText } = FunkThreshold();
 
@@ -147,23 +149,6 @@ const currentItem = computed({
     emit("update:enabledIds", value);
   },
 });
-
-// omikujiのエディターを開く
-const openEditorItem = (type: ListCategory, id: string) => {
-  // typeは'rules'か'omikuji'か'place'のいずれか
-  if (
-    (type === "omikuji" && props.Omiken.omikuji?.[id]) ||
-    (type === "place" && props.Omiken.place?.[id]) ||
-    (type === "rules" && props.Omiken.rules?.[id])
-  ) {
-    emit("open-editor", {
-      isOpen: true,
-      type,
-      mode: null,
-      key: id,
-    });
-  }
-};
 
 // アイテムを追加
 const addItemOmikuji = () => {
@@ -179,8 +164,4 @@ const addItemOmikuji = () => {
 const updateEnabledIds = () => {
   emit("update:enabledIds", currentItem.value);
 };
-const openEditor = (editorItem: ListEntry<ListCategory>) =>
-  emit("open-editor", editorItem);
-const updateOmiken = (payload: OmikenEntry<OmikenCategory>) =>
-  emit("update:Omiken", payload);
 </script>
