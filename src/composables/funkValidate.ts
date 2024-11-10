@@ -1,5 +1,5 @@
 // src/composables/funkValidate.ts
-import { type ListCategory, type EditerTypeMap, AccessLevel } from "../types";
+import { type ListCategory, type ListTypeMap, AccessCondition } from "../types";
 import { z } from "zod";
 import _ from "lodash";
 
@@ -75,7 +75,7 @@ const thresholdSchema = z
         "gift",
       ])
       .default("none"),
-    access: z.nativeEnum(AccessLevel).optional(),
+    access: z.nativeEnum(AccessCondition).optional(),
     syoken: z.enum(["syoken", "hi", "again"]).optional(),
     match: z.array(z.string()).optional(),
     time: thresholdTimeSchema.optional(),
@@ -253,8 +253,8 @@ const defaultValues = {
 export function validateData<T extends ListCategory>(
   type: T,
   items: Record<string, unknown>
-): Record<string, EditerTypeMap[T]> {
-  const validatedData: Record<string, EditerTypeMap[T]> = {};
+): Record<string, ListTypeMap[T]> {
+  const validatedData: Record<string, ListTypeMap[T]> = {};
 
   for (const [key, item] of Object.entries(items)) {
     const itemWithDefaults = _.merge(
@@ -266,7 +266,7 @@ export function validateData<T extends ListCategory>(
 
     try {
       const validatedItem = schemas[type].parse({ [key]: itemWithDefaults });
-      validatedData[key] = validatedItem[key] as EditerTypeMap[T];
+      validatedData[key] = validatedItem[key] as ListTypeMap[T];
     } catch (error) {
       if (error instanceof z.ZodError) {
         console.error(
@@ -281,7 +281,7 @@ export function validateData<T extends ListCategory>(
         ...defaultValues[type],
         id: key,
         ..._.pick(itemWithDefaults, ['name', 'description']) // 基本プロパティは保持
-      } as unknown as EditerTypeMap[T];
+      } as unknown as ListTypeMap[T];
     }
   }
 

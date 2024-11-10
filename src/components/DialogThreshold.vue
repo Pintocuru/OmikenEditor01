@@ -1,5 +1,17 @@
 <!-- src/components/DialogThreshold.vue -->
+<!-- これはたぶん使わない -->
 <template>
+  <!-- Rules用 
+  <DialogThresholdRules
+    v-model="ruleThreshold"
+    :themeColor="themeColor"
+  />
+
+  <DialogThresholdOmikuji
+    v-model="omikujiThreshold"
+    :themeColor="themeColor"
+  />
+-->
   <v-card>
     <v-toolbar :color="themeColor" density="compact">
       <v-toolbar-title
@@ -82,11 +94,11 @@
         />
 
         <v-card
-          v-if="currentItem.threshold.conditionType === ConditionType.TIME"
+          v-if="currentItem.threshold.conditionType === ConditionType.CLOCK"
         >
           <DialogThresholdInput
-            v-model="currentItem.threshold.time"
-            :conditionType="ConditionType.TIME"
+            v-model="currentItem.threshold.clock"
+            :conditionType="ConditionType.CLOCK"
             @update:modelValue="updateThreshold"
           />
         </v-card>
@@ -135,10 +147,9 @@ import {
   ConditionType,
   RulesType,
   OmikujiType,
-  EditerEntryTypeMap,
-  AccessLevel,
-  SyokenType,
-  ThresholdType,
+  ListItemTypeMap,
+  AccessCondition,
+  SyokenCondition,
 } from "../types";
 import { onMounted, ref } from "vue";
 
@@ -162,8 +173,8 @@ const initializeThreshold = () => {
   if (!props.currentItem?.threshold) return;
   const base = { value1: 0 };
   const defaults: Partial<ThresholdType> = {
-    access: AccessLevel.ANYONE,
-    syoken: SyokenType.SYOKEN,
+    access: AccessCondition.ANYONE,
+    syoken: SyokenCondition.SYOKEN,
     match: [],
     time: {
       ...base,
@@ -204,7 +215,7 @@ const updateThreshold = () => {
     "weight" in props.currentItem ? ("omikuji" as const) : ("rules" as const);
   const update = {
     [props.currentItem.id]: props.currentItem,
-  } as EditerEntryTypeMap[typeof type];
+  } as ListItemTypeMap[typeof type];
 
   emit("update:Omiken", { type, update });
 };

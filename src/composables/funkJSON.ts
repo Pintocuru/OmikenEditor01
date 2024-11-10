@@ -1,7 +1,7 @@
 // src/composables/funkJSON.ts
 import { ref } from 'vue';
 import { validateData } from "./FunkValidate";
-import type { OmikenType, fetchJSONType, CHARAEditType, PresetOmikenEditType, ListCategory, EditerTypeMap, RulesType, OmikujiType, PlaceType } from '../types';
+import type { OmikenType, fetchJSONType, CHARAEditType, PresetOmikenEditType, ListCategory, ListTypeMap, RulesType, OmikujiType, PlaceType } from '../types';
 import _ from 'lodash';
 import Swal from 'sweetalert2';
 import { useToast } from 'vue-toastification';

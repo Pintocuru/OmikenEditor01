@@ -75,7 +75,7 @@
             />
           </v-window-item>
           <v-window-item value="filter">
-            <DialogThreshold
+            <DialogThresholdOmikuji
               :currentItem="currentItem"
               :themeColor="themeColor"
               @update:Omiken="updateOmiken"
@@ -102,6 +102,7 @@ import DialogThreshold from "./DialogThreshold.vue";
 import { FunkThreshold } from "@/composables/FunkThreshold";
 import { FunkOmikuji } from "@/composables/FunkOmikuji";
 import { FunkEmits } from "@/composables/FunkEmits";
+import DialogThresholdOmikuji from "./DialogThresholdOmikuji.vue";
 // props/emits
 const props = defineProps<{
   entry: ListEntry<"omikuji"> | null;

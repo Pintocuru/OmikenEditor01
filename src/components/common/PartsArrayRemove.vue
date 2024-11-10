@@ -21,7 +21,7 @@
 
 <script setup lang="ts">
 import { ref, defineProps, defineEmits, PropType } from "vue";
-import type { OmikenEntry, OmikenCategory, EditerEntryTypeMap } from "@/types";
+import type { OmikenEntry, OmikenCategory, ListItemTypeMap } from "@/types";
 
 const props = defineProps({
   type: { type: String as PropType<OmikenCategory>, required: true }, // "omikuji" または "place"
@@ -45,7 +45,7 @@ function updateOmiken() {
       update: {
         [String(props.currentItem.id)]: props.currentItem,
         // @ts-ignore preferences preset ではこのコンポーネントを使わないので
-      } as EditerEntryTypeMap[typeof props.type],
+      } as ListItemTypeMap[typeof props.type],
     } satisfies OmikenEntry<typeof props.type>;
 
     emit("update:Omiken", update);

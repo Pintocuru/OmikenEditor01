@@ -17,7 +17,7 @@ export type NaviCategory = ListCategory | "preset" | "preferences";
 
 // リスト用カテゴリー
 export type ListCategory = "rules" | "omikuji" | "place";
-export type ListType = RulesType | OmikujiType | PlaceType;
+export type ListType = ListTypeMap[ListCategory];
 export type ListEntry<T extends ListCategory> = {
   isOpen: boolean; // ダイアログの開閉状態
   type: T;
@@ -33,11 +33,13 @@ export type ListEntryCollect = {
 export type OmikenCategory = ListCategory | "preset" | "preferences";
 export type OmikenEntry<T extends OmikenCategory> = {
   type: T;
-  update?: T extends ListCategory ? EditerEntryTypeMap[T] : never; // 更新アイテム
-  addKeys?:  // 新規追加アイテム(部分入力可)
+  update?: T extends ListCategory ? ListItemTypeMap[T] : never; // 更新アイテム
+  addKeys?: // 新規追加アイテム(部分入力可)
   T extends "omikuji"
-  ? (Partial<EditerTypeMap[T]> & { rulesId?: string })[] // 新しいキーの追加
-  : T extends ListCategory ? Partial<EditerTypeMap[T]>[] : never;
+  ? (Partial<ListTypeMap[T]> & { rulesId?: string })[] // 新しいキーの追加
+  : T extends ListCategory
+  ? Partial<ListTypeMap[T]>[]
+  : never;
   delKeys?: string[]; // 削除するアイテムのキー名
   reorder?: T extends ListCategory ? string[] : never; // 順番の指定
   preset?: T extends "preset" ? Record<string, PresetOmikenEditType> : never; // プリセット用
@@ -67,23 +69,21 @@ export interface PresetOmikenEditType extends fetchJSONType {
 
 // Omibot:おみくじボット用型定義
 export interface OmikenType {
-  rules: Record<string, EditerTypeMap["rules"]>; // おみくじのルールを管理
+  rules: Record<string, ListTypeMap["rules"]>; // おみくじのルールを管理
   rulesOrder: string[]; // ルールの順序
-  omikuji: Record<string, EditerTypeMap["omikuji"]>; // おみくじ関連のメッセージ
-  place: Record<string, EditerTypeMap["place"]>; // プレースホルダー
+  omikuji: Record<string, ListTypeMap["omikuji"]>; // おみくじ関連のメッセージ
+  place: Record<string, ListTypeMap["place"]>; // プレースホルダー
   preferences: PreferencesType;
 }
 
 // コンテンツの型マッピング
-export type EditerTypeMap = {
+export type ListTypeMap = {
   rules: RulesType;
   omikuji: OmikujiType;
   place: PlaceType;
 };
-export type EditerEntryTypeMap = {
-  rules: Record<string, RulesType>;
-  omikuji: Record<string, OmikujiType>;
-  place: Record<string, PlaceType>;
+export type ListItemTypeMap = {
+  [K in keyof ListTypeMap]: Record<string, ListTypeMap[K]>;
 };
 
 // 基本となる項目のインターフェース
@@ -96,56 +96,82 @@ interface BaseType {
 // rules:おみくじルールの型定義
 export interface RulesType extends BaseType {
   color: string; // edit時、識別する際に付ける色
+  threshold: RuleThresholdType; // 発動条件
   enabledIds: string[]; // omikujiの適用するIDリスト
-  matchStartsWith: string[]; // 特定のフレーズで始まるキーワード（省略可）
-  threshold: ThresholdType; // 発動条件
 }
 
 // おみくじメッセージの型定義
 export interface OmikujiType extends BaseType {
   weight: number; // 出現割合
-  threshold: ThresholdType; // 発動条件
+  threshold: OmikujiThresholdType; // 発動条件
   post: OmikujiPostType[];
 }
 
-// 発動条件を設定する型定義
-export interface ThresholdType {
-  conditionType: ConditionType; // condition選択用
-  access?: AccessLevel; // ユーザーの役職
-  syoken?: SyokenType; // 初見・久しぶり
-  match?: string[]; // 追加キーワード
-  time?: TimeCondition;
-  elapsed?: ElapsedCondition;
-  count?: CountCondition;
-  gift?: GiftCondition;
+// 共通の条件型
+export interface ThresholdTypeCommon {
+  conditionType: ConditionType; // condition選択
+  match?: string[]; // キーワード
+  count?: CountCondition; // コメント数
+  gift?: GiftCondition; // ギフト
 }
+
+// ルール用の条件型
+export interface RuleThresholdType extends ThresholdTypeCommon {
+  access?: AccessCondition; // ユーザーの役職
+  syoken?: SyokenCondition; // 初見・久しぶり
+  timer?: TimerCondition; // タイマー(number,時報ありか
+}
+
+// おみくじ用の条件型
+export interface OmikujiThresholdType extends ThresholdTypeCommon {
+  clock?: ClockCondition; // 時刻
+  elapsed?: ElapsedCondition; // 経過時間
+}
+
+// ThresholdType
+export type ThresholdType = RuleThresholdType | OmikujiThresholdType;
 
 // condition選択用
 export enum ConditionType {
-  NONE = "none", // 制限なし
-  ACCESS = 'access', // 
-  SYOKEN = 'syoken',
-  MATCH = 'match',
-  TIME = "time",
+  NONE = "none",
+  ACCESS = "access",
+  SYOKEN = "syoken",
+  MATCH = "match",
+  CLOCK = "clock",
+  TIMER = "timer",
   ELAPSED = "elapsed",
   COUNT = "count",
   GIFT = "gift",
 }
 
 // 初見・コメント履歴の種別
-export enum SyokenType {
+export enum SyokenCondition {
   SYOKEN = "syoken", // 初見
   HI = "hi", // その配信枠で1回目のコメント
   AGAIN = "again", // 前回のコメントから7日以上経過
 }
 
 // ルールの有効/無効 0:OFF/1:だれでも/2:メンバー/3:モデレーター/4:管理者
-export enum AccessLevel {
+export enum AccessCondition {
   OFF = 0,
   ANYONE = 1,
   MEMBER = 2,
   MODERATOR = 3,
   ADMIN = 4,
+}
+
+// タイマー
+export interface TimerCondition {
+  type: ConditionType.TIMER;
+  minutes: number;
+  isBaseZero: boolean;
+}
+
+// clock:時間指定(0-23時)
+export interface ClockCondition {
+  type: ConditionType.CLOCK;
+  startHour: number;
+  durationHours: number;
 }
 
 // 共通の定義
@@ -155,13 +181,7 @@ export interface BaseCondition {
   value2?: number;
 }
 
-// time:時間指定(0-23時)
-export interface TimeCondition extends BaseCondition {
-  type: ConditionType.TIME;
-  comparison: Extract<ComparisonType, "range">;
-}
-
-// second: 投稿してからの時間(interval:ミリ秒)
+// Elapsed: 投稿してからの時間(interval:ミリ秒)
 export interface ElapsedCondition extends BaseCondition {
   type: ConditionType.ELAPSED;
   comparison: Extract<ComparisonType, "min" | "max" | "range">;
@@ -175,7 +195,7 @@ export interface CountCondition extends BaseCondition {
   unit: "lc" | "no" | "tc";
 }
 
-// ギフト金額
+// Gift:ギフト金額
 export interface GiftCondition extends BaseCondition {
   type: ConditionType.GIFT;
   comparison: Extract<ComparisonType, "min" | "max" | "range" | "equal">;

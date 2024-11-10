@@ -1,28 +1,17 @@
 <!-- src/components/DialogThresholdInput.vue -->
 <template>
-  <v-card-text>
-  <v-row dense>
-    <v-col
-      cols="12"
-      sm="3"
-      v-if="
-        currentItem &&
-        'comparison' in currentItem &&
-        !isTimeCondition(currentItem)
-      "
-    >
+  <v-sheet class="d-flex align-center ga-2">
+    <v-sheet v-if="currentItem && 'comparison' in currentItem">
       <v-select
         v-model="currentItem.comparison"
         :items="getComparisonItems(conditionType)"
         label="比較方法"
         @update:modelValue="$emit('update:modelValue', currentItem)"
       />
-    </v-col>
+    </v-sheet>
 
-    <v-col
+    <v-sheet
       v-if="isElapsedCondition(currentItem) || isCountCondition(currentItem)"
-      cols="12"
-      sm="3"
     >
       <v-select
         v-if="currentItem?.unit"
@@ -31,45 +20,41 @@
         label="単位"
         @update:modelValue="$emit('update:modelValue', currentItem)"
       />
-    </v-col>
+    </v-sheet>
 
-    <v-col v-if="currentItem" cols="6" sm="3">
+    <v-sheet v-if="currentItem">
       <v-text-field
         v-model.number="currentItem.value1"
         type="number"
         min="0"
-        :max="isTimeCondition(currentItem) ? 23 : 100000"
+        max="100000"
         :label="getValue1Label(conditionType)"
         @update:modelValue="$emit('update:modelValue', currentItem)"
       />
-    </v-col>
+    </v-sheet>
 
-    <v-col
+    <v-sheet
       v-if="
         currentItem &&
         (!('comparison' in currentItem) || currentItem.comparison === 'range')
       "
-      cols="6"
-      sm="3"
     >
       <v-text-field
         v-model.number="currentItem.value2"
         type="number"
         min="0"
-        :max="isTimeCondition(currentItem) ? 24 : 100000"
+        max="100000"
         :label="getValue2Label(conditionType)"
         @update:modelValue="$emit('update:modelValue', currentItem)"
       />
-    </v-col>
-  </v-row>
-  </v-card-text>
+    </v-sheet>
+  </v-sheet>
 </template>
 
 <script setup lang="ts">
 import { computed } from "vue";
 import { FunkThreshold } from "../composables/FunkThreshold";
 import {
-  TimeCondition,
   ElapsedCondition,
   CountCondition,
   GiftCondition,
@@ -77,7 +62,6 @@ import {
 } from "@/types";
 
 type ModelValueType =
-  | TimeCondition
   | ElapsedCondition
   | CountCondition
   | GiftCondition
@@ -93,8 +77,6 @@ const emit = defineEmits<{
 }>();
 
 // 型ガード関数
-const isTimeCondition = (value: ModelValueType): value is TimeCondition =>
-  value?.type === ConditionType.TIME;
 const isElapsedCondition = (value: ModelValueType): value is ElapsedCondition =>
   value?.type === ConditionType.ELAPSED;
 const isCountCondition = (value: ModelValueType): value is CountCondition =>
@@ -102,29 +84,9 @@ const isCountCondition = (value: ModelValueType): value is CountCondition =>
 const isGiftCondition = (value: ModelValueType): value is GiftCondition =>
   value?.type === ConditionType.GIFT;
 
-// デフォルト値の生成
-const getDefaultValue = (type: ConditionType): ModelValueType => {
-  const base = { value1: 0 };
-  switch (type) {
-    case ConditionType.TIME:
-      return { ...base, type, comparison: "range" as const, value2: 23 };
-    case ConditionType.ELAPSED:
-      return { ...base, type, comparison: "max" as const, unit: "minute" };
-    case ConditionType.COUNT:
-      return { ...base, type, comparison: "max" as const, unit: "lc" };
-    case ConditionType.GIFT:
-      return { ...base, type, comparison: "max" as const };
-    default:
-      return undefined;
-  }
-};
-
-// 外部から利用可能な関数を公開
-defineExpose({ getDefaultValue });
-
 // computedプロパティで型安全な値を提供
 const currentItem = computed({
-  get: () => props.modelValue || getDefaultValue(props.conditionType),
+  get: () => props.modelValue,
   set: (value) => emit("update:modelValue", value),
 });
 

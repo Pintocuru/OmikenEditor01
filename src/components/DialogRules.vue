@@ -28,24 +28,9 @@
           />
         </v-col>
       </v-row>
-      <!-- おみくじワード -->
-      <v-card>
-        <v-toolbar :color="currentItem.color" density="compact">
-          <v-toolbar-title> 💬 おみくじワード </v-toolbar-title>
-        </v-toolbar>
-        <v-combobox
-          v-model="currentItem.matchStartsWith"
-          label="前方一致"
-          chips
-          multiple
-          @update:modelValue="updateItem"
-        />
-      </v-card>
-
-      <!-- フィルタリング -->
-      <DialogThreshold
+      <!-- Rules用フィルタリング -->
+      <DialogThresholdRules
         :currentItem="currentItem"
-        :themeColor="currentItem.color"
         @update:Omiken="updateOmiken"
       />
     </v-card-text>
@@ -56,8 +41,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, ref, Ref } from "vue";
-import DialogThreshold from "./DialogThreshold.vue";
+import { computed, inject, Ref } from "vue";
+import DialogThresholdRules from "./DialogThresholdRules.vue";
 import DialogRulesColor from "./DialogRulesColor.vue";
 import type {
   ListEntry,

@@ -21,7 +21,7 @@
 
 <script setup lang="ts">
 import { ref, defineProps, defineEmits, PropType } from "vue";
-import type { OmikenEntry, OmikenCategory, EditerEntryTypeMap } from "@/types";
+import type { OmikenEntry, OmikenCategory, ListItemTypeMap } from "@/types";
 
 const props = defineProps({
   type: { type: String as PropType<OmikenCategory>, required: true }, // "omikuji" または "place"
