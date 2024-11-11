@@ -49,7 +49,6 @@ import {
   OmikenCategory,
   OmikujiType,
   OmikujiThresholdType,
-  ClockCondition,
 } from "../types";
 import DialogThresholdBase from "./DialogThresholdBase.vue";
 import DialogThresholdInput from "./DialogThresholdInput.vue";
@@ -58,8 +57,6 @@ import {
   FunkThresholdInitial,
 } from "@/composables/FunkThreshold";
 import { ref } from "vue";
-
-type ModelValueType = ClockCondition | undefined;
 
 const props = defineProps<{
   currentItem: OmikujiType;

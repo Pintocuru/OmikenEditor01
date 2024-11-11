@@ -1,7 +1,6 @@
 // src/composables/FunkEmits.ts
 
-import { computed, inject, Ref } from "vue";
-import { AppStateType, ListCategory, ListEntry, OmikenCategory, OmikenEntry, OmikenType, PresetOmikenEditType } from "@/types";
+import { ListCategory, ListEntry, OmikenCategory, OmikenEntry, PresetOmikenEditType } from "@/types";
 
 export function FunkEmits(emit: any) {
  

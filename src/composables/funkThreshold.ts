@@ -17,33 +17,33 @@ import {
   TimerCondition,
 } from "@/types";
 
-// 型定義
-type ThresholdItem = {
+// 基本的な型定義
+interface ThresholdItem {
   label: string;
   value: ConditionType;
   icon: string;
   description: string;
-};
+}
 
-type ComparisonItem = {
+interface ComparisonItem {
   title: string;
   value: ComparisonType;
-};
+}
 
-type ValueLabel = {
+interface ValueLabel {
   value1: string;
   value2: string;
-};
+}
 
-type UnitItem = {
+interface UnitItem {
   title: string;
   value: string;
-};
+}
 
-// しきい値の設定に関する関数群を提供
-export function FunkThreshold() {
-  // 定数定義
-  const THRESHOLD_ITEMS: ThresholdItem[] = [
+// 定数定義を分離して管理性を向上
+const CONSTANTS = {
+  // しきい値の設定項目一覧
+  THRESHOLD_ITEMS: [
     {
       label: "制限なし",
       value: ConditionType.NONE,
@@ -98,24 +98,27 @@ export function FunkThreshold() {
       icon: "mdi-gift",
       description: "ギフト送信による判定",
     },
-  ];
+  ] as ThresholdItem[],
 
-  const ACCESS_ITEMS = [
+  // アクセス権限の設定項目
+  ACCESS_ITEMS: [
     { title: "OFF", value: AccessCondition.OFF },
     { title: "だれでも", value: AccessCondition.ANYONE },
     { title: "メンバー", value: AccessCondition.MEMBER },
     { title: "モデレーター", value: AccessCondition.MODERATOR },
     { title: "管理者", value: AccessCondition.ADMIN },
-  ];
+  ],
 
-  const SYOKEN_ITEMS = [
+  // 初見判定の設定項目
+  SYOKEN_ITEMS: [
     { title: "初見さん", value: SyokenCondition.SYOKEN },
     { title: "枠初コメ", value: SyokenCondition.HI },
     { title: "久しぶり", value: SyokenCondition.AGAIN },
-  ];
+  ],
 
-  // マッピング定義
-  const MAPPINGS = {
+  // マッピング定義をグループ化
+  MAPPINGS: {
+    // 比較演算子の定義
     comparison: {
       base: [
         { title: "以下", value: "min" },
@@ -130,15 +133,14 @@ export function FunkThreshold() {
         [ConditionType.GIFT]: [{ title: "等しい", value: "equal" }],
       } as Partial<Record<ConditionType, ComparisonItem[]>>,
     },
+    // 値のラベル定義
     value: {
       [ConditionType.CLOCK]: { value1: "時刻", value2: "終了時刻" },
       [ConditionType.ELAPSED]: { value1: "経過時間", value2: "経過時間(終了)" },
-      [ConditionType.COUNT]: {
-        value1: "コメント数",
-        value2: "コメント数(終了)",
-      },
+      [ConditionType.COUNT]: { value1: "コメント数", value2: "コメント数(終了)" },
       [ConditionType.GIFT]: { value1: "ポイント", value2: "ポイント(終了)" },
     } as Partial<Record<ConditionType, ValueLabel>>,
+    // 単位の定義
     unit: {
       [ConditionType.ELAPSED]: [
         { title: "秒", value: "second" },
@@ -152,11 +154,13 @@ export function FunkThreshold() {
         { title: "総個人コメント数", value: "tc" },
       ],
     } as Partial<Record<ConditionType, UnitItem[]>>,
+    // 初見判定の表示テキスト
     syoken: {
       [SyokenCondition.SYOKEN]: "初見さん",
       [SyokenCondition.HI]: "配信枠初コメント",
       [SyokenCondition.AGAIN]: "7日以上ぶり",
     } as Record<SyokenCondition, string>,
+    // アクセス権限の表示テキスト
     access: {
       [AccessCondition.OFF]: "無効",
       [AccessCondition.ANYONE]: "制限なし",
@@ -164,124 +168,125 @@ export function FunkThreshold() {
       [AccessCondition.MODERATOR]: "モデレーター以上",
       [AccessCondition.ADMIN]: "管理者のみ",
     } as Record<AccessCondition, string>,
-  };
+  },
+};
 
-  // 発動条件があるか
+/**
+ * しきい値の設定に関する機能を提供する関数
+ * @returns しきい値関連の各種ユーティリティ関数
+ */
+export function FunkThreshold() {
+  /**
+   * 発動条件が設定されているかチェック
+   * @param threshold チェック対象のしきい値
+   * @returns 発動条件があればtrue
+   */
   const isThreshold = (threshold: ThresholdType): boolean => {
-    // 型ガードを使用して、thresholdがRuleThresholdTypeかOmikujiThresholdTypeかを判定
-    if (threshold.conditionType === ConditionType.NONE) {
-      return false;
-    }
+    if (threshold.conditionType === ConditionType.NONE) return false;
 
     if (threshold.conditionType === ConditionType.ACCESS) {
-      // thresholdがRuleThresholdTypeであることが保証される
-      if ('access' in threshold) {
-        return threshold.access !== AccessCondition.ANYONE;
-      }
+      return 'access' in threshold && threshold.access !== AccessCondition.ANYONE;
     }
 
     if (threshold.conditionType === ConditionType.MATCH) {
-      // thresholdがRuleThresholdTypeであることが保証される
-      if ('match' in threshold) {
-        // matchがundefinedでないことを確認
-        return Array.isArray(threshold.match) && threshold.match.length > 0;
-      }
+      return 'match' in threshold && Array.isArray(threshold.match) && threshold.match.length > 0;
     }
 
-    return true; // その他の条件を満たす場合
+    return true;
   };
 
-
-  // 条件タイプに応じた比較項目を取得
+  /**
+   * 条件タイプに応じた比較演算子の一覧を取得
+   * @param type 条件タイプ
+   * @returns 利用可能な比較演算子の一覧
+   */
   const getComparisonItems = (type: ConditionType): ComparisonItem[] => {
-    const additionalItems = MAPPINGS.comparison.additional[type] || [];
-    return [...MAPPINGS.comparison.base, ...additionalItems];
+    const additionalItems = CONSTANTS.MAPPINGS.comparison.additional[type] || [];
+    return [...CONSTANTS.MAPPINGS.comparison.base, ...additionalItems];
   };
 
-  // 条件タイプに応じた値ラベルを取得
+  /**
+   * 条件タイプに応じた値のラベルを取得
+   * @param type 条件タイプ
+   * @param isValue2 終了値のラベルを取得する場合はtrue
+   * @returns 値のラベル文字列
+   */
   const getValueLabel = (type: ConditionType, isValue2 = false): string => {
-    const labels = MAPPINGS.value[type];
-    return labels
-      ? isValue2
-        ? labels.value2
-        : labels.value1
-      : isValue2
-        ? "値(終了)"
-        : "値";
+    const labels = CONSTANTS.MAPPINGS.value[type];
+    return labels ? (isValue2 ? labels.value2 : labels.value1) : (isValue2 ? "値(終了)" : "値");
   };
 
-  // 条件タイプに応じた単位項目を取得
+  /**
+   * 条件タイプに応じた単位の一覧を取得
+   * @param type 条件タイプ
+   * @returns 利用可能な単位の一覧
+   */
   const getUnitItems = (type: ConditionType): UnitItem[] => {
-    return MAPPINGS.unit[type] || [];
+    return CONSTANTS.MAPPINGS.unit[type] || [];
   };
 
-  // しきい値の説明文を生成
+  /**
+   * しきい値の説明文を生成
+   * @param threshold しきい値の設定
+   * @returns 人間が読める形式の説明文
+   */
   const getExampleText = (threshold: ThresholdType): string => {
     if (!threshold) return "";
 
     const handlers: Record<ConditionType, (threshold: any) => string> = {
-
-      [ConditionType.TIMER]: (t: { timer?: TimerCondition; }) => {
-        if (!t.timer) return "";
-        const { minutes, isBaseZero } = t.timer;
-        return `${isBaseZero ? "0分" : "起動時"}から${minutes}分ごと`;
-      },
-      [ConditionType.SYOKEN]: (t: { syoken: SyokenCondition; }) => `${MAPPINGS.syoken[t.syoken || SyokenCondition.SYOKEN]}の場合`,
-
-      [ConditionType.ACCESS]: (t: { access: AccessCondition; }) => MAPPINGS.access[t.access || AccessCondition.OFF],
-
-      [ConditionType.MATCH]: (t: { match?: string[]; }) => t.match?.length
-        ? `「${t.match.join("」「")}」を含む場合`
-        : "キーワード未設定",
-
-      [ConditionType.CLOCK]: (t: { clock?: ClockCondition; }) => {
-        if (!t.clock) return "";
-        const { startHour, durationHours } = t.clock;
-        const endHour = (startHour + durationHours) % 24;
-        return `${startHour}時～${endHour}時の範囲`;
+      [ConditionType.TIMER]: ({ timer }: { timer?: TimerCondition }) => {
+        if (!timer) return "";
+        return `${timer.isBaseZero ? "0分" : "起動時"}から${timer.minutes}分ごと`;
       },
 
-      [ConditionType.ELAPSED]: (t: { elapsed?: ElapsedCondition; }) => {
-        if (!t.elapsed) return "";
-        const unitMap = {
-          second: "秒",
-          minute: "分",
-          hour: "時間",
-          day: "日",
-        };
-        return `最後のコメントから${getComparisonText(
-          t.elapsed,
-          unitMap[t.elapsed.unit]
-        )}`;
+      [ConditionType.SYOKEN]: ({ syoken }: { syoken: SyokenCondition }) =>
+        `${CONSTANTS.MAPPINGS.syoken[syoken || SyokenCondition.SYOKEN]}の場合`,
+
+      [ConditionType.ACCESS]: ({ access }: { access: AccessCondition }) =>
+        CONSTANTS.MAPPINGS.access[access || AccessCondition.OFF],
+
+      [ConditionType.MATCH]: ({ match }: { match?: string[] }) =>
+        match?.length ? `「${match.join("」「")}」を含む場合` : "キーワード未設定",
+
+      [ConditionType.CLOCK]: ({ clock }: { clock?: ClockCondition }) => {
+        if (!clock) return "";
+        const endHour = (clock.startHour + clock.durationHours) % 24;
+        return `${clock.startHour}時～${endHour}時の範囲`;
       },
 
-      [ConditionType.COUNT]: (t: { count?: CountCondition; }) => {
-        if (!t.count) return "";
+      [ConditionType.ELAPSED]: ({ elapsed }: { elapsed?: ElapsedCondition }) => {
+        if (!elapsed) return "";
+        const unitMap = { second: "秒", minute: "分", hour: "時間", day: "日" };
+        return `最後のコメントから${getComparisonText(elapsed, unitMap[elapsed.unit])}`;
+      },
+
+      [ConditionType.COUNT]: ({ count }: { count?: CountCondition }) => {
+        if (!count) return "";
         const unitMap = {
           lc: "配信枠のコメント数",
           no: "個人コメント数",
           tc: "総個人コメント数",
         };
-        return `${unitMap[t.count.unit]}が${getComparisonText(
-          t.count,
-          ""
-        )}`;
+        return `${unitMap[count.unit]}が${getComparisonText(count, "")}`;
       },
 
-      [ConditionType.GIFT]: (t: { gift?: GiftCondition; }) => {
-        if (!t.gift) return "";
-        return `ギフト金額が${getComparisonText(t.gift, "pt")}`;
+      [ConditionType.GIFT]: ({ gift }: { gift?: GiftCondition }) => {
+        if (!gift) return "";
+        return `ギフト金額が${getComparisonText(gift, "pt")}`;
       },
 
       [ConditionType.NONE]: () => "制限なし",
-
     };
 
-    const handler = handlers[threshold.conditionType];
-    return handler ? handler(threshold) : "制限なし";
+    return handlers[threshold.conditionType]?.(threshold) || "制限なし";
   };
 
-  // 比較条件のテキストを生成
+  /**
+   * 比較条件のテキストを生成
+   * @param condition 比較条件
+   * @param unit 単位
+   * @returns 人間が読める形式の比較条件文
+   */
   const getComparisonText = (
     condition: BaseCondition & { comparison: ComparisonType },
     unit: string
@@ -300,9 +305,9 @@ export function FunkThreshold() {
 
   return {
     items: {
-      threshold: THRESHOLD_ITEMS,
-      access: ACCESS_ITEMS,
-      syoken: SYOKEN_ITEMS,
+      threshold: CONSTANTS.THRESHOLD_ITEMS,
+      access: CONSTANTS.ACCESS_ITEMS,
+      syoken: CONSTANTS.SYOKEN_ITEMS,
     },
     isThreshold,
     getComparisonItems,
@@ -312,9 +317,12 @@ export function FunkThreshold() {
   };
 }
 
-// 初期化用
+/**
+ * Thresholdの初期値を生成する関数
+ * @returns rulesとomikujiのThreshold初期値
+ */
 export function FunkThresholdInitial() {
-  // 共通
+  // 共通の初期値
   const commonThreshold: ThresholdTypeCommon = {
     conditionType: ConditionType.MATCH,
     match: ['yaa'],
@@ -331,38 +339,35 @@ export function FunkThresholdInitial() {
     },
   };
 
-  // rules用
-  const ruleThreshold: RuleThresholdType = {
-    ...commonThreshold,
-    conditionType: ConditionType.MATCH,
-    access: AccessCondition.ANYONE,
-    syoken: SyokenCondition.SYOKEN,
-    timer: {
-      type: ConditionType.TIMER,
-      minutes: 1 as number & { _brand: "1-180" },
-      isBaseZero: false
-    }
-  };
-
-  // omikuji用
-  const omikujiThreshold: OmikujiThresholdType = {
-    ...commonThreshold,
-    conditionType: ConditionType.NONE,
-    clock: {
-      type: ConditionType.CLOCK,
-      startHour: 0,
-      durationHours: 1
-    },
-    elapsed: {
-      type: ConditionType.ELAPSED,
-      comparison: "min",
-      unit: "minute",
-      value1: 0
-    }
-  };
-
   return {
-    rule: ruleThreshold,
-    omikuji: omikujiThreshold
+    // rules用の初期値
+    rule: {
+      ...commonThreshold,
+      conditionType: ConditionType.MATCH,
+      access: AccessCondition.ANYONE,
+      syoken: SyokenCondition.SYOKEN,
+      timer: {
+        type: ConditionType.TIMER,
+        minutes: 1 as number & { _brand: "1-180" },
+        isBaseZero: false
+      }
+    } as RuleThresholdType,
+
+    // omikuji用の初期値
+    omikuji: {
+      ...commonThreshold,
+      conditionType: ConditionType.NONE,
+      clock: {
+        type: ConditionType.CLOCK,
+        startHour: 0,
+        durationHours: 1
+      },
+      elapsed: {
+        type: ConditionType.ELAPSED,
+        comparison: "min",
+        unit: "minute",
+        value1: 0
+      }
+    } as OmikujiThresholdType
   };
 }
