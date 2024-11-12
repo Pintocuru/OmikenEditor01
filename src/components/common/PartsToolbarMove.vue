@@ -8,7 +8,7 @@
           icon="mdi-arrow-up"
           density="compact"
           :disabled="isFirstItem"
-          @click="moveItem('up')"
+          @click.stop="moveItem('up')"
         />
       </template>
     </v-tooltip>
@@ -19,7 +19,7 @@
           icon="mdi-arrow-down"
           density="compact"
           :disabled="isLastItem"
-          @click="moveItem('down')"
+          @click.stop="moveItem('down')"
         />
       </template>
     </v-tooltip>

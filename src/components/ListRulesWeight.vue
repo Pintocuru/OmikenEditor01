@@ -1,4 +1,5 @@
 <!-- src/components/ListRulesWeight.vue -->
+<!-- !おそらく使用しない -->
 <template>
   <v-dialog v-model="dialogWeight.isOpen" max-width="600px">
     <v-card density="compact" style="max-height: 80vh; overflow-y: auto">
@@ -19,12 +20,12 @@
           <template #item="{ element: omikujiId }">
             <v-list-item>
               <v-row align="center" no-gutters>
+                  <!-- 配列を移動できるツマミ -->
                 <v-col cols="auto" class="me-1">
                   <v-icon class="handle" color="grey">mdi-drag</v-icon>
                 </v-col>
-
+                  <!-- 名前 -->
                 <v-col cols="2" class="me-2">
-                  <!-- 配列を移動できるツマミ -->
                   <v-sheet
                     class="font-medium"
                     @click="openEditorOmikuji(Omiken.omikuji[omikujiId])"

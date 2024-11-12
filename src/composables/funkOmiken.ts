@@ -107,8 +107,9 @@ export function funkOmiken(listEntry: Ref<ListEntryCollect>) {
       }
 
       // 追加処理
-      if (addKeys?.length) {
-        addKeys.forEach(item => {
+      const addItems = Array.isArray(addKeys) ? addKeys : addKeys ? [addKeys] : [];
+      if (addItems.length) {
+        addItems.forEach(item => {
           const newKey = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
           const validatedItem = validateData(type, { [newKey]: item as ListType });
           Object.assign(newState[type], validatedItem);
@@ -122,8 +123,9 @@ export function funkOmiken(listEntry: Ref<ListEntryCollect>) {
       }
 
       // 削除処理
-      if (delKeys?.length) {
-        delKeys.forEach(key => {
+      const delItems = Array.isArray(delKeys) ? delKeys : delKeys ? [delKeys] : [];
+      if (delItems.length) {
+        delItems.forEach(key => {
           delete newState[type][key];
           if (orderKey) newState[orderKey] = newState[orderKey].filter(id => id !== key);
           if (type === 'omikuji') {
