@@ -60,19 +60,16 @@
       <v-expand-transition>
         <div v-show="expandedPanels.includes(ruleId)">
           <ListRulesOmikujiSetting
-            :Omiken="Omiken"
-            :ruleId="ruleId"
+            :rulesEntry="Omiken.rules[ruleId]"
             :uiState="uiState"
-            :enabledIds="Omiken.rules[ruleId].enabledIds"
             @update:Omiken="updateOmiken"
           />
           <v-card-text>
             <v-row>
               <ListRulesOmikujiView
-                :Omiken="Omiken"
-                :ruleId="ruleId"
+                :rulesEntry="Omiken.rules[ruleId]"
+                :omikuji="Omiken.omikuji"
                 :uiState="uiState"
-                :enabledIds="Omiken.rules[ruleId].enabledIds"
                 @open-editor="openEditor"
                 @update:Omiken="updateOmiken"
               />

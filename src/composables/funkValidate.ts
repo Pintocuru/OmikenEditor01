@@ -1,5 +1,5 @@
 // src/composables/funkValidate.ts
-import { type ListCategory, type ListTypeMap, AccessCondition } from "../types";
+import { type ListCategory, type ListTypeMap, AccessCondition, OmikenType, OmikujiType, RulesType } from "../types";
 import { z } from "zod";
 import _ from "lodash";
 
@@ -108,6 +108,13 @@ const thresholdSchema = z
     }
   });
 
+// enabledIdsの検証用スキーマ
+const enabledIdsSchema = z.array(z.string())
+  .transform(ids => {
+    // 重複を除去して返す
+    return [...new Set(ids)];
+  });
+
 // rulesのZodスキーマ
 const rulesSchema = z.record(
   z.object({
@@ -115,7 +122,7 @@ const rulesSchema = z.record(
     name: z.string().default("おみくじ"),
     color: z.string().default(""),
     description: z.string().default(""),
-    enabledIds: z.array(z.string()).default([]),
+    enabledIds: enabledIdsSchema.default([]),
     matchStartsWith: z.array(z.string()).default([]),
     threshold: thresholdSchema,
   })
@@ -184,6 +191,24 @@ const placeSchema = z.record(
   })
 );
 
+// rulesOrderスキーマを修正
+const rulesOrderSchema = (rules: Record<string, RulesType>) =>
+  z.array(z.string())
+    .transform(order => {
+      const rulesKeys = Object.keys(rules);
+
+      // 1. 重複を除去
+      const uniqueOrder = [...new Set(order)];
+
+      // 2. rulesに存在しないキーを除去
+      const validOrder = uniqueOrder.filter(key => rulesKeys.includes(key));
+
+      // 3. rulesにあるが順序にないキーを追加
+      const missingKeys = rulesKeys.filter(key => !validOrder.includes(key));
+
+      return [...validOrder, ...missingKeys];
+    });
+
 const preferencesSchema = z.record(
   z.object({
     // コメントしてからBotが反応するまでの遅延(秒)
@@ -241,54 +266,82 @@ const defaultValues = {
       },
     ],
   },
-  preferences: {
-    basicDelay: 1,
-    omikujiCooldown: 2,
-    commentDuration: 5,
-    BotUserIDname: "FirstCounter",
-  },
+  preferences: {},
 };
 
 // rules omikuji placeのバリデーション
-export function validateData<T extends ListCategory>(
-  type: T,
-  items: Record<string, unknown>
-): Record<string, ListTypeMap[T]> {
-  const validatedData: Record<string, ListTypeMap[T]> = {};
+// validateDataの型定義を拡張
+type ValidationCategory = ListCategory | 'rulesOrder';
+type ValidationTypeMap = ListTypeMap & {
+  rulesOrder: string[];
+};
 
-  for (const [key, item] of Object.entries(items)) {
+export function validateData<T extends ValidationCategory>(
+  type: T,
+  items: Record<string, unknown> | string[],
+  options?: {
+    omikuji?: Record<string, OmikujiType>;
+    rules?: Record<string, RulesType>;
+  }
+): T extends 'rulesOrder' ? string[] : Record<string, ValidationTypeMap[T]> {
+  // rulesOrderの検証
+  if (type === 'rulesOrder' && Array.isArray(items) && options?.rules) {
+    try {
+      const order = items as string[];
+      const schema = rulesOrderSchema(options.rules);
+      return schema.parse(order) as any;
+    } catch (error) {
+      console.error('RulesOrder validation warning:', error);
+      // エラー時は全てのルールキーを返す
+      return Object.keys(options.rules) as any;
+    }
+  }
+
+  // 既存のvalidateDataロジック
+  const validatedData: Record<string, any> = {};
+  const itemsRecord = items as Record<string, unknown>;
+
+  for (const [key, item] of Object.entries(itemsRecord)) {
     const itemWithDefaults = _.merge(
       {},
-      defaultValues[type],
+      defaultValues[type as ListCategory],
       { id: key },
       item
     );
 
     try {
-      const validatedItem = schemas[type].parse({ [key]: itemWithDefaults });
-      validatedData[key] = validatedItem[key] as ListTypeMap[T];
+      if ('enabledIds' in itemWithDefaults && options?.omikuji) {
+        const enabledIds = (itemWithDefaults).enabledIds;
+        // おみくじに存在するIDのみをフィルタリング
+        const omikujiKeys = Object.keys(options.omikuji);
+        itemWithDefaults.enabledIds = enabledIds.filter(id => omikujiKeys.includes(id));
+      }
+
+      const validatedItem = schemas[type as ListCategory].parse({ [key]: itemWithDefaults });
+      validatedData[key] = { ...validatedItem[key], id: key };
     } catch (error) {
       if (error instanceof z.ZodError) {
         console.error(
-          `Validation error for ${type} item ${key}:`,
-          JSON.stringify(error.errors, null, 2), // エラー内容を詳細に表示
-          '\nInput value:', // 入力値も表示
+          `Validation warning for ${type} item ${key}:`,
+          JSON.stringify(error.errors, null, 2),
+          '\nInput value:',
           JSON.stringify(itemWithDefaults, null, 2)
         );
+      } else {
+        console.error(`Validation warning: ${(error as Error).message}`);
       }
-      // エラー時は部分的な値を保持
+
       validatedData[key] = {
-        ...defaultValues[type],
+        ...defaultValues[type as ListCategory],
         id: key,
-        ..._.pick(itemWithDefaults, ['name', 'description']) // 基本プロパティは保持
-      } as unknown as ListTypeMap[T];
+        ..._.pick(itemWithDefaults, ['name', 'description'])
+      };
     }
   }
 
-  return validatedData;
+  return validatedData as any;
 }
 
-// xxxOrderの検証
 export const generateOrder = (items: { [key: string]: any }): string[] => {
   return Object.keys(items);
 };

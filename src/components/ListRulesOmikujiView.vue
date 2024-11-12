@@ -1,58 +1,68 @@
 <!-- src/components/ListRulesOmikujiView.vue -->
 <template>
   <draggable
-    v-model="currentItem"
+    v-model="currentItem.enabledIds"
     item-key="id"
     class="d-flex flex-wrap"
-    @end="() => updateRulesEnabledIds(currentItem, ruleId)"
+    @end="() => updateRulesEnabledIds(currentItem.enabledIds, currentItem.id)"
   >
     <template #item="{ element: omikujiId }">
       <v-col cols="12" sm="6" md="4" lg="3" class="pa-1">
-        <v-card variant="tonal" :color="weightColor(omikujiId, enabledIds)">
+        <v-card
+          variant="tonal"
+          :color="weightColor(omikujiId, currentItem.enabledIds)"
+        >
           <!-- タイトルバーと操作ボタン -->
           <v-toolbar
             density="compact"
-            :color="getPostTypeColor(Omiken.omikuji[omikujiId].post, true)"
+            :color="getPostTypeColor(omikuji[omikujiId].post, true)"
           >
             <v-toolbar-title @click="openEditorItem('omikuji', omikujiId)">
-              <!-- TODO 幅が狭いと下記は殆ど見えない。解決方法は? -->
-              {{ Omiken.omikuji[omikujiId]?.name }}
+              <v-tooltip bottom>
+                <template #activator="{ props }">
+                  <span v-bind="props" class="truncate">{{
+                    omikuji[omikujiId]?.name
+                  }}</span>
+                </template>
+                <span>{{ omikuji[omikujiId]?.name }}</span>
+              </v-tooltip>
             </v-toolbar-title>
             <template #append>
- <PartsArrayRemoveRules
-  selectCategory="omikuji"
-  :rules="Omiken.rules[ruleId]"
-  :item="Omiken.omikuji[omikujiId]"
-  @edit="openEditorItem('omikuji', omikujiId)"
-  @update:Omiken="updateOmiken"
-/>
+              <PartsArrayActionOmikuji
+                :rulesEntry="currentItem"
+                :omikujiEntry="omikuji[omikujiId]"
+                @edit="openEditorItem('omikuji', omikujiId)"
+                @update:Omiken="updateOmiken"
+              />
             </template>
           </v-toolbar>
 
           <!-- おみくじ内容 -->
           <v-card-text class="py-4">
             <!-- onecommeのcontent表示 -->
-            <v-sheet class="pb-3" v-if="Omiken.omikuji[omikujiId]?.post">
-              {{ getOnecommeContent(Omiken.omikuji[omikujiId].post) }}
+            <v-sheet class="pb-3" v-if="omikuji[omikujiId]?.post">
+              {{ getOnecommeContent(omikuji[omikujiId].post) }}
             </v-sheet>
 
             <v-sheet class="list-group d-flex flex-wrap">
               <!-- 発動条件の表示 -->
               <v-chip
-                v-if="isThreshold(Omiken.omikuji[omikujiId]?.threshold)"
+                v-if="isThreshold(omikuji[omikujiId]?.threshold)"
                 density="compact"
                 variant="outlined"
                 color="yellow lighten-3"
               >
-                🔐 {{ getExampleText(Omiken.omikuji[omikujiId].threshold) }}
+                🔐 {{ getExampleText(omikuji[omikujiId].threshold) }}
               </v-chip>
               <!-- 既存の出現割合表示 -->
               <v-chip density="compact" variant="text">
-                🎯 {{ Omiken.omikuji[omikujiId]?.weight }}/{{
-                  weightTotal(enabledIds)
+                🎯 {{ omikuji[omikujiId]?.weight }}/{{
+                  weightTotal(currentItem.enabledIds)
                 }}
                 <span class="ml-2"
-                  >({{ weightPercentage(omikujiId, enabledIds) }}%)</span
+                  >({{
+                    weightPercentage(omikujiId, currentItem.enabledIds)
+                  }}%)</span
                 >
               </v-chip>
             </v-sheet>
@@ -60,24 +70,25 @@
             <v-sheet v-if="uiState.showWeightEditor">
               <v-text-field
                 class="pt-2"
-                v-model.number="
-                  Omiken.omikuji[Omiken.omikuji[omikujiId].id].weight
-                "
+                v-model.number="omikuji[omikuji[omikujiId].id].weight"
                 label="出現割合"
                 min="0"
                 type="number"
-                @update:modelValue="
-                  updateOmikujiWeight(Omiken.omikuji[omikujiId])
-                "
+                @update:modelValue="updateOmikujiWeight(omikuji[omikujiId])"
               />
               <v-progress-linear
                 :model-value="
-                  weightPercentage(Omiken.omikuji[omikujiId].id, enabledIds)
+                  weightPercentage(
+                    omikuji[omikujiId].id,
+                    currentItem.enabledIds
+                  )
                 "
                 buffer-value="10"
                 absolute
                 prop
-                :color="weightColor(Omiken.omikuji[omikujiId].id, enabledIds)"
+                :color="
+                  weightColor(omikuji[omikujiId].id, currentItem.enabledIds)
+                "
               />
             </v-sheet>
             <!-- 出現割合を表示 -->
@@ -89,9 +100,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
-import PartsToolbarAction from "./common/PartsToolbarAction.vue";
-import PartsArrayRemoveRules from "./common/PartsArrayRemoveRules.vue";
+import { computed } from "vue";
+import PartsArrayActionOmikuji from "./common/PartsArrayActionOmikuji.vue";
 import { FunkRules } from "../composables/FunkRules";
 import { FunkOmikuji } from "../composables/FunkOmikuji";
 import { FunkThreshold } from "../composables/FunkThreshold";
@@ -99,17 +109,17 @@ import draggable from "vuedraggable";
 import type {
   ListCategory,
   ListEntry,
+  ListTypeMap,
   OmikenCategory,
   OmikenEntry,
-  OmikenType,
   OmikujiType,
+  RulesType,
 } from "@/types";
 import { FunkEmits } from "@/composables/FunkEmits";
 
 const props = defineProps<{
-  Omiken: OmikenType;
-  ruleId: string;
-  enabledIds: string[];
+  rulesEntry: RulesType;
+  omikuji: Record<string, ListTypeMap["omikuji"]>;
   uiState: { showEnabledIds: boolean; showWeightEditor: boolean };
 }>();
 
@@ -119,7 +129,7 @@ const emit = defineEmits<{
 }>();
 
 // コンポーザブル:FunkEmits
-const { updateOmiken, openEditorItem } = FunkEmits(emit);
+const { updateOmiken, updateOmikenEntry, openEditorItem } = FunkEmits(emit);
 // コンポーザブル:funkRules
 const { weightTotal, weightPercentage, weightColor } = FunkRules();
 // コンポーザブル:FunkOmikuji
@@ -129,36 +139,28 @@ const { isThreshold, getExampleText } = FunkThreshold();
 
 // ドラッグ&ドロップでの更新も同様に
 const currentItem = computed({
-  get: () => props.enabledIds,
-  set: (value) => {
-    if (props.ruleId) {
-      updateRulesEnabledIds(value, props.ruleId);
-    }
-  },
+  get: () => props.rulesEntry,
+  set: (value) =>
+    props.rulesEntry &&
+    updateOmiken({
+      type: "rules",
+      update: { [props.rulesEntry.id]: { ...value } },
+    }),
 });
 
 // rules.enabledIds の更新
 const updateRulesEnabledIds = (enabledIds: string[], ruleId: string) => {
   if (!ruleId) return;
   const updatedRule = {
-    ...props.Omiken.rules[ruleId],
-    enabledIds,
-  };
-
-  emit("update:Omiken", {
-    type: "rules",
-    update: {
-      [ruleId]: updatedRule,
+    [ruleId]: {
+      ...props.rulesEntry,
+      enabledIds,
     },
-  });
+  };
+  updateOmikenEntry("rules", updatedRule);
 };
 // omikuji.weight の更新
 const updateOmikujiWeight = (omikujiData: OmikujiType) => {
-  emit("update:Omiken", {
-    type: "omikuji",
-    update: {
-      [omikujiData.id]: omikujiData,
-    },
-  });
+  updateOmikenEntry("omikuji", { [omikujiData.id]: omikujiData });
 };
 </script>

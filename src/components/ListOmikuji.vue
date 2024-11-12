@@ -23,9 +23,8 @@
             {{ Omiken.omikuji[omikujiId]?.name }}
           </v-toolbar-title>
           <template #append>
-            <ListItemPartsAction
-              selectCategory="omikuji"
-              :item="Omiken.omikuji[omikujiId]"
+            <PartsArrayActionOmikuji
+              :omikujiEntry="Omiken.omikuji[omikujiId]"
               @edit="openEditorItem('omikuji', omikujiId)"
               @update:Omiken="updateOmiken"
             />
@@ -74,6 +73,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import ListItemPartsAction from "./common/PartsToolbarAction.vue";
+import PartsArrayActionOmikuji from "./common/PartsArrayActionOmikuji.vue";
 import { FunkOmikuji } from "../composables/FunkOmikuji";
 import { FunkThreshold } from "../composables/FunkThreshold";
 import type {
@@ -104,7 +104,9 @@ const { isThreshold, getExampleText } = FunkThreshold();
 // おみくじIDをソートして取得
 const sortedOmikujiIds = computed(() =>
   Object.keys(props.Omiken.omikuji).sort((a, b) =>
-    (props.Omiken.omikuji[a]?.name || "").localeCompare(props.Omiken.omikuji[b]?.name || "")
+    (props.Omiken.omikuji[a]?.name || "").localeCompare(
+      props.Omiken.omikuji[b]?.name || ""
+    )
   )
 );
 
@@ -115,5 +117,4 @@ const addItemOmikuji = () => {
     addKeys: [{}],
   });
 };
-
 </script>

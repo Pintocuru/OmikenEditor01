@@ -3,14 +3,14 @@
   <v-sheet class="d-flex ga-2 justify-end">
     <v-expand-transition>
       <v-select v-if="uiState.showEnabledIds" 
-        v-model="currentItem" 
+        v-model="currentItem.enabledIds" 
         :items="omikujiLists" 
         label="有効にするおみくじ" 
         chips
         multiple 
         item-title="name" 
         item-value="id"
-        @update:modelValue="(value) => updateRulesEnabledIds(value, ruleId)" 
+        @update:modelValue="(value) => updateRulesEnabledIds(value, currentItem.id)" 
       />
     </v-expand-transition>
     <v-tooltip text="有効リストを表示" location="top">
@@ -42,12 +42,10 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { FunkRules } from "../composables/FunkRules";
-import type { OmikenType, OmikenCategory, OmikenEntry } from "@/types";
+import type { OmikenCategory, OmikenEntry, RulesType } from "@/types";
 
 const props = defineProps<{
-  Omiken: OmikenType;
-  ruleId: string;
-  enabledIds: string[];
+  rulesEntry: RulesType;
   uiState: { showEnabledIds: boolean; showWeightEditor: boolean; };
 }>();
 
@@ -58,27 +56,28 @@ const emit = defineEmits<{
 const { omikujiLists } = FunkRules();
 
 const currentItem = computed({
-  get: () => props.enabledIds,
+  get: () => props.rulesEntry,
   set: (value) => {
-    if (props.ruleId) {
-      updateRulesEnabledIds(value, props.ruleId);
+    if (props.rulesEntry) {
+      updateRulesEnabledIds(value.enabledIds, props.rulesEntry.id);
     }
   },
 });
 
 const addItemOmikuji = () => {
-  if (props.ruleId) {
+  if (props.rulesEntry.id) {
     emit("update:Omiken", {
       type: "omikuji",
-      addKeys: [{ rulesId: props.ruleId }],
+      addKeys: [{ rulesId: props.rulesEntry.id }],
     });
   }
 };
 
+// rules.enabledIds の更新
 const updateRulesEnabledIds = (enabledIds: string[], ruleId: string) => {
   if (!ruleId) return;
   const updatedRule = {
-    ...props.Omiken.rules[ruleId],
+    ...props.rulesEntry,
     enabledIds,
   };
 

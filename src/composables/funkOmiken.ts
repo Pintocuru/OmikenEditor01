@@ -13,8 +13,9 @@ import type {
   PresetOmikenEditType,
   RulesType,
   OmikujiType,
-  PlaceType} from '../types';
-import { funkJSON,  } from "./FunkJSON";
+  PlaceType
+} from '../types';
+import { funkJSON, } from "./FunkJSON";
 import { generateOrder, validateData } from "./FunkValidate";
 
 export function funkOmiken(listEntry: Ref<ListEntryCollect>) {
@@ -109,17 +110,36 @@ export function funkOmiken(listEntry: Ref<ListEntryCollect>) {
       // 追加処理
       const addItems = Array.isArray(addKeys) ? addKeys : addKeys ? [addKeys] : [];
       if (addItems.length) {
-        addItems.forEach(item => {
+        for (const item of addItems) {
           const newKey = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-          const validatedItem = validateData(type, { [newKey]: item as ListType });
+
+          // rulesの場合はomikujiデータも渡す
+          const validatedItem = type === 'rules'
+            ? validateData(type, { [newKey]: item as ListType }, newState.omikuji)
+            : validateData(type, { [newKey]: item as ListType });
+
           Object.assign(newState[type], validatedItem);
-          if (orderKey) newState[orderKey].push(newKey); // orderKey が存在する場合のみ push
+
+          if (type === 'rules' && orderKey) {
+            newState[orderKey].push(newKey);
+            newState[orderKey] = validateData('rulesOrder', newState[orderKey], newState[type],);
+          }
 
           if (type === 'omikuji' && 'rulesId' in item && item.rulesId) {
             const rulesId = item.rulesId;
-            newState.rules[rulesId].enabledIds.push(newKey);
+            // enabledIdsの検証を含むvalidateData呼び出し
+            const updatedRule = validateData('rules',
+              {
+                [rulesId]: {
+                  ...newState.rules[rulesId],
+                  enabledIds: [...newState.rules[rulesId].enabledIds, newKey]
+                }
+              },
+              newState.omikuji
+            );
+            Object.assign(newState.rules, updatedRule);
           }
-        });
+        }
       }
 
       // 削除処理
