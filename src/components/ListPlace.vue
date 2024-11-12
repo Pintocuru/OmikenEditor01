@@ -20,9 +20,9 @@
             {{ Omiken.place[placeId]?.name }}
           </v-toolbar-title>
           <template #append>
-            <ListItemPartsAction
-              selectCategory="place"
-              :item="Omiken.place[placeId]"
+            <PartsArrayAction
+              category="place"
+              :placeEntry="Omiken.place[placeId]"
               @edit="openEditorItem('place', placeId)"
               @update:Omiken="updateOmiken"
             />
@@ -63,6 +63,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import ListItemPartsAction from "./common/PartsToolbarAction.vue";
+import PartsArrayAction from "./common/PartsArrayAction.vue";
 import type {
   ListCategory,
   ListEntry,

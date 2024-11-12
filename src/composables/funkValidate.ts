@@ -17,13 +17,20 @@ const thresholdValueRangeSwap = (schema: any) =>
     return data;
   });
 
+// タイマー用のスキーマ
+const thresholdTimerSchema = z.object({
+  type: z.literal("timer"),
+  minutes: z.number().int().min(1).max(60),
+  isBaseZero: z.boolean()
+});
+
 // 時間フィルターのスキーマ
-const thresholdTimeSchema = z.object({
-  isEnabled: z.boolean().default(false),
-  value1: thresholdValueTransform.refine((val) => val >= 0 && val < 24, {
+const thresholdClockSchema = z.object({
+  type: z.literal("clock"), 
+  startHour: thresholdValueTransform.refine((val) => val >= 0 && val < 24, {
     message: "0-23の範囲で指定してください",
   }),
-  value2: thresholdValueTransform.refine((val) => val >= 0 && val < 25, {
+  durationHours: thresholdValueTransform.refine((val) => val >= 1 && val < 24, {
     message: "0-23の範囲で指定してください",
   }),
 });
@@ -31,7 +38,7 @@ const thresholdTimeSchema = z.object({
 // 経過時間フィルターのスキーマ
 const thresholdElapsedSchema = thresholdValueRangeSwap(
   z.object({
-    isEnabled: z.boolean().default(false),
+    type: z.literal("elapsed"), 
     unit: z.enum(["second", "minute", "hour", "day"]),
     comparison: z.enum(["min", "max", "range"]),
     value1: thresholdValueTransform,
@@ -42,7 +49,7 @@ const thresholdElapsedSchema = thresholdValueRangeSwap(
 // カウントフィルターのスキーマ
 const thresholdCountSchema = thresholdValueRangeSwap(
   z.object({
-    isEnabled: z.boolean().default(false),
+    type: z.literal("count"), 
     unit: z.enum(["lc", "no", "tc"]),
     comparison: z.enum(["min", "equal", "max", "loop", "range"]),
     value1: thresholdValueTransform,
@@ -53,60 +60,78 @@ const thresholdCountSchema = thresholdValueRangeSwap(
 // ギフトフィルターのスキーマ
 const thresholdGiftSchema = thresholdValueRangeSwap(
   z.object({
-    isEnabled: z.boolean().default(false),
+    type: z.literal("gift"), 
     comparison: z.enum(["min", "equal", "max", "range"]),
     value1: thresholdValueTransform,
     value2: thresholdValueTransform.optional(),
   })
 );
 
-// thresholdスキーマ
-const thresholdSchema = z
-  .object({
-    conditionType: z
-      .enum([
-        "none",
-        "access",
-        "syoken",
-        "match",
-        "time",
-        "elapsed",
-        "count",
-        "gift",
-      ])
-      .default("none"),
-    access: z.nativeEnum(AccessCondition).optional(),
-    syoken: z.enum(["syoken", "hi", "again"]).optional(),
-    match: z.array(z.string()).optional(),
-    time: thresholdTimeSchema.optional(),
-    elapsed: thresholdElapsedSchema.optional(),
-    count: thresholdCountSchema.optional(),
-    gift: thresholdGiftSchema.optional(),
-  })
-  .transform((data) => {
-    const result = { conditionType: data.conditionType };
-    // conditionTypeに応じて必要なキーのみを残す
-    switch (data.conditionType) {
-      case "none":
-        return result;
-      case "access":
-        return { ...result, access: data.access };
-      case "syoken":
-        return { ...result, syoken: data.syoken };
-      case "match":
-        return { ...result, match: data.match };
-      case "time":
-        return { ...result, time: data.time };
-      case "elapsed":
-        return { ...result, elapsed: data.elapsed };
-      case "count":
-        return { ...result, count: data.count };
-      case "gift":
-        return { ...result, gift: data.gift };
-      default:
-        return result;
-    }
-  });
+
+// 共通のthresholdスキーマ
+const thresholdTypeCommonSchema = z.object({
+  match: z.array(z.string()).optional().default(["おみくじ"]),
+  count: thresholdCountSchema.optional(),
+  gift: thresholdGiftSchema.optional(),
+  access: z.nativeEnum(AccessCondition).optional(),
+});
+
+// rules用thresholdのスキーマ
+const ruleThresholdSchema = thresholdTypeCommonSchema.extend({
+  conditionType: z.enum(["match", "access", "syoken", "timer", "count", "gift"]).default("match") ,
+  syoken: z.enum(["syoken", "hi", "again"]).optional(),
+  timer: thresholdTimerSchema.optional(),
+}).transform((data) => {
+  const result = { conditionType: data.conditionType };
+  // conditionTypeに応じて必要なキーのみを残す
+  switch (data.conditionType) {
+    case "access":
+      return { ...result, access: data.access };
+    case "syoken":
+      return { ...result, syoken: data.syoken };
+    case "match":
+      return { ...result, match: data.match };
+    case "timer":
+      return { ...result, timer: data.timer };
+    case "count":
+      return { ...result, count: data.count };
+    case "gift":
+      return { ...result, gift: data.gift };
+    default:
+      return result;
+  }
+});
+
+// omikuji用thresholdのスキーマ
+const omikujiThresholdSchema = thresholdTypeCommonSchema.extend({
+  conditionType: z.enum(["none", "access", "match", "clock", "elapsed", "count", "gift"]).default("none"),
+  clock: thresholdClockSchema.optional(),
+  elapsed: thresholdElapsedSchema.optional(),
+}).transform((data) => {
+  const result = { conditionType: data.conditionType };
+  // conditionTypeに応じて必要なキーのみを残す
+  switch (data.conditionType) {
+    case "none":
+      return result;
+    case "access":
+      return { ...result, access: data.access };
+    case "match":
+      return { ...result, match: data.match };
+    case "clock":
+      return { ...result, clock: data.clock };
+    case "elapsed":
+      return { ...result, elapsed: data.elapsed };
+    case "count":
+      return { ...result, count: data.count };
+    case "gift":
+      return { ...result, gift: data.gift };
+    default:
+      return result;
+  }
+});
+
+
+
 
 // enabledIdsの検証用スキーマ
 const enabledIdsSchema = z.array(z.string())
@@ -123,8 +148,7 @@ const rulesSchema = z.record(
     color: z.string().default(""),
     description: z.string().default(""),
     enabledIds: enabledIdsSchema.default([]),
-    matchStartsWith: z.array(z.string()).default([]),
-    threshold: thresholdSchema,
+    threshold: ruleThresholdSchema,
   })
 );
 
@@ -160,7 +184,7 @@ const omikujiSchema = z.record(
     name: z.string().default("大吉"),
     description: z.string().default(""),
     weight: z.number().int().nonnegative().default(1),
-    threshold: thresholdSchema,
+    threshold: omikujiThresholdSchema,
     post: omikujiPostSchema.default([]),
   })
 );
@@ -237,7 +261,6 @@ const defaultValues = {
     description: "",
     color: "",
     enabledIds: [],
-    matchStartsWith: [],
     threshold: {},
   },
   omikuji: {
@@ -280,8 +303,8 @@ export function validateData<T extends ValidationCategory>(
   type: T,
   items: Record<string, unknown> | string[],
   options?: {
-    omikuji?: Record<string, OmikujiType>;
     rules?: Record<string, RulesType>;
+    omikuji?: Record<string, OmikujiType>;
   }
 ): T extends 'rulesOrder' ? string[] : Record<string, ValidationTypeMap[T]> {
   // rulesOrderの検証
@@ -318,6 +341,7 @@ export function validateData<T extends ValidationCategory>(
       }
 
       const validatedItem = schemas[type as ListCategory].parse({ [key]: itemWithDefaults });
+      console.log(type);
       validatedData[key] = { ...validatedItem[key], id: key };
     } catch (error) {
       if (error instanceof z.ZodError) {

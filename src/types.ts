@@ -112,13 +112,13 @@ export interface OmikujiType extends BaseType {
 export interface ThresholdTypeCommon {
   conditionType: ConditionType; // condition選択
   match?: string[]; // キーワード
+  access?: AccessCondition; // ユーザーの役職
   count?: CountCondition; // コメント数
   gift?: GiftCondition; // ギフト
 }
 
 // ルール用の条件型
 export interface RuleThresholdType extends ThresholdTypeCommon {
-  access?: AccessCondition; // ユーザーの役職
   syoken?: SyokenCondition; // 初見・久しぶり
   timer?: TimerCondition; // タイマー(number,時報ありか
 }

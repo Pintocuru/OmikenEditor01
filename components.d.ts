@@ -69,6 +69,7 @@ declare module 'vue' {
     OmikujiEditorFiltering: typeof import('./src/components/OmikujiEditorFiltering.vue')['default']
     OmikujiEditorMessage: typeof import('./src/components/OmikujiEditorMessage.vue')['default']
     OmikujiList: typeof import('./src/components/OmikujiList.vue')['default']
+    PartsArrayAction: typeof import('./src/components/common/PartsArrayAction.vue')['default']
     PartsArrayActionOmikuji: typeof import('./src/components/common/PartsArrayActionOmikuji.vue')['default']
     PartsArrayRemove: typeof import('./src/components/common/PartsArrayRemove.vue')['default']
     PartsArrayRemovePlace: typeof import('./src/components/common/PartsArrayRemovePlace.vue')['default']

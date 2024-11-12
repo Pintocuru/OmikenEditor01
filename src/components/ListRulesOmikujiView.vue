@@ -28,7 +28,8 @@
               </v-tooltip>
             </v-toolbar-title>
             <template #append>
-              <PartsArrayActionOmikuji
+              <PartsArrayAction
+              category="omikuji"
                 :rulesEntry="currentItem"
                 :omikujiEntry="omikuji[omikujiId]"
                 @edit="openEditorItem('omikuji', omikujiId)"
@@ -101,7 +102,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import PartsArrayActionOmikuji from "./common/PartsArrayActionOmikuji.vue";
+import PartsArrayAction from "./common/PartsArrayAction.vue";
 import { FunkRules } from "../composables/FunkRules";
 import { FunkOmikuji } from "../composables/FunkOmikuji";
 import { FunkThreshold } from "../composables/FunkThreshold";

@@ -14,9 +14,9 @@
         "1730380661023-714m5",
         "1730435587723-zj28l"
       ],
-      "matchStartsWith": ["おみくじ", "omikuji", "omikuzi", "御神籤"],
       "threshold": {
-        "conditionType": "none"
+        "conditionType": "match",
+        "match": ["おみくじ", "omikuji", "omikuzi", "御神籤"]
       }
     },
     "1730186223570-nxukm": {
@@ -34,9 +34,9 @@
         "1730443354996-49v8q",
         "1730443324119-ddrt1"
       ],
-      "matchStartsWith": ["フラワー", "ふらわー", "flower"],
       "threshold": {
-        "conditionType": "none"
+        "conditionType": "match",
+        "match": ["フラワー", "ふらわー", "flower"]
       }
     }
   },

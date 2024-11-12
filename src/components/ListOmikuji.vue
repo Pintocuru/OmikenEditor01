@@ -23,7 +23,8 @@
             {{ Omiken.omikuji[omikujiId]?.name }}
           </v-toolbar-title>
           <template #append>
-            <PartsArrayActionOmikuji
+            <PartsArrayAction
+            category="omikuji"
               :omikujiEntry="Omiken.omikuji[omikujiId]"
               @edit="openEditorItem('omikuji', omikujiId)"
               @update:Omiken="updateOmiken"
@@ -72,8 +73,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import ListItemPartsAction from "./common/PartsToolbarAction.vue";
-import PartsArrayActionOmikuji from "./common/PartsArrayActionOmikuji.vue";
+import PartsArrayAction from "./common/PartsArrayAction.vue";
 import { FunkOmikuji } from "../composables/FunkOmikuji";
 import { FunkThreshold } from "../composables/FunkThreshold";
 import type {
