@@ -84,7 +84,10 @@ export type ListTypeMap = {
   place: PlaceType;
 };
 export type ListItemTypeMap = {
-  [K in keyof ListTypeMap]: Record<string, ListTypeMap[K]>;
+  rules: Record<string, RulesType>;
+  omikuji: Record<string, OmikujiType>;
+  place: Record<string, PlaceType>;
+  rulesOrder: string[]; // 追加
 };
 
 // 基本となる項目のインターフェース
@@ -110,7 +113,6 @@ export interface OmikujiType extends BaseType {
 
 // 共通の条件型
 export interface ThresholdTypeCommon {
-  conditionType: ConditionType; // condition選択
   match?: string[]; // キーワード
   access?: AccessCondition; // ユーザーの役職
   count?: CountCondition; // コメント数
@@ -119,12 +121,14 @@ export interface ThresholdTypeCommon {
 
 // ルール用の条件型
 export interface RuleThresholdType extends ThresholdTypeCommon {
+  conditionType: ConditionRulesType;
   syoken?: SyokenCondition; // 初見・久しぶり
   timer?: TimerCondition; // タイマー(number,時報ありか
 }
 
 // おみくじ用の条件型
 export interface OmikujiThresholdType extends ThresholdTypeCommon {
+  conditionType: ConditionOmikujiType;
   clock?: ClockCondition; // 時刻
   elapsed?: ElapsedCondition; // 経過時間
 }
@@ -132,18 +136,24 @@ export interface OmikujiThresholdType extends ThresholdTypeCommon {
 // ThresholdType
 export type ThresholdType = RuleThresholdType | OmikujiThresholdType;
 
+
+export type ConditionType = ConditionRulesType | ConditionOmikujiType;
 // condition選択用
-export enum ConditionType {
-  NONE = "none",
-  ACCESS = "access",
-  SYOKEN = "syoken",
-  MATCH = "match",
-  CLOCK = "clock",
-  TIMER = "timer",
-  ELAPSED = "elapsed",
-  COUNT = "count",
-  GIFT = "gift",
-}
+export type ConditionRulesType =
+  | "match"
+  | "count"
+  | "gift"
+  | "access"
+  | "syoken"
+  | "timer";
+export type ConditionOmikujiType =
+  | "none"
+  | "access"
+  | "match"
+  | "clock"
+  | "elapsed"
+  | "count"
+  | "gift";
 
 // 初見・コメント履歴の種別
 export enum SyokenCondition {
@@ -163,14 +173,14 @@ export enum AccessCondition {
 
 // タイマー
 export interface TimerCondition {
-  type: ConditionType.TIMER;
+  type: 'timer';
   minutes: number;
   isBaseZero: boolean;
 }
 
 // clock:時間指定(0-23時)
 export interface ClockCondition {
-  type: ConditionType.CLOCK;
+  type: 'clock';
   startHour: number;
   durationHours: number;
 }
@@ -184,21 +194,21 @@ export interface BaseCondition {
 
 // Elapsed: 投稿してからの時間(interval:ミリ秒)
 export interface ElapsedCondition extends BaseCondition {
-  type: ConditionType.ELAPSED;
+  type: 'elapsed';
   comparison: Extract<ComparisonType, "min" | "max" | "range">;
   unit: "second" | "minute" | "hour" | "day";
 }
 
 // lc:配信枠の全体コメ数 / no:配信枠の個人コメ数 / tc:総数の個人コメ数
 export interface CountCondition extends BaseCondition {
-  type: ConditionType.COUNT;
+  type: 'count';
   comparison: ComparisonType;
   unit: "lc" | "no" | "tc";
 }
 
 // Gift:ギフト金額
 export interface GiftCondition extends BaseCondition {
-  type: ConditionType.GIFT;
+  type: 'gift';
   comparison: Extract<ComparisonType, "min" | "max" | "range" | "equal">;
 }
 

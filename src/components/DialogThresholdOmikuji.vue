@@ -10,7 +10,7 @@
     @update:Omiken="updateOmiken"
   >
     <v-sheet
-      v-if="threshold.conditionType === ConditionType.CLOCK"
+      v-if="threshold.conditionType === 'clock'"
       class="d-flex align-center ga-2 w-100"
     >
       <v-text-field
@@ -31,10 +31,10 @@
       />
     </v-sheet>
 
-    <v-sheet v-if="threshold.conditionType === ConditionType.ELAPSED">
+    <v-sheet v-if="threshold.conditionType === 'elapsed'">
       <DialogThresholdInput
         v-model="threshold.elapsed"
-        :conditionType="ConditionType.ELAPSED"
+        conditionType="elapsed"
         @update:modelValue="updateThreshold"
       />
     </v-sheet>
@@ -44,11 +44,11 @@
 <script setup lang="ts">
 import { FunkEmits } from "@/composables/FunkEmits";
 import {
-  ConditionType,
   OmikenEntry,
   OmikenCategory,
   OmikujiType,
   OmikujiThresholdType,
+  ConditionType,
 } from "../types";
 import DialogThresholdBase from "./DialogThresholdBase.vue";
 import DialogThresholdInput from "./DialogThresholdInput.vue";
@@ -79,13 +79,13 @@ const { updateOmiken } = FunkEmits(emit);
 
 // フィルタリングの並び順
 const omikujiConditions = [
-  ConditionType.NONE,
-  ConditionType.GIFT,
-  ConditionType.CLOCK,
-  ConditionType.ELAPSED,
-  ConditionType.COUNT,
-  ConditionType.MATCH,
-];
+  "none",
+  "gift",
+  "clock",
+  "elapsed",
+  "count",
+  "match",
+] as ConditionType[];
 
 // 更新処理
 const updateThreshold = () => {

@@ -10,7 +10,7 @@
     @update:Omiken="updateOmiken"
   >
     <v-sheet
-      v-if="threshold?.conditionType === ConditionType.TIMER"
+      v-if="threshold?.conditionType === 'timer'"
       class="d-flex align-center ga-2"
     >
       <v-text-field
@@ -30,7 +30,7 @@
     </v-sheet>
 
     <v-radio-group
-      v-if="threshold.conditionType === ConditionType.SYOKEN"
+      v-if="threshold.conditionType === 'syoken'"
       v-model="threshold.syoken"
       inline
       @change="updateThreshold"
@@ -41,7 +41,7 @@
     </v-radio-group>
 
     <v-slider
-      v-if="threshold.conditionType === ConditionType.ACCESS"
+      v-if="threshold.conditionType === 'access'"
       v-model="threshold.access"
       :min="0"
       :max="4"
@@ -61,11 +61,11 @@
 <script setup lang="ts">
 import { FunkEmits } from "@/composables/FunkEmits";
 import {
-  ConditionType,
   OmikenEntry,
   OmikenCategory,
   RulesType,
   RuleThresholdType,
+  ConditionType,
 } from "../types";
 import DialogThresholdBase from "./DialogThresholdBase.vue";
 import {
@@ -95,13 +95,13 @@ const { updateOmiken } = FunkEmits(emit);
 
 // フィルタリングの並び順
 const ruleConditions = [
-  ConditionType.MATCH,
-  ConditionType.TIMER,
-  ConditionType.ACCESS,
-  ConditionType.SYOKEN,
-  ConditionType.COUNT,
-  ConditionType.GIFT,
-];
+  "match",
+  "timer",
+  "access",
+  "syoken",
+  "count",
+  "gift",
+] as ConditionType[];
 
 // 更新処理
 const updateThreshold = () => {

@@ -78,11 +78,11 @@ const emit = defineEmits<{
 
 // 型ガード関数
 const isElapsedCondition = (value: ModelValueType): value is ElapsedCondition =>
-  value?.type === ConditionType.ELAPSED;
+  value?.type === 'elapsed';
 const isCountCondition = (value: ModelValueType): value is CountCondition =>
-  value?.type === ConditionType.COUNT;
+  value?.type === 'count';
 const isGiftCondition = (value: ModelValueType): value is GiftCondition =>
-  value?.type === ConditionType.GIFT;
+  value?.type === 'gift';
 
 // computedプロパティで型安全な値を提供
 const currentItem = computed({

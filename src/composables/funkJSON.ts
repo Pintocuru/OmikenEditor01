@@ -95,13 +95,13 @@ export function funkJSON() {
       // データの検証と正規化 // TODO 並び順のバリデーションも行いたい
       // TODO 例えば、Objectのキーと配列が合わない可能性もあるので。
       const validatedData: OmikenType = {
-        rules: validateData('rules', data.rules, { omikuji: data.omikuji }),
-        rulesOrder: validateData('rulesOrder', data.rulesOrder, { rules: data.rules }),
+        rules: validateData('rules', data.rules,),
+        rulesOrder: validateData('rulesOrder', data.rulesOrder, ),
         omikuji: validateData('omikuji', data.omikuji),
         place: validateData('place', data.place),
         preferences: data.preferences
       };
-      console.log(validatedData.rulesOrder);
+      console.log(validatedData.rules);
 
       lastSavedState.value = _.cloneDeep(validatedData);
       await Swal.fire({

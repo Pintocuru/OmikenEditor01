@@ -1,6 +1,6 @@
 // src/composables/funkOmiken.ts
 
-import { computed, onMounted, provide, Ref, ref } from 'vue';
+import { computed, onMounted, provide, Ref, ref } from "vue";
 import type {
   OmikenType,
   OmikenEntry,
@@ -13,10 +13,10 @@ import type {
   PresetOmikenEditType,
   RulesType,
   OmikujiType,
-  PlaceType
-} from '../types';
-import { funkJSON, } from "./FunkJSON";
-import { generateOrder, validateData } from "./FunkValidate";
+  PlaceType,
+} from "../types";
+import { funkJSON } from "./FunkJSON";
+import { validateData } from "./FunkValidate";
 
 export function funkOmiken(listEntry: Ref<ListEntryCollect>) {
   const AppState = ref<AppStateType>({
@@ -29,7 +29,7 @@ export function funkOmiken(listEntry: Ref<ListEntryCollect>) {
         basicDelay: 1,
         omikujiCooldown: 2,
         commentDuration: 5,
-        BotUserIDname: 'FirstCounter'
+        BotUserIDname: "FirstCounter",
       },
     },
     CHARA: {},
@@ -39,14 +39,16 @@ export function funkOmiken(listEntry: Ref<ListEntryCollect>) {
 
   // ダイアログがすべて閉じている+保存フラグならtrue
   const isOmikenSave = computed(() => {
-    const isDialogsClosed = !Object.values(listEntry.value).some(entry => entry.isOpen);
+    const isDialogsClosed = !Object.values(listEntry.value).some(
+      (entry) => entry.isOpen
+    );
     return isDialogsClosed && isOmikenChanged.value;
   });
 
   // provide
   provide("AppStateKey", AppState);
 
-  const { fetchOmiken, fetchPreset, saveOmiken, } = funkJSON();
+  const { fetchOmiken, fetchPreset, saveOmiken } = funkJSON();
 
   // アプリケーションの初期化を一元管理
   const initializeApp = async () => {
@@ -63,7 +65,7 @@ export function funkOmiken(listEntry: Ref<ListEntryCollect>) {
       // 自動保存の開始
       startOmikenSave();
     } catch (error) {
-      console.error('Failed to initialize app:', error);
+      console.error("Failed to initialize app:", error);
       throw error;
     }
   };
@@ -77,12 +79,10 @@ export function funkOmiken(listEntry: Ref<ListEntryCollect>) {
         isOmikenChanged.value = false;
       }
     }, autoSaveInterval);
-
   };
 
   // 初期化処理の実行
   onMounted(initializeApp);
-
 
   // Omikenの更新
   const updateOmiken = (payload: OmikenEntry<OmikenCategory>) => {
@@ -90,16 +90,19 @@ export function funkOmiken(listEntry: Ref<ListEntryCollect>) {
     const { type, update, addKeys, delKeys, reorder, preferences } = payload;
 
     // 現在のステートのディープコピーを作成
-    const newState: OmikenType = JSON.parse(JSON.stringify(AppState.value.Omiken));
+    const newState: OmikenType = JSON.parse(
+      JSON.stringify(AppState.value.Omiken)
+    );
 
     // preferences の更新
-    if (type === 'preferences' && preferences) {
+    if (type === "preferences" && preferences) {
       newState.preferences = {
         ...newState.preferences,
-        ...preferences
+        ...preferences,
       };
-    } else if (type === 'rules' || type === 'omikuji' || type === 'place') {
-      const orderKey: OrderKey | undefined = type === 'rules' ? 'rulesOrder' : undefined;
+    } else if (type === "rules" || type === "omikuji" || type === "place") {
+      const orderKey: OrderKey | undefined =
+        type === "rules" ? "rulesOrder" : undefined;
 
       // 更新処理
       if (update) {
@@ -108,34 +111,47 @@ export function funkOmiken(listEntry: Ref<ListEntryCollect>) {
       }
 
       // 追加処理
-      const addItems = Array.isArray(addKeys) ? addKeys : addKeys ? [addKeys] : [];
+      const addItems = Array.isArray(addKeys)
+        ? addKeys
+        : addKeys
+        ? [addKeys]
+        : [];
       if (addItems.length) {
         for (const item of addItems) {
-          const newKey = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+          const newKey = `${Date.now()}-${Math.random()
+            .toString(36)
+            .slice(2, 7)}`;
 
           // rulesの場合はomikujiデータも渡す
-          const validatedItem = type === 'rules'
-            ? validateData(type, { [newKey]: item as ListType }, newState.omikuji)
-            : validateData(type, { [newKey]: item as ListType });
+          const validatedItem =
+            type === "rules"
+              ? validateData(
+                  type,
+                  { [newKey]: item as ListType }
+                )
+              : validateData(type, { [newKey]: item as ListType });
 
           Object.assign(newState[type], validatedItem);
 
-          if (type === 'rules' && orderKey) {
+          if (type === "rules" && orderKey) {
             newState[orderKey].push(newKey);
-            newState[orderKey] = validateData('rulesOrder', newState[orderKey], newState[type],);
+            newState[orderKey] = validateData(
+              "rulesOrder",
+              newState[orderKey]
+            );
           }
 
-          if (type === 'omikuji' && 'rulesId' in item && item.rulesId) {
+          if (type === "omikuji" && "rulesId" in item && item.rulesId) {
             const rulesId = item.rulesId;
             // enabledIdsの検証を含むvalidateData呼び出し
-            const updatedRule = validateData('rules',
+            const updatedRule = validateData(
+              "rules",
               {
                 [rulesId]: {
                   ...newState.rules[rulesId],
-                  enabledIds: [...newState.rules[rulesId].enabledIds, newKey]
-                }
+                  enabledIds: [...newState.rules[rulesId].enabledIds, newKey],
+                },
               },
-              newState.omikuji
             );
             Object.assign(newState.rules, updatedRule);
           }
@@ -143,26 +159,30 @@ export function funkOmiken(listEntry: Ref<ListEntryCollect>) {
       }
 
       // 削除処理
-      const delItems = Array.isArray(delKeys) ? delKeys : delKeys ? [delKeys] : [];
+      const delItems = Array.isArray(delKeys)
+        ? delKeys
+        : delKeys
+        ? [delKeys]
+        : [];
       if (delItems.length) {
-        delItems.forEach(key => {
+        delItems.forEach((key) => {
           delete newState[type][key];
-          if (orderKey) newState[orderKey] = newState[orderKey].filter(id => id !== key);
-          if (type === 'omikuji') {
-            Object.values(newState.rules).forEach(rule => {
-              rule.enabledIds = rule.enabledIds.filter(id => id !== key);
+          if (orderKey)
+            newState[orderKey] = newState[orderKey].filter((id) => id !== key);
+          if (type === "omikuji") {
+            Object.values(newState.rules).forEach((rule) => {
+              rule.enabledIds = rule.enabledIds.filter((id) => id !== key);
             });
           }
         });
       }
 
       // 順序の更新
-      if (reorder && orderKey === 'rulesOrder') newState[orderKey] = reorder;
-
+      if (reorder && orderKey === "rulesOrder") newState[orderKey] = reorder;
     }
     // ステートの一括更新
     AppState.value.Omiken = newState;
-    console.log('保存フラグが立ったよ');
+    console.log("保存フラグが立ったよ");
     isOmikenChanged.value = true;
   };
 
@@ -170,29 +190,31 @@ export function funkOmiken(listEntry: Ref<ListEntryCollect>) {
   const updateOmikenPreset = (preset: PresetOmikenEditType) => {
     // 現在のpreferencesとステートのコピーを保持
     const currentPreferences = AppState.value.Omiken.preferences;
-    const newState: OmikenType = JSON.parse(JSON.stringify(AppState.value.Omiken));
+    const newState: OmikenType = JSON.parse(
+      JSON.stringify(AppState.value.Omiken)
+    );
 
-    const categories: ListCategory[] = ['rules', 'omikuji', 'place'];
+    const categories: ListCategory[] = ["rules", "omikuji", "place"];
 
-    if (preset.mode === 'overwrite') {
+    if (preset.mode === "overwrite") {
       // 上書きモード：プリセットの内容で完全に置き換え（preferences除く）
-      categories.forEach(type => {
+      categories.forEach((type) => {
         switch (type) {
-          case 'rules':
-            newState[type] = validateData(type, preset.item[type]) as Record<string, RulesType>;
-            newState[`${type}Order`] = generateOrder(newState[type]);
+          case "rules":
+            newState[type] = validateData(type, preset.item[type]);
+            newState[`rulesOrder`] = validateData("rulesOrder", newState[type]);
             break;
-          case 'omikuji':
-            newState[type] = validateData(type, preset.item[type]) as Record<string, OmikujiType>;
+          case "omikuji":
+            newState[type] = validateData(type, preset.item[type]);
             break;
-          case 'place':
-            newState[type] = validateData(type, preset.item[type]) as Record<string, PlaceType>;
+          case "place":
+            newState[type] = validateData(type, preset.item[type]);
             break;
         }
       });
     } else {
       // 追加モード：既存のデータを保持しながら新しいデータを追加
-      categories.forEach(type => {
+      categories.forEach((type) => {
         const orderKey = `${type}Order` as const;
         const validatedNewData = validateData(type, preset.item[type]);
 
@@ -211,7 +233,7 @@ export function funkOmiken(listEntry: Ref<ListEntryCollect>) {
           renamedData[newKey] = {
             ...value,
             id: newKey, // IDも更新
-            name: `${value.name}${counter > 1 ? ` (${counter - 1})` : ''}` // 名前も区別
+            name: `${value.name}${counter > 1 ? ` (${counter - 1})` : ""}`, // 名前も区別
           };
           existingIds.add(newKey);
         });
@@ -219,12 +241,13 @@ export function funkOmiken(listEntry: Ref<ListEntryCollect>) {
         // データの結合
         newState[type] = {
           ...newState[type],
-          ...renamedData
+          ...renamedData,
         };
 
         // OrderArrayの更新（既存の順序を保持しつつ、新規キーを追加）
         const newKeys = Object.keys(renamedData);
-        if (orderKey === 'rulesOrder') newState[orderKey] = [...newState[orderKey], ...newKeys];
+        if (orderKey === "rulesOrder")
+          newState[orderKey] = [...newState[orderKey], ...newKeys];
       });
     }
 
@@ -233,11 +256,13 @@ export function funkOmiken(listEntry: Ref<ListEntryCollect>) {
 
     // ステートの更新
     AppState.value.Omiken = newState;
-    console.log(`プリセットを${preset.mode === 'overwrite' ? '上書き' : '追加'}で適用しました`);
+    console.log(
+      `プリセットを${
+        preset.mode === "overwrite" ? "上書き" : "追加"
+      }で適用しました`
+    );
     isOmikenChanged.value = true;
   };
-
-
 
   // 強制保存用 // TODO これは閉じた時のみ使うのでreturnしなくてもいいかも
   const forceSave = () => {

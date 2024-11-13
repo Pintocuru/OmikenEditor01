@@ -41,7 +41,7 @@
       <!-- MATCH COUNT GIFT -->
         <v-sheet class="pt-8">
           <v-combobox
-            v-if="threshold.conditionType === ConditionType.MATCH"
+            v-if="threshold.conditionType === 'match'"
             v-model="threshold.match"
             label="含まれるキーワード"
             chips
@@ -49,17 +49,17 @@
             clearable
             @update:modelValue="handleChange(threshold)"
           />
-          <v-card v-if="threshold.conditionType === ConditionType.COUNT">
+          <v-card v-if="threshold.conditionType === 'count'">
             <DialogThresholdInput
               v-model="threshold.count"
-              :conditionType="ConditionType.COUNT"
+              conditionType="count"
               @update:modelValue="handleChange(threshold)"
             />
           </v-card>
-          <v-card v-if="threshold.conditionType === ConditionType.GIFT">
+          <v-card v-if="threshold.conditionType === 'gift'">
             <DialogThresholdInput
               v-model="threshold.gift"
-              :conditionType="ConditionType.GIFT"
+              conditionType="gift"
               @update:modelValue="handleChange(threshold)"
             />
           </v-card>
@@ -71,6 +71,7 @@
 </template>
 
 <script setup lang="ts">
+
 import { computed } from "vue";
 import {
   ConditionType,
@@ -112,14 +113,16 @@ const filteredItems = computed(() => {
 // 値が変更されたときに直接emitする
 const handleChange = (newValue: ThresholdType) => {
   emit("update:threshold", newValue);
-
-  // @ts-ignore: threshold のみの更新のため
-  emit("update:Omiken", {
-    type: props.type,
-    update: {
+  const update = {
+    [props.currentItem.id]: {
       ...props.currentItem,
       threshold: newValue,
     },
+  };
+  // @ts-ignore threshold　の型が複雑なので
+  emit("update:Omiken", {
+    type: props.type,
+    update,
   });
 };
 

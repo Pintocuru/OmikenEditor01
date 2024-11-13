@@ -1,5 +1,5 @@
 // src/composables/funkValidate.ts
-import { type ListCategory, type ListTypeMap, AccessCondition, OmikenType, OmikujiType, RulesType } from "../types";
+import { type ListCategory, type ListTypeMap, AccessCondition, ListItemTypeMap, OmikenType, OmikujiType, PlaceType, RulesType } from "../types";
 import { z } from "zod";
 import _ from "lodash";
 
@@ -21,24 +21,24 @@ const thresholdValueRangeSwap = (schema: any) =>
 const thresholdTimerSchema = z.object({
   type: z.literal("timer"),
   minutes: z.number().int().min(1).max(60),
-  isBaseZero: z.boolean()
+  isBaseZero: z.boolean(),
 });
 
 // 時間フィルターのスキーマ
 const thresholdClockSchema = z.object({
-  type: z.literal("clock"), 
-  startHour: thresholdValueTransform.refine((val) => val >= 0 && val < 24, {
-    message: "0-23の範囲で指定してください",
-  }),
-  durationHours: thresholdValueTransform.refine((val) => val >= 1 && val < 24, {
-    message: "0-23の範囲で指定してください",
-  }),
+  type: z.literal("clock"),
+  startHour: thresholdValueTransform.transform(
+    (val) => (val >= 0 && val < 24 ? val : 0) // 0-23 以外の値はデフォルトの 0 に変換
+  ),
+  durationHours: thresholdValueTransform.transform(
+    (val) => (val >= 1 && val < 24 ? val : 1) // 1-23 以外の値はデフォルトの 1 に変換
+  ),
 });
 
 // 経過時間フィルターのスキーマ
 const thresholdElapsedSchema = thresholdValueRangeSwap(
   z.object({
-    type: z.literal("elapsed"), 
+    type: z.literal("elapsed"),
     unit: z.enum(["second", "minute", "hour", "day"]),
     comparison: z.enum(["min", "max", "range"]),
     value1: thresholdValueTransform,
@@ -49,7 +49,7 @@ const thresholdElapsedSchema = thresholdValueRangeSwap(
 // カウントフィルターのスキーマ
 const thresholdCountSchema = thresholdValueRangeSwap(
   z.object({
-    type: z.literal("count"), 
+    type: z.literal("count"),
     unit: z.enum(["lc", "no", "tc"]),
     comparison: z.enum(["min", "equal", "max", "loop", "range"]),
     value1: thresholdValueTransform,
@@ -60,13 +60,12 @@ const thresholdCountSchema = thresholdValueRangeSwap(
 // ギフトフィルターのスキーマ
 const thresholdGiftSchema = thresholdValueRangeSwap(
   z.object({
-    type: z.literal("gift"), 
+    type: z.literal("gift"),
     comparison: z.enum(["min", "equal", "max", "range"]),
     value1: thresholdValueTransform,
     value2: thresholdValueTransform.optional(),
   })
 );
-
 
 // 共通のthresholdスキーマ
 const thresholdTypeCommonSchema = z.object({
@@ -77,68 +76,72 @@ const thresholdTypeCommonSchema = z.object({
 });
 
 // rules用thresholdのスキーマ
-const ruleThresholdSchema = thresholdTypeCommonSchema.extend({
-  conditionType: z.enum(["match", "access", "syoken", "timer", "count", "gift"]).default("match") ,
-  syoken: z.enum(["syoken", "hi", "again"]).optional(),
-  timer: thresholdTimerSchema.optional(),
-}).transform((data) => {
-  const result = { conditionType: data.conditionType };
-  // conditionTypeに応じて必要なキーのみを残す
-  switch (data.conditionType) {
-    case "access":
-      return { ...result, access: data.access };
-    case "syoken":
-      return { ...result, syoken: data.syoken };
-    case "match":
-      return { ...result, match: data.match };
-    case "timer":
-      return { ...result, timer: data.timer };
-    case "count":
-      return { ...result, count: data.count };
-    case "gift":
-      return { ...result, gift: data.gift };
-    default:
-      return result;
-  }
-});
+const ruleThresholdSchema = thresholdTypeCommonSchema
+  .extend({
+    conditionType: z
+      .enum(["match", "access", "syoken", "timer", "count", "gift"])
+      .default("match"),
+    syoken: z.enum(["syoken", "hi", "again"]).optional(),
+    timer: thresholdTimerSchema.optional(),
+  })
+  .transform((data) => {
+    const result = { conditionType: data.conditionType };
+    // conditionTypeに応じて必要なキーのみを残す
+    switch (data.conditionType) {
+      case "access":
+        return { ...result, access: data.access };
+      case "syoken":
+        return { ...result, syoken: data.syoken };
+      case "match":
+        return { ...result, match: data.match };
+      case "timer":
+        return { ...result, timer: data.timer };
+      case "count":
+        return { ...result, count: data.count };
+      case "gift":
+        return { ...result, gift: data.gift };
+      default:
+        return result;
+    }
+  });
 
 // omikuji用thresholdのスキーマ
-const omikujiThresholdSchema = thresholdTypeCommonSchema.extend({
-  conditionType: z.enum(["none", "access", "match", "clock", "elapsed", "count", "gift"]).default("none"),
-  clock: thresholdClockSchema.optional(),
-  elapsed: thresholdElapsedSchema.optional(),
-}).transform((data) => {
-  const result = { conditionType: data.conditionType };
-  // conditionTypeに応じて必要なキーのみを残す
-  switch (data.conditionType) {
-    case "none":
-      return result;
-    case "access":
-      return { ...result, access: data.access };
-    case "match":
-      return { ...result, match: data.match };
-    case "clock":
-      return { ...result, clock: data.clock };
-    case "elapsed":
-      return { ...result, elapsed: data.elapsed };
-    case "count":
-      return { ...result, count: data.count };
-    case "gift":
-      return { ...result, gift: data.gift };
-    default:
-      return result;
-  }
-});
-
-
-
-
-// enabledIdsの検証用スキーマ
-const enabledIdsSchema = z.array(z.string())
-  .transform(ids => {
-    // 重複を除去して返す
-    return [...new Set(ids)];
+const omikujiThresholdSchema = thresholdTypeCommonSchema
+  .extend({
+    conditionType: z
+      .enum(["none", "access", "match", "clock", "elapsed", "count", "gift"])
+      .default("none"),
+    clock: thresholdClockSchema.optional(),
+    elapsed: thresholdElapsedSchema.optional(),
+  })
+  .transform((data) => {
+    const result = { conditionType: data.conditionType };
+    // conditionTypeに応じて必要なキーのみを残す
+    switch (data.conditionType) {
+      case "none":
+        return result;
+      case "access":
+        return { ...result, access: data.access };
+      case "match":
+        return { ...result, match: data.match };
+      case "clock":
+        return { ...result, clock: data.clock };
+      case "elapsed":
+        return { ...result, elapsed: data.elapsed };
+      case "count":
+        return { ...result, count: data.count };
+      case "gift":
+        return { ...result, gift: data.gift };
+      default:
+        return result;
+    }
   });
+
+// rulesOrder/enabledIdsの配列用スキーマ
+const arraySchema = z.array(z.string()).transform((ids) => {
+  // 重複を除去して返す
+  return [...new Set(ids)];
+});
 
 // rulesのZodスキーマ
 const rulesSchema = z.record(
@@ -147,7 +150,7 @@ const rulesSchema = z.record(
     name: z.string().default("おみくじ"),
     color: z.string().default(""),
     description: z.string().default(""),
-    enabledIds: enabledIdsSchema.default([]),
+    enabledIds: arraySchema.default([]),
     threshold: ruleThresholdSchema,
   })
 );
@@ -215,24 +218,6 @@ const placeSchema = z.record(
   })
 );
 
-// rulesOrderスキーマを修正
-const rulesOrderSchema = (rules: Record<string, RulesType>) =>
-  z.array(z.string())
-    .transform(order => {
-      const rulesKeys = Object.keys(rules);
-
-      // 1. 重複を除去
-      const uniqueOrder = [...new Set(order)];
-
-      // 2. rulesに存在しないキーを除去
-      const validOrder = uniqueOrder.filter(key => rulesKeys.includes(key));
-
-      // 3. rulesにあるが順序にないキーを追加
-      const missingKeys = rulesKeys.filter(key => !validOrder.includes(key));
-
-      return [...validOrder, ...missingKeys];
-    });
-
 const preferencesSchema = z.record(
   z.object({
     // コメントしてからBotが反応するまでの遅延(秒)
@@ -249,123 +234,78 @@ const preferencesSchema = z.record(
 // スキーマをまとめる
 const schemas = {
   rules: rulesSchema,
+  rulesOrder: arraySchema.default([]),
   omikuji: omikujiSchema,
   place: placeSchema,
   preferences: preferencesSchema,
 } as const;
 
-// デフォルト値の設定
-const defaultValues = {
-  rules: {
-    name: "おみくじ",
-    description: "",
-    color: "",
-    enabledIds: [],
-    threshold: {},
-  },
-  omikuji: {
-    name: "大吉",
-    description: "",
-    weight: 1,
-    threshold: {},
-    post: [
-      {
-        type: "onecomme",
-        botKey: "mamono",
-        iconKey: "Default",
-        delaySeconds: 0,
-        content: "<<user>>さんの運勢は【大吉】",
-      },
-    ],
-  },
-  place: {
-    name: "random",
-    description: "",
-    isWeight: false,
-    values: [
-      {
-        weight: 1,
-        value: "",
-      },
-    ],
-  },
-  preferences: {},
-};
 
-// rules omikuji placeのバリデーション
-// validateDataの型定義を拡張
-type ValidationCategory = ListCategory | 'rulesOrder';
-type ValidationTypeMap = ListTypeMap & {
-  rulesOrder: string[];
-};
+// 型の定義
+const validators = {
+  rules: (data: unknown) => schemas.rules.parse(data) as Record<string, RulesType>,
+  omikuji: (data: unknown) => schemas.omikuji.parse(data) as Record<string, OmikujiType>,
+  place: (data: unknown) => schemas.place.parse(data) as Record<string, PlaceType>,
+  rulesOrder: (data: unknown) => schemas.rulesOrder.parse(data) as string[],
+} as const;
 
-export function validateData<T extends ValidationCategory>(
+// バリデーション関数
+export const validateData = <T extends keyof ListItemTypeMap>(
   type: T,
-  items: Record<string, unknown> | string[],
-  options?: {
-    rules?: Record<string, RulesType>;
-    omikuji?: Record<string, OmikujiType>;
+  data: unknown
+): ListItemTypeMap[T] => {
+  try {
+    // バリデーションを行い、通った場合はそのまま返す
+    return validators[type](data) as ListItemTypeMap[T]; // 明示的に型をキャスト
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      console.error("Validation errors:", error.errors);
+      // schemasからデフォルト値を取得して返す
+      return validateDefault(type);
+    }
+    // その他のエラーが発生した場合もschemasからデフォルト値を取得
+    return validateDefault(type);
   }
-): T extends 'rulesOrder' ? string[] : Record<string, ValidationTypeMap[T]> {
-  // rulesOrderの検証
-  if (type === 'rulesOrder' && Array.isArray(items) && options?.rules) {
-    try {
-      const order = items as string[];
-      const schema = rulesOrderSchema(options.rules);
-      return schema.parse(order) as any;
-    } catch (error) {
-      console.error('RulesOrder validation warning:', error);
-      // エラー時は全てのルールキーを返す
-      return Object.keys(options.rules) as any;
+};
+
+// schemasからデフォルト値を取得する関数
+const validateDefault = <T extends keyof typeof validators>(
+  type: T
+): ListItemTypeMap[T] => {
+  try {
+    switch (type) {
+      case "rules": {
+        const emptyRules = validators.rules({});
+        return emptyRules as unknown as ListItemTypeMap[T];
+      }
+      case "omikuji": {
+        const emptyOmikuji = validators.omikuji({});
+        return emptyOmikuji as unknown as ListItemTypeMap[T];
+      }
+      case "place": {
+        const emptyPlace = validators.place({});
+        return emptyPlace as unknown as ListItemTypeMap[T];
+      }
+      case "rulesOrder": {
+        const emptyOrder = validators.rulesOrder([]);
+        return emptyOrder as unknown as ListItemTypeMap[T];
+      }
+      default:
+        throw new Error(`Unknown type: ${type}`);
+    }
+  } catch {
+    // 型に応じたフォールバック値を返す
+    switch (type) {
+      case "rules":
+        return {} as Record<string, RulesType> as ListItemTypeMap[T];
+      case "omikuji":
+        return {} as Record<string, OmikujiType> as ListItemTypeMap[T];
+      case "place":
+        return {} as Record<string, PlaceType> as ListItemTypeMap[T];
+      case "rulesOrder":
+        return [] as string[] as ListItemTypeMap[T];
+      default:
+        throw new Error(`Unknown type: ${type}`);
     }
   }
-
-  // 既存のvalidateDataロジック
-  const validatedData: Record<string, any> = {};
-  const itemsRecord = items as Record<string, unknown>;
-
-  for (const [key, item] of Object.entries(itemsRecord)) {
-    const itemWithDefaults = _.merge(
-      {},
-      defaultValues[type as ListCategory],
-      { id: key },
-      item
-    );
-
-    try {
-      if ('enabledIds' in itemWithDefaults && options?.omikuji) {
-        const enabledIds = (itemWithDefaults).enabledIds;
-        // おみくじに存在するIDのみをフィルタリング
-        const omikujiKeys = Object.keys(options.omikuji);
-        itemWithDefaults.enabledIds = enabledIds.filter(id => omikujiKeys.includes(id));
-      }
-
-      const validatedItem = schemas[type as ListCategory].parse({ [key]: itemWithDefaults });
-      console.log(type);
-      validatedData[key] = { ...validatedItem[key], id: key };
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        console.error(
-          `Validation warning for ${type} item ${key}:`,
-          JSON.stringify(error.errors, null, 2),
-          '\nInput value:',
-          JSON.stringify(itemWithDefaults, null, 2)
-        );
-      } else {
-        console.error(`Validation warning: ${(error as Error).message}`);
-      }
-
-      validatedData[key] = {
-        ...defaultValues[type as ListCategory],
-        id: key,
-        ..._.pick(itemWithDefaults, ['name', 'description'])
-      };
-    }
-  }
-
-  return validatedData as any;
-}
-
-export const generateOrder = (items: { [key: string]: any }): string[] => {
-  return Object.keys(items);
 };

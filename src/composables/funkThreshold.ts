@@ -46,55 +46,55 @@ const CONSTANTS = {
   THRESHOLD_ITEMS: [
     {
       label: "制限なし",
-      value: ConditionType.NONE,
+      value: "none",
       icon: "mdi-block-helper",
       description: "条件による制限を設定しません",
     },
     {
       label: "タイマー投稿",
-      value: ConditionType.TIMER,
+      value: "timer",
       icon: "mdi-clock-time-four",
       description: "一定の時間ごとに自動でBOTが話します",
     },
     {
       label: "メンバー・モデレーター判定",
-      value: ConditionType.ACCESS,
+      value: 'access',
       icon: "mdi-account-check",
       description: "メンバーシップやモデレーター権限を判定",
     },
     {
       label: "初見・久しぶり",
-      value: ConditionType.SYOKEN,
+      value: 'syoken',
       icon: "mdi-account-clock",
       description: "視聴者の初見や復帰を判定",
     },
     {
       label: "キーワード一致",
-      value: ConditionType.MATCH,
+      value: 'match',
       icon: "mdi-text-search",
       description: "特定のキーワードのコメントを判定",
     },
     {
       label: "時間指定",
-      value: ConditionType.CLOCK,
+      value: 'clock',
       icon: "mdi-clock-time-four",
       description: "指定した時間帯のみ有効",
     },
     {
       label: "経過時間",
-      value: ConditionType.ELAPSED,
+      value: 'elapsed',
       icon: "mdi-timer",
       description: "配信開始からの経過時間で判定",
     },
     {
       label: "コメント数",
-      value: ConditionType.COUNT,
+      value: 'count',
       icon: "mdi-comment-multiple",
       description: "コメント投稿回数による判定",
     },
     {
       label: "ギフト",
-      value: ConditionType.GIFT,
+      value: 'gift',
       icon: "mdi-gift",
       description: "ギフト送信による判定",
     },
@@ -126,29 +126,32 @@ const CONSTANTS = {
         { title: "範囲", value: "range" },
       ] as ComparisonItem[],
       additional: {
-        [ConditionType.COUNT]: [
+        count: [
           { title: "等しい", value: "equal" },
           { title: "繰り返し", value: "loop" },
         ],
-        [ConditionType.GIFT]: [{ title: "等しい", value: "equal" }],
+        gift: [{ title: "等しい", value: "equal" }],
       } as Partial<Record<ConditionType, ComparisonItem[]>>,
     },
     // 値のラベル定義
     value: {
-      [ConditionType.CLOCK]: { value1: "時刻", value2: "終了時刻" },
-      [ConditionType.ELAPSED]: { value1: "経過時間", value2: "経過時間(終了)" },
-      [ConditionType.COUNT]: { value1: "コメント数", value2: "コメント数(終了)" },
-      [ConditionType.GIFT]: { value1: "ポイント", value2: "ポイント(終了)" },
+      clock: { value1: "時刻", value2: "終了時刻" },
+      elapsed: { value1: "経過時間", value2: "経過時間(終了)" },
+      count: {
+        value1: "コメント数",
+        value2: "コメント数(終了)",
+      },
+      gift: { value1: "ポイント", value2: "ポイント(終了)" },
     } as Partial<Record<ConditionType, ValueLabel>>,
     // 単位の定義
     unit: {
-      [ConditionType.ELAPSED]: [
+      elapsed: [
         { title: "秒", value: "second" },
         { title: "分", value: "minute" },
         { title: "時間", value: "hour" },
         { title: "日", value: "day" },
       ],
-      [ConditionType.COUNT]: [
+      count: [
         { title: "配信枠のコメント番号", value: "lc" },
         { title: "個人コメント数", value: "no" },
         { title: "総個人コメント数", value: "tc" },
@@ -182,13 +185,13 @@ export function FunkThreshold() {
    * @returns 発動条件があればtrue
    */
   const isThreshold = (threshold: ThresholdType): boolean => {
-    if (threshold.conditionType === ConditionType.NONE) return false;
+    if (threshold.conditionType === 'none') return false;
 
-    if (threshold.conditionType === ConditionType.ACCESS) {
+    if (threshold.conditionType === 'access') {
       return 'access' in threshold && threshold.access !== AccessCondition.ANYONE;
     }
 
-    if (threshold.conditionType === ConditionType.MATCH) {
+    if (threshold.conditionType === 'match') {
       return 'match' in threshold && Array.isArray(threshold.match) && threshold.match.length > 0;
     }
 
@@ -234,33 +237,33 @@ export function FunkThreshold() {
     if (!threshold) return "";
 
     const handlers: Record<ConditionType, (threshold: any) => string> = {
-      [ConditionType.TIMER]: ({ timer }: { timer?: TimerCondition }) => {
+      timer: ({ timer }: { timer?: TimerCondition }) => {
         if (!timer) return "";
         return `${timer.isBaseZero ? "0分" : "起動時"}から${timer.minutes}分ごと`;
       },
 
-      [ConditionType.SYOKEN]: ({ syoken }: { syoken: SyokenCondition }) =>
+      syoken: ({ syoken }: { syoken: SyokenCondition }) =>
         `${CONSTANTS.MAPPINGS.syoken[syoken || SyokenCondition.SYOKEN]}の場合`,
 
-      [ConditionType.ACCESS]: ({ access }: { access: AccessCondition }) =>
+      access: ({ access }: { access: AccessCondition }) =>
         CONSTANTS.MAPPINGS.access[access || AccessCondition.OFF],
 
-      [ConditionType.MATCH]: ({ match }: { match?: string[] }) =>
+      match: ({ match }: { match?: string[] }) =>
         match?.length ? `「${match.join("」「")}」を含む場合` : "キーワード未設定",
 
-      [ConditionType.CLOCK]: ({ clock }: { clock?: ClockCondition }) => {
+      clock: ({ clock }: { clock?: ClockCondition }) => {
         if (!clock) return "";
         const endHour = (clock.startHour + clock.durationHours) % 24;
         return `${clock.startHour}時～${endHour}時の範囲`;
       },
 
-      [ConditionType.ELAPSED]: ({ elapsed }: { elapsed?: ElapsedCondition }) => {
+      elapsed: ({ elapsed }: { elapsed?: ElapsedCondition }) => {
         if (!elapsed) return "";
         const unitMap = { second: "秒", minute: "分", hour: "時間", day: "日" };
         return `最後のコメントから${getComparisonText(elapsed, unitMap[elapsed.unit])}`;
       },
 
-      [ConditionType.COUNT]: ({ count }: { count?: CountCondition }) => {
+      count: ({ count }: { count?: CountCondition }) => {
         if (!count) return "";
         const unitMap = {
           lc: "配信枠のコメント数",
@@ -270,12 +273,12 @@ export function FunkThreshold() {
         return `${unitMap[count.unit]}が${getComparisonText(count, "")}`;
       },
 
-      [ConditionType.GIFT]: ({ gift }: { gift?: GiftCondition }) => {
+      gift: ({ gift }: { gift?: GiftCondition }) => {
         if (!gift) return "";
         return `ギフト金額が${getComparisonText(gift, "pt")}`;
       },
 
-      [ConditionType.NONE]: () => "制限なし",
+      none: () => "制限なし",
     };
 
     return handlers[threshold.conditionType]?.(threshold) || "制限なし";
@@ -324,18 +327,19 @@ export function FunkThreshold() {
 export function FunkThresholdInitial() {
   // 共通の初期値
   const commonThreshold: ThresholdTypeCommon = {
-    conditionType: ConditionType.MATCH,
-    match: ['yaa'],
+    match: ["おみくじ"],
     count: {
-      type: ConditionType.COUNT,
-      comparison: 'max',
-      unit: 'lc',
-      value1: 0
+      type: "count",
+      comparison: "max",
+      unit: "lc",
+      value1: 0,
+      value2: 1,
     },
     gift: {
-      type: ConditionType.GIFT,
-      comparison: 'max',
-      value1: 0
+      type: "gift",
+      comparison: "max",
+      value1: 0,
+      value2: 1,
     },
   };
 
@@ -343,31 +347,32 @@ export function FunkThresholdInitial() {
     // rules用の初期値
     rule: {
       ...commonThreshold,
-      conditionType: ConditionType.MATCH,
+      conditionType: "match",
       access: AccessCondition.ANYONE,
       syoken: SyokenCondition.SYOKEN,
       timer: {
-        type: ConditionType.TIMER,
-        minutes: 1 as number & { _brand: "1-180" },
-        isBaseZero: false
-      }
+        type: "timer",
+        minutes: 5,
+        isBaseZero: false,
+      },
     } as RuleThresholdType,
 
     // omikuji用の初期値
     omikuji: {
       ...commonThreshold,
-      conditionType: ConditionType.NONE,
+      conditionType: "none",
       clock: {
-        type: ConditionType.CLOCK,
+        type: "clock",
         startHour: 0,
-        durationHours: 1
+        durationHours: 1,
       },
       elapsed: {
-        type: ConditionType.ELAPSED,
-        comparison: "min",
-        unit: "minute",
-        value1: 0
-      }
-    } as OmikujiThresholdType
+        type: "elapsed",
+        comparison: "max",
+        unit: "hour",
+        value1: 0,
+        value2: 1,
+      },
+    } as OmikujiThresholdType,
   };
 }

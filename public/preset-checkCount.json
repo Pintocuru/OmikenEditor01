@@ -10,11 +10,9 @@
         "1731156395590-mupgd",
         "1731156509378-04ync"
       ],
-      "matchStartsWith": ["初見", "所見", "しょけん", "syoken"],
       "threshold": {
         "conditionType": "count",
         "count": {
-          "isEnabled": false,
           "unit": "tc",
           "comparison": "max",
           "value1": 6
