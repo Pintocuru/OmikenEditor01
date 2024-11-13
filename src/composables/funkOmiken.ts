@@ -11,9 +11,6 @@ import type {
   ListEntryCollect,
   ListCategory,
   PresetOmikenEditType,
-  RulesType,
-  OmikujiType,
-  PlaceType,
 } from "../types";
 import { funkJSON } from "./FunkJSON";
 import { validateData } from "./FunkValidate";
@@ -188,66 +185,96 @@ export function funkOmiken(listEntry: Ref<ListEntryCollect>) {
 
   // Presetからの上書き・追加
   const updateOmikenPreset = (preset: PresetOmikenEditType) => {
-    // 現在のpreferencesとステートのコピーを保持
     const currentPreferences = AppState.value.Omiken.preferences;
+    // 深いコピーを作成
     const newState: OmikenType = JSON.parse(
       JSON.stringify(AppState.value.Omiken)
     );
-
     const categories: ListCategory[] = ["rules", "omikuji", "place"];
 
     if (preset.mode === "overwrite") {
-      // 上書きモード：プリセットの内容で完全に置き換え（preferences除く）
+      // 上書きモード
       categories.forEach((type) => {
-        switch (type) {
-          case "rules":
-            newState[type] = validateData(type, preset.item[type]);
-            newState[`rulesOrder`] = validateData("rulesOrder", newState[type]);
-            break;
-          case "omikuji":
-            newState[type] = validateData(type, preset.item[type]);
-            break;
-          case "place":
-            newState[type] = validateData(type, preset.item[type]);
-            break;
+        // プリセットデータをバリデート
+        const validatedData = validateData(type, preset.item[type]);
+        newState[type] = validatedData;
+
+        // rulesの場合、rulesOrderも更新
+        if (type === "rules") {
+          // rulesOrderは既存のrulesのキーから生成
+          const validKeys = Object.keys(validatedData);
+          newState.rulesOrder = validateData("rulesOrder", validKeys);
         }
       });
     } else {
-      // 追加モード：既存のデータを保持しながら新しいデータを追加
+      // 追加モード
       categories.forEach((type) => {
-        const orderKey = `${type}Order` as const;
+        // プリセットデータを先にバリデート
         const validatedNewData = validateData(type, preset.item[type]);
-
-        // 重複するIDを検出し、新しいIDを生成
         const existingIds = new Set(Object.keys(newState[type]));
         const renamedData: Record<string, any> = {};
 
+        // 各アイテムの処理
         Object.entries(validatedNewData).forEach(([key, value]) => {
           let newKey = key;
           let counter = 1;
-          // 重複するIDがある場合、新しいIDを生成
+
+          // 重複IDの解決
           while (existingIds.has(newKey)) {
             newKey = `${key}_${counter}`;
             counter++;
           }
-          renamedData[newKey] = {
+
+          // タイプ別の特殊処理
+          const baseItem = {
             ...value,
-            id: newKey, // IDも更新
-            name: `${value.name}${counter > 1 ? ` (${counter - 1})` : ""}`, // 名前も区別
+            id: newKey,
+            name: `${value.name}${counter > 1 ? ` (${counter - 1})` : ""}`,
           };
+
+          // タイプ別の追加処理
+          switch (type) {
+            case "rules":
+              renamedData[newKey] = {
+                ...baseItem,
+                threshold: {
+                  ...baseItem.threshold,
+                  match: baseItem.threshold?.match ?? ["おみくじ"],
+                },
+              };
+              break;
+            case "omikuji":
+              renamedData[newKey] = {
+                ...baseItem,
+                weight: typeof value.weight === "number" ? value.weight : 1,
+              };
+              break;
+            case "place":
+              renamedData[newKey] = {
+                ...baseItem,
+                isWeight: !!value.isWeight,
+                values: Array.isArray(value.values) ? value.values : [],
+              };
+              break;
+          }
+
           existingIds.add(newKey);
         });
 
-        // データの結合
+        // バリデート済みデータの結合
         newState[type] = {
           ...newState[type],
           ...renamedData,
         };
 
-        // OrderArrayの更新（既存の順序を保持しつつ、新規キーを追加）
-        const newKeys = Object.keys(renamedData);
-        if (orderKey === "rulesOrder")
-          newState[orderKey] = [...newState[orderKey], ...newKeys];
+        // rulesOrderの更新（rulesの場合のみ）
+        if (type === "rules") {
+          const newKeys = Object.keys(renamedData);
+          newState.rulesOrder = validateData("rulesOrder", [
+            ...newState.rulesOrder,
+            ...newKeys,
+          ]);
+        }
       });
     }
 
@@ -262,14 +289,6 @@ export function funkOmiken(listEntry: Ref<ListEntryCollect>) {
       }で適用しました`
     );
     isOmikenChanged.value = true;
-  };
-
-  // 強制保存用 // TODO これは閉じた時のみ使うのでreturnしなくてもいいかも
-  const forceSave = () => {
-    if (isOmikenChanged.value) {
-      saveOmiken(AppState.value.Omiken);
-      isOmikenChanged.value = false;
-    }
   };
 
   return {

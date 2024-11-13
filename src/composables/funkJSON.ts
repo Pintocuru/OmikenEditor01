@@ -1,11 +1,20 @@
 // src/composables/funkJSON.ts
-import { ref } from 'vue';
+import { ref } from "vue";
 import { validateData } from "./FunkValidate";
-import type { OmikenType, fetchJSONType, CHARAEditType, PresetOmikenEditType, ListCategory, ListTypeMap, RulesType, OmikujiType, PlaceType } from '../types';
-import _ from 'lodash';
-import Swal from 'sweetalert2';
-import { useToast } from 'vue-toastification';
-
+import type {
+  OmikenType,
+  fetchJSONType,
+  CHARAEditType,
+  PresetOmikenEditType,
+  ListCategory,
+  ListTypeMap,
+  RulesType,
+  OmikujiType,
+  PlaceType,
+} from "../types";
+import _ from "lodash";
+import Swal from "sweetalert2";
+import { useToast } from "vue-toastification";
 
 // ! /////////////////////////////////////////
 // !
@@ -13,7 +22,6 @@ import { useToast } from 'vue-toastification';
 // ! Editer自身では、fetchを使ったJSON読み込みも更新も行えません!
 // !
 // ! /////////////////////////////////////////
-
 
 // JSONデータの読み込み・書き込み
 export function funkJSON() {
@@ -23,25 +31,26 @@ export function funkJSON() {
   const lastSavedState = ref<OmikenType | null>(null); // 1つ前へ戻る機能
   const toast = useToast(); // vue-toastification // TODO sweetalert2 に変更
 
-
   // OmikenとCHARAデータの読み込み
   const fetchPreset = async () => {
     isLoading.value = true;
     try {
       // index.jsonからプリセット一覧取得
-      const response = await fetch('/index.json');
+      const response = await fetch("/index.json");
       const presets = await response.json();
 
       // 型ごとにデータ取得と整形
       const [charaData, presetData] = await Promise.all([
-        fetchCHARA(presets.filter((p: fetchJSONType) => p.type === 'CHARA')),
-        fetchPreOmiken(presets.filter((p: fetchJSONType) => p.type === 'Omiken'))
+        fetchCHARA(presets.filter((p: fetchJSONType) => p.type === "CHARA")),
+        fetchPreOmiken(
+          presets.filter((p: fetchJSONType) => p.type === "Omiken")
+        ),
       ]);
 
       return { charaData, presetData };
     } catch (error) {
-      console.error('Failed to load data:', error);
-      throw new Error('データの読み込みに失敗しました');
+      console.error("Failed to load data:", error);
+      throw new Error("データの読み込みに失敗しました");
     } finally {
       isLoading.value = false;
     }
@@ -50,8 +59,8 @@ export function funkJSON() {
   // Preset.CHARAの読み込み
   const fetchCHARA = async (charaPaths: fetchJSONType[]) => {
     const responses = await Promise.all(
-      charaPaths.map(async p => {
-        const item = await fetch(p.path).then(r => r.json());
+      charaPaths.map(async (p) => {
+        const item = await fetch(p.path).then((r) => r.json());
         return { ...p, item } as CHARAEditType;
       })
     );
@@ -64,77 +73,85 @@ export function funkJSON() {
   // Preset.Omikenの読み込み
   const fetchPreOmiken = async (presetPaths: fetchJSONType[]) => {
     const responses = await Promise.all(
-      presetPaths.map(async p => {
-        const item = await fetch(p.path).then(r => r.json());
+      presetPaths.map(async (p) => {
+        const item = await fetch(p.path).then((r) => r.json());
         return { ...p, item } as PresetOmikenEditType;
       })
     );
-    return responses.reduce<Record<string, PresetOmikenEditType>>((acc, data) => {
-      acc[data.id] = data;
-      return acc;
-    }, {});
+    return responses.reduce<Record<string, PresetOmikenEditType>>(
+      (acc, data) => {
+        acc[data.id] = data;
+        return acc;
+      },
+      {}
+    );
   };
 
   // 現在のOmiken読み込み
   const fetchOmiken = async (): Promise<OmikenType | null> => {
     // 取得中ならreturn
     if (isLoading.value) {
-      console.warn('データの取得が既に進行中です');
+      console.warn("データの取得が既に進行中です");
       return null;
     }
     isLoading.value = true;
 
     try {
       // fetchを使って読み込み
-      const response = await fetch('/src/state.json');
+      const response = await fetch("/src/state.json");
       if (!response.ok) {
-        throw new Error('Network response was not ok: ' + response.statusText);
+        throw new Error("Network response was not ok: " + response.statusText);
       }
       const data = await response.json();
 
-      // データの検証と正規化 // TODO 並び順のバリデーションも行いたい
-      // TODO 例えば、Objectのキーと配列が合わない可能性もあるので。
+      // データの検証と正規化
       const validatedData: OmikenType = {
-        rules: validateData('rules', data.rules,),
-        rulesOrder: validateData('rulesOrder', data.rulesOrder, ),
-        omikuji: validateData('omikuji', data.omikuji),
-        place: validateData('place', data.place),
-        preferences: data.preferences
+        rules: validateData("rules", data.rules),
+        rulesOrder: validateData("rulesOrder", data.rulesOrder),
+        omikuji: validateData("omikuji", data.omikuji),
+        place: validateData("place", data.place),
+        preferences: data.preferences,
       };
-      console.log(validatedData.rules);
 
       lastSavedState.value = _.cloneDeep(validatedData);
       await Swal.fire({
-        title: '読み込み完了',
-        text: 'データの読み込みが完了しました。',
-        icon: 'success',
-        confirmButtonText: 'OK'
+        title: "読み込み完了",
+        text: "データの読み込みが完了しました。",
+        icon: "success",
+        confirmButtonText: "OK",
       });
       isLoading.value = false;
       return validatedData;
     } catch (error) {
       noAppBoot.value = true;
       await Swal.fire({
-        title: '読み込み失敗',
-        text: 'データの読み込みに失敗しました。アプリケーションを起動できません。',
-        icon: 'error',
-        confirmButtonText: 'OK',
+        title: "読み込み失敗",
+        text: "データの読み込みに失敗しました。アプリケーションを起動できません。",
+        icon: "error",
+        confirmButtonText: "OK",
       });
-      throw new Error('データ読み込み失敗');
+      throw new Error("データ読み込み失敗");
     }
   };
 
   // Objectを指定された順序で並び替える関数 // TODO reorderはrulesのみ
-  function reorderObject<T>(obj: Record<string, T>, order: string[]): Record<string, T> {
+  function reorderObject<T>(
+    obj: Record<string, T>,
+    order: string[]
+  ): Record<string, T> {
     // 順序配列の検証
-    const validOrder = order.filter(key => key in obj);
+    const validOrder = order.filter((key) => key in obj);
     // オブジェクトのキーと順序配列の整合性チェック
     const objKeys = Object.keys(obj);
-    if (validOrder.length !== objKeys.length ||
-      !objKeys.every(key => validOrder.includes(key))) {
-      console.warn(`順序配列とオブジェクトのキーが一致しません: ${validOrder.length} != ${objKeys.length}`);
+    if (
+      validOrder.length !== objKeys.length ||
+      !objKeys.every((key) => validOrder.includes(key))
+    ) {
+      console.warn(
+        `順序配列とオブジェクトのキーが一致しません: ${validOrder.length} != ${objKeys.length}`
+      );
       // 不足しているキーを順序配列に追加
-      objKeys.forEach(key => {
+      objKeys.forEach((key) => {
         if (!validOrder.includes(key)) validOrder.push(key);
       });
     }
@@ -149,29 +166,31 @@ export function funkJSON() {
 
   // Omikenの保存
   const saveOmiken = async (Omiken: OmikenType): Promise<void> => {
-
     // 各ObjectをOrderの順番に直す
     const newOmiken: OmikenType = {
-      rules: reorderObject(Omiken.rules, Omiken.rulesOrder ?? Object.keys(Omiken.rules)),
+      rules: reorderObject(
+        Omiken.rules,
+        Omiken.rulesOrder ?? Object.keys(Omiken.rules)
+      ),
       omikuji: Omiken.omikuji,
       place: Omiken.place,
       rulesOrder: Omiken.rulesOrder ?? Object.keys(Omiken.rules),
-      preferences: Omiken.preferences
+      preferences: Omiken.preferences,
     };
 
     if (noAppBoot.value) {
-      toast('🚫データ保存はできません');
+      toast("🚫データ保存はできません");
       return;
     }
     // テストモード:保存できたことをログに表示
     if (!canUpdateJSON.value) {
-      toast('💾saveDataまで届きました');
-      console.warn('saveDataまで届きました:', newOmiken);
+      toast("💾saveDataまで届きました");
+      console.warn("saveDataまで届きました:", newOmiken);
       return;
     }
     // ロード中ならreturn
     if (isLoading.value) {
-      console.warn('💾canUpdateJSON:true');
+      console.warn("💾canUpdateJSON:true");
       return;
     }
 
@@ -179,18 +198,17 @@ export function funkJSON() {
     try {
       // TODO ここでAppState.Omiken のデータをAPIで飛ばす
     } catch (error) {
-      console.error('Error saving data:', error);
+      console.error("Error saving data:", error);
       await Swal.fire({
-        title: '保存失敗',
-        text: 'データの保存に失敗しました。',
-        icon: 'error',
-        confirmButtonText: 'OK'
+        title: "保存失敗",
+        text: "データの保存に失敗しました。",
+        icon: "error",
+        confirmButtonText: "OK",
       });
     } finally {
       isLoading.value = false;
     }
   };
-
 
   return {
     fetchPreset,
@@ -200,4 +218,3 @@ export function funkJSON() {
     saveOmiken,
   };
 }
-

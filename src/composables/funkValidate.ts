@@ -1,5 +1,14 @@
 // src/composables/funkValidate.ts
-import { type ListCategory, type ListTypeMap, AccessCondition, ListItemTypeMap, OmikenType, OmikujiType, PlaceType, RulesType } from "../types";
+import {
+  type ListCategory,
+  type ListTypeMap,
+  AccessCondition,
+  ListItemTypeMap,
+  OmikenType,
+  OmikujiType,
+  PlaceType,
+  RulesType,
+} from "../types";
 import { z } from "zod";
 import _ from "lodash";
 
@@ -151,7 +160,10 @@ const rulesSchema = z.record(
     color: z.string().default(""),
     description: z.string().default(""),
     enabledIds: arraySchema.default([]),
-    threshold: ruleThresholdSchema,
+    threshold: ruleThresholdSchema.catch({
+      conditionType: "match",
+      match: ["おみくじ"],
+    }),
   })
 );
 
@@ -187,7 +199,9 @@ const omikujiSchema = z.record(
     name: z.string().default("大吉"),
     description: z.string().default(""),
     weight: z.number().int().nonnegative().default(1),
-    threshold: omikujiThresholdSchema,
+    threshold: omikujiThresholdSchema.catch({
+      conditionType: "none",
+    }),
     post: omikujiPostSchema.default([]),
   })
 );
@@ -240,72 +254,58 @@ const schemas = {
   preferences: preferencesSchema,
 } as const;
 
-
 // 型の定義
 const validators = {
-  rules: (data: unknown) => schemas.rules.parse(data) as Record<string, RulesType>,
-  omikuji: (data: unknown) => schemas.omikuji.parse(data) as Record<string, OmikujiType>,
-  place: (data: unknown) => schemas.place.parse(data) as Record<string, PlaceType>,
-  rulesOrder: (data: unknown) => schemas.rulesOrder.parse(data) as string[],
+  rules: (data: unknown) => (schemas.rules.safeParse(data).success ? data : {}),
+  omikuji: (data: unknown) =>
+    schemas.omikuji.safeParse(data).success ? data : {},
+  place: (data: unknown) => (schemas.place.safeParse(data).success ? data : {}),
+  rulesOrder: (data: unknown) =>
+    schemas.rulesOrder.safeParse(data).success ? data : [],
 } as const;
 
-// バリデーション関数
+// validateData
 export const validateData = <T extends keyof ListItemTypeMap>(
   type: T,
   data: unknown
 ): ListItemTypeMap[T] => {
   try {
-    // バリデーションを行い、通った場合はそのまま返す
-    return validators[type](data) as ListItemTypeMap[T]; // 明示的に型をキャスト
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      console.error("Validation errors:", error.errors);
-      // schemasからデフォルト値を取得して返す
-      return validateDefault(type);
-    }
-    // その他のエラーが発生した場合もschemasからデフォルト値を取得
-    return validateDefault(type);
+    console.log(data);
+    const schema = schemas[type];
+    // parseを使用することで、スキーマ定義に基づいた
+    // バリデーション・変換・デフォルト値の適用が自動的に行われる
+    return schema.parse(data) as ListItemTypeMap[T];
+  } catch (e) {
+    // エラーログ
+    console.error(`Validation error for ${type}:`, e);
+    // デフォルト値を返す
+    return validateDefault(type, data);
   }
 };
 
 // schemasからデフォルト値を取得する関数
 const validateDefault = <T extends keyof typeof validators>(
-  type: T
+  type: T,
+  data: unknown
 ): ListItemTypeMap[T] => {
-  try {
-    switch (type) {
-      case "rules": {
-        const emptyRules = validators.rules({});
-        return emptyRules as unknown as ListItemTypeMap[T];
-      }
-      case "omikuji": {
-        const emptyOmikuji = validators.omikuji({});
-        return emptyOmikuji as unknown as ListItemTypeMap[T];
-      }
-      case "place": {
-        const emptyPlace = validators.place({});
-        return emptyPlace as unknown as ListItemTypeMap[T];
-      }
-      case "rulesOrder": {
-        const emptyOrder = validators.rulesOrder([]);
-        return emptyOrder as unknown as ListItemTypeMap[T];
-      }
-      default:
-        throw new Error(`Unknown type: ${type}`);
-    }
-  } catch {
-    // 型に応じたフォールバック値を返す
-    switch (type) {
-      case "rules":
-        return {} as Record<string, RulesType> as ListItemTypeMap[T];
-      case "omikuji":
-        return {} as Record<string, OmikujiType> as ListItemTypeMap[T];
-      case "place":
-        return {} as Record<string, PlaceType> as ListItemTypeMap[T];
-      case "rulesOrder":
-        return [] as string[] as ListItemTypeMap[T];
-      default:
-        throw new Error(`Unknown type: ${type}`);
-    }
+  switch (type) {
+    case "rules":
+      return schemas.rules.safeParse(data).success
+        ? (data as ListItemTypeMap[T])
+        : (schemas.rules.parse({}) as ListItemTypeMap[T]);
+    case "omikuji":
+      return schemas.omikuji.safeParse(data).success
+        ? (data as ListItemTypeMap[T])
+        : (schemas.omikuji.parse({}) as ListItemTypeMap[T]);
+    case "place":
+      return schemas.place.safeParse(data).success
+        ? (data as ListItemTypeMap[T])
+        : (schemas.place.parse({}) as ListItemTypeMap[T]);
+    case "rulesOrder":
+      return schemas.rulesOrder.safeParse(data).success
+        ? (data as ListItemTypeMap[T])
+        : (schemas.rulesOrder.parse([]) as ListItemTypeMap[T]);
+    default:
+      throw new Error(`Unknown type: ${type}`);
   }
 };
