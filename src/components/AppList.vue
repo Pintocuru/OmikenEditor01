@@ -64,16 +64,18 @@ const emit = defineEmits<{
 const { updateOmiken,openEditor ,updateOmikenPreset} = FunkEmits(emit);
 
 // 表示制御用の計算プロパティ
-const showItemCount = computed(() => props.naviCategory !== 'preferences');
-const showAddButton = computed(() => props.naviCategory !== 'preferences');
+const showItemCount = computed(() => props.naviCategory !== 'presets');
+const showAddButton = computed(() => props.naviCategory !== 'presets');
 
 
 // 現在のカテゴリに応じたアイテム一覧を取得
 const currentItems = computed(() => {
-  const excludedCategories = ['preset', ];
-  return excludedCategories.includes(props.naviCategory) 
-    ? {} 
-    : props.Omiken[props.naviCategory];
+  const excludedCategories: NaviCategory[] = ['presets']; // 修正: 'preset' を除外
+  if (excludedCategories.includes(props.naviCategory)) {
+    return {};
+  }
+  // 型を明示的に指定
+  return props.Omiken[props.naviCategory as keyof OmikenType];
 });
 
 // アイテムカウント

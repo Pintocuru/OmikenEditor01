@@ -87,17 +87,15 @@ const rulesSchema = z.record(
     z.object({
       color: z.string().default("#66FFFF"),
       ruleType: z.union([z.literal(false), z.enum(["comment", "timer"])]),
-      enableIds: arraySchema.default([]),
-      threshold: z.array(thresholdSchema).default([
-        {
-          conditionType: "match",
-          match: {
-            target: "comment",
-            case: "starts",
-            value: ["おみくじ"],
+      enableIds: z.array(z.string()).default([]),
+      threshold: z
+        .array(thresholdSchema)
+        .default([
+          {
+            conditionType: "match",
+            match: { target: "comment", case: "starts", value: ["おみくじ"] },
           },
-        },
-      ]),
+        ]),
     })
   )
 );

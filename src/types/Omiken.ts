@@ -144,7 +144,10 @@ export interface CountCondition {
     | "equal" // 等しい
     | "loop"; // 数値をvalue1で割った数
   unit:
-    | "draws" // rulesに該当した回数
+    | "draws" // その枠でrulesに該当した回数(個人)
+    | "totalDraws" // その枠でrulesに該当した回数(合計)
+    | "gameDraws" // rulesに該当した総回数(個人)
+    | "gameTotalDraws" // rulesに該当した総回数(合計)
     | "gift" // ギフトの金額(comment.data.price)
     | "lc" // 配信枠の全体コメ数(comment.meta.lc)
     | "no" // 配信枠の個人コメ数(comment.meta.no)
