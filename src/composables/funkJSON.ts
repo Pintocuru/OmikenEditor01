@@ -6,11 +6,6 @@ import type {
   fetchJSONType,
   CHARAEditType,
   PresetOmikenEditType,
-  ListCategory,
-  ListTypeMap,
-  RulesType,
-  OmikujiType,
-  PlaceType,
 } from "../types";
 import _ from "lodash";
 import Swal from "sweetalert2";
@@ -25,7 +20,7 @@ import { useToast } from "vue-toastification";
 
 // JSONデータの読み込み・書き込み
 export function funkJSON() {
-  const canUpdateJSON = ref(false); // テストモード:JSONを書き込みするか
+  const canUpdateJSON = ref(false); // * テストモード:JSONを書き込みするか
   const isLoading = ref(false); // 読み込み中かどうか、読み込み失敗ならずっとtrue
   const noAppBoot = ref(false); // 起動できたか
   const lastSavedState = ref<OmikenType | null>(null); // 1つ前へ戻る機能
@@ -196,7 +191,21 @@ export function funkJSON() {
 
     isLoading.value = true;
     try {
-      // TODO ここでAppState.Omiken のデータをAPIで飛ばす
+      // PluginのAPIにPOST送信
+      // TODO URL間違ってる
+       const response = await fetch(
+         "http://localhost:11180/api/plugins/OmiKen100-omi/omiken",
+         {
+           method: "POST",
+           headers: {
+             "Content-Type": "application/json",
+           },
+           body: JSON.stringify(Omiken),
+         }
+       );
+
+       if (!response.ok) throw new Error("Network response was not ok");
+       return await response.json();
     } catch (error) {
       console.error("Error saving data:", error);
       await Swal.fire({
@@ -205,6 +214,7 @@ export function funkJSON() {
         icon: "error",
         confirmButtonText: "OK",
       });
+         throw error;
     } finally {
       isLoading.value = false;
     }

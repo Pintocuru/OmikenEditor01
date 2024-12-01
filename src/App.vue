@@ -33,11 +33,11 @@ import AppHeader from "./components/AppHeader.vue";
 import AppNavigation from "./components/AppNavigation.vue";
 import AppList from "./components/AppList.vue";
 import AppDialog from "./components/AppDialog.vue";
-import { funkOmiken as funkOmiken } from "./composables/funkOmiken";
-import { funkUI } from "./composables/funkUI";
+import { FunkOmiken } from "./composables/FunkOmiken";
+import { FunkUI } from "./composables/FunkUI";
 
-const { uiDark, naviCategory, listEntry, openEditor } = funkUI();
+const { uiDark, naviCategory, listEntry, openEditor } = FunkUI();
 
 // コンポーザブルの使用
-const { AppState, updateOmiken, updateOmikenPreset } = funkOmiken(listEntry);
+const { AppState, updateOmiken, updateOmikenPreset } = FunkOmiken(listEntry);
 </script>

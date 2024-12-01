@@ -1,4 +1,4 @@
-// src/composables/funkOmiken.ts
+// src/composables/FunkOmiken.ts
 
 import { computed, onMounted, provide, Ref, ref } from "vue";
 import type {
@@ -15,7 +15,7 @@ import type {
 import { funkJSON } from "./FunkJSON";
 import { validateData } from "./FunkValidate";
 
-export function funkOmiken(listEntry: Ref<ListEntryCollect>) {
+export function FunkOmiken(listEntry: Ref<ListEntryCollect>) {
   const AppState = ref<AppStateType>({
     Omiken: {
       rules: {},

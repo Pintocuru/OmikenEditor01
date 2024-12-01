@@ -8,7 +8,7 @@ import type {
 } from "../types";
 import _ from 'lodash';
 
-export function funkUI() {
+export function FunkUI() {
   // UI
   const uiDark = ref("dark"); // ダークモード
   const uiDrawer = ref(null); // ナビゲーションドロワーの表示/非表示
