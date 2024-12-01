@@ -1,10 +1,10 @@
 // src/composables/FunkPreset.ts
 import { ref, Ref } from 'vue';
-import { AppEditerType, fetchJSONType, } from "@/types";
+import { AppEditerType,  PresetType, } from "@/types";
 
 
-export function usePresetManager(appState: Ref<AppEditerType> | undefined) {
-  const availablePresets = ref<fetchJSONType[]>([]);
+export function usePresetManager(AppEditer: Ref<AppEditerType> | undefined) {
+  const Presets = ref<PresetType[]>([]);
   const isLoading = ref(false);
 
   // プリセット一覧の読み込み - omikujiのみを取得
@@ -14,7 +14,7 @@ export function usePresetManager(appState: Ref<AppEditerType> | undefined) {
       const response = await fetch('/presets/index.json');
       const presets = await response.json();
       // Omikenタイプのプリセットのみをフィルタリング
-      availablePresets.value = presets.filter((preset: fetchJSONType) =>
+      Presets.value = presets.filter((preset: PresetType) =>
         preset.type === 'Omiken'
       );
     } catch (error) {
@@ -26,10 +26,10 @@ export function usePresetManager(appState: Ref<AppEditerType> | undefined) {
   };
 
   const applyPreset = async (presetId: string, mode: 'overwrite' | 'append') => {
-    if (!appState) return
+    if (!AppEditer) return
     isLoading.value = true;
     try {
-      const preset = availablePresets.value.find(p => p.id === presetId);
+      const preset = Presets.value.find(p => p.id === presetId);
       if (!preset) {
         throw new Error('プリセットが見つかりません');
       }
@@ -39,31 +39,30 @@ export function usePresetManager(appState: Ref<AppEditerType> | undefined) {
 
       // omikujiタイプのみの処理
       if (mode === 'overwrite') {
-        appState.value.Omiken = {
-          ...appState.value.Omiken,
+        AppEditer.value.Omiken = {
+          ...AppEditer.value.Omiken,
           ...presetData.Omiken
         };
       } else {
         // 追加モード：既存のデータを保持しながら新しいデータを追加
-        appState.value.Omiken = {
-          ...appState.value.Omiken,
+        AppEditer.value.Omiken = {
+          ...AppEditer.value.Omiken,
           rules: {
-            ...appState.value.Omiken.rules,
+            ...AppEditer.value.Omiken.rules,
             ...presetData.Omiken.rules
           },
-          rulesOrder: [...new Set([...appState.value.Omiken.rulesOrder, ...presetData.Omiken.rulesOrder])],
-          omikuji: {
-            ...appState.value.Omiken.omikuji,
+          rulesOrder: [...new Set([...AppEditer.value.Omiken.rulesOrder, ...presetData.Omiken.rulesOrder])],
+          omikujis: {
+            ...AppEditer.value.Omiken.omikujis,
             ...presetData.Omiken.omikuji
           },
-          place: {
-            ...appState.value.Omiken.place,
+          places: {
+            ...AppEditer.value.Omiken.places,
             ...presetData.Omiken.place
           },
         };
       }
 
-      appState.value.activePresetId = presetId;
     } catch (error) {
       console.error('Failed to apply preset:', error);
       throw new Error('プリセットの適用に失敗しました');
@@ -73,7 +72,7 @@ export function usePresetManager(appState: Ref<AppEditerType> | undefined) {
   };
 
   return {
-    availablePresets,
+    availablePresets: Presets,
     isLoading,
     loadPresetList,
     applyPreset

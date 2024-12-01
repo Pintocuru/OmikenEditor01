@@ -3,10 +3,10 @@
 import {
   ListCategory,
   ListEntry,
-  ListTypeMap,
   OmikenCategory,
   OmikenEntry,
   OmikenType,
+  PresetOmikenType,
 } from "@/types/index";
 
 export function FunkEmits(emit: any) {
@@ -34,7 +34,7 @@ export function FunkEmits(emit: any) {
   };
 
   // Preset更新
-  const updateOmikenPreset = (preset: PresetOmikenEditType) =>
+  const updateOmikenPreset = (preset: PresetOmikenType) =>
     emit("update:OmikenPreset", preset);
 
   return {

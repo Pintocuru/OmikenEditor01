@@ -10,7 +10,7 @@ import type {
   OmikenCategory,
   ListEntryCollect,
   ListCategory,
-  PresetOmikenEditType,
+  PresetOmikenType,
 } from "@/types/index";
 import { funkJSON } from "./FunkJSON";
 import { validateData } from "./FunkValidate";
@@ -20,17 +20,11 @@ export function FunkOmiken(listEntry: Ref<ListEntryCollect>) {
     Omiken: {
       rules: {},
       rulesOrder: [],
-      omikuji: {},
-      place: {},
-      preferences: {
-        basicDelay: 1,
-        omikujiCooldown: 2,
-        commentDuration: 5,
-        BotUserIDname: "FirstCounter",
-      },
+      omikujis: {},
+      places: {},
     },
-    Chara: {},
-    Preset: {},
+    Charas: {},
+    Presets: {},
   });
   const isOmikenChanged = ref(false); // 保存フラグ
 
@@ -52,8 +46,8 @@ export function FunkOmiken(listEntry: Ref<ListEntryCollect>) {
     try {
       // 外部データの読み込み
       const { charaData, presetData } = await fetchPreset();
-      AppEditer.value.Chara = charaData;
-      AppEditer.value.Preset = presetData;
+      AppEditer.value.Charas = charaData;
+      AppEditer.value.Presets = presetData;
 
       // 使用しているOmikenデータの読み込み
       const omikenData = await fetchOmiken();
@@ -84,20 +78,14 @@ export function FunkOmiken(listEntry: Ref<ListEntryCollect>) {
   // Omikenの更新
   const updateOmiken = (payload: OmikenEntry<OmikenCategory>) => {
     if (!payload) return;
-    const { type, update, addKeys, delKeys, reorder, preferences } = payload;
+    const { type, update, addKeys, delKeys, reorder } = payload;
 
     // 現在のステートのディープコピーを作成
     const newState: OmikenType = JSON.parse(
       JSON.stringify(AppEditer.value.Omiken)
     );
 
-    // preferences の更新
-    if (type === "preferences" && preferences) {
-      newState.preferences = {
-        ...newState.preferences,
-        ...preferences,
-      };
-    } else if (type === "rules" || type === "omikuji" || type === "place") {
+     if (type === "rules" || type === "omikujis" || type === "places") {
       const orderKey: OrderKey | undefined =
         type === "rules" ? "rulesOrder" : undefined;
 
@@ -138,7 +126,7 @@ export function FunkOmiken(listEntry: Ref<ListEntryCollect>) {
             );
           }
 
-          if (type === "omikuji" && "rulesId" in item && item.rulesId) {
+          if (type === "omikujis" && "rulesId" in item && item.rulesId) {
             const rulesId = item.rulesId;
             // enableIdsの検証を含むvalidateData呼び出し
             const updatedRule = validateData(
@@ -166,7 +154,7 @@ export function FunkOmiken(listEntry: Ref<ListEntryCollect>) {
           delete newState[type][key];
           if (orderKey)
             newState[orderKey] = newState[orderKey].filter((id) => id !== key);
-          if (type === "omikuji") {
+          if (type === "omikujis") {
             Object.values(newState.rules).forEach((rule) => {
               rule.enableIds = rule.enableIds.filter((id) => id !== key);
             });
@@ -184,13 +172,12 @@ export function FunkOmiken(listEntry: Ref<ListEntryCollect>) {
   };
 
   // Presetからの上書き・追加
-  const updateOmikenPreset = (preset: PresetOmikenEditType) => {
-    const currentPreferences = AppEditer.value.Omiken.preferences;
+  const updateOmikenPreset = (preset: PresetOmikenType) => {
     // 深いコピーを作成
     const newState: OmikenType = JSON.parse(
       JSON.stringify(AppEditer.value.Omiken)
     );
-    const categories: ListCategory[] = ["rules", "omikuji", "place"];
+    const categories: ListCategory[] = ["rules", "omikujis", "places"];
 
     if (preset.mode === "overwrite") {
       // 上書きモード
@@ -243,13 +230,13 @@ export function FunkOmiken(listEntry: Ref<ListEntryCollect>) {
                 },
               };
               break;
-            case "omikuji":
+            case "omikujis":
               renamedData[newKey] = {
                 ...baseItem,
                 weight: typeof value.weight === "number" ? value.weight : 1,
               };
               break;
-            case "place":
+            case "places":
               renamedData[newKey] = {
                 ...baseItem,
                 isWeight: !!value.isWeight,
@@ -277,9 +264,6 @@ export function FunkOmiken(listEntry: Ref<ListEntryCollect>) {
         }
       });
     }
-
-    // preferencesを復元
-    newState.preferences = currentPreferences;
 
     // ステートの更新
     AppEditer.value.Omiken = newState;

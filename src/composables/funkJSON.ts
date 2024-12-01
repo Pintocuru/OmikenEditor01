@@ -3,9 +3,9 @@ import { ref } from "vue";
 import { validateData } from "./FunkValidate";
 import type {
   OmikenType,
-  fetchJSONType,
-  CharaEditType,
-  PresetOmikenEditType,
+  PresetCharaType,
+  PresetOmikenType,
+  PresetType,
 } from "@/types/index";
 import _ from "lodash";
 import Swal from "sweetalert2";
@@ -36,10 +36,8 @@ export function funkJSON() {
 
       // 型ごとにデータ取得と整形
       const [charaData, presetData] = await Promise.all([
-        fetchChara(presets.filter((p: fetchJSONType) => p.type === "Chara")),
-        fetchPreOmiken(
-          presets.filter((p: fetchJSONType) => p.type === "Omiken")
-        ),
+        fetchChara(presets.filter((p: PresetType) => p.type === "Chara")),
+        fetchPreOmiken(presets.filter((p: PresetType) => p.type === "Omiken")),
       ]);
 
       return { charaData, presetData };
@@ -52,34 +50,31 @@ export function funkJSON() {
   };
 
   // Preset.Charaの読み込み
-  const fetchChara = async (charaPaths: fetchJSONType[]) => {
+  const fetchChara = async (charaPaths: PresetType[]) => {
     const responses = await Promise.all(
       charaPaths.map(async (p) => {
         const item = await fetch(p.path).then((r) => r.json());
-        return { ...p, item } as CharaEditType;
+        return { ...p, item } as PresetCharaType;
       })
     );
-    return responses.reduce<Record<string, CharaEditType>>((acc, chara) => {
+    return responses.reduce<Record<string, PresetCharaType>>((acc, chara) => {
       acc[chara.id] = chara;
       return acc;
     }, {});
   };
 
   // Preset.Omikenの読み込み
-  const fetchPreOmiken = async (presetPaths: fetchJSONType[]) => {
+  const fetchPreOmiken = async (presetPaths: PresetOmikenType[]) => {
     const responses = await Promise.all(
       presetPaths.map(async (p) => {
         const item = await fetch(p.path).then((r) => r.json());
-        return { ...p, item } as PresetOmikenEditType;
+        return { ...p, item } as PresetOmikenType;
       })
     );
-    return responses.reduce<Record<string, PresetOmikenEditType>>(
-      (acc, data) => {
-        acc[data.id] = data;
-        return acc;
-      },
-      {}
-    );
+    return responses.reduce<Record<string, PresetOmikenType>>((acc, data) => {
+      acc[data.id] = data;
+      return acc;
+    }, {});
   };
 
   // 現在のOmiken読み込み
@@ -103,8 +98,8 @@ export function funkJSON() {
       const validatedData: OmikenType = {
         rules: validateData("rules", data.rules),
         rulesOrder: validateData("rulesOrder", data.rulesOrder),
-        omikuji: validateData("omikuji", data.omikuji),
-        place: validateData("place", data.place),
+        omikuji: validateData("omikujis", data.omikuji),
+        place: validateData("places", data.place),
         preferences: data.preferences,
       };
 
@@ -167,10 +162,9 @@ export function funkJSON() {
         Omiken.rules,
         Omiken.rulesOrder ?? Object.keys(Omiken.rules)
       ),
-      omikuji: Omiken.omikuji,
-      place: Omiken.place,
+      omikujis: Omiken.omikujis,
+      places: Omiken.places,
       rulesOrder: Omiken.rulesOrder ?? Object.keys(Omiken.rules),
-      preferences: Omiken.preferences,
     };
 
     if (noAppBoot.value) {

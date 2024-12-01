@@ -6,7 +6,7 @@ import { AppEditerType, OmikenType } from "@/types";
 export function FunkRules() {
   // inject
   const AppEditer = inject<Ref<AppEditerType>>("AppEditerKey");
-  const omikuji = computed(() => AppEditer?.value.Omiken.omikuji ?? {});
+  const omikuji = computed(() => AppEditer?.value.Omiken.omikujis ?? {});
 
   // 定数
   const SWITCH_CONFIG = {
@@ -98,16 +98,16 @@ export function FunkRules() {
   // rulesのenableIds に入っているomikujiのプレースホルダーを探す
   const rulesOfPlaces = (Omiken: OmikenType, enableIds?: string[]) =>
     computed(() => {
-      if (!enableIds) return Object.values(Omiken.place);
+      if (!enableIds) return Object.values(Omiken.places);
 
       const usedPlaceNames = enableIds
-        .flatMap((id) => Omiken.omikuji[id]?.post ?? [])
+        .flatMap((id) => Omiken.omikujis[id]?.post ?? [])
         .flatMap((post) => {
           const matches = post.content?.match(/<<([^>>]+)>>/g) ?? [];
           return matches.map((m) => m.replace(/<<|>>/g, ""));
         });
 
-      return Object.values(Omiken.place).filter((place) =>
+      return Object.values(Omiken.places).filter((place) =>
         usedPlaceNames.includes(place.name)
       );
     });

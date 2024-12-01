@@ -6,8 +6,8 @@ import { computed, inject, Ref } from "vue";
 export function FunkOmikuji() {
   // Inject
   const AppEditer = inject<Ref<AppEditerType>>("AppEditerKey");
-  const Chara = AppEditer?.value.Chara;
-  const place = AppEditer?.value.Omiken.place;
+  const Chara = AppEditer?.value.Charas;
+  const place = AppEditer?.value.Omiken.places;
 
   const POST_TYPES: Record<PostTypeKey, { color: string; label: string }> = {
     onecomme: { color: "orange", label: "わんコメ" },
@@ -75,7 +75,7 @@ export function FunkOmikuji() {
   // アイコンキーアイテムの取得
   const getIconKeyItems = (botKey: string | undefined) => {
     if (!botKey || !Chara || !(botKey in Chara)) return [];
-    return Object.keys(Chara[botKey].item.image).map((key) => ({
+    return Object.keys(Chara[botKey].image).map((key) => ({
       text: key,
       value: key,
     }));
@@ -84,14 +84,14 @@ export function FunkOmikuji() {
   // キャラクターの背景色を取得する関数
   const getCharaColor = (botKey: string | undefined): string => {
     if (!botKey || !Chara || !Chara[botKey]) return "";
-    return Chara[botKey].item.color["--lcv-background-color"];
+    return Chara[botKey].color["--lcv-background-color"];
   };
 
   // キャラクターの画像を取得する関数
   const getCharaImage = (post: OmikujiPostType): string => {
     if (!post.botKey || !post.iconKey || !Chara || !Chara[post.botKey])
       return "";
-    return `/img/${Chara[post.botKey].item.image[post.iconKey]}`;
+    return `/img/${Chara[post.botKey].image[post.iconKey]}`;
   };
 
   //---
