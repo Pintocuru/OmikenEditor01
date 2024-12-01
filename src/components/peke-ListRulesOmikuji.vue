@@ -44,7 +44,7 @@
         @end="() => updateRulesEnabledIds(currentItem, ruleId)">
         <template #item="{ element: omikujiId }">
           <v-col cols="12" sm="6" md="4" lg="3" class="pa-1">
-            <v-card variant="tonal" :color="weightColor(omikujiId, enabledIds)">
+            <v-card variant="tonal" :color="weightColor(omikujiId, enableIds)">
               <!-- タイトルバーと操作ボタン -->
               <v-toolbar density="compact" :color="getPostTypeColor(Omiken.omikuji[omikujiId].post, true)">
                 <v-toolbar-title @click="openEditorItem('omikuji', omikujiId)">
@@ -73,9 +73,9 @@
                   <!-- 既存の出現割合表示 -->
                   <v-chip density="compact" variant="text">
                     🎯 {{ Omiken.omikuji[omikujiId]?.weight }}/{{
-                      weightTotal(enabledIds)
+                      weightTotal(enableIds)
                     }}
-                    <span class="ml-2">({{ weightPercentage(omikujiId, enabledIds) }}%)</span>
+                    <span class="ml-2">({{ weightPercentage(omikujiId, enableIds) }}%)</span>
                   </v-chip>
                 </v-sheet>
                 <!-- 出現割合表示の編集 -->
@@ -84,8 +84,8 @@
                     " label="出現割合" min="0" type="number" @update:modelValue="
                       updateOmikujiWeight(Omiken.omikuji[omikujiId])
                       " />
-                  <v-progress-linear :model-value="weightPercentage(Omiken.omikuji[omikujiId].id, enabledIds)
-                    " buffer-value="10" absolute prop :color="weightColor(Omiken.omikuji[omikujiId].id, enabledIds)
+                  <v-progress-linear :model-value="weightPercentage(Omiken.omikuji[omikujiId].id, enableIds)
+                    " buffer-value="10" absolute prop :color="weightColor(Omiken.omikuji[omikujiId].id, enableIds)
                       " />
                 </v-sheet>
                 <!-- 出現割合を表示 -->
@@ -112,13 +112,13 @@ import type {
   OmikenEntry,
   OmikenType,
   OmikujiType,
-} from "@/types";
+} from "@/types/index";
 import { FunkEmits } from "@/composables/FunkEmits";
 
 const props = defineProps<{
   Omiken: OmikenType;
   ruleId: string;
-  enabledIds: string[];
+  enableIds: string[];
 }>();
 
 const emit = defineEmits<{
@@ -138,7 +138,7 @@ const { isThreshold, getExampleText } = FunkThreshold();
 
 // ドラッグ&ドロップでの更新も同様に
 const currentItem = computed({
-  get: () => props.enabledIds,
+  get: () => props.enableIds,
   set: (value) => {
     if (props.ruleId) {
       updateRulesEnabledIds(value, props.ruleId);
@@ -162,12 +162,12 @@ const addItemOmikuji = () => {
   }
 };
 
-// rules.enabledIds の更新
-const updateRulesEnabledIds = (enabledIds: string[], ruleId: string) => {
+// rules.enableIds の更新
+const updateRulesEnabledIds = (enableIds: string[], ruleId: string) => {
   if (!ruleId) return;
   const updatedRule = {
     ...props.Omiken.rules[ruleId],
-    enabledIds,
+    enableIds,
   };
 
   emit("update:Omiken", {

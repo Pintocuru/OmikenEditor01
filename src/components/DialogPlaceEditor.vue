@@ -35,7 +35,7 @@
             </v-col>
             <v-col cols="auto">
               <PartsArrayRemovePlace
-                type="omikuji"
+                type="omikujis"
                 :currentItem="currentItem"
                 :index="index"
                 size="32"
@@ -53,10 +53,10 @@
 <script setup lang="ts">
 import draggable from "vuedraggable";
 import PartsArrayRemovePlace from "./common/PartsArrayRemovePlace.vue";
-import type { PlaceValueType, PlaceType, ListEntry } from "../types";
+import type { PlaceValueType, PlaceType, ListEntry } from "@/types/index";
 
 const props = defineProps<{
-  entry: ListEntry<"place"> | null;
+  entry: ListEntry<"places"> | null;
   currentItem: PlaceType;
   isWeightMode: boolean;
 }>();

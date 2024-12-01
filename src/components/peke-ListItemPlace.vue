@@ -35,7 +35,7 @@ import {
   OmikenEntry,
   OmikenType,
   OmikenCategory,
-} from "@/types";
+} from "@/types/index";
 import ListItemPartsAction from "./common/PartsToolbarAction.vue";
 
 // Props Emits
@@ -73,7 +73,7 @@ function openEditor() {
   emit("open-editor", {
     isOpen: true,
     type: props.naviCategory,
-    mode:null,
+    mode: null,
     key,
   });
 }

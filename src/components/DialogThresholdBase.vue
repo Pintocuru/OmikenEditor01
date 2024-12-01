@@ -80,12 +80,12 @@ import {
   OmikujiType,
   RulesType,
   ThresholdType,
-} from "../types";
+} from "@/types/index";
 import { FunkThreshold } from "../composables/FunkThreshold";
 import DialogThresholdInput from "./DialogThresholdInput.vue";
 
 const props = defineProps<{
-  type: "rules" | "omikuji";
+  type: "rules" | "omikujis";
   currentItem: RulesType | OmikujiType;
   threshold: ThresholdType;
   themeColor: string;

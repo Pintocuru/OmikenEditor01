@@ -1,9 +1,14 @@
 // src/composables/FunkEmits.ts
 
-import { ListCategory, ListEntry, ListTypeMap, OmikenCategory, OmikenEntry, PresetOmikenEditType } from "@/types";
+import {
+  ListCategory,
+  ListEntry,
+  ListTypeMap,
+  OmikenCategory,
+  OmikenEntry,
+} from "@/types/index";
 
 export function FunkEmits(emit: any) {
-
   // ダイアログを表示するemit
   const openEditorItem = (type: ListCategory, id: string) => {
     emit("open-editor", {
@@ -20,10 +25,12 @@ export function FunkEmits(emit: any) {
   const updateOmiken = (payload: OmikenEntry<OmikenCategory>) =>
     emit("update:Omiken", payload);
 
-  const updateOmikenEntry = <T extends ListCategory>(type: T, update: Record<string, ListTypeMap[T]>) => {
-    emit("update:Omiken", { type, update, });
+  const updateOmikenEntry = <T extends ListCategory>(
+    type: T,
+    update: Record<string, ListTypeMap[T]>
+  ) => {
+    emit("update:Omiken", { type, update });
   };
-
 
   // Preset更新
   const updateOmikenPreset = (preset: PresetOmikenEditType) =>
@@ -37,7 +44,6 @@ export function FunkEmits(emit: any) {
     // Omiken のアップデート
     updateOmiken,
     updateOmikenEntry,
-    updateOmikenPreset
-
+    updateOmikenPreset,
   };
 }

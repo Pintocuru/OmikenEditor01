@@ -122,12 +122,12 @@
 import { computed, inject, ref, Ref } from "vue";
 import Swal from "sweetalert2";
 import {
-  AppStateType,
+  AppEditerType,
   OmikenCategory,
   OmikenEntry,
   PresetOmikenEditType,
   fetchJSONType,
-} from "@/types";
+} from "@/types/index";
 
 // props/emits
 
@@ -140,13 +140,13 @@ const emit = defineEmits<{
 const isLoading = ref(false);
 
 // キャラクターデータのインジェクト
-const AppState = inject<Ref<AppStateType>>("AppStateKey");
+const AppEditer = inject<Ref<AppEditerType>>("AppEditerKey");
 
 // タブの制御
 const activeTab = ref("preset");
 // データの整形
 const presetList = computed(() => {
-  const presets = AppState?.value.Preset;
+  const presets = AppEditer?.value.Preset;
   if (!presets) return [];
   return Object.entries(presets).map(([id, data]) => {
     const { id: _, ...rest } = data;
@@ -157,7 +157,7 @@ const presetList = computed(() => {
   }) as Array<{ id: string } & PresetOmikenEditType>;
 });
 
-const charaList = computed(() => AppState?.value.CHARA || {});
+const charaList = computed(() => AppEditer?.value.Chara || {});
 
 const handlePresetSelect = async (preset: fetchJSONType & { item: any }) => {
   try {
@@ -210,7 +210,7 @@ const handlePresetSelect = async (preset: fetchJSONType & { item: any }) => {
 const getTypeLabel = (type: fetchJSONType["type"]) => {
   const labels = {
     Omiken: "おみくじ",
-    CHARA: "キャラクター",
+    Chara: "キャラクター",
   };
   return labels[type];
 };

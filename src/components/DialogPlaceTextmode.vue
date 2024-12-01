@@ -23,7 +23,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import type { PlaceValueType } from '../types'
+import type { PlaceValueType } from '@/types/index'
 
 const props = defineProps<{
   modelValue: boolean

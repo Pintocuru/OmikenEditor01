@@ -1,9 +1,9 @@
 // src/composables/FunkPreset.ts
 import { ref, Ref } from 'vue';
-import { AppStateType, fetchJSONType, } from "@/types";
+import { AppEditerType, fetchJSONType, } from "@/types";
 
 
-export function usePresetManager(appState: Ref<AppStateType> | undefined) {
+export function usePresetManager(appState: Ref<AppEditerType> | undefined) {
   const availablePresets = ref<fetchJSONType[]>([]);
   const isLoading = ref(false);
 

@@ -5,7 +5,7 @@
       "name": "初見詐欺",
       "color": "#424242",
       "description": "",
-      "enabledIds": [
+      "enableIds": [
         "1731155764248-k28me",
         "1731156395590-mupgd",
         "1731156509378-04ync"
@@ -24,7 +24,7 @@
       "name": "ギフト",
       "color": "#FFEB3B",
       "description": "",
-      "enabledIds": [
+      "enableIds": [
         "1731155125168-cfu88",
         "1731155030049-srmcn",
         "1731155187246-xn0mv",
@@ -45,7 +45,7 @@
       "name": "初見",
       "color": "#4CAF50",
       "description": "",
-      "enabledIds": [
+      "enableIds": [
         "1731148126492-sqbn5",
         "1731149012459-vcc4r",
         "1730456695760-5zb8i",
@@ -89,7 +89,7 @@
       "name": "コメント数チェック",
       "color": "#3F51B5",
       "description": "",
-      "enabledIds": [
+      "enableIds": [
         "1730456057476-pw29g",
         "1730456230208-vqklr",
         "1730456354800-4sj0v"

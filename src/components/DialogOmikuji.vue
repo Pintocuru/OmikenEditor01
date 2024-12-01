@@ -93,19 +93,18 @@ import { computed, inject, Ref, ref } from "vue";
 import type {
   OmikenEntry,
   ListEntry,
-  AppStateType,
   OmikenCategory,
   ListCategory,
-} from "../types";
+  AppEditerType,
+} from "@/types/index";
 import DialogOmikujiPost from "./DialogOmikujiPost.vue";
-import DialogThreshold from "./DialogThreshold.vue";
 import { FunkThreshold } from "@/composables/FunkThreshold";
 import { FunkOmikuji } from "@/composables/FunkOmikuji";
 import { FunkEmits } from "@/composables/FunkEmits";
 import DialogThresholdOmikuji from "./DialogThresholdOmikuji.vue";
 // props/emits
 const props = defineProps<{
-  entry: ListEntry<"omikuji"> | null;
+  entry: ListEntry<"omikujis"> | null;
 }>();
 
 const emit = defineEmits<{
@@ -114,8 +113,8 @@ const emit = defineEmits<{
 }>();
 
 // inject
-const AppState = inject<Ref<AppStateType>>("AppStateKey");
-const omikuji = AppState?.value.Omiken.omikuji;
+const AppEditer = inject<Ref<AppEditerType>>("AppEditerKey");
+const omikujis = AppEditer?.value.Omiken.omikujis;
 
 // コンポーザブル:FunkEmits
 const { updateOmiken, openEditor } = FunkEmits(emit);
@@ -130,14 +129,14 @@ const tab = ref("post"); // タブの状態管理
 
 // propsからデータを解読
 const currentItem = computed(() =>
-  props.entry?.key && omikuji ? omikuji[props.entry.key as string] : null
+  props.entry?.key && omikujis ? omikujis[props.entry.key as string] : null
 );
 
 // postのonecommeで使われているBotKeyの色を取得する
 const key = props.entry?.key;
 let themeColor: string;
-if (omikuji && typeof key === "string" && omikuji[key]) {
-  themeColor = getPostTypeColor(omikuji[key].post, true);
+if (omikujis && typeof key === "string" && omikujis[key]) {
+  themeColor = getPostTypeColor(omikujis[key].post, true);
 } else {
   themeColor = "";
 }
@@ -152,7 +151,7 @@ const postCount = computed(() => {
 const updateItem = () => {
   if (currentItem.value) {
     emit("update:Omiken", {
-      type: "omikuji",
+      type: "omikujis",
       update: { [currentItem.value.id]: currentItem.value },
     });
   }

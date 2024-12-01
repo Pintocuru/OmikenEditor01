@@ -4,13 +4,13 @@
     <AppHeader v-model:uiDark="uiDark" @update:uidark="uiDark = $event" />
     <AppNavigation
       v-model:naviCategory="naviCategory"
-      :Omiken="AppState.Omiken"
+      :Omiken="AppEditer.Omiken"
       @update:category="naviCategory = $event"
     />
     <v-main>
       <v-container>
         <AppList
-          :Omiken="AppState.Omiken"
+          :Omiken="AppEditer.Omiken"
           :naviCategory="naviCategory"
           @update:Omiken="updateOmiken"
           @update:OmikenPreset="updateOmikenPreset"
@@ -21,7 +21,7 @@
 
     <AppDialog
       v-model:listEntry="listEntry"
-      :Omiken="AppState.Omiken"
+      :Omiken="AppEditer.Omiken"
       @update:Omiken="updateOmiken"
       @open-editor="openEditor"
     />
@@ -39,5 +39,5 @@ import { FunkUI } from "./composables/FunkUI";
 const { uiDark, naviCategory, listEntry, openEditor } = FunkUI();
 
 // コンポーザブルの使用
-const { AppState, updateOmiken, updateOmikenPreset } = FunkOmiken(listEntry);
+const { AppEditer, updateOmiken, updateOmikenPreset } = FunkOmiken(listEntry);
 </script>

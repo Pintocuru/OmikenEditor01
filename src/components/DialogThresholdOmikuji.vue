@@ -3,7 +3,7 @@
   <DialogThresholdBase
     v-if="currentItem"
     v-model:threshold="threshold"
-    type="omikuji"
+    type="omikujis"
     :currentItem="currentItem"
     :themeColor="themeColor"
     :availableConditions="omikujiConditions"
@@ -47,9 +47,8 @@ import {
   OmikenEntry,
   OmikenCategory,
   OmikujiType,
-  OmikujiThresholdType,
   ConditionType,
-} from "../types";
+} from "@/types/index";
 import DialogThresholdBase from "./DialogThresholdBase.vue";
 import DialogThresholdInput from "./DialogThresholdInput.vue";
 import {

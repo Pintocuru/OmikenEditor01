@@ -1,12 +1,12 @@
 // src/composables/funkRules.ts
 
 import { computed, inject, Ref } from "vue";
-import { AppStateType, OmikenType } from "@/types";
+import { AppEditerType, OmikenType } from "@/types";
 
 export function FunkRules() {
   // inject
-  const AppState = inject<Ref<AppStateType>>("AppStateKey");
-  const omikuji = computed(() => AppState?.value.Omiken.omikuji ?? {});
+  const AppEditer = inject<Ref<AppEditerType>>("AppEditerKey");
+  const omikuji = computed(() => AppEditer?.value.Omiken.omikuji ?? {});
 
   // 定数
   const SWITCH_CONFIG = {
@@ -41,43 +41,43 @@ export function FunkRules() {
   });
 
   // 有効なomikujiのリスト
-  const enabledOmikujiLists = (enabledIds: string[] = []) => {
-    const isAllEnabled = enabledIds.length === 0;
+  const enabledOmikujiLists = (enableIds: string[] = []) => {
+    const isAllEnabled = enableIds.length === 0;
     return isAllEnabled
       ? omikujiLists.value
-      : omikujiLists.value.filter((option) => enabledIds.includes(option.id));
+      : omikujiLists.value.filter((option) => enableIds.includes(option.id));
   };
 
-  const chipColors = (enabledIds: string[]) => {
+  const chipColors = (enableIds: string[]) => {
     return Object.keys(omikuji).map((id) => ({
       id,
-      color: weightColor.value(id, enabledIds),
+      color: weightColor.value(id, enableIds),
     }));
   };
 
   // weight合計を計算
   const weightTotal = computed(
-    () => (enabledIds: string[]) =>
-      enabledIds.reduce((sum, id) => sum + (omikuji.value[id]?.weight ?? 0), 0)
+    () => (enableIds: string[]) =>
+      enableIds.reduce((sum, id) => sum + (omikuji.value[id]?.weight ?? 0), 0)
   );
 
   // totalWeightの割合を計算
   const weightPercentage = computed(
-    () => (optionId: string, enabledIds: string[]) => {
+    () => (optionId: string, enableIds: string[]) => {
       const weight = omikuji.value[optionId]?.weight ?? 0;
-      const total = weightTotal.value(enabledIds);
+      const total = weightTotal.value(enableIds);
       return total > 0 ? parseFloat(((weight / total) * 100).toFixed(1)) : 0;
     }
   );
 
   // v-chipに色を付与
   const weightColor = computed(
-    () => (optionId: string, enabledIds: string[]) => {
-      const percentage = weightPercentage.value(optionId, enabledIds);
+    () => (optionId: string, enableIds: string[]) => {
+      const percentage = weightPercentage.value(optionId, enableIds);
       if (percentage === 0) return COLORS.ZERO;
 
-      const weights = enabledIds
-        .map((id) => weightPercentage.value(id, enabledIds))
+      const weights = enableIds
+        .map((id) => weightPercentage.value(id, enableIds))
         .filter((w) => w > 0);
       const avg = weights.reduce((sum, w) => sum + w, 0) / weights.length;
       const std = Math.sqrt(
@@ -95,12 +95,12 @@ export function FunkRules() {
     }
   );
 
-  // rulesのenabledIds に入っているomikujiのプレースホルダーを探す
-  const rulesOfPlaces = (Omiken: OmikenType, enabledIds?: string[]) =>
+  // rulesのenableIds に入っているomikujiのプレースホルダーを探す
+  const rulesOfPlaces = (Omiken: OmikenType, enableIds?: string[]) =>
     computed(() => {
-      if (!enabledIds) return Object.values(Omiken.place);
+      if (!enableIds) return Object.values(Omiken.place);
 
-      const usedPlaceNames = enabledIds
+      const usedPlaceNames = enableIds
         .flatMap((id) => Omiken.omikuji[id]?.post ?? [])
         .flatMap((post) => {
           const matches = post.content?.match(/<<([^>>]+)>>/g) ?? [];

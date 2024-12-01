@@ -73,7 +73,7 @@ import {
   OmikenCategory,
   ListEntryCollect,
   OmikenType,
-} from "@/types";
+} from "@/types/index";
 import { FunkEmits } from "@/composables/FunkEmits";
 
 // Props / emit
@@ -95,8 +95,8 @@ const { updateOmiken, openEditor } = FunkEmits(emit);
 const getEditComponent = (type: ListCategory, mode?: string | null) => {
   const editorMap: Record<ListCategory, any> = {
     rules: DialogRules,
-    omikuji: DialogOmikuji,
-    place: DialogPlace,
+    omikujis: DialogOmikuji,
+    places: DialogPlace,
   };
   return editorMap[type] || null;
 };

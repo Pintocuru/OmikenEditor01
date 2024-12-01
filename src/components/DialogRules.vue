@@ -49,8 +49,8 @@ import type {
   OmikenEntry,
   ListCategory,
   OmikenCategory,
-  AppStateType,
-} from "../types";
+  AppEditerType,
+} from "@/types/index";
 import { FunkEmits } from "@/composables/FunkEmits";
 
 // props/emits
@@ -64,8 +64,8 @@ const emit = defineEmits<{
 }>();
 
 // inject
-const AppState = inject<Ref<AppStateType>>("AppStateKey");
-const rules = AppState?.value.Omiken.rules;
+const AppEditer = inject<Ref<AppEditerType>>("AppEditerKey");
+const rules = AppEditer?.value.Omiken.rules;
 
 // コンポーザブル:FunkEmits
 const { updateOmiken } = FunkEmits(emit);

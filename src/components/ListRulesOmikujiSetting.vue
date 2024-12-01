@@ -3,7 +3,7 @@
   <v-sheet class="d-flex ga-2 justify-end">
     <v-expand-transition>
       <v-select v-if="uiState.showEnabledIds" 
-        v-model="currentItem.enabledIds" 
+        v-model="currentItem.enableIds" 
         :items="omikujiLists" 
         label="有効にするおみくじ" 
         chips
@@ -42,7 +42,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { FunkRules } from "../composables/FunkRules";
-import type { OmikenCategory, OmikenEntry, RulesType } from "@/types";
+import type { OmikenCategory, OmikenEntry, RulesType } from "@/types/index";
 
 const props = defineProps<{
   rulesEntry: RulesType;
@@ -59,7 +59,7 @@ const currentItem = computed({
   get: () => props.rulesEntry,
   set: (value) => {
     if (props.rulesEntry) {
-      updateRulesEnabledIds(value.enabledIds, props.rulesEntry.id);
+      updateRulesEnabledIds(value.enableIds, props.rulesEntry.id);
     }
   },
 });
@@ -73,12 +73,12 @@ const addItemOmikuji = () => {
   }
 };
 
-// rules.enabledIds の更新
-const updateRulesEnabledIds = (enabledIds: string[], ruleId: string) => {
+// rules.enableIds の更新
+const updateRulesEnabledIds = (enableIds: string[], ruleId: string) => {
   if (!ruleId) return;
   const updatedRule = {
     ...props.rulesEntry,
-    enabledIds,
+    enableIds,
   };
 
   emit("update:Omiken", {

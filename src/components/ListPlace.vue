@@ -71,7 +71,7 @@ import type {
   OmikenEntry,
   OmikenType,
   PlaceValueType,
-} from "@/types";
+} from "@/types/index";
 import { FunkEmits } from "@/composables/FunkEmits";
 
 const props = defineProps<{
@@ -104,7 +104,7 @@ const getRandomValues = (values: PlaceValueType[], count: number) => {
 // アイテムを追加
 const addItemPlace = () => {
   emit("update:Omiken", {
-    type: "place",
+    type: "places",
     addKeys: [{}],
   });
 };

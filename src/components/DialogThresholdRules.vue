@@ -66,7 +66,7 @@ import {
   RulesType,
   RuleThresholdType,
   ConditionType,
-} from "../types";
+} from "@/types/index";
 import DialogThresholdBase from "./DialogThresholdBase.vue";
 import {
   FunkThreshold,

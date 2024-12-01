@@ -68,7 +68,7 @@
               .validPlaceholders" :key="index" text="クリックでエディターを開く" location="bottom">
               <template v-slot:activator="{ props: tooltipProps }">
                 <v-chip v-bind="tooltipProps" class="me-2" color="primary" variant="outlined" @click="
-                  openEditorItem('place',
+                  openEditorItem('places',
                     extractValidPlaceholders(post.content).placeholderIds[
                     index
                     ]
@@ -79,7 +79,7 @@
               </template>
             </v-tooltip>
             <!-- 複製・削除ボタン -->
-            <PartsArrayRemove :type="'omikuji'" :currentItem="currentItem" :array="currentItem.post" :index="index"
+            <PartsArrayRemove type="omikujis" :currentItem="currentItem" :array="currentItem.post" :index="index"
               @update:Omiken="updateOmiken" />
           </v-sheet>
         </v-expansion-panel-text>
@@ -96,14 +96,14 @@
 <script setup lang="ts">
 import { inject, Ref } from "vue";
 import type {
-  AppStateType,
   ListCategory,
   ListEntry,
   OmikujiType,
   OmikenCategory,
   OmikenEntry,
   OmikujiPostType,
-} from "../types";
+  AppEditerType,
+} from "@/types/index";
 import { FunkOmikuji } from "../composables/FunkOmikuji";
 import PartsArrayRemove from "../components/common/PartsArrayRemove.vue";
 import { FunkEmits } from "@/composables/FunkEmits";
@@ -118,8 +118,8 @@ const emit = defineEmits<{
 }>();
 
 // inject
-const AppState = inject<Ref<AppStateType>>("AppStateKey");
-const CHARA = AppState?.value.CHARA;
+const AppEditer = inject<Ref<AppEditerType>>("AppEditerKey");
+const Charas = AppEditer?.value.Charas;
 
 // コンポーザブル:FunkEmits
 const { updateOmiken, openEditorItem } = FunkEmits(emit);
@@ -144,7 +144,7 @@ const {
 const updateOmikenOmikuji = () => {
   if (props.currentItem) {
     emit("update:Omiken", {
-      type: "omikuji",
+      type: "omikujis",
       update: { [props.currentItem.id]: props.currentItem },
     });
   }
@@ -152,13 +152,14 @@ const updateOmikenOmikuji = () => {
 
 // postに追加
 const addPost = (position = "bottom") => {
-  const botKey = CHARA ? Object.keys(CHARA)[0] : "mamono";
+  const botKey = Charas ? Object.keys(Charas)[0] : "mamono";
   const newPost: OmikujiPostType = {
     type: "onecomme",
     botKey: botKey,
     iconKey: "Default",
     delaySeconds: 0,
     content: "<<user>>の新しいメッセージ",
+    party: ""
   };
 
   if (position === "top") {

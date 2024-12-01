@@ -5,7 +5,7 @@
       "name": "おみくじ",
       "color": "#ff0000",
       "description": "",
-      "enabledIds": [
+      "enableIds": [
         "1729669848759-a4czl",
         "1730186257904-r3vdg",
         "1730380299548-w1lfc",
@@ -24,7 +24,7 @@
       "name": "フラワーおみくじ",
       "color": "",
       "description": "",
-      "enabledIds": [
+      "enableIds": [
         "1730186417456-m98tz",
         "1730186488892-o4w6g",
         "1730443222489-4lfj9",

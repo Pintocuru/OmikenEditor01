@@ -34,7 +34,7 @@ import type {
   OmikenEntry,
   OmikenType,
   OmikenCategory,
-} from "@/types";
+} from "@/types/index";
 
 // Props Emits
 const props = defineProps<{

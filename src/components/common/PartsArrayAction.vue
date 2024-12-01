@@ -27,7 +27,7 @@ import type {
   OmikenCategory,
   OmikujiType,
   RulesType,
-  AppStateType,
+  AppEditerType,
   PlaceType,
   ListCategory,
 } from "@/types";
@@ -48,7 +48,7 @@ const emit = defineEmits<{
 const menu = ref(false);
 
 // Inject
-const AppState = inject<Ref<AppStateType>>("AppStateKey");
+const AppEditer = inject<Ref<AppEditerType>>("AppEditerKey");
 
 /**
  * メニュー項目の定義
@@ -129,7 +129,7 @@ const duplicateItem = () => {
 
   const duplicatedItem = JSON.parse(JSON.stringify(entry));
   duplicatedItem.name = `${duplicatedItem.name} (コピー)`;
-  // rulesEntryがあるならrules.enabledIdsにも入れる
+  // rulesEntryがあるならrules.enableIdsにも入れる
   if (props.rulesEntry) duplicatedItem.rulesId = props.rulesEntry.id;
 
   emit("update:Omiken", {
@@ -168,7 +168,7 @@ const removeList = () => {
   const update: Record<string, RulesType> = {
     [props.rulesEntry.id]: {
       ...props.rulesEntry,
-      enabledIds: props.rulesEntry.enabledIds.filter(
+      enableIds: props.rulesEntry.enableIds.filter(
         (id: string) => id !== props.omikujiEntry?.id
       ),
     },
@@ -182,9 +182,9 @@ const removeList = () => {
 
 // rules選択リストの生成 (omikuji)
 const rulesList = computed(() => {
-  if (!AppState?.value.Omiken.rules) return [];
+  if (!AppEditer?.value.Omiken.rules) return [];
 
-  return Object.entries(AppState.value.Omiken.rules).map(([id, rule]) => ({
+  return Object.entries(AppEditer.value.Omiken.rules).map(([id, rule]) => ({
     id,
     name: rule.name,
   }));
@@ -205,7 +205,7 @@ const addList = async () => {
   });
 
   if (ruleId) {
-    const rulesEntry = AppState?.value.Omiken.rules[ruleId];
+    const rulesEntry = AppEditer?.value.Omiken.rules[ruleId];
     if (!rulesEntry) return;
     if (!props.omikujiEntry) return;
     emit("update:Omiken", {
@@ -213,7 +213,7 @@ const addList = async () => {
       update: {
         [ruleId]: {
           ...rulesEntry,
-          enabledIds: [...rulesEntry.enabledIds, props.omikujiEntry.id],
+          enableIds: [...rulesEntry.enableIds, props.omikujiEntry.id],
         },
       },
     });

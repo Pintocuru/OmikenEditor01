@@ -1,10 +1,10 @@
 // src/composables/funkDialog.ts
-import type { CHARAType } from "../types";
+import type { CharaType } from "@/types/index";
 
 
 // おみくじエディット用
 export function funkOmikuji(
-  CHARA: CHARAType | undefined = {}
+  Chara: CharaType | undefined = {}
 ) {
   // メッセージタイプの配列
 

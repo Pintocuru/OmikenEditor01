@@ -49,7 +49,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import type { OmikenType, OmikenEntry, OmikenCategory } from '@/types';
+import type { OmikenType, OmikenEntry, OmikenCategory } from '@/types/index';
 
 const props = defineProps<{
   Omiken: OmikenType;

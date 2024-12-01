@@ -29,7 +29,7 @@ import {
   OmikenEntry,
   OmikenType,
   OmikenCategory,
-} from "@/types";
+} from "@/types/index";
 import _ from "lodash";
 const props = defineProps<{
   Omiken: OmikenType;

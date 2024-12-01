@@ -1,13 +1,13 @@
 // src/composables/FunkOmikuji.ts
 
-import { AppStateType, OmikujiPostType } from "@/types";
+import { AppEditerType, OmikujiPostType } from "@/types/index";
 import { computed, inject, Ref } from "vue";
 
 export function FunkOmikuji() {
   // Inject
-  const AppState = inject<Ref<AppStateType>>("AppStateKey");
-  const CHARA = AppState?.value.CHARA;
-  const place = AppState?.value.Omiken.place;
+  const AppEditer = inject<Ref<AppEditerType>>("AppEditerKey");
+  const Chara = AppEditer?.value.Chara;
+  const place = AppEditer?.value.Omiken.place;
 
   const POST_TYPES: Record<PostTypeKey, { color: string; label: string }> = {
     onecomme: { color: "orange", label: "わんコメ" },
@@ -41,8 +41,8 @@ export function FunkOmikuji() {
 
   // キャラクター一覧の作成
   const botKeyItems = computed(() => {
-    if (!CHARA || typeof CHARA !== "object") return [];
-    return Object.entries(CHARA).map(([key, value]) => ({
+    if (!Chara || typeof Chara !== "object") return [];
+    return Object.entries(Chara).map(([key, value]) => ({
       text: value.name,
       value: key,
     }));
@@ -74,8 +74,8 @@ export function FunkOmikuji() {
 
   // アイコンキーアイテムの取得
   const getIconKeyItems = (botKey: string | undefined) => {
-    if (!botKey || !CHARA || !(botKey in CHARA)) return [];
-    return Object.keys(CHARA[botKey].item.image).map((key) => ({
+    if (!botKey || !Chara || !(botKey in Chara)) return [];
+    return Object.keys(Chara[botKey].item.image).map((key) => ({
       text: key,
       value: key,
     }));
@@ -83,15 +83,15 @@ export function FunkOmikuji() {
 
   // キャラクターの背景色を取得する関数
   const getCharaColor = (botKey: string | undefined): string => {
-    if (!botKey || !CHARA || !CHARA[botKey]) return "";
-    return CHARA[botKey].item.color["--lcv-background-color"];
+    if (!botKey || !Chara || !Chara[botKey]) return "";
+    return Chara[botKey].item.color["--lcv-background-color"];
   };
 
   // キャラクターの画像を取得する関数
   const getCharaImage = (post: OmikujiPostType): string => {
-    if (!post.botKey || !post.iconKey || !CHARA || !CHARA[post.botKey])
+    if (!post.botKey || !post.iconKey || !Chara || !Chara[post.botKey])
       return "";
-    return `/img/${CHARA[post.botKey].item.image[post.iconKey]}`;
+    return `/img/${Chara[post.botKey].item.image[post.iconKey]}`;
   };
 
   //---

@@ -37,7 +37,6 @@ import ListRules from "./ListRules.vue";
 import ListOmikuji from "./ListOmikuji.vue";
 import ListPlace from "./ListPlace.vue";
 import ListPreset from "./ListPreset.vue";
-import ListPreferences from "./ListPreferences.vue";
 import type {
   OmikenType,
   ListCategory,
@@ -45,8 +44,8 @@ import type {
   NaviCategory,
   OmikenCategory,
   ListEntry,
-  PresetOmikenEditType,
-} from "@/types";
+  PresetType,
+} from "@/types/index";
 import { FunkEmits } from "@/composables/FunkEmits";
 
 // Props Emits
@@ -57,7 +56,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: "update:Omiken", payload: OmikenEntry<OmikenCategory>): void;
-  (e: "update:OmikenPreset", preset: PresetOmikenEditType): void;
+  (e: "update:OmikenPreset", preset: PresetType): void;
   (e: "open-editor", editorItem: ListEntry<ListCategory>): void;
 }>();
 
@@ -71,7 +70,7 @@ const showAddButton = computed(() => props.naviCategory !== 'preferences');
 
 // 現在のカテゴリに応じたアイテム一覧を取得
 const currentItems = computed(() => {
-  const excludedCategories = ['preset', 'preferences'];
+  const excludedCategories = ['preset', ];
   return excludedCategories.includes(props.naviCategory) 
     ? {} 
     : props.Omiken[props.naviCategory];
@@ -83,11 +82,10 @@ const itemsCount = computed(() => Object.keys(currentItems.value).length);
 // これはなに？
 const currentListComponent = computed(() => {
   const componentMap = {
-    preset: ListPreset,
-    preferences: ListPreferences,
     rules: ListRules,
-    omikuji: ListOmikuji,
-    place: ListPlace,
+    omikujis: ListOmikuji,
+    places: ListPlace,
+    presets: ListPreset,
   } as const;
   
   return componentMap[props.naviCategory];
@@ -95,7 +93,7 @@ const currentListComponent = computed(() => {
 
 // アイテムを追加
 const addItem = () => {
-  if (props.naviCategory !== "preferences") {
+  if (props.naviCategory !== "presets") {
     emit("update:Omiken", { type: props.naviCategory, addKeys: [{}] });
   }
 };

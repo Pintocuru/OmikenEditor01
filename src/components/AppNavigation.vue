@@ -20,21 +20,12 @@
       </v-list-item>
       <v-divider class="my-4" />
 
-      <!-- preset  -->
+      <!-- presets  -->
       <v-list-item>
-        <v-card @click="openList('preset')" class="py-4">
+        <v-card @click="openList('presets')" class="py-4">
           <v-card-title class="d-flex align-center">
             <v-icon icon="mdi-file" size="large" class="mr-4"></v-icon>
             プリセット
-          </v-card-title>
-        </v-card>
-      </v-list-item>
-      <!-- preferences  -->
-      <v-list-item>
-        <v-card @click="openList('preferences')" class="py-4">
-          <v-card-title class="d-flex align-center">
-            <v-icon icon="mdi-cog" size="large" class="mr-4"></v-icon>
-            設定画面
           </v-card-title>
         </v-card>
       </v-list-item>
@@ -66,14 +57,14 @@ const sections = computed(() => [
   },
   {
     title: "おみくじ",
-    type: "omikuji" as const,
-    items: props.Omiken.omikuji || {},
+    type: "omikujis" as const,
+    items: props.Omiken.omikujis || {},
     icon: "mdi-crystal-ball",
   },
   {
     title: "プレースホルダー",
-    type: "place" as const,
-    items: props.Omiken.place || {},
+    type: "places" as const,
+    items: props.Omiken.places || {},
     icon: "mdi-tag",
   },
 ]);

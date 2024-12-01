@@ -22,9 +22,9 @@
           <v-toolbar-title class="ml-2">
             <span v-if="isThreshold(Omiken.rules[ruleId]?.threshold)">🔐</span>
             {{ index + 1 }}. {{ Omiken.rules[ruleId]?.name }}
-            <!-- enabledIdsにあるアイテム数 -->
+            <!-- enableIdsにあるアイテム数 -->
             <v-chip label class="ml-4">
-              {{ Omiken.rules[ruleId]?.enabledIds.length }} items
+              {{ Omiken.rules[ruleId]?.enableIds.length }} items
             </v-chip>
             <!-- 展開状態を示すアイコン -->
             <v-icon class="ml-2">
@@ -67,8 +67,8 @@
           <v-card-text>
             <v-row>
               <ListRulesOmikujiView
-                :rulesEntry="Omiken.rules[ruleId]"
-                :omikuji="Omiken.omikuji"
+                :rule="Omiken.rules[ruleId]"
+                :omikujis="Omiken.omikuji"
                 :uiState="uiState"
                 @open-editor="openEditor"
                 @update:Omiken="updateOmiken"
@@ -92,7 +92,7 @@ import type {
   ListCategory,
   ListEntry,
   OmikenCategory,
-} from "@/types";
+} from "@/types/index";
 import { FunkThreshold } from "@/composables/FunkThreshold";
 import { FunkEmits } from "@/composables/FunkEmits";
 import { ref } from "vue";

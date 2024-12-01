@@ -7,7 +7,7 @@
         <v-toolbar-title>
           出現割合の一斉編集
           <v-chip label class="ml-4">
-            {{ weightTotal(enabledIds) }}
+            {{ weightTotal(enableIds) }}
           </v-chip>
         </v-toolbar-title>
       </v-toolbar>
@@ -48,16 +48,16 @@
                   <!-- 出現割合を表示 -->
                   <v-progress-linear
                     :model-value="
-                      weightPercentage(Omiken.omikuji[omikujiId].id, enabledIds)
+                      weightPercentage(Omiken.omikuji[omikujiId].id, enableIds)
                     "
                     buffer-value="10"
                     :color="
-                      weightColor(Omiken.omikuji[omikujiId].id, enabledIds)
+                      weightColor(Omiken.omikuji[omikujiId].id, enableIds)
                     "
                     height="35"
                     striped
                     >出現割合：{{
-                      weightPercentage(Omiken.omikuji[omikujiId].id, enabledIds)
+                      weightPercentage(Omiken.omikuji[omikujiId].id, enableIds)
                     }}
                     %</v-progress-linear
                   >
@@ -91,18 +91,18 @@ import {
   OmikenEntry,
   OmikenType,
   OmikujiType,
-} from "@/types";
+} from "@/types/index";
 import draggable from "vuedraggable";
 import { FunkRules } from "@/composables/FunkRules";
 
 const props = defineProps<{
   Omiken: OmikenType;
   ruleId?: string;
-  enabledIds: string[];
+  enableIds: string[];
 }>();
 
 const emit = defineEmits<{
-  (e: "update:enabledIds", newEnabledIds: string[]): void;
+  (e: "update:enableIds", newEnabledIds: string[]): void;
   (e: "open-editor", editorItem: ListEntry<ListCategory>): void;
   (e: "update:Omiken", payload: OmikenEntry<OmikenCategory>): void;
 }>();
@@ -113,9 +113,9 @@ const { weightTotal, weightColor, weightPercentage } =
   FunkRules();
 
 const currentItem = computed({
-  get: () => [...props.enabledIds],
+  get: () => [...props.enableIds],
   set: (value) => {
-    emit("update:enabledIds", value);
+    emit("update:enableIds", value);
   },
 });
 
@@ -133,7 +133,7 @@ const openDialogWeight = (omikujiId?: string) => {
 
 // 更新アップデート
 const updateEnabledIds = () => {
-  emit("update:enabledIds", currentItem.value);
+  emit("update:enableIds", currentItem.value);
 };
 
 const openEditorOmikuji = (omikuji: OmikujiType) => {

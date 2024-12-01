@@ -4,9 +4,9 @@ import { validateData } from "./FunkValidate";
 import type {
   OmikenType,
   fetchJSONType,
-  CHARAEditType,
+  CharaEditType,
   PresetOmikenEditType,
-} from "../types";
+} from "@/types/index";
 import _ from "lodash";
 import Swal from "sweetalert2";
 import { useToast } from "vue-toastification";
@@ -26,7 +26,7 @@ export function funkJSON() {
   const lastSavedState = ref<OmikenType | null>(null); // 1つ前へ戻る機能
   const toast = useToast(); // vue-toastification // TODO sweetalert2 に変更
 
-  // OmikenとCHARAデータの読み込み
+  // OmikenとCharaデータの読み込み
   const fetchPreset = async () => {
     isLoading.value = true;
     try {
@@ -36,7 +36,7 @@ export function funkJSON() {
 
       // 型ごとにデータ取得と整形
       const [charaData, presetData] = await Promise.all([
-        fetchCHARA(presets.filter((p: fetchJSONType) => p.type === "CHARA")),
+        fetchChara(presets.filter((p: fetchJSONType) => p.type === "Chara")),
         fetchPreOmiken(
           presets.filter((p: fetchJSONType) => p.type === "Omiken")
         ),
@@ -51,15 +51,15 @@ export function funkJSON() {
     }
   };
 
-  // Preset.CHARAの読み込み
-  const fetchCHARA = async (charaPaths: fetchJSONType[]) => {
+  // Preset.Charaの読み込み
+  const fetchChara = async (charaPaths: fetchJSONType[]) => {
     const responses = await Promise.all(
       charaPaths.map(async (p) => {
         const item = await fetch(p.path).then((r) => r.json());
-        return { ...p, item } as CHARAEditType;
+        return { ...p, item } as CharaEditType;
       })
     );
-    return responses.reduce<Record<string, CHARAEditType>>((acc, chara) => {
+    return responses.reduce<Record<string, CharaEditType>>((acc, chara) => {
       acc[chara.id] = chara;
       return acc;
     }, {});

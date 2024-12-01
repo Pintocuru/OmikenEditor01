@@ -14,19 +14,19 @@
         <!-- タイトルバーと操作ボタン -->
         <v-toolbar
           density="compact"
-          :color="getPostTypeColor(Omiken.omikuji[omikujiId].post, true)"
+          :color="getPostTypeColor(Omiken.omikujis[omikujiId].post, true)"
         >
-          <v-toolbar-title @click="openEditorItem('omikuji', omikujiId)">
-            <span v-if="isThreshold(Omiken.omikuji[omikujiId]?.threshold)"
+          <v-toolbar-title @click="openEditorItem('omikujis', omikujiId)">
+            <span v-if="isThreshold(Omiken.omikujis[omikujiId]?.threshold)"
               >🔐</span
             >
-            {{ Omiken.omikuji[omikujiId]?.name }}
+            {{ Omiken.omikujis[omikujiId]?.name }}
           </v-toolbar-title>
           <template #append>
             <PartsArrayAction
-            category="omikuji"
-              :omikujiEntry="Omiken.omikuji[omikujiId]"
-              @edit="openEditorItem('omikuji', omikujiId)"
+            category="omikujis"
+              :omikujiEntry="Omiken.omikujis[omikujiId]"
+              @edit="openEditorItem('omikujis', omikujiId)"
               @update:Omiken="updateOmiken"
             />
           </template>
@@ -34,23 +34,23 @@
 
         <!-- おみくじ内容 -->
         <v-card-text class="py-4">
-          <v-sheet class="pb-3" v-if="Omiken.omikuji[omikujiId]?.post">
-            {{ getOnecommeContent(Omiken.omikuji[omikujiId].post) }}
+          <v-sheet class="pb-3" v-if="Omiken.omikujis[omikujiId]?.post">
+            {{ getOnecommeContent(Omiken.omikujis[omikujiId].post) }}
           </v-sheet>
 
           <v-sheet class="list-group d-flex flex-wrap">
             <!-- 発動条件の表示 -->
             <v-chip
-              v-if="isThreshold(Omiken.omikuji[omikujiId]?.threshold)"
+              v-if="isThreshold(Omiken.omikujis[omikujiId]?.threshold)"
               density="compact"
               variant="outlined"
               color="yellow lighten-3"
             >
-              🔐 {{ getExampleText(Omiken.omikuji[omikujiId].threshold) }}
+              🔐 {{ getExampleText(Omiken.omikujis[omikujiId].threshold) }}
             </v-chip>
             <!-- 既存の出現割合表示 -->
             <v-chip density="compact" variant="text">
-              🎯 {{ Omiken.omikuji[omikujiId]?.weight }}
+              🎯 {{ Omiken.omikujis[omikujiId]?.weight }}
             </v-chip>
           </v-sheet>
         </v-card-text>
@@ -82,7 +82,7 @@ import type {
   OmikenCategory,
   OmikenEntry,
   OmikenType,
-} from "@/types";
+} from "@/types/index";
 import { FunkEmits } from "@/composables/FunkEmits";
 
 const props = defineProps<{
@@ -103,9 +103,9 @@ const { isThreshold, getExampleText } = FunkThreshold();
 
 // おみくじIDをソートして取得
 const sortedOmikujiIds = computed(() =>
-  Object.keys(props.Omiken.omikuji).sort((a, b) =>
-    (props.Omiken.omikuji[a]?.name || "").localeCompare(
-      props.Omiken.omikuji[b]?.name || ""
+  Object.keys(props.Omiken.omikujis).sort((a, b) =>
+    (props.Omiken.omikujis[a]?.name || "").localeCompare(
+      props.Omiken.omikujis[b]?.name || ""
     )
   )
 );

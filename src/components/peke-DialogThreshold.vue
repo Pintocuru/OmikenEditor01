@@ -150,7 +150,7 @@ import {
   ListItemTypeMap,
   AccessCondition,
   SyokenCondition,
-} from "../types";
+} from "@/types/index";
 import { onMounted, ref } from "vue";
 
 const props = defineProps<{

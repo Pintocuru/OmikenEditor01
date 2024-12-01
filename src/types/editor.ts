@@ -1,27 +1,31 @@
 // src/types/editor.ts
-
-import { ListTypeMap, ListItemTypeMap, OmikenType, PreferencesType } from "./Omiken";
-import { CHARAType } from "./chara";
-
+import {
+  ListTypeMap,
+  ListItemTypeMap,
+  OmikenType,
+  CharaType,
+  PresetOmikenType,
+} from "./index";
 
 // エディター用型定義
 
-// AppState
-export interface AppStateType {
+// AppEditer
+export interface AppEditerType {
   Omiken: OmikenType;
-  CHARA: Record<string, CHARAEditType>;
-  Preset: Record<string, PresetOmikenEditType>; // プリセットデータ
+  Charas: Record<string, CharaType>;
+  Presets: Record<string, PresetOmikenType>; // プリセットデータ
 }
 
 // xxxOrder用の型
 export type OrderKey = "rulesOrder";
 
 // ナビゲーション用カテゴリー
-export type NaviCategory = ListCategory | "preset" | "preferences";
+export type NaviCategory = ListCategory | "presets" ;
 
 // リスト用カテゴリー
-export type ListCategory = "rules" | "omikuji" | "place";
-export type ListType = ListTypeMap[ListCategory];
+export type ListCategory = "rules" | "omikujis" | "places";
+export type ItemCategory = "rule" | "omikuji" | "place";
+export type ListType = ListTypeMap[ItemCategory];
 export type ListEntry<T extends ListCategory> = {
   isOpen: boolean; // ダイアログの開閉状態
   type: T;
@@ -34,38 +38,19 @@ export type ListEntryCollect = {
 };
 
 // ファイル操作用
-export type OmikenCategory = ListCategory | "preset" | "preferences";
+export type OmikenCategory = ListCategory | "preset" ;
 export type OmikenEntry<T extends OmikenCategory> = {
   type: T;
   update?: T extends ListCategory ? ListItemTypeMap[T] : never; // 更新アイテム
   addKeys?: // 新規追加アイテム(部分入力可)
   T extends "omikuji"
-  ? (Partial<ListTypeMap[T]> & { rulesId?: string }) | (Partial<ListTypeMap[T]> & { rulesId?: string })[]
-  : T extends ListCategory
-  ? Partial<ListTypeMap[T]> | Partial<ListTypeMap[T]>[]
-  : never;
+    ?
+        | (Partial<ListTypeMap[T]> & { rulesId?: string })
+        | (Partial<ListTypeMap[T]> & { rulesId?: string })[]
+    : T extends ListCategory
+    ? Partial<ListTypeMap[T]> | Partial<ListTypeMap[T]>[]
+    : never;
   delKeys?: string | string[]; // 削除するアイテムのキー名
   reorder?: T extends ListCategory ? string[] : never; // 順番の指定
-  preset?: T extends "preset" ? Record<string, PresetOmikenEditType> : never; // プリセット用
-  preferences?: T extends "preferences" ? PreferencesType : never; // 設定用
+  preset?: T extends "preset" ? PresetOmikenType : never; // プリセット用
 } | null;
-
-
-// JSON読み込み用
-export interface fetchJSONType {
-  id: string;
-  name: string;
-  description: string;
-  type: "Omiken" | "CHARA";
-  path: string;
-  banner: string;
-}
-
-// Edit用キャラデータ
-export interface CHARAEditType extends fetchJSONType {
-  item: CHARAType; // キャラデータ
-}
-export interface PresetOmikenEditType extends fetchJSONType {
-  item: Omit<OmikenType, "preferences">; // キャラデータ(preferences抜き)
-  mode: "overwrite" | "append"; // 追加豊富(上書き/追加)
-}

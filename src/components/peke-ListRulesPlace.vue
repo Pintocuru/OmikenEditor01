@@ -1,4 +1,5 @@
 <!-- src/components/ListRulesPlace.vue -->
+<!-- ! おそらく使わない-->>
 <template>
   <v-row dense>
     <v-col
@@ -12,7 +13,7 @@
         <v-toolbar density="compact">
           <v-toolbar-title
             class="ml-3"
-            @click="openEditorItem('place', place.id)"
+            @click="openEditorItem('places', place.id)"
           >
             {{ place.name }}
             <!-- アイテム数を表示 -->
@@ -51,14 +52,14 @@ import {
   OmikenEntry,
   OmikenType,
   PlaceValueType,
-} from "@/types";
+} from "@/types/index";
 import { ref, watchEffect } from "vue";
 import { FunkRules } from "../composables/FunkRules";
 import { FunkEmits } from "../composables/FunkEmits";
 
 const props = defineProps<{
   Omiken: OmikenType;
-  enabledIds?: string[];
+  enableIds?: string[];
 }>();
 
 const emit = defineEmits<{
@@ -71,7 +72,7 @@ const { openEditorItem } = FunkEmits(emit);
 
 // コンポーザブル:FunkRules
 const { rulesOfPlaces } = FunkRules();
-const getRulesOfPlaces = rulesOfPlaces(props.Omiken, props.enabledIds);
+const getRulesOfPlaces = rulesOfPlaces(props.Omiken, props.enableIds);
 
 // ランダムでvaluesの内容を表示させる
 const randomValues = ref<Record<string, string>>({});

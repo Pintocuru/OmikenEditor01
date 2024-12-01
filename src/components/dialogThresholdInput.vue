@@ -55,16 +55,12 @@
 import { computed } from "vue";
 import { FunkThreshold } from "../composables/FunkThreshold";
 import {
-  ElapsedCondition,
   CountCondition,
-  GiftCondition,
   ConditionType,
-} from "@/types";
+} from "@/types/index";
 
 type ModelValueType =
-  | ElapsedCondition
   | CountCondition
-  | GiftCondition
   | undefined;
 
 const props = defineProps<{
@@ -76,7 +72,7 @@ const emit = defineEmits<{
   "update:modelValue": [ModelValueType];
 }>();
 
-// 型ガード関数
+// 型ガード関数 // TODO Thresholdの修正
 const isElapsedCondition = (value: ModelValueType): value is ElapsedCondition =>
   value?.type === 'elapsed';
 const isCountCondition = (value: ModelValueType): value is CountCondition =>

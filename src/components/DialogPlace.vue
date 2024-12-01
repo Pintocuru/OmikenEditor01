@@ -77,13 +77,13 @@ import type {
   OmikenEntry,
   OmikenCategory,
   ListEntry,
-  AppStateType,
+  AppEditerType,
   ListCategory,
-} from "../types";
+} from "@/types/index";
 import Swal from "sweetalert2";
 
 const props = defineProps<{
-  entry: ListEntry<"place"> | null;
+  entry: ListEntry<"places"> | null;
 }>();
 
 const emit = defineEmits<{
@@ -92,8 +92,8 @@ const emit = defineEmits<{
 }>();
 
 // inject
-const AppState = inject<Ref<AppStateType>>("AppStateKey");
-const place = AppState?.value.Omiken.place;
+const AppEditer = inject<Ref<AppEditerType>>("AppEditerKey");
+const place = AppEditer?.value.Omiken.places;
 
 const currentItem = ref<PlaceType | null>(null);
 
@@ -148,6 +148,7 @@ const handleTextEditorSave = (values: PlaceValueType[]) => {
   updateOmikenPlace(currentItem.value);
 };
 
+// TODO 仕様変更:Weightモードのみになりました
 const isWeightMode = computed({
   get: () => currentItem.value?.isWeight ?? false,
   set: (value) => updateItem("isWeight", value),
@@ -180,7 +181,7 @@ const updateOmikenPlace = (updatedItem: PlaceType) => {
   if (!currentItem.value || !props.entry?.key) return;
   const key = props.entry.key as string;
   emit("update:Omiken", {
-    type: "place",
+    type: "places",
     update: { [key]: updatedItem },
   });
 };
