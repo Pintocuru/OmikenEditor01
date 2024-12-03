@@ -61,7 +61,8 @@ export interface OmikujiType extends BaseType {
   weight: number; // 出現割合
   threshold: ThresholdType[]; // 発動条件
   status?: string; // ユーザーに対するステータスの付与
-  delete: boolean; // コメントを無効化するか
+  isDelete: boolean; // コメントを無効にするか
+  isSilent: boolean; // 読み上げを無効にするか
   script?: {
     scriptId: string; // 使用する外部スクリプトのid
     parameter: string; // 外部スクリプトに渡す引数

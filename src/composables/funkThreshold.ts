@@ -6,7 +6,6 @@ import {
   CountCondition,
   SyokenCondition,
   ThresholdType,
-  MatchCondition,
 } from "@/types/index";
 
 // 基本的な型定義
@@ -270,7 +269,8 @@ export function FunkThreshold() {
   };
 }
 
-// Thresholdの初期値を生成する関数
+
+ // Thresholdの初期値を生成する関数
 export function FunkThresholdInitial() {
   return {
       conditionType: "match",
@@ -289,5 +289,5 @@ export function FunkThresholdInitial() {
         value1: 0,
         value2: 1,
       },
-    } as ThresholdType,
-}
+    } as ThresholdType
+};
