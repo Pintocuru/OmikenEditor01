@@ -2,36 +2,54 @@
 <template>
   <v-sheet class="d-flex ga-2 justify-end">
     <v-expand-transition>
-      <v-select v-if="uiState.showEnabledIds" 
-        v-model="currentItem.enableIds" 
-        :items="omikujiLists" 
-        label="有効にするおみくじ" 
+      <v-select
+        v-if="uiState.showEnabledIds"
+        v-model="currentItem.enableIds"
+        :items="omikujiLists"
+        label="有効にするおみくじ"
         chips
-        multiple 
-        item-title="name" 
+        multiple
+        item-title="name"
         item-value="id"
-        @update:modelValue="(value) => updateRulesEnabledIds(value, currentItem.id)" 
+        @update:modelValue="
+          (value) => updateRulesEnabledIds(value, currentItem.id)
+        "
       />
     </v-expand-transition>
     <v-tooltip text="有効リストを表示" location="top">
       <template v-slot:activator="{ props }">
-        <v-btn icon :color="uiState.showEnabledIds ? 'primary' : ''" v-bind="props"
-          @click="uiState.showEnabledIds = !uiState.showEnabledIds">
+        <v-btn
+          icon
+          :color="uiState.showEnabledIds ? 'primary' : ''"
+          v-bind="props"
+          @click="uiState.showEnabledIds = !uiState.showEnabledIds"
+        >
           <v-icon>mdi-format-list-checks</v-icon>
         </v-btn>
       </template>
     </v-tooltip>
     <v-tooltip text="出現割合を編集する" location="top">
       <template v-slot:activator="{ props }">
-        <v-btn icon :color="uiState.showWeightEditor ? 'primary' : ''" v-bind="props"
-          @click="uiState.showWeightEditor = !uiState.showWeightEditor">
+        <v-btn
+          icon
+          :color="uiState.showWeightEditor ? 'primary' : ''"
+          v-bind="props"
+          @click="uiState.showWeightEditor = !uiState.showWeightEditor"
+        >
           <v-icon>mdi-percent</v-icon>
         </v-btn>
       </template>
     </v-tooltip>
     <v-tooltip text="アイテムを追加する" location="top">
       <template v-slot:activator="{ props }">
-        <v-btn icon v-bind="props" @click="addItemOmikuji" color="primary" variant="flat" class="mr-2">
+        <v-btn
+          icon
+          v-bind="props"
+          @click="addItemOmikuji"
+          color="primary"
+          variant="flat"
+          class="mr-2"
+        >
           <v-icon left>mdi-plus</v-icon>
         </v-btn>
       </template>
@@ -46,7 +64,7 @@ import type { OmikenCategory, OmikenEntry, RulesType } from "@/types/index";
 
 const props = defineProps<{
   rulesEntry: RulesType;
-  uiState: { showEnabledIds: boolean; showWeightEditor: boolean; };
+  uiState: { showEnabledIds: boolean; showWeightEditor: boolean };
 }>();
 
 const emit = defineEmits<{
@@ -58,6 +76,7 @@ const { omikujiLists } = FunkRules();
 const currentItem = computed({
   get: () => props.rulesEntry,
   set: (value) => {
+    if (!value) return;
     if (props.rulesEntry) {
       updateRulesEnabledIds(value.enableIds, props.rulesEntry.id);
     }
@@ -65,9 +84,10 @@ const currentItem = computed({
 });
 
 const addItemOmikuji = () => {
+  if (!props.rulesEntry) return;
   if (props.rulesEntry.id) {
     emit("update:Omiken", {
-      type: "omikuji",
+      type: "omikujis",
       addKeys: [{ rulesId: props.rulesEntry.id }],
     });
   }
@@ -76,6 +96,7 @@ const addItemOmikuji = () => {
 // rules.enableIds の更新
 const updateRulesEnabledIds = (enableIds: string[], ruleId: string) => {
   if (!ruleId) return;
+  if (!props.rulesEntry) return;
   const updatedRule = {
     ...props.rulesEntry,
     enableIds,

@@ -134,7 +134,8 @@ const omikujiSchema = z.record(
       weight: z.number().int().nonnegative().default(1),
       threshold: z.array(thresholdSchema).default([]),
       status: z.string().optional(),
-      delete: z.boolean().default(false),
+      isDelete: z.boolean().default(false),
+      isSilent: z.boolean().default(false),
       script: z
         .object({
           scriptId: z.string(),
@@ -182,16 +183,16 @@ const validators = {
 } as const;
 
 // validateData
-export const validateData = <T extends keyof ListItemTypeMap>(
+export const validateData = <T extends keyof OmikenType>(
   type: T,
   data: unknown
-): ListItemTypeMap[T] => {
+): OmikenType[T] => {
   try {
     console.log(data);
     const schema = schemas[type];
     // parseを使用することで、スキーマ定義に基づいた
     // バリデーション・変換・デフォルト値の適用が自動的に行われる
-    return schema.parse(data) as ListItemTypeMap[T];
+    return schema.parse(data) as OmikenType[T];
   } catch (e) {
     // エラーログ
     console.error(`Validation error for ${type}:`, e);

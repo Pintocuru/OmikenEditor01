@@ -40,7 +40,7 @@ export function funkJSON() {
         fetchPreOmiken(presets.filter((p: PresetType) => p.type === "Omiken")),
       ]);
 
-      return { charaData, presetData };
+      return { Charas: charaData, Presets: presetData };
     } catch (error) {
       console.error("Failed to load data:", error);
       throw new Error("データの読み込みに失敗しました");

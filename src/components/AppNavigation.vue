@@ -3,11 +3,13 @@
   <v-navigation-drawer permanent rail rail-width="100" expand-on-hover>
     <v-list>
       <v-list-item v-for="(section, index) in sections" :key="index">
-        <v-card @click="openList(section.type as ListCategory)" class="py-4">
+        <!-- メインセクション -->
+        <v-card @click="openList(section.category)" class="py-4">
           <v-card-title class="d-flex align-center">
             <v-badge
               class="mr-4"
-              :content="Object.keys(section.items).length"
+              v-if="section.itemCount>0"
+              :content="section.itemCount"
               color="primary"
               :model-value="true"
               location="bottom end"
@@ -17,17 +19,21 @@
             {{ section.title }}
           </v-card-title>
         </v-card>
-      </v-list-item>
-      <v-divider class="my-4" />
 
-      <!-- presets  -->
-      <v-list-item>
-        <v-card @click="openList('presets')" class="py-4">
-          <v-card-title class="d-flex align-center">
-            <v-icon icon="mdi-file" size="large" class="mr-4"></v-icon>
-            プリセット
-          </v-card-title>
-        </v-card>
+        <!-- サブセクション -->
+        <v-list v-if="section.subSections" class="pl-4">
+          <v-list-item
+            v-for="(subSection, subIndex) in section.subSections"
+            :key="subIndex"
+          >
+            <v-card @click="openList(subSection.category)" class="py-2">
+              <v-card-title class="d-flex align-center">
+                <v-icon icon="mdi-chevron-right" size="small" class="mr-2" />
+                {{ subSection.title }}
+              </v-card-title>
+            </v-card>
+          </v-list-item>
+        </v-list>
       </v-list-item>
     </v-list>
   </v-navigation-drawer>
@@ -35,40 +41,88 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { OmikenType, ListCategory, NaviCategory } from "@/types";
+import { CategoryActive, OmikenType } from "@/types";
 
 // Props / Emit
 const props = defineProps<{
   Omiken: OmikenType;
-  naviCategory: NaviCategory;
+  naviCategory: CategoryActive;
 }>();
 
 const emit = defineEmits<{
-  (e: "update:category", value: NaviCategory): void;
+  (e: "update:category", value: CategoryActive): void;
 }>();
 
+interface Section {
+  title: string;
+  icon: string;
+  itemCount: number;
+  category: CategoryActive;
+  subSections?: {
+    title: string;
+    itemCount: number;
+    category: CategoryActive;
+  }[];
+}
+
 // セクション情報の計算
-const sections = computed(() => [
+const sections = computed<Section[]>(() => [
   {
     title: "ルール",
-    type: "rules" as const,
-    items: props.Omiken.rules || {},
     icon: "mdi-book-open-variant",
+    itemCount: 0,
+    category: { main: "rules", sub: "comment" },
+    subSections: [
+      {
+        title: "コメント",
+        itemCount: Object.keys(props.Omiken.rules || {}).length,
+        category: { main: "rules", sub: "comment" },
+      },
+      {
+        title: "タイマー",
+        itemCount: 3,
+        category: { main: "rules", sub: "timer" },
+      },
+    ],
   },
   {
     title: "おみくじ",
-    type: "omikujis" as const,
-    items: props.Omiken.omikujis || {},
     icon: "mdi-crystal-ball",
+    itemCount: Object.keys(props.Omiken.omikujis || {}).length,
+    category: { main: "omikujis" },
   },
   {
     title: "プレースホルダー",
-    type: "places" as const,
-    items: props.Omiken.places || {},
     icon: "mdi-tag",
+    itemCount: Object.keys(props.Omiken.places || {}).length,
+    category: { main: "places" },
+  },
+  {
+    title: "プリセット",
+    icon: "mdi-file",
+    itemCount: 0,
+    category: { main: "presets", sub: "Omiken" },
+    subSections: [
+      {
+        title: "おみくじデータ",
+        itemCount: 10,
+        category: { main: "presets", sub: "Omiken" },
+      },
+      {
+        title: "キャラクター",
+        itemCount: 10,
+        category: { main: "presets", sub: "Chara" },
+      },
+      {
+        title: "スクリプト",
+        itemCount: 8,
+        category: { main: "presets", sub: "Script" },
+      },
+    ],
   },
 ]);
 
 // リスト開閉関数
-const openList = (type: NaviCategory) => emit("update:category", type);
+const openList = (category: CategoryActive) =>
+  emit("update:category", category);
 </script>

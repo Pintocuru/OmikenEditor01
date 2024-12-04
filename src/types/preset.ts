@@ -7,7 +7,6 @@ export interface PresetType extends BaseType {
   type: "Omiken" | "Chara" | "Script";
   path: string;
   banner?: string;
-  mode?: "overwrite" | "append"; // 追加方法(上書き/追加)
 }
 
 // ---

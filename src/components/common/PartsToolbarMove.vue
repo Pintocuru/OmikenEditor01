@@ -32,7 +32,7 @@ import { computed } from "vue";
 
 const props = defineProps<{
   index: number;
-  rulesOrder: string[]; // 追加
+  rulesOrder?: string[];
 }>();
 
 const emit = defineEmits<{
@@ -40,9 +40,13 @@ const emit = defineEmits<{
 }>();
 
 const isFirstItem = computed(() => props.index === 0);
-const isLastItem = computed(() => props.index === props.rulesOrder.length - 1);
+const isLastItem = computed(() => {
+  return props.rulesOrder && props.index === props.rulesOrder.length - 1;
+});
 
 function moveItem(direction: "up" | "down") {
+  if (!props.rulesOrder) return;
+
   const newIndex = direction === "up" ? props.index - 1 : props.index + 1;
   if (newIndex >= 0 && newIndex < props.rulesOrder.length) {
     // 新しい配列を作成して順序を変更

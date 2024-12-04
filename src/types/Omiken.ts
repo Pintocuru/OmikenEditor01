@@ -14,9 +14,9 @@ export interface OmikenType {
 
 // コンテンツの型マッピング
 export type ListTypeMap = {
-  rule: RulesType;
-  omikuji: OmikujiType;
-  place: PlaceType;
+  rules: RulesType;
+  omikujis: OmikujiType;
+  places: PlaceType;
 };
 export type ListItemTypeMap = Omit<OmikenType, "rulesOrder">;
 
@@ -122,14 +122,14 @@ export type ConditionType =
   | "count"
   | "match";
 
-// 初見・コメント履歴の種別
+// syoken:初見・コメント履歴の種別
 export enum SyokenCondition {
   SYOKEN = 1, // 初見
   AGAIN = 2, // 前回のコメントから7日以上経過
   HI = 3, // その配信枠で1回目のコメント
 }
 
-// ルールの有効/無効 0:OFF/1:だれでも/2:メンバー/3:モデレーター/4:管理者
+// access:ユーザーの役職 0:OFF/1:だれでも/2:メンバー/3:モデレーター/4:管理者
 export enum AccessCondition {
   MEMBER = 2,
   MODERATOR = 3,

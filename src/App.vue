@@ -11,7 +11,7 @@
       <v-container>
         <AppList
           :Omiken="AppEditer.Omiken"
-          :naviCategory="naviCategory"
+          :categoryActive="naviCategory"
           @update:Omiken="updateOmiken"
           @update:OmikenPreset="updateOmikenPreset"
           @open-editor="openEditor"

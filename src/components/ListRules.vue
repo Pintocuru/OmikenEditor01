@@ -20,7 +20,6 @@
             @update:Omiken="updateOmiken"
           />
           <v-toolbar-title class="ml-2">
-            <span v-if="isThreshold(Omiken.rules[ruleId]?.threshold)">🔐</span>
             {{ index + 1 }}. {{ Omiken.rules[ruleId]?.name }}
             <!-- enableIdsにあるアイテム数 -->
             <v-chip label class="ml-4">
@@ -68,7 +67,7 @@
             <v-row>
               <ListRulesOmikujiView
                 :rule="Omiken.rules[ruleId]"
-                :omikujis="Omiken.omikuji"
+                :omikujis="Omiken.omikujis"
                 :uiState="uiState"
                 @open-editor="openEditor"
                 @update:Omiken="updateOmiken"
@@ -92,10 +91,12 @@ import type {
   ListCategory,
   ListEntry,
   OmikenCategory,
+  CategoryActive,
+  AppEditerType,
 } from "@/types/index";
 import { FunkThreshold } from "@/composables/FunkThreshold";
 import { FunkEmits } from "@/composables/FunkEmits";
-import { ref } from "vue";
+import { inject, Ref, ref } from "vue";
 
 // 展開状態を管理する配列
 const expandedPanels = ref<string[]>([]);
@@ -111,7 +112,7 @@ const togglePanel = (ruleId: string) => {
 };
 
 const props = defineProps<{
-  Omiken: OmikenType;
+  categoryActive: CategoryActive;
 }>();
 
 const emit = defineEmits<{
@@ -119,10 +120,15 @@ const emit = defineEmits<{
   (e: "open-editor", editorItem: ListEntry<ListCategory>): void;
 }>();
 
+// inject
+const AppEditer =
+  inject<Ref<AppEditerType>>("AppEditerKey") ?? ref({} as AppEditerType);
+const Omiken = AppEditer.value.Omiken;
+
 // コンポーザブル:FunkEmits
 const { updateOmiken, openEditor, openEditorItem } = FunkEmits(emit);
 // コンポーザブル:funkThreshold
-const { isThreshold, getExampleText } = FunkThreshold();
+const {  getExampleText } = FunkThreshold();
 
 // UIの各種ref
 const uiState = ref({

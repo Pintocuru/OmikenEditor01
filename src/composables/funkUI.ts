@@ -1,12 +1,11 @@
 // src/composables/funkUI.ts
 import { Ref, ref } from "vue";
 import type {
+  CategoryActive,
   ListCategory,
   ListEntry,
   ListEntryCollect,
-  NaviCategory,
 } from "../types";
-import _ from 'lodash';
 
 export function FunkUI() {
   // UI
@@ -14,13 +13,15 @@ export function FunkUI() {
   const uiDrawer = ref(null); // ナビゲーションドロワーの表示/非表示
 
   // ナビゲーション用:選択したカテゴリ
-  const naviCategory = ref<NaviCategory>("rules");
+const naviCategory = ref<CategoryActive>({
+  main: "rules", sub:'comment',
+});
 
   // ダイアログで表示させるアイテム 
   const listEntry: Ref<ListEntryCollect> = ref({
     rules: { isOpen: false, type: 'rules', key: null, item: null, mode: null },
-    omikuji: { isOpen: false, type: 'omikuji', key: null, item: null, mode: null },
-    place: { isOpen: false, type: 'place', key: null, item: null, mode: null },
+    omikujis: { isOpen: false, type: 'omikujis', key: null, item: null, mode: null },
+    places: { isOpen: false, type: 'places', key: null, item: null, mode: null },
   });
 
   // ダイアログを開く

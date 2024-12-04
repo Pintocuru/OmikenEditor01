@@ -4,7 +4,7 @@
     v-model="currentItem.enableIds"
     item-key="id"
     class="d-flex flex-wrap"
-    @end="() => updateRulesEnabledIds(currentItem.enableIds, currentItem.id)"
+    @end="() => updateRulesEnableIds(currentItem.enableIds, currentItem.id)"
   >
     <template #item="{ element: omikujiId }">
       <v-col cols="12" sm="6" md="4" lg="3" class="pa-1">
@@ -29,7 +29,7 @@
             </v-toolbar-title>
             <template #append>
               <PartsArrayAction
-              category="omikujis"
+                category="omikujis"
                 :rulesEntry="currentItem"
                 :omikujiEntry="omikujis[omikujiId]"
                 @edit="openEditorItem('omikujis', omikujiId)"
@@ -120,7 +120,7 @@ import { FunkEmits } from "@/composables/FunkEmits";
 
 const props = defineProps<{
   rule: RulesType;
-  omikujis: Record<string, ListTypeMap["omikuji"]>;
+  omikujis: Record<string, ListTypeMap["omikujis"]>;
   uiState: { showEnabledIds: boolean; showWeightEditor: boolean };
 }>();
 
@@ -150,9 +150,8 @@ const currentItem = computed({
 });
 
 // rules.enableIds の更新
-const updateRulesEnabledIds = (enableIds: string[], ruleId: string) => {
-  if (!ruleId) return;
-  const updatedRule = {
+const updateRulesEnableIds = (enableIds: string[], ruleId: string) => {
+  const updatedRule: Record<string, RulesType> = {
     [ruleId]: {
       ...props.rule,
       enableIds,

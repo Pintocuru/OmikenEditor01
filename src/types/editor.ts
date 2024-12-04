@@ -4,7 +4,7 @@ import {
   ListItemTypeMap,
   OmikenType,
   CharaType,
-  PresetOmikenType,
+  PresetType,
 } from "./index";
 
 // エディター用型定義
@@ -12,20 +12,30 @@ import {
 // AppEditer
 export interface AppEditerType {
   Omiken: OmikenType;
-  Charas: Record<string, CharaType>;
-  Presets: Record<string, PresetOmikenType>; // プリセットデータ
+  Presets: Record<string, OmikenType>; // preset:Omiken
+  Charas: Record<string, CharaType>; // preset:Chara
+  Scripts: Record<string, PresetType>; // preset:Script
 }
 
-// xxxOrder用の型
-export type OrderKey = "rulesOrder";
 
-// ナビゲーション用カテゴリー
-export type NaviCategory = ListCategory | "presets" ;
+// メインカテゴリーの型
+export type CategoryMain = "rules" | "omikujis" | "places" | "presets";
+export type CategorySub = {
+  rules: "comment" | "timer" | "meta" | "waitingList" | "setList" | "reactions";
+  omikujis: never; // サブカテゴリーなし
+  places: never; // サブカテゴリーなし
+  presets: "Omiken" | "Chara" | "Script";
+};
+export type CategoryActive<T extends CategoryMain = CategoryMain> = {
+  main: T; // 現在選択されているメインカテゴリー
+  sub?: CategorySub[T]; // メインカテゴリーに対応するサブカテゴリー（オプショナル）
+};
+
 
 // リスト用カテゴリー
 export type ListCategory = "rules" | "omikujis" | "places";
 export type ItemCategory = "rule" | "omikuji" | "place";
-export type ListType = ListTypeMap[ItemCategory];
+export type ListType = ListTypeMap[ListCategory];
 export type ListEntry<T extends ListCategory> = {
   isOpen: boolean; // ダイアログの開閉状態
   type: T;
@@ -38,19 +48,31 @@ export type ListEntryCollect = {
 };
 
 // ファイル操作用
-export type OmikenCategory = ListCategory | "preset" ;
-export type OmikenEntry<T extends OmikenCategory> = {
-  type: T;
-  update?: T extends ListCategory ? ListItemTypeMap[T] : never; // 更新アイテム
-  addKeys?: // 新規追加アイテム(部分入力可)
-  T extends "omikuji"
-    ?
-        | (Partial<ListTypeMap[T]> & { rulesId?: string })
-        | (Partial<ListTypeMap[T]> & { rulesId?: string })[]
-    : T extends ListCategory
-    ? Partial<ListTypeMap[T]> | Partial<ListTypeMap[T]>[]
-    : never;
-  delKeys?: string | string[]; // 削除するアイテムのキー名
-  reorder?: T extends ListCategory ? string[] : never; // 順番の指定
-  preset?: T extends "preset" ? PresetOmikenType : never; // プリセット用
-} | null;
+export type OmikenCategory = ListCategory | "preset";
+export type OmikenEntry<T extends OmikenCategory> = T extends ListCategory
+  ? {
+      type: T;
+      update?: T extends ListCategory ? ListItemTypeMap[T] : never;
+      addKeys?: T extends "omikujis"
+        ? OmikujisAddItem
+        : PartialListItem<T> | PartialListItem<T>[];
+      delKeys?: string | string[];
+      reorder?: string[];
+      preset?: T extends "preset" ? OmikenType : never;
+    }
+  : null;
+
+// addItem用のPartial型(一部のキーだけでデータを作成できる)
+type PartialListItem<T extends ListCategory> = Partial<ListTypeMap[T]>;
+
+// OmikujisはrulesのIDが必須
+type OmikujisAddItem = 
+  | (PartialListItem<"omikujis"> & { rulesId?: string })
+  | (PartialListItem<"omikujis"> & { rulesId?: string })[];
+
+
+// おみくじデータ付きpresetデータ
+export interface PresetOmikenType extends PresetType {
+  item: OmikenType;
+  mode?: "overwrite" | "append"; // 追加方法(上書き/追加)
+}

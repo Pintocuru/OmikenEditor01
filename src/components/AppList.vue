@@ -3,10 +3,7 @@
   <v-card>
     <v-toolbar>
       <v-toolbar-title>
-        {{ naviCategory }}
-        <v-chip v-if="showItemCount" label class="ml-4">
-          {{ itemsCount }} items
-        </v-chip>
+        {{ categoryActive }}
       </v-toolbar-title>
       <template #append>
         <v-btn
@@ -22,7 +19,7 @@
     <v-sheet>
       <component
         :is="currentListComponent"
-        :Omiken="Omiken"
+        :categoryActive="categoryActive"
         @update:Omiken="updateOmiken"
         @update:OmikenPreset="updateOmikenPreset"
         @open-editor="openEditor"
@@ -41,17 +38,16 @@ import type {
   OmikenType,
   ListCategory,
   OmikenEntry,
-  NaviCategory,
   OmikenCategory,
   ListEntry,
   PresetType,
+  CategoryActive,
 } from "@/types/index";
 import { FunkEmits } from "@/composables/FunkEmits";
 
 // Props Emits
 const props = defineProps<{
-  Omiken: OmikenType;
-  naviCategory: NaviCategory;
+  categoryActive: CategoryActive;
 }>();
 
 const emit = defineEmits<{
@@ -64,24 +60,9 @@ const emit = defineEmits<{
 const { updateOmiken,openEditor ,updateOmikenPreset} = FunkEmits(emit);
 
 // 表示制御用の計算プロパティ
-const showItemCount = computed(() => props.naviCategory !== 'presets');
-const showAddButton = computed(() => props.naviCategory !== 'presets');
+const showAddButton = computed(() => props.categoryActive.main !== 'presets');
 
-
-// 現在のカテゴリに応じたアイテム一覧を取得
-const currentItems = computed(() => {
-  const excludedCategories: NaviCategory[] = ['presets']; // 修正: 'preset' を除外
-  if (excludedCategories.includes(props.naviCategory)) {
-    return {};
-  }
-  // 型を明示的に指定
-  return props.Omiken[props.naviCategory as keyof OmikenType];
-});
-
-// アイテムカウント
-const itemsCount = computed(() => Object.keys(currentItems.value).length);
-
-// これはなに？
+// 子コンポーネントの指定
 const currentListComponent = computed(() => {
   const componentMap = {
     rules: ListRules,
@@ -90,13 +71,13 @@ const currentListComponent = computed(() => {
     presets: ListPreset,
   } as const;
   
-  return componentMap[props.naviCategory];
+  return componentMap[props.categoryActive.main];
 });
 
 // アイテムを追加
 const addItem = () => {
-  if (props.naviCategory !== "presets") {
-    emit("update:Omiken", { type: props.naviCategory, addKeys: [{}] });
+  if (props.categoryActive.main !== "presets") {
+    emit("update:Omiken", { type: props.categoryActive.main, addKeys: [{}] });
   }
 };
 

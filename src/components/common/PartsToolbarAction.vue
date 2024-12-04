@@ -3,9 +3,9 @@
   <v-btn
     v-for="(action, index) in actions"
     :key="index"
-    :size="!isSmall ? 'default':'small'"
-    :height="!isSmall ? '':30"
-    :width="!isSmall ? '':30"
+    :size="!isSmall ? 'default' : 'small'"
+    :height="!isSmall ? '' : 30"
+    :width="!isSmall ? '' : 30"
     icon
     @click.stop="action.handler"
   >
@@ -26,7 +26,7 @@ type ItemOrGroup = ListType | { name: string; items: ListType[] };
 const props = defineProps<{
   selectCategory: ListCategory;
   ruleId?: string;
-  item: ItemOrGroup;
+  item?: ItemOrGroup;
   isSmall?: boolean;
 }>();
 
@@ -57,6 +57,7 @@ const actions = [
 
 // アイテムの複製
 function duplicateItem() {
+  if (!props.item) return;
   const item = props.item;
   const isGroup = "items" in item;
   const itemsToDuplicate = isGroup ? item.items : [item as ListType];
@@ -68,9 +69,9 @@ function duplicateItem() {
     return newItem;
   });
 
-  if (props.selectCategory === "omikuji" && props.ruleId) {
+  if (props.selectCategory === "omikujis" && props.ruleId) {
     emit("update:Omiken", {
-      type: "omikuji",
+      type: "omikujis",
       addKeys: duplicatedItems.map((item) => ({
         ...item,
         rulesId: props.ruleId,
@@ -87,6 +88,7 @@ function duplicateItem() {
 
 // アイテムの削除
 function deleteItem() {
+  if (!props.item) return;
   const item = props.item;
   const isGroup = "items" in item;
   const itemsToDelete = isGroup ? item.items : [item];
