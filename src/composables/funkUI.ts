@@ -13,15 +13,27 @@ export function FunkUI() {
   const uiDrawer = ref(null); // ナビゲーションドロワーの表示/非表示
 
   // ナビゲーション用:選択したカテゴリ
-const naviCategory = ref<CategoryActive>({
-  main: "rules", sub:'comment',
-});
+  const naviCategory = ref<CategoryActive>({
+    main: "rules",
+  });
 
-  // ダイアログで表示させるアイテム 
+  // ダイアログで表示させるアイテム
   const listEntry: Ref<ListEntryCollect> = ref({
-    rules: { isOpen: false, type: 'rules', key: null, item: null, mode: null },
-    omikujis: { isOpen: false, type: 'omikujis', key: null, item: null, mode: null },
-    places: { isOpen: false, type: 'places', key: null, item: null, mode: null },
+    rules: { isOpen: false, type: "rules", key: null, item: null, mode: null },
+    omikujis: {
+      isOpen: false,
+      type: "omikujis",
+      key: null,
+      item: null,
+      mode: null,
+    },
+    places: {
+      isOpen: false,
+      type: "places",
+      key: null,
+      item: null,
+      mode: null,
+    },
   });
 
   // ダイアログを開く
@@ -30,7 +42,7 @@ const naviCategory = ref<CategoryActive>({
 
     if (listEntry.value && listEntry.value[type]) {
       const entry = listEntry.value[type] as ListEntry<T>;
-      entry.key = key
+      entry.key = key;
       entry.mode = mode || null;
       entry.isOpen = true;
     }
@@ -45,9 +57,8 @@ const naviCategory = ref<CategoryActive>({
   };
 }
 
-
-export function funkList(emit:any) {
-  const openEditor = (item: { id: any; }, type = "rules") => {
+export function funkList(emit: any) {
+  const openEditor = (item: { id: any }, type = "rules") => {
     const payload = { [item.id]: item };
     emit("open-editor", {
       isOpen: true,

@@ -1,10 +1,10 @@
 // src/types/editor.ts
 import {
-  ListTypeMap,
-  ListItemTypeMap,
+  OmikenTypeMap,
   OmikenType,
   CharaType,
   PresetType,
+  TypesType,
 } from "./index";
 
 // エディター用型定義
@@ -17,13 +17,13 @@ export interface AppEditerType {
   Scripts: Record<string, PresetType>; // preset:Script
 }
 
-
 // メインカテゴリーの型
-export type CategoryMain = "rules" | "omikujis" | "places" | "presets";
+export type CategoryMain = "types" | ListCategory | "presets";
 export type CategorySub = {
-  rules: "comment" | "timer" | "meta" | "waitingList" | "setList" | "reactions";
-  omikujis: never; // サブカテゴリーなし
-  places: never; // サブカテゴリーなし
+  types: never;
+  rules: never;
+  omikujis: never;
+  places: never;
   presets: "Omiken" | "Chara" | "Script";
 };
 export type CategoryActive<T extends CategoryMain = CategoryMain> = {
@@ -31,11 +31,9 @@ export type CategoryActive<T extends CategoryMain = CategoryMain> = {
   sub?: CategorySub[T]; // メインカテゴリーに対応するサブカテゴリー（オプショナル）
 };
 
-
 // リスト用カテゴリー
-export type ListCategory = "rules" | "omikujis" | "places";
-export type ItemCategory = "rule" | "omikuji" | "place";
-export type ListType = ListTypeMap[ListCategory];
+export type ListCategory =  "rules" | "omikujis" | "places";
+export type ListType = OmikenTypeMap[ListCategory];
 export type ListEntry<T extends ListCategory> = {
   isOpen: boolean; // ダイアログの開閉状態
   type: T;
@@ -43,33 +41,28 @@ export type ListEntry<T extends ListCategory> = {
   key: string | string[] | null;
 };
 // listEntry全体の型
-export type ListEntryCollect = {
-  [K in ListCategory]: ListEntry<K>;
-};
+export type ListEntryCollect = Record<ListCategory, ListEntry<ListCategory>>;
 
 // ファイル操作用
-export type OmikenCategory = ListCategory | "preset";
-export type OmikenEntry<T extends OmikenCategory> = T extends ListCategory
-  ? {
-      type: T;
-      update?: T extends ListCategory ? ListItemTypeMap[T] : never;
-      addKeys?: T extends "omikujis"
-        ? OmikujisAddItem
-        : PartialListItem<T> | PartialListItem<T>[];
-      delKeys?: string | string[];
-      reorder?: string[];
-      preset?: T extends "preset" ? OmikenType : never;
-    }
-  : null;
+export type OmikenEntry<T extends "types" | ListCategory> = {
+  type: T;
+  update?: T extends "types" ? never : OmikenTypeMap[T];
+  addKeys?: AddKeysCategory[T];
+  delKeys?: T extends "types" ? TypesType[] : string | string[];
+  reTypes?: T extends "types" ? Partial<Record<TypesType, string[]>> : never;
+};
+
+type AddKeysCategory = {
+  types: never;
+  rules: PartialListItem<"rules"> & { types?: TypesType };
+  omikujis:
+    | (PartialListItem<"omikujis"> & { rulesId?: string })
+    | (PartialListItem<"omikujis"> & { rulesId?: string })[];
+  places: PartialListItem<"places"> | PartialListItem<"places">[];
+};
 
 // addItem用のPartial型(一部のキーだけでデータを作成できる)
-type PartialListItem<T extends ListCategory> = Partial<ListTypeMap[T]>;
-
-// OmikujisはrulesのIDが必須
-type OmikujisAddItem = 
-  | (PartialListItem<"omikujis"> & { rulesId?: string })
-  | (PartialListItem<"omikujis"> & { rulesId?: string })[];
-
+type PartialListItem<T extends ListCategory> = Partial<OmikenTypeMap[T]>;
 
 // おみくじデータ付きpresetデータ
 export interface PresetOmikenType extends PresetType {

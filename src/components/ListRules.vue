@@ -8,6 +8,7 @@
     >
       <!-- ヘッダー部分 -->
       <v-card
+      v-if="Omiken.rules[ruleId].ruleType === props.categoryActive.sub"
         elevation="0"
         class="w-100"
         @click="togglePanel(ruleId)"
@@ -86,7 +87,6 @@ import ListRulesOmikujiView from "./ListRulesOmikujiView.vue";
 import PartsToolbarAction from "./common/PartsToolbarAction.vue";
 import PartsToolbarMove from "./common/PartsToolbarMove.vue";
 import type {
-  OmikenType,
   OmikenEntry,
   ListCategory,
   ListEntry,
@@ -124,6 +124,9 @@ const emit = defineEmits<{
 const AppEditer =
   inject<Ref<AppEditerType>>("AppEditerKey") ?? ref({} as AppEditerType);
 const Omiken = AppEditer.value.Omiken;
+
+const rules = Omiken.rules
+const rulesOrder = Omiken.rulesOrder
 
 // コンポーザブル:FunkEmits
 const { updateOmiken, openEditor, openEditorItem } = FunkEmits(emit);

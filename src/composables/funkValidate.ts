@@ -1,5 +1,11 @@
 // src/composables/funkValidate.ts
-import { AccessCondition, ListItemTypeMap, OmikenType, SyokenCondition } from "../types";
+import {
+  AccessCondition,
+  OmikenType,
+  SyokenCondition,
+  TypesType,
+  RulesType,
+} from "../types";
 import { z } from "zod";
 import _ from "lodash";
 
@@ -86,16 +92,19 @@ const rulesSchema = z.record(
   baseSchema.merge(
     z.object({
       color: z.string().default("#66FFFF"),
-      ruleType: z.union([z.literal(false), z.enum(["comment", "timer"])]),
       enableIds: z.array(z.string()).default([]),
-      threshold: z
-        .array(thresholdSchema)
-        .default([
-          {
-            conditionType: "match",
-            match: { target: "comment", case: "starts", value: ["おみくじ"] },
-          },
-        ]),
+      threshold: z.array(thresholdSchema).default([
+        {
+          conditionType: "match",
+          match: { target: "comment", case: "starts", value: ["おみくじ"] },
+        },
+      ]),
+      timerConfig: z
+        .object({
+          minutes: z.number().int().nonnegative(), // 分単位
+          isBaseZero: z.boolean(), // ベースがゼロかどうか
+        })
+        .optional(),
     })
   )
 );
@@ -104,12 +113,12 @@ const rulesSchema = z.record(
 export const omikujiPostSchema = z
   .array(
     z.object({
-      type: z
-        .enum(["onecomme", "party", "toast", "speech"])
-        .default("onecomme"),
+      type: z.enum(["onecomme", "party", "speech"]).default("onecomme"),
       botKey: z.string().default("mamono"),
       iconKey: z.string().default("Default"),
-      party: z.string().default(""),
+      party: z.string().optional(),
+      isSilent: z.boolean().optional(),
+      generatorParam: z.string().optional(),
       delaySeconds: z.number().default(0),
       content: z.string().default("<<user>>さんの運勢は【大吉】<<random>>"),
     })
@@ -121,7 +130,7 @@ export const omikujiPostSchema = z
         return a.delaySeconds - b.delaySeconds;
       }
       // delaySecondsが同じ場合はtypeの順序でソート
-      const typeOrder = ["onecomme", "party", "toast", "speech"];
+      const typeOrder = ["onecomme", "party", "speech"];
       return typeOrder.indexOf(a.type) - typeOrder.indexOf(b.type);
     })
   );
@@ -164,39 +173,49 @@ const placeSchema = z.record(
   )
 );
 
+// typesのZodスキーマ
+const TypesType = z.enum([
+  'comment',
+  'timer',
+  'meta',
+  'waitingList',
+  'setList',
+  'reactions',
+  'unused',
+]);
+
+// typesフィールドのZodスキーマ
+const typesSchema = z.record(TypesType, z.array(z.string()));
+
 // スキーマをまとめる
 const schemas = {
+  types: typesSchema,
   rules: rulesSchema,
-  rulesOrder: arraySchema.default([]),
   omikujis: omikujiSchema,
   places: placeSchema,
-} as const;
-
-// 型の定義
-const validators = {
-  rules: (data: unknown) => (schemas.rules.safeParse(data).success ? data : {}),
-  rulesOrder: (data: unknown) =>
-    schemas.rulesOrder.safeParse(data).success ? data : [],
-  omikujis: (data: unknown) =>
-    schemas.omikujis.safeParse(data).success ? data : {},
-  places: (data: unknown) => (schemas.places.safeParse(data).success ? data : {}),
 } as const;
 
 // validateData
 export const validateData = <T extends keyof OmikenType>(
   type: T,
-  data: unknown
+  data: unknown,
+  additionalContext?: { rules?: Record<string, RulesType> }
 ): OmikenType[T] => {
   try {
-    console.log(data);
     const schema = schemas[type];
-    // parseを使用することで、スキーマ定義に基づいた
-    // バリデーション・変換・デフォルト値の適用が自動的に行われる
+
+    if (type === "types" && additionalContext?.rules) {
+      // typesの場合は追加のバリデーションを実行
+      const parsedData = schema.parse(data) as Record<TypesType, string[]>;
+      return validateTypes(
+        parsedData,
+        additionalContext.rules
+      ) as OmikenType[T];
+    }
+
     return schema.parse(data) as OmikenType[T];
   } catch (e) {
-    // エラーログ
     console.error(`Validation error for ${type}:`, e);
-    // デフォルト値を返す
     return validateDefault(type, data);
   }
 };
@@ -211,10 +230,6 @@ const validateDefault = <T extends keyof OmikenType>(
       return schemas.rules.safeParse(data).success
         ? (data as OmikenType[T])
         : (schemas.rules.parse({}) as OmikenType[T]);
-    case "rulesOrder":
-      return schemas.rulesOrder.safeParse(data).success
-        ? (data as OmikenType[T])
-        : (schemas.rulesOrder.parse([]) as OmikenType[T]);
     case "omikujis":
       return schemas.omikujis.safeParse(data).success
         ? (data as OmikenType[T])
@@ -226,4 +241,31 @@ const validateDefault = <T extends keyof OmikenType>(
     default:
       throw new Error(`Unknown type: ${type}`);
   }
+};
+
+const validateTypes = (
+  types: Record<TypesType, string[]>,
+  rules: Record<string, RulesType>
+): Record<TypesType, string[]> => {
+  // 深いコピーを作成
+  const validatedTypes = JSON.parse(JSON.stringify(types));
+
+  // すべてのtypesの配列を処理
+  (Object.keys(validatedTypes) as TypesType[]).forEach((typeKey) => {
+    // 重複を除去し、かつ存在するrulesのidのみを残す
+    validatedTypes[typeKey] = Array.from(
+      new Set(validatedTypes[typeKey])
+    ).filter(
+      (ruleId): ruleId is string =>
+        typeof ruleId === "string" && ruleId in rules
+    );
+
+    // どの配列にもrulesのidが入っていない場合、'unused'に'unused'を追加
+    if (validatedTypes[typeKey].length === 0 && typeKey !== "unused") {
+      validatedTypes[typeKey] = ["unused"];
+    }
+  });
+
+  // 'unused'が空の場合は空配列のまま
+  return validatedTypes;
 };

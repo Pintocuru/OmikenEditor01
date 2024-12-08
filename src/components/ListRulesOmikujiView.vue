@@ -110,7 +110,7 @@ import draggable from "vuedraggable";
 import type {
   ListCategory,
   ListEntry,
-  ListTypeMap,
+  OmikenTypeMap,
   OmikenCategory,
   OmikenEntry,
   OmikujiType,
@@ -120,7 +120,7 @@ import { FunkEmits } from "@/composables/FunkEmits";
 
 const props = defineProps<{
   rule: RulesType;
-  omikujis: Record<string, ListTypeMap["omikujis"]>;
+  omikujis: Record<string, OmikenTypeMap["omikujis"]>;
   uiState: { showEnabledIds: boolean; showWeightEditor: boolean };
 }>();
 

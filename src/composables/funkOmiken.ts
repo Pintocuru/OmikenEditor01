@@ -4,21 +4,28 @@ import { computed, onMounted, provide, Ref, ref } from "vue";
 import type {
   OmikenType,
   OmikenEntry,
-  ListType,
   AppEditerType,
-  OmikenCategory,
   ListEntryCollect,
   ListCategory,
   PresetOmikenType,
+  TypesType,
 } from "@/types/index";
 import { funkJSON } from "./FunkJSON";
 import { validateData } from "./FunkValidate";
 
-export function FunkOmiken(listEntry: Ref<ListEntryCollect>) {
+export async function FunkOmiken(listEntry: Ref<ListEntryCollect>) {
   const AppEditer = ref<AppEditerType>({
     Omiken: {
+      types: {
+        comment: [],
+        timer: [],
+        meta: [],
+        waitingList: [],
+        setList: [],
+        reactions: [],
+        unused: [],
+      },
       rules: {},
-      rulesOrder: [],
       omikujis: {},
       places: {},
     },
@@ -27,14 +34,6 @@ export function FunkOmiken(listEntry: Ref<ListEntryCollect>) {
     Scripts: {},
   });
   const isOmikenChanged = ref(false); // 保存フラグ
-
-  // ダイアログがすべて閉じている+保存フラグならtrue
-  const isOmikenSave = computed(() => {
-    const isDialogsClosed = !Object.values(listEntry.value).some(
-      (entry) => entry.isOpen
-    );
-    return isDialogsClosed && isOmikenChanged.value;
-  });
 
   // provide
   provide("AppEditerKey", AppEditer);
@@ -53,33 +52,22 @@ export function FunkOmiken(listEntry: Ref<ListEntryCollect>) {
       // 使用しているOmikenデータの読み込み
       const omikenData = await fetchOmiken();
       if (omikenData) AppEditer.value.Omiken = omikenData;
-
-      // 自動保存の開始
-      startOmikenSave();
     } catch (error) {
       console.error("Failed to initialize app:", error);
       throw error;
     }
   };
 
-  // 自動保存の処理 // TODO 別にsetInterval使わなくてもいいのでは…
-  const startOmikenSave = () => {
-    const autoSaveInterval = 2000;
-    const interval = setInterval(() => {
-      if (isOmikenSave.value) {
-        saveOmiken(AppEditer.value.Omiken);
-        isOmikenChanged.value = false;
-      }
-    }, autoSaveInterval);
-  };
+  // 手動保存のみに変更
+  // saveOmiken(AppEditer.value.Omiken);
 
   // 初期化処理の実行
-  onMounted(initializeApp);
+  await initializeApp();
 
   // Omikenの更新(rules/omikujis/places)
   const updateOmiken = (payload: OmikenEntry<ListCategory>) => {
     if (!payload) return;
-    const { type, update, addKeys, delKeys, reorder } = payload;
+    const { type, update, addKeys, delKeys, reTypes } = payload;
 
     // ディープコピー
     const newState: OmikenType = JSON.parse(
@@ -89,7 +77,7 @@ export function FunkOmiken(listEntry: Ref<ListEntryCollect>) {
     handleUpdate(newState, type, update);
     handleAddItems(newState, type, addKeys);
     handleDeleteItems(newState, type, delKeys);
-    handleReorder(newState, type, reorder);
+    if (reTypes) handleReTypes(newState, type, reTypes);
 
     // ステートの一括更新
     AppEditer.value.Omiken = newState;
@@ -127,11 +115,16 @@ export function FunkOmiken(listEntry: Ref<ListEntryCollect>) {
 
       Object.assign(state[type], validatedItem);
 
-      if (type === "rules") {
-        state["rulesOrder"].push(newKey);
-        state["rulesOrder"] = validateData("rulesOrder", state["rulesOrder"]);
+      // types:指定したtypeにrulesIdを追加
+      if (type === "rules" && "types" in item && item.types) {
+        const types = item.types as TypesType;
+        state.types[types].push(newKey);
+        state.types = validateData("types", state.types, {
+          rules: state.rules,
+        });
       }
 
+      // rules:指定したtypeにomikujiIdを追加
       if (type === "omikujis" && "rulesId" in item && item.rulesId) {
         updateRulesEnableIds(state, item.rulesId, newKey);
       }
@@ -154,7 +147,9 @@ export function FunkOmiken(listEntry: Ref<ListEntryCollect>) {
       delete state[type][key];
 
       if (type === "rules") {
-        state["rulesOrder"] = state["rulesOrder"].filter((id) => id !== key);
+        Object.values(state.types).forEach((type) => {
+          type = type.filter((id) => id !== key);
+        });
       }
 
       if (type === "omikujis") {
@@ -181,12 +176,17 @@ export function FunkOmiken(listEntry: Ref<ListEntryCollect>) {
   };
 
   // 順序の再編成
-  const handleReorder = (
+  const handleReTypes = (
     state: OmikenType,
     type: ListCategory,
-    reorder?: string[]
+    reTypes: Partial<Record<TypesType, string[]>>
   ) => {
-    if (reorder && type === "rules") state["rulesOrder"] = reorder;
+    if (reTypes && type === "rules") {
+      state.types = {
+        ...state.types,
+        ...reTypes,
+      };
+    }
   };
 
   // ユニークキーの生成
@@ -212,15 +212,14 @@ export function FunkOmiken(listEntry: Ref<ListEntryCollect>) {
       ) as OmikenType[T];
 
       if (mode === "overwrite") {
+        // 上書き
         newState[type] = validatedData;
 
         if (type === "rules") {
-          newState.rulesOrder = validateData(
-            "rulesOrder",
-            Object.keys(validatedData)
-          );
+          newState.types = validateData("types", Object.keys(validatedData));
         }
       } else {
+        // 追加
         const updatedData = addNewItems(
           newState[type] as OmikenType[T],
           validatedData,
@@ -231,12 +230,15 @@ export function FunkOmiken(listEntry: Ref<ListEntryCollect>) {
 
         if (type === "rules") {
           const newKeys = Object.keys(updatedData).filter(
-            (key) => !Object.keys(newState[type]).includes(key)
+            (key): key is TypesType => key in newState.types // 型チェックを追加
           );
-          newState.rulesOrder = validateData("rulesOrder", [
-            ...newState.rulesOrder,
-            ...newKeys,
-          ]);
+
+          newState.types = validateData("types", {
+            ...newState.types,
+            ...Object.fromEntries(
+              newKeys.map((key) => [key, newState.types[key]])
+            ),
+          });
         }
       }
     };

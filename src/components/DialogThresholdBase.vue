@@ -87,13 +87,13 @@ import DialogThresholdInput from "./DialogThresholdInput.vue";
 const props = defineProps<{
   type: "rules" | "omikujis";
   currentItem: RulesType | OmikujiType;
-  threshold: ThresholdType;
+  threshold: ThresholdType[];
   themeColor: string;
   availableConditions: ConditionType[];
 }>();
 
 const emit = defineEmits<{
-  (e: "update:threshold", value: ThresholdType): void;
+  (e: "update:threshold", value: ThresholdType[]): void;
   (e: "update:Omiken", payload: OmikenEntry<OmikenCategory>): void;
 }>();
 

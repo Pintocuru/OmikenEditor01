@@ -47,18 +47,21 @@ export function usePresetManager(AppEditer: Ref<AppEditerType> | undefined) {
         // 追加モード：既存のデータを保持しながら新しいデータを追加
         AppEditer.value.Omiken = {
           ...AppEditer.value.Omiken,
+          types: {
+            ...AppEditer.value.Omiken.types,
+            ...presetData.Omiken.types,
+          },
           rules: {
             ...AppEditer.value.Omiken.rules,
-            ...presetData.Omiken.rules
+            ...presetData.Omiken.rules,
           },
-          rulesOrder: [...new Set([...AppEditer.value.Omiken.rulesOrder, ...presetData.Omiken.rulesOrder])],
           omikujis: {
             ...AppEditer.value.Omiken.omikujis,
-            ...presetData.Omiken.omikuji
+            ...presetData.Omiken.omikuji,
           },
           places: {
             ...AppEditer.value.Omiken.places,
-            ...presetData.Omiken.place
+            ...presetData.Omiken.place,
           },
         };
       }

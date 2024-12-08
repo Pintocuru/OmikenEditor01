@@ -1,6 +1,6 @@
 // src/composables/FunkOmikuji.ts
 
-import { AppEditerType, OmikujiPostType } from "@/types/index";
+import { AppEditerType, OneCommePostType } from "@/types/index";
 import { computed, inject, Ref } from "vue";
 
 export function FunkOmikuji() {
@@ -35,7 +35,7 @@ export function FunkOmikuji() {
     ["onecomme", "toast"].includes(type);
 
   // ポストの色を取得
-  const getPostColor = (post: OmikujiPostType): string => {
+  const getPostColor = (post: OneCommePostType): string => {
     return isCharacterPost(post.type) ? getCharaColor(post.botKey) : "";
   };
 
@@ -50,7 +50,7 @@ export function FunkOmikuji() {
 
   // postからonecommeを探し色を取得する
   const getPostTypeColor = (
-    post: OmikujiPostType[],
+    post: OneCommePostType[],
     isBotcolor?: boolean
   ): string => {
     const onecommePost = post.find((p) => p.type === "onecomme");
@@ -63,8 +63,6 @@ export function FunkOmikuji() {
     switch (firstPost.type) {
       case "party":
         return "deep-orange";
-      case "toast":
-        return "blue";
       case "speech":
         return "green";
       default:
@@ -88,7 +86,7 @@ export function FunkOmikuji() {
   };
 
   // キャラクターの画像を取得する関数
-  const getCharaImage = (post: OmikujiPostType): string => {
+  const getCharaImage = (post: OneCommePostType): string => {
     if (!post.botKey || !post.iconKey || !Chara || !Chara[post.botKey])
       return "";
     return `/img/${Chara[post.botKey].image[post.iconKey]}`;
@@ -139,7 +137,7 @@ export function FunkOmikuji() {
   };
 
   // onecommeのcontentを取得
-  const getOnecommeContent = (posts: OmikujiPostType[]): string => {
+  const getOnecommeContent = (posts: OneCommePostType[]): string => {
     const onecommePost = posts.find((p) => p.type === "onecomme");
     return onecommePost?.content ?? "";
   };

@@ -3,7 +3,7 @@
 import {
   ListCategory,
   ListEntry,
-  ListTypeMap,
+  OmikenTypeMap,
   OmikenCategory,
   OmikenEntry,
   OmikenType,
@@ -29,7 +29,7 @@ export function FunkEmits(emit: any) {
 
   const updateOmikenEntry = <T extends ListCategory>(
     type: T,
-    update: Record<string, ListTypeMap[T]>
+    update: Record<string, OmikenTypeMap[T]>
   ) => {
     emit("update:Omiken", { type, update });
   };

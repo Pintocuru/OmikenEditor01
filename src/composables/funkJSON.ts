@@ -1,30 +1,19 @@
 // src/composables/funkJSON.ts
 import { ref } from "vue";
 import { validateData } from "./FunkValidate";
-import type {
-  OmikenType,
-  PresetCharaType,
-  PresetOmikenType,
-  PresetType,
-} from "@/types/index";
+import type { OmikenType, PresetOmikenType, PresetType } from "@/types/index";
 import _ from "lodash";
 import Swal from "sweetalert2";
+import axios from "axios";
 import { useToast } from "vue-toastification";
-
-// ! /////////////////////////////////////////
-// !
-// ! すべてのJSON読み込み・更新 は、代わりに「APIで通信をする」に変わります。
-// ! Editer自身では、fetchを使ったJSON読み込みも更新も行えません!
-// !
-// ! /////////////////////////////////////////
+import { configs } from "@/config";
 
 // JSONデータの読み込み・書き込み
 export function funkJSON() {
   const canUpdateJSON = ref(false); // * テストモード:JSONを書き込みするか
   const isLoading = ref(false); // 読み込み中かどうか、読み込み失敗ならずっとtrue
   const noAppBoot = ref(false); // 起動できたか
-  const lastSavedState = ref<OmikenType | null>(null); // 1つ前へ戻る機能
-  const toast = useToast(); // vue-toastification // TODO sweetalert2 に変更
+  const baseUrl = "http://localhost:11180/api/plugins/" + configs.PLUGIN_UID;
 
   // OmikenとCharaデータの読み込み
   const fetchPreset = async () => {
@@ -87,23 +76,17 @@ export function funkJSON() {
     isLoading.value = true;
 
     try {
-      // fetchを使って読み込み
-      const response = await fetch("/src/state.json");
-      if (!response.ok) {
-        throw new Error("Network response was not ok: " + response.statusText);
-      }
-      const data = await response.json();
+      // プラグインのAPIから読み込み
+      const data = await apiRequest("GET", "data", "Omiken");
 
       // データの検証と正規化
       const validatedData: OmikenType = {
+        types: validateData("types", data.types),
         rules: validateData("rules", data.rules),
-        rulesOrder: validateData("rulesOrder", data.rulesOrder),
-        omikuji: validateData("omikujis", data.omikuji),
-        place: validateData("places", data.place),
-        preferences: data.preferences,
+        omikujis: validateData("omikujis", data.omikujis),
+        places: validateData("places", data.places),
       };
 
-      lastSavedState.value = _.cloneDeep(validatedData);
       await Swal.fire({
         title: "読み込み完了",
         text: "データの読み込みが完了しました。",
@@ -124,57 +107,16 @@ export function funkJSON() {
     }
   };
 
-  // Objectを指定された順序で並び替える関数 // TODO reorderはrulesのみ
-  function reorderObject<T>(
-    obj: Record<string, T>,
-    order: string[]
-  ): Record<string, T> {
-    // 順序配列の検証
-    const validOrder = order.filter((key) => key in obj);
-    // オブジェクトのキーと順序配列の整合性チェック
-    const objKeys = Object.keys(obj);
-    if (
-      validOrder.length !== objKeys.length ||
-      !objKeys.every((key) => validOrder.includes(key))
-    ) {
-      console.warn(
-        `順序配列とオブジェクトのキーが一致しません: ${validOrder.length} != ${objKeys.length}`
-      );
-      // 不足しているキーを順序配列に追加
-      objKeys.forEach((key) => {
-        if (!validOrder.includes(key)) validOrder.push(key);
-      });
-    }
-    // 順序に従って新しいオブジェクトを構築
-    return validOrder.reduce((acc, key) => {
-      if (key in obj) {
-        acc[key] = obj[key];
-      }
-      return acc;
-    }, {} as Record<string, T>);
-  }
-
   // Omikenの保存
   const saveOmiken = async (Omiken: OmikenType): Promise<void> => {
-    // 各ObjectをOrderの順番に直す
-    const newOmiken: OmikenType = {
-      rules: reorderObject(
-        Omiken.rules,
-        Omiken.rulesOrder ?? Object.keys(Omiken.rules)
-      ),
-      omikujis: Omiken.omikujis,
-      places: Omiken.places,
-      rulesOrder: Omiken.rulesOrder ?? Object.keys(Omiken.rules),
-    };
-
     if (noAppBoot.value) {
-      toast("🚫データ保存はできません");
+      showToast("データ保存はできません", "warning");
       return;
     }
     // テストモード:保存できたことをログに表示
     if (!canUpdateJSON.value) {
-      toast("💾saveDataまで届きました");
-      console.warn("saveDataまで届きました:", newOmiken);
+      showToast("💾saveDataまで届きました", "info");
+      console.warn("💾saveDataまで届きました:", Omiken);
       return;
     }
     // ロード中ならreturn
@@ -184,22 +126,19 @@ export function funkJSON() {
     }
 
     isLoading.value = true;
-    try {
-      // PluginのAPIにPOST送信
-      // TODO URL間違ってる
-       const response = await fetch(
-         "http://localhost:11180/api/plugins/OmiKen100-omi/omiken",
-         {
-           method: "POST",
-           headers: {
-             "Content-Type": "application/json",
-           },
-           body: JSON.stringify(Omiken),
-         }
-       );
 
-       if (!response.ok) throw new Error("Network response was not ok");
-       return await response.json();
+    try {
+      const response = await apiRequest("POST", "writing", "", Omiken);
+      // PluginのAPIにPOST送信
+      await Swal.fire({
+        title: "保存したよ",
+        text: "データの保存に成功したよ。",
+        icon: "success",
+        confirmButtonText: "OK",
+      });
+
+      if (!response.ok) throw new Error("Network response was not ok");
+      return await response.json();
     } catch (error) {
       console.error("Error saving data:", error);
       await Swal.fire({
@@ -208,9 +147,44 @@ export function funkJSON() {
         icon: "error",
         confirmButtonText: "OK",
       });
-         throw error;
+      throw error;
     } finally {
       isLoading.value = false;
+    }
+  };
+
+  // Sweetalert2を使用したトースト的な通知
+  const showToast = (
+    message: string,
+    type: "success" | "error" | "warning" | "info" = "info"
+  ) => {
+    Swal.fire({
+      toast: true,
+      position: "top-end",
+      showConfirmButton: false,
+      timer: 3000,
+      timerProgressBar: true,
+      icon: type,
+      title: message,
+    });
+  };
+
+  // プラグインからAPI叩いてget/Post
+  const apiRequest = async (
+    method: "GET" | "POST",
+    mode: string,
+    type?: string,
+    data?: object
+  ): Promise<any> => {
+    try {
+      const url = `${baseUrl}?mode=${mode},type=${type || ""},`;
+      const response =
+        method === "GET" ? await axios.get(url) : await axios.post(url, data);
+
+      return response.data;
+    } catch (error) {
+      console.error("Failed to fetch services:", error);
+      return {};
     }
   };
 

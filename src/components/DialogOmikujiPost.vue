@@ -101,7 +101,7 @@ import type {
   OmikujiType,
   OmikenCategory,
   OmikenEntry,
-  OmikujiPostType,
+  OneCommePostType,
   AppEditerType,
 } from "@/types/index";
 import { FunkOmikuji } from "../composables/FunkOmikuji";
@@ -153,7 +153,7 @@ const updateOmikenOmikuji = () => {
 // postに追加
 const addPost = (position = "bottom") => {
   const botKey = Charas ? Object.keys(Charas)[0] : "mamono";
-  const newPost: OmikujiPostType = {
+  const newPost: OneCommePostType = {
     type: "onecomme",
     botKey: botKey,
     iconKey: "Default",
