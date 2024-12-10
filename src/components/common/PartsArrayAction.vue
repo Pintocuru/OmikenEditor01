@@ -24,7 +24,7 @@
 import { ref, computed, inject, Ref } from "vue";
 import type {
   OmikenEntry,
-  OmikenCategory,
+  OmikenEntryType,
   OmikujiType,
   RulesType,
   AppEditerType,
@@ -42,7 +42,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: "edit"): void;
-  (e: "update:Omiken", payload: OmikenEntry<OmikenCategory>): void;
+  (e: "update:Omiken", payload: OmikenEntry<OmikenEntryType>): void;
 }>();
 
 const menu = ref(false);

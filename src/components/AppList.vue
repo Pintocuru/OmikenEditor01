@@ -30,15 +30,15 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
+import ListTypes from "./ListTypes.vue";
 import ListRules from "./ListRules.vue";
 import ListOmikuji from "./ListOmikuji.vue";
 import ListPlace from "./ListPlace.vue";
 import ListPreset from "./ListPreset.vue";
 import type {
-  OmikenType,
   ListCategory,
   OmikenEntry,
-  OmikenCategory,
+  OmikenEntryType,
   ListEntry,
   PresetType,
   CategoryActive,
@@ -51,7 +51,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: "update:Omiken", payload: OmikenEntry<OmikenCategory>): void;
+  (e: "update:Omiken", payload: OmikenEntry<OmikenEntryType>): void;
   (e: "update:OmikenPreset", preset: PresetType): void;
   (e: "open-editor", editorItem: ListEntry<ListCategory>): void;
 }>();
@@ -65,6 +65,7 @@ const showAddButton = computed(() => props.categoryActive.main !== 'presets');
 // 子コンポーネントの指定
 const currentListComponent = computed(() => {
   const componentMap = {
+    types: ListTypes,
     rules: ListRules,
     omikujis: ListOmikuji,
     places: ListPlace,

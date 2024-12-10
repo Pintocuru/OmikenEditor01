@@ -79,7 +79,7 @@ import { FunkThreshold } from "../composables/FunkThreshold";
 import type {
   ListCategory,
   ListEntry,
-  OmikenCategory,
+  OmikenEntryType,
   OmikenEntry,
   OmikenType,
 } from "@/types/index";
@@ -90,7 +90,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: "update:Omiken", payload: OmikenEntry<OmikenCategory>): void;
+  (e: "update:Omiken", payload: OmikenEntry<OmikenEntryType>): void;
   (e: "open-editor", editorItem: ListEntry<ListCategory>): void;
 }>();
 

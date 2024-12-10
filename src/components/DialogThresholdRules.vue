@@ -62,7 +62,7 @@
 import { FunkEmits } from "@/composables/FunkEmits";
 import {
   OmikenEntry,
-  OmikenCategory,
+  OmikenEntryType,
   RulesType,
   RuleThresholdType,
   ConditionType,
@@ -80,7 +80,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: "update:Omiken", payload: OmikenEntry<OmikenCategory>): void;
+  (e: "update:Omiken", payload: OmikenEntry<OmikenEntryType>): void;
 }>();
 
 const threshold = ref<RuleThresholdType>({

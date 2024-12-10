@@ -70,7 +70,7 @@ import {
   ListEntry,
   ListCategory,
   OmikenEntry,
-  OmikenCategory,
+  OmikenEntryType,
   ListEntryCollect,
   OmikenType,
 } from "@/types/index";
@@ -84,7 +84,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: "update:listEntry", newEntry: ListEntryCollect): void;
-  (e: "update:Omiken", payload: OmikenEntry<OmikenCategory>): void;
+  (e: "update:Omiken", payload: OmikenEntry<OmikenEntryType>): void;
   (e: "open-editor", editorItem: ListEntry<ListCategory>): void;
 }>();
 

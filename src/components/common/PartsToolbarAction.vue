@@ -3,7 +3,7 @@
   <v-btn
     v-for="(action, index) in actions"
     :key="index"
-    :size="!isSmall ? 'default' : 'small'"
+    :size="!isSmall ? 'small' : 'small'"
     :height="!isSmall ? '' : 30"
     :width="!isSmall ? '' : 30"
     icon
@@ -17,7 +17,7 @@
 </template>
 
 <script setup lang="ts">
-import { ListCategory, ListType, OmikenEntry, OmikenCategory } from "@/types";
+import { ListCategory, ListType, OmikenEntry, OmikenEntryType } from "@/types";
 import { cloneDeep } from "lodash";
 import Swal from "sweetalert2";
 
@@ -32,7 +32,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: "edit"): void;
-  (e: "update:Omiken", payload: OmikenEntry<OmikenCategory>): void;
+  (e: "update:Omiken", payload: OmikenEntry<OmikenEntryType>): void;
 }>();
 
 //

@@ -8,7 +8,7 @@
           <v-card-title class="d-flex align-center">
             <v-badge
               class="mr-4"
-              v-if="section.itemCount>0"
+              v-if="section.itemCount > 0"
               :content="section.itemCount"
               color="primary"
               :model-value="true"
@@ -68,22 +68,16 @@ interface Section {
 // セクション情報の計算
 const sections = computed<Section[]>(() => [
   {
+    title: "モード",
+    icon: "",
+    itemCount: 0,
+    category: { main: "types" },
+  },
+  {
     title: "ルール",
     icon: "mdi-book-open-variant",
-    itemCount: 0,
-    category: { main: "rules", sub: "comment" },
-    subSections: [
-      {
-        title: "コメント",
-        itemCount: Object.keys(props.Omiken.rules || {}).length,
-        category: { main: "rules", sub: "comment" },
-      },
-      {
-        title: "タイマー",
-        itemCount: 3,
-        category: { main: "rules", sub: "timer" },
-      },
-    ],
+    itemCount:  Object.keys(props.Omiken.rules || {}).length,
+    category: { main: "rules" },
   },
   {
     title: "おみくじ",

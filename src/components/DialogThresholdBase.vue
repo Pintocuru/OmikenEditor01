@@ -75,7 +75,7 @@
 import { computed } from "vue";
 import {
   ConditionType,
-  OmikenCategory,
+  OmikenEntryType,
   OmikenEntry,
   OmikujiType,
   RulesType,
@@ -94,7 +94,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: "update:threshold", value: ThresholdType[]): void;
-  (e: "update:Omiken", payload: OmikenEntry<OmikenCategory>): void;
+  (e: "update:Omiken", payload: OmikenEntry<OmikenEntryType>): void;
 }>();
 
 const { items, isThreshold, getExampleText } = FunkThreshold();

@@ -99,7 +99,7 @@ import type {
   ListCategory,
   ListEntry,
   OmikujiType,
-  OmikenCategory,
+  OmikenEntryType,
   OmikenEntry,
   OneCommePostType,
   AppEditerType,
@@ -113,7 +113,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: "update:Omiken", payload: OmikenEntry<OmikenCategory>): void;
+  (e: "update:Omiken", payload: OmikenEntry<OmikenEntryType>): void;
   (e: "open-editor", editorItem: ListEntry<ListCategory>): void;
 }>();
 

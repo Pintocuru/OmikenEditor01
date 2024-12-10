@@ -44,7 +44,8 @@ export type ListEntry<T extends ListCategory> = {
 export type ListEntryCollect = Record<ListCategory, ListEntry<ListCategory>>;
 
 // ファイル操作用
-export type OmikenEntry<T extends "types" | ListCategory> = {
+export type OmikenEntryType = "types" | ListCategory;
+export type OmikenEntry<T extends OmikenEntryType> = {
   type: T;
   update?: T extends "types" ? never : OmikenTypeMap[T];
   addKeys?: AddKeysCategory[T];

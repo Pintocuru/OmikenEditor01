@@ -1,72 +1,34 @@
 // src/composables/FunkOmiken.ts
 
-import { computed, onMounted, provide, Ref, ref } from "vue";
+import { provide, ref } from "vue";
 import type {
   OmikenType,
   OmikenEntry,
   AppEditerType,
-  ListEntryCollect,
   ListCategory,
   PresetOmikenType,
   TypesType,
 } from "@/types/index";
-import { funkJSON } from "./FunkJSON";
+import { DataService, defaultAppEditer } from "./FunkJSON";
 import { validateData } from "./FunkValidate";
 
-export async function FunkOmiken(listEntry: Ref<ListEntryCollect>) {
-  const AppEditer = ref<AppEditerType>({
-    Omiken: {
-      types: {
-        comment: [],
-        timer: [],
-        meta: [],
-        waitingList: [],
-        setList: [],
-        reactions: [],
-        unused: [],
-      },
-      rules: {},
-      omikujis: {},
-      places: {},
-    },
-    Charas: {},
-    Presets: {},
-    Scripts: {},
-  });
-  const isOmikenChanged = ref(false); // 保存フラグ
-
+export function FunkOmiken() {
+  const AppEditer = ref<AppEditerType>(defaultAppEditer);
   // provide
   provide("AppEditerKey", AppEditer);
 
-  const { fetchOmiken, fetchPreset, saveOmiken } = funkJSON();
-
-  // アプリケーションの初期化を一元管理
-  const initializeApp = async () => {
-    try {
-      // 外部データの読み込み
-      const { Charas, Presets, Scripts } = await fetchPreset();
-      AppEditer.value.Presets = Presets;
-      AppEditer.value.Charas = Charas;
-      AppEditer.value.Scripts = Scripts;
-
-      // 使用しているOmikenデータの読み込み
-      const omikenData = await fetchOmiken();
-      if (omikenData) AppEditer.value.Omiken = omikenData;
-    } catch (error) {
-      console.error("Failed to initialize app:", error);
-      throw error;
-    }
-  };
-
-  // 手動保存のみに変更
-  // saveOmiken(AppEditer.value.Omiken);
-
   // 初期化処理の実行
-  await initializeApp();
+  async function AppEditerInitialize() {
+    try {
+      AppEditer.value = await DataService.fetchInitialData();
+    } catch (error) {
+      console.error("Initialization failed", error);
+    }
+  }
 
   // Omikenの更新(rules/omikujis/places)
-  const updateOmiken = (payload: OmikenEntry<ListCategory>) => {
-    if (!payload) return;
+  function updateOmiken(payload: OmikenEntry<ListCategory>) {
+    if (!payload || !AppEditer.value) return;
     const { type, update, addKeys, delKeys, reTypes } = payload;
 
     // ディープコピー
@@ -82,8 +44,7 @@ export async function FunkOmiken(listEntry: Ref<ListEntryCollect>) {
     // ステートの一括更新
     AppEditer.value.Omiken = newState;
     console.log("保存フラグが立ったよ");
-    isOmikenChanged.value = true;
-  };
+  }
 
   // 更新処理
   const handleUpdate = (
@@ -131,6 +92,21 @@ export async function FunkOmiken(listEntry: Ref<ListEntryCollect>) {
     });
   };
 
+  // ルールの有効IDを更新
+  const updateRulesEnableIds = (
+    state: OmikenType,
+    rulesId: string,
+    newKey: string
+  ) => {
+    const updatedRule = validateData("rules", {
+      [rulesId]: {
+        ...state.rules[rulesId],
+        enableIds: [...state.rules[rulesId].enableIds, newKey],
+      },
+    });
+    Object.assign(state.rules, updatedRule);
+  };
+
   // 削除処理
   const handleDeleteItems = (
     state: OmikenType,
@@ -160,21 +136,6 @@ export async function FunkOmiken(listEntry: Ref<ListEntryCollect>) {
     });
   };
 
-  // ルールの有効IDを更新
-  const updateRulesEnableIds = (
-    state: OmikenType,
-    rulesId: string,
-    newKey: string
-  ) => {
-    const updatedRule = validateData("rules", {
-      [rulesId]: {
-        ...state.rules[rulesId],
-        enableIds: [...state.rules[rulesId].enableIds, newKey],
-      },
-    });
-    Object.assign(state.rules, updatedRule);
-  };
-
   // 順序の再編成
   const handleReTypes = (
     state: OmikenType,
@@ -195,6 +156,7 @@ export async function FunkOmiken(listEntry: Ref<ListEntryCollect>) {
 
   // Presetからの上書き・追加
   const updateOmikenPreset = (preset: PresetOmikenType) => {
+    if (!AppEditer.value) return;
     // 深いコピーを作成
     const newState: OmikenType = JSON.parse(
       JSON.stringify(AppEditer.value.Omiken)
@@ -323,11 +285,11 @@ export async function FunkOmiken(listEntry: Ref<ListEntryCollect>) {
         preset.mode === "overwrite" ? "上書き" : "追加"
       }で適用しました`
     );
-    isOmikenChanged.value = true;
   };
 
   return {
     AppEditer,
+    AppEditerInitialize,
     updateOmiken,
     updateOmikenPreset,
   };

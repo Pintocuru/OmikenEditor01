@@ -27,7 +27,7 @@
 </template>
 
 <script setup lang="ts">
-import type { OmikenEntry, OmikenCategory } from "@/types";
+import type { OmikenEntry, OmikenEntryType } from "@/types";
 import { computed } from "vue";
 
 const props = defineProps<{
@@ -36,7 +36,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: "update:Omiken", payload: OmikenEntry<OmikenCategory>): void;
+  (e: "update:Omiken", payload: OmikenEntry<OmikenEntryType>): void;
 }>();
 
 const isFirstItem = computed(() => props.index === 0);

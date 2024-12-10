@@ -93,7 +93,7 @@ import { computed, inject, Ref, ref } from "vue";
 import type {
   OmikenEntry,
   ListEntry,
-  OmikenCategory,
+  OmikenEntryType,
   ListCategory,
   AppEditerType,
 } from "@/types/index";
@@ -108,7 +108,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: "update:Omiken", payload: OmikenEntry<OmikenCategory>): void;
+  (e: "update:Omiken", payload: OmikenEntry<OmikenEntryType>): void;
   (e: "open-editor", editorItem: ListEntry<ListCategory>): void;
 }>();
 

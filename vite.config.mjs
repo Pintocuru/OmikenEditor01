@@ -45,7 +45,7 @@ export default defineConfig({
     minify: false, // ミニファイを無効化
     lib: {
       entry: {
-        'test': 'src/test.vue',
+        'test': 'src/main.vue',
       },
       formats: ['es', 'cjs', 'umd', 'iife'], // ESモジュールとUMD形式で出力
       fileName: (format, entryName) => `${entryName}.${format}.js`,

@@ -48,7 +48,7 @@ import type {
   ListEntry,
   OmikenEntry,
   ListCategory,
-  OmikenCategory,
+  OmikenEntryType,
   AppEditerType,
 } from "@/types/index";
 import { FunkEmits } from "@/composables/FunkEmits";
@@ -59,7 +59,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: "update:Omiken", payload: OmikenEntry<OmikenCategory>): void;
+  (e: "update:Omiken", payload: OmikenEntry<OmikenEntryType>): void;
   (e: "open-editor", editorItem: ListEntry<ListCategory>): void;
 }>();
 

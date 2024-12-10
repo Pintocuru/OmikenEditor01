@@ -21,10 +21,10 @@
 
 <script setup lang="ts">
 import { ref, defineProps, defineEmits, PropType } from "vue";
-import type { OmikenEntry, OmikenCategory, OmikenTypeMap } from "@/types";
+import type { OmikenEntry, OmikenEntryType, OmikenTypeMap } from "@/types";
 
 const props = defineProps({
-  type: { type: String as PropType<OmikenCategory>, required: true }, // "omikuji" または "place"
+  type: { type: String as PropType<OmikenEntryType>, required: true }, // "omikuji" または "place"
   currentItem: { type: Object, required: true },
   array: { type: Array, required: true },
   index: { type: Number, required: true },
