@@ -1,16 +1,19 @@
 // src/composables/funkJSON.ts
 import { ref } from "vue";
 import { validateData } from "./FunkValidate";
-import type {
-  AppEditerType,
-  CharaType,
-  OmikenType,
-  PresetType,
+import {
+  DataType,
+  Mode,
+  type AppEditerType,
+  type CharaType,
+  type OmikenType,
+  type ParamsType,
+  type PresetType,
 } from "@/types/index";
 import _ from "lodash";
 import Swal from "sweetalert2";
 import OneSDK from '@onecomme.com/onesdk';
-import axios, { AxiosRequestConfig } from "axios";
+import { AxiosRequestConfig } from "axios";
 import { configs } from "@/config";
 
 // JSONデータの読み込み・書き込み
@@ -40,12 +43,7 @@ export function funkJSON() {
     isLoading.value = true;
 
     try {
-      const response = await DataService.apiRequest(
-        "POST",
-        "writing",
-        "",
-        Omiken
-      );
+      const response = await ApiClient.request('POST', Mode.Backup, DataType.Omiken, Omiken);
       // PluginのAPIにPOST送信
       await Swal.fire({
         title: "保存したよ",
@@ -54,8 +52,8 @@ export function funkJSON() {
         confirmButtonText: "OK",
       });
 
-      if (!response.ok) throw new Error("Network response was not ok");
-      return await response.json(); // ? これはなに？
+      // エラーハンドリングしたいがなにをすればいいのか
+      //if (!response.ok) throw new Error("Network response was not ok");
     } catch (error) {
       console.error("Error saving data:", error);
       await Swal.fire({
@@ -114,131 +112,104 @@ export const defaultAppEditer: AppEditerType = {
   Omiken: defaultOmiken,
 };
 
-export class DataService {
-  // 共通のAPI呼び出しメソッド
-  static async apiRequest(
-    method: "GET" | "POST",
-    mode: string,
-    type?: string,
+
+// APIクライアント
+export class ApiClient {
+  private static readonly baseUrl = `http://localhost:11180/api/plugins/${configs.PLUGIN_UID}`;
+
+  static async request(
+    method: 'GET' | 'POST',
+    mode: ParamsType['mode'],
+    type: ParamsType['type'],
     data?: object
-  ): Promise<Record<string, unknown>> {
-    const baseUrl = `http://localhost:11180/api/plugins/${configs.PLUGIN_UID}`;
+  ): Promise<string> {
+    const config: AxiosRequestConfig = {
+      headers: { 'Content-Type': 'application/json' },
+      data: data || {}
+    };
+
+    const url = `${this.baseUrl}?mode=${mode}&type=${type || ''}`;
+    
     try {
-     // 共通の config を作成
-     const config: AxiosRequestConfig = {
-      headers: {
-       'Content-Type': 'application/json'
-      },
-      data: data || {} // data を config の中に含める
-     };
-     // TODO 実際の挙動を検証してね
-     const url = `${baseUrl}?mode=${mode}&type=${type || ''}`;
-     const response = method === 'GET' ? await OneSDK.get(url, config) : await OneSDK.post(url, config);
+      const response = method === 'GET' 
+        ? await OneSDK.get(url, {}) 
+        : await OneSDK.post(url, config);
 
-     if (!response.data) {
-      throw new Error(`No data returned for ${type}`);
-     }
-
-     return response.data as Record<string, unknown>;
+      this.validateResponse(response, type);
+      return response.data.response;
     } catch (error) {
-      console.error(`API Request Error (${method}, ${mode}, ${type}):`, error);
-
-      if (axios.isAxiosError(error)) {
-        if (error.response) {
-          throw new Error(
-            `API Error: ${error.response.status} - ${
-              error.response.data?.message || "Unknown error"
-            }`
-          );
-        } else if (error.request) {
-          throw new Error(`No response received for ${type}`);
-        }
-      }
-
-      throw new Error(
-        `Failed to fetch ${type}: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`
-      );
+      throw new ApiError(method, mode, type, error);
     }
   }
 
-  // Omiken専用の読み込みメソッド
-  private static async fetchOmiken(): Promise<OmikenType> {
-    try {
-      // APIリクエストの結果を取得
-      const data = await this.apiRequest("GET", "data", "Omiken");
-
-      // ステータスコードが 200 以外の場合はエラーをスロー
-      if (data.code !== 200) {
-        throw new Error(`Unexpected response code: ${data.code}`);
-      }
-
-      // 実際のデータが response 内に格納されていることを考慮
-      const responseData = data.response as OmikenType;
-
-      if (!responseData) {
-        throw new Error("Response data is missing or invalid.");
-      }
-
-      // 検証済みデータの作成
-      const validatedData: OmikenType = {
-        types: validateData("types", responseData.types),
-        rules: validateData("rules", responseData.rules),
-        omikujis: validateData("omikujis", responseData.omikujis),
-        places: validateData("places", responseData.places),
-      };
-
-
-      return validatedData;
-    } catch (error) {
-      // エラーをコンソールに出力
-      console.error("Failed to fetch Omiken:", error);
-
-      // デフォルトデータを返す
-      return defaultOmiken;
+  // Validate: データがなければエラー
+  private static validateResponse(response: any, type: string): void {
+    if (!response.data || response.data.code !== 200) {
+      throw new ApiError('VALIDATION', '', type, 'Invalid response');
     }
   }
+}
 
-  // 初期データ一括読み込み
-  static async fetchInitialData(): Promise<AppEditerType> {
-    try {
-      // APIリクエストと Omiken データを並行して取得
-      const [presetsResponse, charasResponse, scriptsResponse, omikenData] =
-        await Promise.all([
-          this.apiRequest("GET", "data", "Presets"),
-          this.apiRequest("GET", "data", "Charas"),
-          this.apiRequest("GET", "data", "Scripts"),
-          this.fetchOmiken(),
-        ]);
-
-      // code チェックと response の抽出
-      if (presetsResponse.code !== 200 || !presetsResponse.response) {
-        throw new Error("Failed to fetch Presets data");
-      }
-      if (charasResponse.code !== 200 || !charasResponse.response) {
-        throw new Error("Failed to fetch Charas data");
-      }
-      if (scriptsResponse.code !== 200 || !scriptsResponse.response) {
-        throw new Error("Failed to fetch Scripts data");
-      }
-
-      // AppEditerType を構築
-      return {
-        Presets: presetsResponse.response as Record<string, OmikenType>,
-        Charas: charasResponse.response as Record<string, CharaType>,
-        Scripts: scriptsResponse.response as Record<string, PresetType>,
-        Omiken: omikenData,
-      };
-    } catch (error) {
-      // エラー処理
-      await this.handleInitializationError(error);
-      throw error;
-    }
+// カスタムエラークラス
+// TODO エラーハンドリングが詳しすぎて嫌、後で削る
+export class ApiError extends Error {
+  constructor(
+    public method: string,
+    public mode: string,
+    public type: string,
+    public originalError: unknown
+  ) {
+    super(`API Error: ${method} ${mode} ${type}`);
+    this.name = 'ApiError';
   }
+}
 
-  // エラーハンドリング
-  private static async handleInitializationError(error: unknown) {
+// メインのデータサービス
+export class DataService {
+ static async fetchInitialData(): Promise<AppEditerType> {
+  try {
+   const [presetsRaw, charasRaw, scriptsRaw, omikenData] = await Promise.all([
+    ApiClient.request('GET', Mode.Data, DataType.Presets),
+    ApiClient.request('GET', Mode.Data, DataType.Charas),
+    ApiClient.request('GET', Mode.Data, DataType.Scripts),
+    this.fetchOmiken()
+   ]);
 
+   return {
+    Presets: JSON.parse(presetsRaw),
+    Charas: JSON.parse(charasRaw),
+    Scripts: JSON.parse(scriptsRaw),
+    Omiken: omikenData
+   };
+  } catch (error) {
+   if (error instanceof ApiError) {
+    // APIエラーの専用ハンドリング
+    await this.handleApiError(error);
+   } 
+   throw error;
   }
+ }
+
+ // Omiken専用の読み込み
+ private static async fetchOmiken(): Promise<OmikenType> {
+  try {
+   const rawData = await ApiClient.request('GET', Mode.Data, DataType.Omiken);
+   const data = JSON.parse(rawData) as OmikenType;
+   // 検証済みデータの作成
+   const validatedData: OmikenType = {
+    types: validateData('types', data.types),
+    rules: validateData('rules', data.rules),
+    omikujis: validateData('omikujis', data.omikujis),
+    places: validateData('places', data.places)
+   };
+   return validatedData;
+  } catch (error) {
+   console.error('Omiken fetch failed:', error);
+   return defaultOmiken;
+  }
+ }
+
+ private static async handleApiError(error: ApiError) {
+  console.error('API Error:', error);
+ }
 }
