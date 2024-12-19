@@ -20,6 +20,8 @@
       <component
         :is="currentListComponent"
         :categoryActive="categoryActive"
+        :Omiken="AppEditer.Omiken"
+        :Presets="AppEditer.Presets"
         @update:Omiken="updateOmiken"
         @update:OmikenPreset="updateOmikenPreset"
         @open-editor="openEditor"
@@ -42,11 +44,13 @@ import type {
   ListEntry,
   PresetType,
   CategoryActive,
+  AppEditerType,
 } from "@/types/index";
 import { FunkEmits } from "@/composables/FunkEmits";
 
 // Props Emits
 const props = defineProps<{
+  AppEditer: AppEditerType;
   categoryActive: CategoryActive;
 }>();
 
@@ -57,10 +61,10 @@ const emit = defineEmits<{
 }>();
 
 // コンポーザブル:FunkEmits
-const { updateOmiken,openEditor ,updateOmikenPreset} = FunkEmits(emit);
+const { updateOmiken, openEditor, updateOmikenPreset } = FunkEmits(emit);
 
 // 表示制御用の計算プロパティ
-const showAddButton = computed(() => props.categoryActive.main !== 'presets');
+const showAddButton = computed(() => props.categoryActive.main !== "presets");
 
 // 子コンポーネントの指定
 const currentListComponent = computed(() => {
@@ -71,7 +75,7 @@ const currentListComponent = computed(() => {
     places: ListPlace,
     presets: ListPreset,
   } as const;
-  
+
   return componentMap[props.categoryActive.main];
 });
 
@@ -81,5 +85,4 @@ const addItem = () => {
     emit("update:Omiken", { type: props.categoryActive.main, addKeys: [{}] });
   }
 };
-
 </script>

@@ -28,10 +28,11 @@
           />
         </v-col>
       </v-row>
-      <!-- Rules用フィルタリング -->
-      <DialogThresholdRules
-        :currentItem="currentItem"
-        @update:Omiken="updateOmiken"
+      <!-- 条件設定 -->
+      <ThresholdMain
+        :Thresholds="currentItem.threshold"
+        :type="'comment'"
+        @update:Thresholds="updateItem"
       />
     </v-card-text>
   </v-card>
@@ -41,15 +42,17 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, Ref } from "vue";
-import DialogThresholdRules from "./DialogThresholdRules.vue";
-import DialogRulesColor from "./DialogRulesColor.vue";
+import { computed, inject, ref, Ref } from "vue";
+import ThresholdMain from "@/components/DialogThreshold/ThresholdMain.vue";
+import DialogRulesColor from "@/components/DialogRulesColor.vue";
 import type {
   ListEntry,
   OmikenEntry,
   ListCategory,
   OmikenEntryType,
   AppEditerType,
+  TypesType,
+  RulesType,
 } from "@/types/index";
 import { FunkEmits } from "@/composables/FunkEmits";
 
@@ -64,8 +67,13 @@ const emit = defineEmits<{
 }>();
 
 // inject
-const AppEditer = inject<Ref<AppEditerType>>("AppEditerKey");
+const AppEditer =
+  inject<Ref<AppEditerType>>("AppEditerKey") ?? ref({} as AppEditerType);
+const types = AppEditer?.value.Omiken.types;
 const rules = AppEditer?.value.Omiken.rules;
+
+// rulesがどのtypeか探す
+const type = computed(() => findRuleType(types || {}, props.entry?.key as string || ''));
 
 // コンポーザブル:FunkEmits
 const { updateOmiken } = FunkEmits(emit);
@@ -84,4 +92,13 @@ const updateItem = () => {
     });
   }
 };
+
+function findRuleType(
+  types: Record<TypesType, string[]>,
+  ruleId: string
+): TypesType | undefined {
+  return Object.entries(types).find(([, ruleIds]) =>
+    ruleIds.includes(ruleId)
+  )?.[0] as TypesType | undefined;
+}
 </script>

@@ -42,6 +42,7 @@ export interface GameType extends DrawsBase {
 // TimeConfig
 export interface TimeConfigType {
   pluginTime: number; // プラグインを起動した時刻
+  lc: number; // プラグインを起動してからカウントしたコメント数
   lastTime: number; // 最後におみくじ機能が実行された時刻
   lastUserId: string; // 最後におみくじを行ったuserId
 }

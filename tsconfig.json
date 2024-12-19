@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "module": "commonjs", // モジュールシステム
+    "target": "ES2020", // 出力するJavaScriptのバージョン
+    "noEmit": false, // 出力を無効にしない（エラーがあっても出力を行う）
+    "moduleResolution": "node", // モジュール解決方法
+    "esModuleInterop": true, // ESモジュールとCommonJSのインポート互換
+    "strict": true, // 厳格な型チェック
+    "skipLibCheck": true, // ライブラリファイルの型チェックをスキップ
+    "jsx": "preserve", // JSXをそのまま残す
+    "forceConsistentCasingInFileNames": true, // 大文字小文字を守る
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "*"
+      ],
+      "@public/*": [
+        "public/*"
+      ]
+    }
+  },
+  // モノレポ全体でコンパイルしたいファイルパス
+  "include": [
+    "templates/**/*",
+    "public/**/*",
+    "public/types/*.ts"
+  ],
+  // 除外するディレクトリ
+  "exclude": [
+    "node_modules",
+    "public"
+  ]
+}

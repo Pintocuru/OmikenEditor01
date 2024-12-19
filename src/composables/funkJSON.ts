@@ -9,7 +9,8 @@ import type {
 } from "@/types/index";
 import _ from "lodash";
 import Swal from "sweetalert2";
-import axios from "axios";
+import OneSDK from '@onecomme.com/onesdk';
+import axios, { AxiosRequestConfig } from "axios";
 import { configs } from "@/config";
 
 // JSONデータの読み込み・書き込み
@@ -123,15 +124,22 @@ export class DataService {
   ): Promise<Record<string, unknown>> {
     const baseUrl = `http://localhost:11180/api/plugins/${configs.PLUGIN_UID}`;
     try {
-      const url = `${baseUrl}?mode=${mode}&type=${type || ""}`;
-      const response =
-        method === "GET" ? await axios.get(url) : await axios.post(url, data);
+     // 共通の config を作成
+     const config: AxiosRequestConfig = {
+      headers: {
+       'Content-Type': 'application/json'
+      },
+      data: data || {} // data を config の中に含める
+     };
+     // TODO 実際の挙動を検証してね
+     const url = `${baseUrl}?mode=${mode}&type=${type || ''}`;
+     const response = method === 'GET' ? await OneSDK.get(url, config) : await OneSDK.post(url, config);
 
-      if (!response.data) {
-        throw new Error(`No data returned for ${type}`);
-      }
+     if (!response.data) {
+      throw new Error(`No data returned for ${type}`);
+     }
 
-      return response.data as Record<string, unknown>;
+     return response.data as Record<string, unknown>;
     } catch (error) {
       console.error(`API Request Error (${method}, ${mode}, ${type}):`, error);
 
@@ -181,13 +189,6 @@ export class DataService {
         places: validateData("places", responseData.places),
       };
 
-      // データ読み込み成功の通知
-      await Swal.fire({
-        title: "読み込み完了",
-        text: "データの読み込みが完了しました。",
-        icon: "success",
-        confirmButtonText: "OK",
-      });
 
       return validatedData;
     } catch (error) {
@@ -238,16 +239,6 @@ export class DataService {
 
   // エラーハンドリング
   private static async handleInitializationError(error: unknown) {
-    const errorMessage =
-      error instanceof Error
-        ? error.message
-        : "データの読み込みに失敗しました。";
 
-    await Swal.fire({
-      title: "読み込み失敗",
-      text: errorMessage,
-      icon: "error",
-      confirmButtonText: "OK",
-    });
   }
 }

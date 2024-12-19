@@ -48,7 +48,7 @@
             <v-sheet class="list-group d-flex flex-wrap">
               <!-- 発動条件の表示 -->
               <v-chip
-                v-if="isThreshold(omikujis[omikujiId]?.threshold)"
+                v-if="omikujis[omikujiId]?.threshold.length !== 0"
                 density="compact"
                 variant="outlined"
                 color="yellow lighten-3"
@@ -136,7 +136,7 @@ const { weightTotal, weightPercentage, weightColor } = FunkRules();
 // コンポーザブル:FunkOmikuji
 const { getOnecommeContent, getPostTypeColor } = FunkOmikuji();
 // コンポーザブル:funkThreshold
-const { isThreshold, getExampleText } = FunkThreshold();
+const {  getExampleText } = FunkThreshold();
 
 // ドラッグ&ドロップでの更新も同様に
 const currentItem = computed({

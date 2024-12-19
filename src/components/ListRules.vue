@@ -1,35 +1,26 @@
 <!-- src/components/ListRules.vue -->
 <template>
   <div class="pt-2">
-    <div
-      v-for="(ruleId, index) in Omiken.rulesOrder"
-      :key="ruleId"
-      class="mb-2"
-    >
+    <div v-for="(rule, index) in rules" :key="rule.id" class="mb-2">
       <!-- ヘッダー部分 -->
       <v-card
-      v-if="Omiken.rules[ruleId].ruleType === props.categoryActive.sub"
         elevation="0"
         class="w-100"
-        @click="togglePanel(ruleId)"
+        @click="togglePanel(rule.id)"
         :class="{ 'cursor-pointer': true }"
       >
-        <v-toolbar :color="Omiken.rules[ruleId]?.color">
-          <PartsToolbarMove
-            :index="index"
-            :rulesOrder="Omiken.rulesOrder"
-            @update:Omiken="updateOmiken"
-          />
+        <v-toolbar :color="rule?.color">
           <v-toolbar-title class="ml-2">
-            {{ index + 1 }}. {{ Omiken.rules[ruleId]?.name }}
+            <!-- TODO typesによるアイコンを付与したい -->
+            {{ rule?.name }}
             <!-- enableIdsにあるアイテム数 -->
             <v-chip label class="ml-4">
-              {{ Omiken.rules[ruleId]?.enableIds.length }} items
+              {{ rule?.enableIds.length }} items
             </v-chip>
             <!-- 展開状態を示すアイコン -->
             <v-icon class="ml-2">
               {{
-                expandedPanels.includes(ruleId)
+                expandedPanels.includes(rule.id)
                   ? "mdi-chevron-up"
                   : "mdi-chevron-down"
               }}
@@ -38,8 +29,8 @@
           <template #append>
             <PartsToolbarAction
               selectCategory="rules"
-              :item="Omiken.rules[ruleId]"
-              @edit="openEditorItem('rules', ruleId)"
+              :item="rule"
+              @edit="openEditorItem('rules', rule.id)"
               @update:Omiken="updateOmiken"
             />
           </template>
@@ -49,25 +40,25 @@
             density="compact"
             variant="outlined"
             color="yellow lighten-3"
-            @click.stop="openEditorItem('rules', ruleId)"
+            @click.stop="openEditorItem('rules', rule.id)"
           >
-            🔐{{ getExampleText(Omiken.rules[ruleId].threshold) }}
+            🔐{{ getExampleText(rule.threshold) }}
           </v-chip>
         </v-card-text>
       </v-card>
 
       <!-- 展開部分 -->
       <v-expand-transition>
-        <div v-show="expandedPanels.includes(ruleId)">
+        <div v-show="expandedPanels.includes(rule.id)">
           <ListRulesOmikujiSetting
-            :rulesEntry="Omiken.rules[ruleId]"
+            :rulesEntry="rule"
             :uiState="uiState"
             @update:Omiken="updateOmiken"
           />
           <v-card-text>
             <v-row>
               <ListRulesOmikujiView
-                :rule="Omiken.rules[ruleId]"
+                :rule="rule"
                 :omikujis="Omiken.omikujis"
                 :uiState="uiState"
                 @open-editor="openEditor"
@@ -85,7 +76,6 @@
 import ListRulesOmikujiSetting from "./ListRulesOmikujiSetting.vue";
 import ListRulesOmikujiView from "./ListRulesOmikujiView.vue";
 import PartsToolbarAction from "./common/PartsToolbarAction.vue";
-import PartsToolbarMove from "./common/PartsToolbarMove.vue";
 import type {
   OmikenEntry,
   ListCategory,
@@ -93,10 +83,12 @@ import type {
   OmikenEntryType,
   CategoryActive,
   AppEditerType,
+  OmikenType,
+  RulesType,
 } from "@/types/index";
 import { FunkThreshold } from "@/composables/FunkThreshold";
 import { FunkEmits } from "@/composables/FunkEmits";
-import { inject, Ref, ref } from "vue";
+import { computed, inject, Ref, ref } from "vue";
 
 // 展開状態を管理する配列
 const expandedPanels = ref<string[]>([]);
@@ -112,6 +104,7 @@ const togglePanel = (ruleId: string) => {
 };
 
 const props = defineProps<{
+  Omiken: OmikenType;
   categoryActive: CategoryActive;
 }>();
 
@@ -120,18 +113,12 @@ const emit = defineEmits<{
   (e: "open-editor", editorItem: ListEntry<ListCategory>): void;
 }>();
 
-// inject
-const AppEditer =
-  inject<Ref<AppEditerType>>("AppEditerKey") ?? ref({} as AppEditerType);
-const Omiken = AppEditer.value.Omiken;
-
-const rules = Omiken.rules
-const rulesOrder = Omiken.rulesOrder
+const rules = computed(() => props.Omiken.rules);
 
 // コンポーザブル:FunkEmits
 const { updateOmiken, openEditor, openEditorItem } = FunkEmits(emit);
 // コンポーザブル:funkThreshold
-const {  getExampleText } = FunkThreshold();
+const { getExampleText } = FunkThreshold();
 
 // UIの各種ref
 const uiState = ref({

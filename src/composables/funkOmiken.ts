@@ -11,9 +11,11 @@ import type {
 } from "@/types/index";
 import { DataService, defaultAppEditer } from "./FunkJSON";
 import { validateData } from "./FunkValidate";
+import Swal from "sweetalert2";
 
 export function FunkOmiken() {
   const AppEditer = ref<AppEditerType>(defaultAppEditer);
+  const isAppEditerLoading = ref(true); // 読込中かどうか
   // provide
   provide("AppEditerKey", AppEditer);
 
@@ -21,8 +23,27 @@ export function FunkOmiken() {
   async function AppEditerInitialize() {
     try {
       AppEditer.value = await DataService.fetchInitialData();
+      isAppEditerLoading.value = false; // ローディング完了
+      // データ読み込み成功の通知
+      await Swal.fire({
+        title: "読み込み完了",
+        text: "データの読み込みが完了しました。",
+        icon: "success",
+        confirmButtonText: "OK",
+      });
     } catch (error) {
       console.error("Initialization failed", error);
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "データの読み込みに失敗しました。";
+
+      await Swal.fire({
+        title: "読み込み失敗",
+        text: errorMessage,
+        icon: "error",
+        confirmButtonText: "OK",
+      });
     }
   }
 
@@ -290,6 +311,7 @@ export function FunkOmiken() {
   return {
     AppEditer,
     AppEditerInitialize,
+    isAppEditerLoading,
     updateOmiken,
     updateOmikenPreset,
   };

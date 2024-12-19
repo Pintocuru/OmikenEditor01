@@ -14,7 +14,7 @@ export function FunkUI() {
 
   // ナビゲーション用:選択したカテゴリ
   const naviCategory = ref<CategoryActive>({
-    main: "rules",
+    main: "types",
   });
 
   // ダイアログで表示させるアイテム

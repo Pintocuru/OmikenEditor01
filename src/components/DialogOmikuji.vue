@@ -75,11 +75,12 @@
             />
           </v-window-item>
           <v-window-item value="filter">
-            <DialogThresholdOmikuji
-              :currentItem="currentItem"
-              :themeColor="themeColor"
-              @update:Omiken="updateOmiken"
-            />
+      <!-- 条件設定 -->
+      <ThresholdMain
+        :Thresholds="currentItem.threshold"
+        :type="'comment'"
+        @update:Thresholds="updateItem"
+      />
           </v-window-item>
         </v-window>
       </v-form>
@@ -97,11 +98,11 @@ import type {
   ListCategory,
   AppEditerType,
 } from "@/types/index";
-import DialogOmikujiPost from "./DialogOmikujiPost.vue";
+import DialogOmikujiPost from "@/components/DialogOmikujiPost.vue";
 import { FunkThreshold } from "@/composables/FunkThreshold";
 import { FunkOmikuji } from "@/composables/FunkOmikuji";
 import { FunkEmits } from "@/composables/FunkEmits";
-import DialogThresholdOmikuji from "./DialogThresholdOmikuji.vue";
+import ThresholdMain from "@/components/DialogThreshold/ThresholdMain.vue";
 // props/emits
 const props = defineProps<{
   entry: ListEntry<"omikujis"> | null;
