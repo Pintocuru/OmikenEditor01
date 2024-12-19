@@ -12,18 +12,16 @@
     "baseUrl": ".",
     "paths": {
       "@/*": [
-        "*"
+        "src/*"
       ],
       "@public/*": [
         "public/*"
-      ]
+      ],
     }
   },
-  // モノレポ全体でコンパイルしたいファイルパス
+  // ファイルパス
   "include": [
-    "templates/**/*",
-    "public/**/*",
-    "public/types/*.ts"
+    "src/**/*",
   ],
   // 除外するディレクトリ
   "exclude": [

@@ -37,6 +37,9 @@ export default (env, argv) => {
   resolve: {
    extensions: ['.ts', '.js', '.vue'] // 省略可能な拡張子
   },
+  alias: {
+   '@': path.resolve(__dirname, 'src')
+  },
   module: {
    rules: [
     // Vueファイルを処理
