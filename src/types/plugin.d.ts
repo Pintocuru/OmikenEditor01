@@ -1,27 +1,53 @@
-// src/types/plugin.ts
+// src/types/plugin.d.ts
 
-import { OnePlugin } from '@onecomme.com/onesdk/types/Plugin';
 import { Service } from '@onecomme.com/onesdk/types/Service';
 import { BaseResponse } from '@onecomme.com/onesdk/types/BaseResponse';
-import { OmikenType } from './Omiken';
-import { CharaType, PresetType, ScriptsParamType } from './preset';
+import { OmikenType, OmikujiType, RulesType, TypesType } from './Omiken';
+import { CharaType, ScriptsParamType } from './preset';
+import { TimerBasedSelector } from '@/Modules/TaskOmikujiSelect';
+import { Comment } from '@onecomme.com/onesdk/types/Comment';
+import { UserNameData } from '@onecomme.com/onesdk/types/UserData';
 
 // ---------------------------------------------------
 
-// プラグイン:AppPlugin の型定義
+// ElectronStore用の型
 export interface StoreType {
- Visits: Record<string, VisitType>;
- Games: Record<string, GameType>;
- TimeConfig: TimeConfigType;
+  Omiken: OmikenType;
+  Visits: Record<string, VisitType>;
+  Games: Record<string, GameType>;
 }
 
-// プラグイン:AppPlugin で呼び出すすべての型定義
-export interface StoreAllType extends StoreType {
- Omiken: OmikenType;
- Presets: Record<string, OmikenType>;
- Charas: Record<string, CharaType>;
- Scripts: Record<string, ScriptsParamType>;
+// おみくじBOT用の型
+export interface StoreMainType extends StoreType {
+  store: any; // ElectronStore不具合のためany ElectronStore<StoreType>
+  OmikenTypesArray?: Record<TypesType, RulesType[]>;
+  Charas: Record<string, CharaType>;
+  Scripts: Record<string, ScriptsParamType>;
+  TimeConfig: TimeConfigType;
 }
+
+// API用の型
+export interface StoreApiType extends StoreType {
+  Presets: Readonly<Record<string, OmikenType>>;
+  Charas: Record<string, CharaType>;
+  Scripts: Record<string, ScriptsParamType>;
+}
+
+// 全体設定用の型
+export interface StoreAllType extends StoreMainType {
+ Presets: Record<string, OmikenType>;
+ filterCommentProcess(comment: Comment, userData: UserNameData): void;
+ timerSelector: TimerBasedSelector;
+}
+
+// プラグインのデータを更新するreturn用の型
+export interface PluginUpdateData {
+ Games?: Record<string, GameType>;
+ Visits?: Record<string, VisitType>;
+ TimeConfig?: TimeConfigType;
+}
+
+// ---
 
 // ユーザーデータ(全体)
 export interface VisitType {
@@ -29,6 +55,7 @@ export interface VisitType {
  userId: string; // ユーザーID
  status: string; // ステータス
  lastPluginTime: number; // 前回コメントした配信枠のactiveTime
+ round: number; // コメントした配信枠の数
  visitData: Record<string, visitDataType>;
 }
 
@@ -47,6 +74,11 @@ export interface visitDataType extends DrawsBase {
 // おみくじデータ
 export interface GameType extends DrawsBase {
  gameData: Record<string, unknown>; // scriptで自由に使えるObject
+}
+
+// 選択したおみくじ
+export interface OmikujiSelectType extends OmikujiType {
+ selectRuleId: string; // 選択されたルールのid
 }
 
 // TimeConfig
@@ -97,16 +129,6 @@ meta
 
 */
 
-// ---------------------------------------------------
-
-// 既存のOnePluginに追加する拡張型
-export interface OnePluginOmiken extends OnePlugin {
- defaultState: Partial<StoreType>;
-
- // プラグイン固有の追加メソッドや属性も必要に応じて定義可能
- initLoadData?(): void;
-}
-
 // ---
 
 // API用
@@ -116,29 +138,30 @@ export type ParamsType = DataModeParams | BackupModeParams;
 
 // データ取得用型定義
 interface DataModeParams {
- mode: Mode.Data;
- type: DataType.Omiken | DataType.Presets | DataType.Charas | DataType.Scripts | DataType.Visits | DataType.Games;
+  mode: Mode.Data;
+  type: DataType.Omiken | DataType.Presets | DataType.Charas | DataType.Scripts | DataType.Visits | DataType.Games;
 }
 
 // バックアップ用型定義
 interface BackupModeParams {
- mode: Mode.Backup;
- type: DataType.Omiken | DataType.Presets | DataType.TimeConfig;
+  mode: Mode.Backup;
+  type: DataType.Omiken | DataType.Presets | DataType.TimeConfig;
 }
+
 
 // モードを定義
 export enum Mode {
- Data = 'data', // データ取得
- Backup = 'backup' // バックアップ(エディター用)
+  Data = 'data', // データ取得
+  Backup = 'backup', // バックアップ(エディター用)
 }
 
 // データの種類を定義
 export enum DataType {
- Omiken = 'Omiken', // おみくじデータ
- Presets = 'Presets', // preset(おみくじデータ)
- Charas = 'Charas', // キャラデータ
- Scripts = 'Scripts', // スクリプト
- Visits = 'Visits', // 個人データ
- Games = 'Games', // スクリプトデータ
- TimeConfig = 'TimeConfig' // 設定(未使用かも)
+  Omiken = 'Omiken', // おみくじデータ
+  Presets = 'Presets', // preset(おみくじデータ)
+  Charas = 'Charas', // キャラデータ
+  Scripts = 'Scripts', // スクリプト
+  Visits = 'Visits', // 個人データ
+  Games = 'Games', // スクリプトデータ
+  TimeConfig = 'TimeConfig', // 設定(未使用かも)
 }

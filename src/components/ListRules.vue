@@ -82,7 +82,7 @@ import type {
   ListEntry,
   OmikenEntryType,
   CategoryActive,
-  AppEditerType,
+  AppEditorType,
   OmikenType,
   RulesType,
 } from "@/types/index";

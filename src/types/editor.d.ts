@@ -1,4 +1,4 @@
-// src/types/editor.ts
+// src/types/editor.d.ts
 import {
   OmikenTypeMap,
   OmikenType,
@@ -9,8 +9,8 @@ import {
 
 // エディター用型定義
 
-// AppEditer
-export interface AppEditerType {
+// AppEditor
+export interface AppEditorType {
   Omiken: OmikenType;
   Presets: Record<string, OmikenType>; // preset:Omiken
   Charas: Record<string, CharaType>; // preset:Chara
@@ -18,7 +18,7 @@ export interface AppEditerType {
 }
 
 // メインカテゴリーの型
-export type CategoryMain = "types" | ListCategory | "presets";
+export type CategoryMain = ListCategory | "presets";
 export type CategorySub = {
   types: never;
   rules: never;
@@ -32,7 +32,7 @@ export type CategoryActive<T extends CategoryMain = CategoryMain> = {
 };
 
 // リスト用カテゴリー
-export type ListCategory =  "rules" | "omikujis" | "places";
+export type ListCategory = "types" | "rules" | "omikujis" | "places";
 export type ListType = OmikenTypeMap[ListCategory];
 export type ListEntry<T extends ListCategory> = {
   isOpen: boolean; // ダイアログの開閉状態
@@ -41,16 +41,17 @@ export type ListEntry<T extends ListCategory> = {
   key: string | string[] | null;
 };
 // listEntry全体の型
-export type ListEntryCollect = Record<ListCategory, ListEntry<ListCategory>>;
+export type ListEntryCollect = {
+  [K in ListCategory]: ListEntry<K>;
+};
 
 // ファイル操作用
-export type OmikenEntryType = "types" | ListCategory;
-export type OmikenEntry<T extends OmikenEntryType> = {
+export type OmikenEntry<T extends ListCategory> = {
   type: T;
   update?: T extends "types" ? never : OmikenTypeMap[T];
   addKeys?: AddKeysCategory[T];
   delKeys?: T extends "types" ? TypesType[] : string | string[];
-  reTypes?: T extends "types" ? Partial<Record<TypesType, string[]>> : never;
+  reTypes?: T extends "types" ? Record<TypesType, string[]> : never;
 };
 
 type AddKeysCategory = {

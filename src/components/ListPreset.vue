@@ -122,7 +122,7 @@
 import { computed, inject, ref, Ref } from "vue";
 import Swal from "sweetalert2";
 import {
-  AppEditerType,
+  AppEditorType,
   OmikenEntryType,
   OmikenEntry,
   PresetOmikenEditType,
@@ -140,13 +140,13 @@ const emit = defineEmits<{
 const isLoading = ref(false);
 
 // キャラクターデータのインジェクト
-const AppEditer = inject<Ref<AppEditerType>>("AppEditerKey");
+const AppEditor = inject<Ref<AppEditorType>>("AppEditorKey");
 
 // タブの制御
 const activeTab = ref("preset");
 // データの整形
 const presetList = computed(() => {
-  const presets = AppEditer?.value.Preset;
+  const presets = AppEditor?.value.Preset;
   if (!presets) return [];
   return Object.entries(presets).map(([id, data]) => {
     const { id: _, ...rest } = data;
@@ -157,7 +157,7 @@ const presetList = computed(() => {
   }) as Array<{ id: string } & PresetOmikenEditType>;
 });
 
-const charaList = computed(() => AppEditer?.value.Chara || {});
+const charaList = computed(() => AppEditor?.value.Chara || {});
 
 const handlePresetSelect = async (preset: fetchJSONType & { item: any }) => {
   try {

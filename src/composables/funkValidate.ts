@@ -44,10 +44,10 @@ const thresholdMatchSchema = z.object({
 const thresholdSchema = z
   .object({
     conditionType: z
-      .enum(["target", "cooldown", "syoken", "access", "count", "match"])
+      .enum(["target", "coolDown", "syoken", "access", "count", "match"])
       .default("match"),
     target: z.literal(null).optional(),
-    cooldown: z.number().default(3).optional(),
+    coolDown: z.number().default(3).optional(),
     syoken: z.nativeEnum(SyokenCondition).optional(),
     access: z.nativeEnum(AccessCondition).optional(),
     match: thresholdMatchSchema.optional(),
@@ -59,8 +59,8 @@ const thresholdSchema = z
     switch (data.conditionType) {
       case "target":
         return { ...result, target: data.target }; // targetのみ保持
-      case "cooldown":
-        return { ...result, cooldown: data.cooldown }; // cooldownのみ保持
+      case "coolDown":
+        return { ...result, coolDown: data.coolDown }; // coolDownのみ保持
       case "syoken":
         return { ...result, syoken: data.syoken }; // syokenのみ保持
       case "access":

@@ -2,7 +2,7 @@
 <template>
   <v-app :theme="uiDark">
     <!-- ローディング中の表示 -->
-    <template v-if="isAppEditerLoading">
+    <template v-if="isAppEditorLoading">
       <v-container class="text-center">
         <v-progress-circular indeterminate color="primary" />
         <p>データを読み込んでいます...<br>
@@ -14,16 +14,16 @@
       </v-container>
     </template>
     <template v-else>
-      <AppHeader v-model:uiDark="uiDark" @update:uidark="uiDark = $event" />
+      <AppHeader v-model:uiDark="uiDark" @update:uiDark="uiDark = $event" />
       <AppNavigation
         v-model:naviCategory="naviCategory"
-        :Omiken="AppEditer.Omiken"
+        :Omiken="AppEditor.Omiken"
         @update:category="naviCategory = $event"
       />
       <v-main>
         <v-container>
           <AppList
-            :AppEditer="AppEditer"
+            :AppEditor="AppEditor"
             :categoryActive="naviCategory"
             @update:Omiken="updateOmiken"
             @update:OmikenPreset="updateOmikenPreset"
@@ -33,7 +33,7 @@
       </v-main>
       <AppDialog
         v-model:listEntry="listEntry"
-        :Omiken="AppEditer.Omiken"
+        :Omiken="AppEditor.Omiken"
         @update:Omiken="updateOmiken"
         @open-editor="openEditor"
       />
@@ -52,15 +52,15 @@ import { onMounted } from "vue";
 
 const { uiDark, naviCategory, listEntry, openEditor } = FunkUI();
 
-// AppEditerのコンポーザブル
+// AppEditorのコンポーザブル
 const {
-  AppEditer,
-  AppEditerInitialize,
-  isAppEditerLoading,
+  AppEditor,
+  AppEditorInitialize,
+  isAppEditorLoading,
   updateOmiken,
   updateOmikenPreset,
 } = FunkOmiken();
 
 // APIから取得
-onMounted(async () => await AppEditerInitialize());
+onMounted(async () => await AppEditorInitialize());
 </script>

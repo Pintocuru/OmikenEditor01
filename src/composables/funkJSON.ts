@@ -4,7 +4,7 @@ import { validateData } from "./FunkValidate";
 import {
   DataType,
   Mode,
-  type AppEditerType,
+  type AppEditorType,
   type CharaType,
   type OmikenType,
   type ParamsType,
@@ -105,7 +105,7 @@ const defaultOmiken: OmikenType = {
   omikujis: {},
   places: {},
 };
-export const defaultAppEditer: AppEditerType = {
+export const defaultAppEditor: AppEditorType = {
   Presets: {},
   Charas: {},
   Scripts: {},
@@ -166,7 +166,7 @@ export class ApiError extends Error {
 
 // メインのデータサービス
 export class DataService {
- static async fetchInitialData(): Promise<AppEditerType> {
+ static async fetchInitialData(): Promise<AppEditorType> {
   try {
    const [presetsRaw, charasRaw, scriptsRaw, omikenData] = await Promise.all([
     ApiClient.request('GET', Mode.Data, DataType.Presets),

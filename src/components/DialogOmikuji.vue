@@ -96,7 +96,7 @@ import type {
   ListEntry,
   OmikenEntryType,
   ListCategory,
-  AppEditerType,
+  AppEditorType,
 } from "@/types/index";
 import DialogOmikujiPost from "@/components/DialogOmikujiPost.vue";
 import { FunkThreshold } from "@/composables/FunkThreshold";
@@ -114,8 +114,8 @@ const emit = defineEmits<{
 }>();
 
 // inject
-const AppEditer = inject<Ref<AppEditerType>>("AppEditerKey");
-const omikujis = AppEditer?.value.Omiken.omikujis;
+const AppEditor = inject<Ref<AppEditorType>>("AppEditorKey");
+const omikujis = AppEditor?.value.Omiken.omikujis;
 
 // コンポーザブル:FunkEmits
 const { updateOmiken, openEditor } = FunkEmits(emit);

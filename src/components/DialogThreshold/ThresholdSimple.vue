@@ -6,10 +6,10 @@
       (詳細設定はありません)
     </v-sheet>
 
-    <!-- cooldown条件 -->
-    <v-sheet v-if="threshold.conditionType === 'cooldown'" class="pt-8">
+    <!-- coolDown条件 -->
+    <v-sheet v-if="threshold.conditionType === 'coolDown'" class="pt-8">
       <v-text-field
-        v-model.number="currentItem.cooldown"
+        v-model.number="currentItem.coolDown"
         type="number"
         min="1"
         max="3600"

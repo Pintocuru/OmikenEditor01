@@ -1,9 +1,9 @@
 // src/composables/FunkPreset.ts
 import { ref, Ref } from 'vue';
-import { AppEditerType,  PresetType, } from "@/types";
+import { AppEditorType,  PresetType, } from "@/types";
 
 
-export function usePresetManager(AppEditer: Ref<AppEditerType> | undefined) {
+export function usePresetManager(AppEditor: Ref<AppEditorType> | undefined) {
   const Presets = ref<PresetType[]>([]);
   const isLoading = ref(false);
 
@@ -26,7 +26,7 @@ export function usePresetManager(AppEditer: Ref<AppEditerType> | undefined) {
   };
 
   const applyPreset = async (presetId: string, mode: 'overwrite' | 'append') => {
-    if (!AppEditer) return
+    if (!AppEditor) return
     isLoading.value = true;
     try {
       const preset = Presets.value.find(p => p.id === presetId);
@@ -39,28 +39,28 @@ export function usePresetManager(AppEditer: Ref<AppEditerType> | undefined) {
 
       // omikujiタイプのみの処理
       if (mode === 'overwrite') {
-        AppEditer.value.Omiken = {
-          ...AppEditer.value.Omiken,
+        AppEditor.value.Omiken = {
+          ...AppEditor.value.Omiken,
           ...presetData.Omiken
         };
       } else {
         // 追加モード：既存のデータを保持しながら新しいデータを追加
-        AppEditer.value.Omiken = {
-          ...AppEditer.value.Omiken,
+        AppEditor.value.Omiken = {
+          ...AppEditor.value.Omiken,
           types: {
-            ...AppEditer.value.Omiken.types,
+            ...AppEditor.value.Omiken.types,
             ...presetData.Omiken.types,
           },
           rules: {
-            ...AppEditer.value.Omiken.rules,
+            ...AppEditor.value.Omiken.rules,
             ...presetData.Omiken.rules,
           },
           omikujis: {
-            ...AppEditer.value.Omiken.omikujis,
+            ...AppEditor.value.Omiken.omikujis,
             ...presetData.Omiken.omikuji,
           },
           places: {
-            ...AppEditer.value.Omiken.places,
+            ...AppEditor.value.Omiken.places,
             ...presetData.Omiken.place,
           },
         };

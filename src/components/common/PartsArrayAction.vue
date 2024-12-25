@@ -27,7 +27,7 @@ import type {
   OmikenEntryType,
   OmikujiType,
   RulesType,
-  AppEditerType,
+  AppEditorType,
   PlaceType,
   ListCategory,
 } from "@/types";
@@ -48,7 +48,7 @@ const emit = defineEmits<{
 const menu = ref(false);
 
 // Inject
-const AppEditer = inject<Ref<AppEditerType>>("AppEditerKey");
+const AppEditor = inject<Ref<AppEditorType>>("AppEditorKey");
 
 /**
  * メニュー項目の定義
@@ -182,9 +182,9 @@ const removeList = () => {
 
 // rules選択リストの生成 (omikuji)
 const rulesList = computed(() => {
-  if (!AppEditer?.value.Omiken.rules) return [];
+  if (!AppEditor?.value.Omiken.rules) return [];
 
-  return Object.entries(AppEditer.value.Omiken.rules).map(([id, rule]) => ({
+  return Object.entries(AppEditor.value.Omiken.rules).map(([id, rule]) => ({
     id,
     name: rule.name,
   }));
@@ -205,7 +205,7 @@ const addList = async () => {
   });
 
   if (ruleId) {
-    const rulesEntry = AppEditer?.value.Omiken.rules[ruleId];
+    const rulesEntry = AppEditor?.value.Omiken.rules[ruleId];
     if (!rulesEntry) return;
     if (!props.omikujiEntry) return;
     emit("update:Omiken", {

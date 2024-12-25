@@ -104,7 +104,7 @@ const getComponent = computed(() => {
 
   const conditionComponentMap = {
     target: ThresholdSimple,
-    cooldown: ThresholdSimple,
+    coolDown: ThresholdSimple,
     syoken: ThresholdSimple,
     access: ThresholdSimple,
     count: ThresholdCount,

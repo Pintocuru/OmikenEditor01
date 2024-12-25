@@ -1,12 +1,12 @@
 // src/composables/funkRules.ts
 
 import { computed, inject, Ref } from "vue";
-import { AppEditerType, OmikenType } from "@/types";
+import { AppEditorType, OmikenType } from "@/types";
 
 export function FunkRules() {
   // inject
-  const AppEditer = inject<Ref<AppEditerType>>("AppEditerKey");
-  const omikuji = computed(() => AppEditer?.value.Omiken.omikujis ?? {});
+  const AppEditor = inject<Ref<AppEditorType>>("AppEditorKey");
+  const omikuji = computed(() => AppEditor?.value.Omiken.omikujis ?? {});
 
   // 定数
   const SWITCH_CONFIG = {

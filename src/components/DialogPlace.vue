@@ -77,7 +77,7 @@ import type {
   OmikenEntry,
   OmikenEntryType,
   ListEntry,
-  AppEditerType,
+  AppEditorType,
   ListCategory,
 } from "@/types/index";
 import Swal from "sweetalert2";
@@ -92,8 +92,8 @@ const emit = defineEmits<{
 }>();
 
 // inject
-const AppEditer = inject<Ref<AppEditerType>>("AppEditerKey");
-const place = AppEditer?.value.Omiken.places;
+const AppEditor = inject<Ref<AppEditorType>>("AppEditorKey");
+const place = AppEditor?.value.Omiken.places;
 
 const currentItem = ref<PlaceType | null>(null);
 

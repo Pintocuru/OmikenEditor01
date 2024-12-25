@@ -50,7 +50,7 @@ import type {
   OmikenEntry,
   ListCategory,
   OmikenEntryType,
-  AppEditerType,
+  AppEditorType,
   TypesType,
   RulesType,
 } from "@/types/index";
@@ -67,10 +67,10 @@ const emit = defineEmits<{
 }>();
 
 // inject
-const AppEditer =
-  inject<Ref<AppEditerType>>("AppEditerKey") ?? ref({} as AppEditerType);
-const types = AppEditer?.value.Omiken.types;
-const rules = AppEditer?.value.Omiken.rules;
+const AppEditor =
+  inject<Ref<AppEditorType>>("AppEditorKey") ?? ref({} as AppEditorType);
+const types = AppEditor?.value.Omiken.types;
+const rules = AppEditor?.value.Omiken.rules;
 
 // rulesがどのtypeか探す
 const type = computed(() => findRuleType(types || {}, props.entry?.key as string || ''));

@@ -18,12 +18,12 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: "update:uidark", value: string): void;
+  (e: "update:uiDark", value: string): void;
 }>();
 
 // テーマ切り替え関数
 const toggleTheme = () =>
-  emit("update:uidark", props.uiDark === "dark" ? "light" : "dark");
+  emit("update:uiDark", props.uiDark === "dark" ? "light" : "dark");
 
 /*
     <template v-slot:prepend>

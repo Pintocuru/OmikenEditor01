@@ -43,8 +43,8 @@
       <v-sheet v-if="threshold.conditionType === 'target'" class="pt-8">
         (詳細設定はありません)
       </v-sheet>
-      <!-- cooldown:クールダウンチェック -->
-      <v-sheet v-if="threshold.conditionType === 'cooldown'" class="pt-8">
+      <!-- coolDown:クールダウンチェック -->
+      <v-sheet v-if="threshold.conditionType === 'coolDown'" class="pt-8">
         <v-text-field
           v-model.number="currentItem.value1"
           type="number"
@@ -165,7 +165,7 @@ const { updateOmiken } = FunkEmits(emit);
 // フィルタリングの並び順
 const conditions: ConditionType[] = [
   "target",
-  "cooldown",
+  "coolDown",
   "syoken",
   "access",
   "count",

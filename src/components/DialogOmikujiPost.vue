@@ -102,7 +102,7 @@ import type {
   OmikenEntryType,
   OmikenEntry,
   OneCommePostType,
-  AppEditerType,
+  AppEditorType,
 } from "@/types/index";
 import { FunkOmikuji } from "../composables/FunkOmikuji";
 import PartsArrayRemove from "../components/common/PartsArrayRemove.vue";
@@ -118,8 +118,8 @@ const emit = defineEmits<{
 }>();
 
 // inject
-const AppEditer = inject<Ref<AppEditerType>>("AppEditerKey");
-const Charas = AppEditer?.value.Charas;
+const AppEditor = inject<Ref<AppEditorType>>("AppEditorKey");
+const Charas = AppEditor?.value.Charas;
 
 // コンポーザブル:FunkEmits
 const { updateOmiken, openEditorItem } = FunkEmits(emit);

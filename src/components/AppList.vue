@@ -20,8 +20,8 @@
       <component
         :is="currentListComponent"
         :categoryActive="categoryActive"
-        :Omiken="AppEditer.Omiken"
-        :Presets="AppEditer.Presets"
+        :Omiken="AppEditor.Omiken"
+        :Presets="AppEditor.Presets"
         @update:Omiken="updateOmiken"
         @update:OmikenPreset="updateOmikenPreset"
         @open-editor="openEditor"
@@ -44,13 +44,13 @@ import type {
   ListEntry,
   PresetType,
   CategoryActive,
-  AppEditerType,
+  AppEditorType,
 } from "@/types";
 import { FunkEmits } from "@/composables/FunkEmits";
 
 // Props Emits
 const props = defineProps<{
-  AppEditer: AppEditerType;
+  AppEditor: AppEditorType;
   categoryActive: CategoryActive;
 }>();
 

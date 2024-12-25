@@ -20,7 +20,7 @@ const THRESHOLD_ITEMS = [
   },
   {
     label: "クールダウン",
-    value: "cooldown",
+    value: "coolDown",
     icon: "",
     description: "一定の時間(秒)経過していなければ対象",
   },
@@ -149,8 +149,8 @@ export function FunkThreshold() {
 
     const handlers: Record<ConditionType, (threshold: any) => string> = {
       target: () => `前回と今回のコメントが同一人物の場合`,
-      cooldown: (cooldown: number) =>
-        `前回のおみくじから${cooldown}秒経過していない場合`,
+      coolDown: (coolDown: number) =>
+        `前回のおみくじから${coolDown}秒経過していない場合`,
       syoken: ({ syoken }: { syoken: SyokenCondition }) =>
         `${EXAMPLES[type].syoken[syoken || SyokenCondition.SYOKEN]}の場合`,
       access: ({ access }: { access: AccessCondition }) =>
@@ -206,7 +206,7 @@ export function FunkThresholdInitial(condition: ConditionType = "match") {
   return {
     conditionType: condition,
     target: null,
-    cooldown: 3,
+    coolDown: 3,
     syoken: SyokenCondition.SYOKEN,
     access: AccessCondition.MEMBER,
     match: {

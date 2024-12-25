@@ -1,13 +1,13 @@
 // src/composables/FunkOmikuji.ts
 
-import { AppEditerType, OneCommePostType } from "@/types/index";
+import { AppEditorType, OneCommePostType } from "@/types/index";
 import { computed, inject, Ref } from "vue";
 
 export function FunkOmikuji() {
   // Inject
-  const AppEditer = inject<Ref<AppEditerType>>("AppEditerKey");
-  const Chara = AppEditer?.value.Charas;
-  const place = AppEditer?.value.Omiken.places;
+  const AppEditor = inject<Ref<AppEditorType>>("AppEditorKey");
+  const Chara = AppEditor?.value.Charas;
+  const place = AppEditor?.value.Omiken.places;
 
   const POST_TYPES: Record<PostTypeKey, { color: string; label: string }> = {
     onecomme: { color: "orange", label: "わんコメ" },
@@ -51,10 +51,10 @@ export function FunkOmikuji() {
   // postからonecommeを探し色を取得する
   const getPostTypeColor = (
     post: OneCommePostType[],
-    isBotcolor?: boolean
+    isBotColor?: boolean
   ): string => {
     const onecommePost = post.find((p) => p.type === "onecomme");
-    if (onecommePost?.botKey && isBotcolor) {
+    if (onecommePost?.botKey && isBotColor) {
       return getCharaColor(onecommePost.botKey) ?? "grey";
     }
 
