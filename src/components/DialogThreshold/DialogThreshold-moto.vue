@@ -127,12 +127,12 @@
 import { FunkEmits } from "@/composables/FunkEmits";
 import {
   OmikenEntry,
-  OmikenEntryType,
+  ListCategory,
   RulesType,
   ThresholdType,
   ConditionType,
   AccessCondition,
-} from "@/types/index";
+} from "@/type";
 import {
   FunkThreshold,
   FunkThresholdInitial,
@@ -147,7 +147,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: "update:Omiken", payload: OmikenEntry<OmikenEntryType>): void;
+  (e: "update:Omiken", payload: OmikenEntry<ListCategory>): void;
 }>();
 
 const dialog = ref(false)

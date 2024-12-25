@@ -35,7 +35,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { MatchCondition, ThresholdType, TypesType } from '@/types'
+import { MatchCondition, ThresholdType, TypesType } from '@/type'
 import { FunkThreshold, FunkThresholdInitial } from '@/composables/FunkThreshold'
 
 const props = defineProps<{

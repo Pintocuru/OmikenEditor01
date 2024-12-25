@@ -8,9 +8,9 @@ import type {
   ListCategory,
   PresetOmikenType,
   TypesType,
-} from "@/types/index";
-import { DataService, defaultAppEditor } from "./FunkJSON";
-import { validateData } from "./FunkValidate";
+} from "@/type";
+import { DataService, defaultAppEditor } from '@/composables/FunkJSON';
+import { validateData } from '@/composables/FunkValidate';
 import Swal from "sweetalert2";
 
 export function FunkOmiken() {

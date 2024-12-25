@@ -1,5 +1,5 @@
 // src/composables/funkDialog.ts
-import type { CharaType } from "@/types/index";
+import type { CharaType } from "@/type";
 
 
 // おみくじエディット用

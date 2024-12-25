@@ -73,17 +73,16 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import PartsArrayAction from "./common/PartsArrayAction.vue";
-import { FunkOmikuji } from "../composables/FunkOmikuji";
-import { FunkThreshold } from "../composables/FunkThreshold";
 import type {
   ListCategory,
   ListEntry,
-  OmikenEntryType,
   OmikenEntry,
   OmikenType,
   CategoryActive,
-} from "@/types/index";
+} from "@/type";
+import PartsArrayAction from "@/components/common/PartsArrayAction.vue";
+import { FunkOmikuji } from "@/composables/FunkOmikuji";
+import { FunkThreshold } from "@/composables/FunkThreshold";
 import { FunkEmits } from "@/composables/FunkEmits";
 
 const props = defineProps<{
@@ -92,7 +91,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: "update:Omiken", payload: OmikenEntry<OmikenEntryType>): void;
+  (e: "update:Omiken", payload: OmikenEntry<ListCategory>): void;
   (e: "open-editor", editorItem: ListEntry<ListCategory>): void;
 }>();
 

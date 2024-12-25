@@ -59,8 +59,8 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { FunkRules } from "../composables/FunkRules";
-import type { OmikenEntryType, OmikenEntry, RulesType } from "@/types/index";
+import type { ListCategory, OmikenEntry, RulesType } from "@/type";
+import { FunkRules } from "@/composables/FunkRules";
 
 const props = defineProps<{
   rulesEntry: RulesType;
@@ -68,7 +68,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: "update:Omiken", payload: OmikenEntry<OmikenEntryType>): void;
+  (e: "update:Omiken", payload: OmikenEntry<ListCategory>): void;
 }>();
 
 const { omikujiLists } = FunkRules();

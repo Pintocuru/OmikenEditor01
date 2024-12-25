@@ -1,3 +1,4 @@
+// webpack.config.mjs
 import path from 'path';
 import { VueLoaderPlugin } from 'vue-loader';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
@@ -38,7 +39,7 @@ export default (env, argv) => {
    extensions: ['.ts', '.js', '.vue'] // 省略可能な拡張子
   },
   alias: {
-   '@': path.resolve(__dirname, 'src')
+   '@': path.resolve(__dirname, 'src') 
   },
   module: {
    rules: [

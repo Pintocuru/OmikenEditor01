@@ -1,5 +1,5 @@
 {
- "name": "omiken-editer",
+ "name": "omiken-editor",
  "version": "0.0.1",
  "scripts": {
   "dev": "vite & node server.js",

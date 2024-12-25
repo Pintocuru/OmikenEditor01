@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "module": "commonjs", // モジュールシステム
+    "module": "esnext", // モジュールシステム
     "target": "ES2020", // 出力するJavaScriptのバージョン
     "noEmit": false, // 出力を無効にしない（エラーがあっても出力を行う）
     "moduleResolution": "node", // モジュール解決方法
@@ -13,11 +13,12 @@
     "paths": {
       "@/*": [
         "src/*"
-      ],
-      "@public/*": [
-        "public/*"
-      ],
-    }
+      ]
+    },
+    "typeRoots": [
+      "node_modules/@types",
+      "src/types"
+    ]
   },
   // ファイルパス
   "include": [

@@ -29,6 +29,7 @@ declare module 'vue' {
     DialogPlace: typeof import('./src/components/DialogPlace.vue')['default']
     DialogPlaceEditor: typeof import('./src/components/DialogPlaceEditor.vue')['default']
     DialogPlaceTextmode: typeof import('./src/components/DialogPlaceTextmode.vue')['default']
+    DialogPlaceTextMode: typeof import('./src/components/DialogPlaceTextMode.vue')['default']
     DialogRule: typeof import('./src/components/DialogRule.vue')['default']
     DialogRules: typeof import('./src/components/DialogRules.vue')['default']
     DialogRulesColor: typeof import('./src/components/DialogRulesColor.vue')['default']

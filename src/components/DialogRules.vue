@@ -43,17 +43,16 @@
 
 <script setup lang="ts">
 import { computed, inject, ref, Ref } from "vue";
-import ThresholdMain from "@/components/DialogThreshold/ThresholdMain.vue";
-import DialogRulesColor from "@/components/DialogRulesColor.vue";
 import type {
   ListEntry,
   OmikenEntry,
   ListCategory,
-  OmikenEntryType,
   AppEditorType,
   TypesType,
   RulesType,
-} from "@/types/index";
+} from "@/type";
+import ThresholdMain from "@/components/DialogThreshold/ThresholdMain.vue";
+import DialogRulesColor from "@/components/DialogRulesColor.vue";
 import { FunkEmits } from "@/composables/FunkEmits";
 
 // props/emits
@@ -62,7 +61,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: "update:Omiken", payload: OmikenEntry<OmikenEntryType>): void;
+  (e: "update:Omiken", payload: OmikenEntry<ListCategory>): void;
   (e: "open-editor", editorItem: ListEntry<ListCategory>): void;
 }>();
 

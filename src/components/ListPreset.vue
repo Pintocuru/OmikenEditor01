@@ -120,19 +120,19 @@
 
 <script setup lang="ts">
 import { computed, inject, ref, Ref } from "vue";
-import Swal from "sweetalert2";
 import {
   AppEditorType,
-  OmikenEntryType,
+  ListCategory,
   OmikenEntry,
   PresetOmikenEditType,
   fetchJSONType,
-} from "@/types/index";
+} from "@/type";
+import Swal from "sweetalert2";
 
 // props/emits
 
 const emit = defineEmits<{
-  (e: "update:Omiken", payload: OmikenEntry<OmikenEntryType>): void;
+  (e: "update:Omiken", payload: OmikenEntry<ListCategory>): void;
   (e: "update:OmikenPreset", preset: PresetOmikenEditType): void;
 }>();
 

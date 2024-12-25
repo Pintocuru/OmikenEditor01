@@ -49,10 +49,10 @@
 
 <script setup lang="ts">
 import { onMounted } from 'vue';
-import DialogRules from './DialogRules.vue';
-import DialogOmikuji from './DialogOmikuji.vue';
-import DialogPlace from './DialogPlace.vue';
-import { ListEntry, ListCategory, OmikenEntry, OmikenEntryType, ListEntryCollect, OmikenType } from '@/types/index';
+import { ListEntry, ListCategory, OmikenEntry,  ListEntryCollect, OmikenType } from '@/type';
+import DialogRules from '@/components/DialogRules.vue';
+import DialogOmikuji from '@/components/DialogOmikuji.vue';
+import DialogPlace from '@/components/DialogPlace.vue';
 import { FunkEmits } from '@/composables/FunkEmits';
 
 // Props / emit
@@ -63,7 +63,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
  (e: 'update:listEntry', newEntry: ListEntryCollect): void;
- (e: 'update:Omiken', payload: OmikenEntry<OmikenEntryType>): void;
+ (e: 'update:Omiken', payload: OmikenEntry<ListCategory>): void;
  (e: 'open-editor', editorItem: ListEntry<ListCategory>): void;
 }>();
 

@@ -21,10 +21,10 @@
 
 <script setup lang="ts">
 import { ref, defineProps, defineEmits, PropType } from "vue";
-import type { OmikenEntry, OmikenEntryType, OmikenTypeMap } from "@/types";
+import type { OmikenEntry, ListCategory, OmikenTypeMap } from "@/type";
 
 const props = defineProps({
-  type: { type: String as PropType<OmikenEntryType>, required: true }, // "omikuji" または "place"
+  type: { type: String as PropType<ListCategory>, required: true }, // "omikuji" または "place"
   currentItem: { type: Object, required: true },
   array: { type: Array, required: true },
   index: { type: Number, required: true },
@@ -33,7 +33,7 @@ const props = defineProps({
 });
 const emit =
   defineEmits<
-    (e: "update:Omiken", payload: OmikenEntry<OmikenEntryType>) => void
+    (e: "update:Omiken", payload: OmikenEntry<ListCategory>) => void
   >();
 
 const menu = ref(false);
@@ -41,7 +41,7 @@ const menu = ref(false);
 function updateOmiken() {
   if (props.currentItem) {
     const update = {
-      type: props.type as OmikenEntryType,
+      type: props.type as ListCategory,
       update: {
         [String(props.currentItem.id)]: props.currentItem,
         // @ts-ignore preferences preset ではこのコンポーネントを使わないので

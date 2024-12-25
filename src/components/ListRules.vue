@@ -73,22 +73,19 @@
 </template>
 
 <script setup lang="ts">
-import ListRulesOmikujiSetting from "./ListRulesOmikujiSetting.vue";
-import ListRulesOmikujiView from "./ListRulesOmikujiView.vue";
-import PartsToolbarAction from "./common/PartsToolbarAction.vue";
-import type {
+import { computed, ref } from "vue";
+import  {
   OmikenEntry,
   ListCategory,
   ListEntry,
-  OmikenEntryType,
   CategoryActive,
-  AppEditorType,
   OmikenType,
-  RulesType,
-} from "@/types/index";
+} from "@/type";
+import ListRulesOmikujiSetting from "@/components/ListRulesOmikujiSetting.vue";
+import ListRulesOmikujiView from "@/components/ListRulesOmikujiView.vue";
+import PartsToolbarAction from "@/components/common/PartsToolbarAction.vue";
 import { FunkThreshold } from "@/composables/FunkThreshold";
 import { FunkEmits } from "@/composables/FunkEmits";
-import { computed, inject, Ref, ref } from "vue";
 
 // 展開状態を管理する配列
 const expandedPanels = ref<string[]>([]);
@@ -109,7 +106,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: "update:Omiken", payload: OmikenEntry<OmikenEntryType>): void;
+  (e: "update:Omiken", payload: OmikenEntry<ListCategory>): void;
   (e: "open-editor", editorItem: ListEntry<ListCategory>): void;
 }>();
 

@@ -75,12 +75,12 @@
 import { computed } from "vue";
 import {
   ConditionType,
-  OmikenEntryType,
+  ListCategory,
   OmikenEntry,
   OmikujiType,
   RulesType,
   ThresholdType,
-} from "@/types/index";
+} from "@/type";
 import { FunkThreshold } from "../composables/FunkThreshold";
 import DialogThresholdInput from "./DialogThresholdInput.vue";
 
@@ -94,7 +94,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: "update:threshold", value: ThresholdType[]): void;
-  (e: "update:Omiken", payload: OmikenEntry<OmikenEntryType>): void;
+  (e: "update:Omiken", payload: OmikenEntry<ListCategory>): void;
 }>();
 
 const { items, isThreshold, getExampleText } = FunkThreshold();

@@ -40,12 +40,11 @@ import ListPreset from "./ListPreset.vue";
 import type {
   ListCategory,
   OmikenEntry,
-  OmikenEntryType,
   ListEntry,
   PresetType,
   CategoryActive,
   AppEditorType,
-} from "@/types";
+} from "@/type";
 import { FunkEmits } from "@/composables/FunkEmits";
 
 // Props Emits
@@ -55,7 +54,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: "update:Omiken", payload: OmikenEntry<OmikenEntryType>): void;
+  (e: "update:Omiken", payload: OmikenEntry<ListCategory>): void;
   (e: "update:OmikenPreset", preset: PresetType): void;
   (e: "open-editor", editorItem: ListEntry<ListCategory>): void;
 }>();

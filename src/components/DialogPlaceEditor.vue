@@ -51,9 +51,9 @@
 </template>
 
 <script setup lang="ts">
+import { PlaceValueType, PlaceType, ListEntry } from "@/type";
+import PartsArrayRemovePlace from "@/components/common/PartsArrayRemovePlace.vue";
 import draggable from "vuedraggable";
-import PartsArrayRemovePlace from "./common/PartsArrayRemovePlace.vue";
-import type { PlaceValueType, PlaceType, ListEntry } from "@/types/index";
 
 const props = defineProps<{
   entry: ListEntry<"places"> | null;

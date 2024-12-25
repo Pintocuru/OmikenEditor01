@@ -63,7 +63,7 @@ import {
   ThresholdType,
   ConditionType,
   TypesType,
-} from "@/types";
+} from "@/type";
 import {
   FunkThresholdInitial,
   FunkThreshold,

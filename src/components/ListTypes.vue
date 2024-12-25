@@ -58,19 +58,18 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import Draggable from 'vuedraggable';
-import PartsToolbarAction from './common/PartsToolbarAction.vue';
-import { FunkThreshold } from '@/composables/FunkThreshold';
-import { FunkEmits } from '@/composables/FunkEmits';
-import type {
+import  {
  OmikenEntry,
  ListCategory,
  ListEntry,
- OmikenEntryType,
  CategoryActive,
  TypesType,
  OmikenType
-} from '@/types/index';
+} from '@/type';
+import PartsToolbarAction from '@/components/common/PartsToolbarAction.vue';
+import { FunkThreshold } from '@/composables/FunkThreshold';
+import { FunkEmits } from '@/composables/FunkEmits';
+import Draggable from 'vuedraggable';
 
 const props = defineProps<{
  Omiken: OmikenType;
@@ -78,7 +77,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
- (e: 'update:Omiken', payload: OmikenEntry<OmikenEntryType>): void;
+ (e: 'update:Omiken', payload: OmikenEntry<ListCategory>): void;
  (e: 'open-editor', editorItem: ListEntry<ListCategory>): void;
 }>();
 

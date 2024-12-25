@@ -4,11 +4,9 @@ import {
   ListCategory,
   ListEntry,
   OmikenTypeMap,
-  OmikenEntryType,
   OmikenEntry,
-  OmikenType,
   PresetOmikenType,
-} from "@/types/index";
+} from "@/type";
 
 export function FunkEmits(emit: any) {
   // ダイアログを表示するemit
@@ -24,7 +22,7 @@ export function FunkEmits(emit: any) {
     emit("open-editor", editorItem);
 
   // Omiken のアップデート
-  const updateOmiken = (payload: OmikenEntry<OmikenEntryType>) =>
+  const updateOmiken = (payload: OmikenEntry<ListCategory>) =>
     emit("update:Omiken", payload);
 
   const updateOmikenEntry = <T extends ListCategory>(

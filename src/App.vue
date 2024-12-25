@@ -42,12 +42,12 @@
 </template>
 
 <script setup lang="ts">
-import AppHeader from "./components/AppHeader.vue";
-import AppNavigation from "./components/AppNavigation.vue";
-import AppList from "./components/AppList.vue";
-import AppDialog from "./components/AppDialog.vue";
-import { FunkOmiken } from "./composables/FunkOmiken";
-import { FunkUI } from "./composables/FunkUI";
+import AppHeader from "@/components/AppHeader.vue";
+import AppNavigation from "@/components/AppNavigation.vue";
+import AppList from "@/components/AppList.vue";
+import AppDialog from "@/components/AppDialog.vue";
+import { FunkOmiken } from "@/composables/FunkOmiken";
+import { FunkUI } from "@/composables/FunkUI";
 import { onMounted } from "vue";
 
 const { uiDark, naviCategory, listEntry, openEditor } = FunkUI();

@@ -1,4 +1,4 @@
-<!-- src/components/DialogPlaceTextmode.vue -->
+<!-- src/components/DialogPlaceTextMode.vue -->
 <template>
   <v-dialog v-model="dialog" @click:outside="handleSave">
     <v-card>
@@ -23,7 +23,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import type { PlaceValueType } from '@/types/index'
+import type { PlaceValueType } from '@/type'
 
 const props = defineProps<{
   modelValue: boolean

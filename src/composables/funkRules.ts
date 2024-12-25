@@ -1,7 +1,7 @@
 // src/composables/funkRules.ts
 
 import { computed, inject, Ref } from "vue";
-import { AppEditorType, OmikenType } from "@/types";
+import { AppEditorType, OmikenType } from "@/type";
 
 export function FunkRules() {
   // inject

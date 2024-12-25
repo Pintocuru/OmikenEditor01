@@ -1,6 +1,6 @@
 // src/composables/FunkPreset.ts
 import { ref, Ref } from 'vue';
-import { AppEditorType,  PresetType, } from "@/types";
+import { AppEditorType,  PresetType, } from "@/type";
 
 
 export function usePresetManager(AppEditor: Ref<AppEditorType> | undefined) {

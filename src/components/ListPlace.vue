@@ -40,8 +40,8 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import type { ListCategory, ListEntry,  OmikenEntry, OmikenType, PlaceValueType } from '@/type';
 import PartsArrayAction from './common/PartsArrayAction.vue';
-import type { ListCategory, ListEntry, OmikenEntryType, OmikenEntry, OmikenType, PlaceValueType } from '@/types/index';
 import { FunkEmits } from '@/composables/FunkEmits';
 
 const props = defineProps<{
@@ -49,7 +49,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
- (e: 'update:Omiken', payload: OmikenEntry<OmikenEntryType>): void;
+ (e: 'update:Omiken', payload: OmikenEntry<ListCategory>): void;
  (e: 'open-editor', editorItem: ListEntry<ListCategory>): void;
 }>();
 

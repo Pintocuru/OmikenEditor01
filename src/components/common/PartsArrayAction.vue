@@ -24,13 +24,12 @@
 import { ref, computed, inject, Ref } from "vue";
 import type {
   OmikenEntry,
-  OmikenEntryType,
   OmikujiType,
   RulesType,
   AppEditorType,
   PlaceType,
   ListCategory,
-} from "@/types";
+} from "@/type";
 import Swal from "sweetalert2";
 
 const props = defineProps<{
@@ -42,7 +41,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: "edit"): void;
-  (e: "update:Omiken", payload: OmikenEntry<OmikenEntryType>): void;
+  (e: "update:Omiken", payload: OmikenEntry<ListCategory>): void;
 }>();
 
 const menu = ref(false);
@@ -81,7 +80,7 @@ const menuItems = computed(() =>
     },
   ].filter(
     (item) =>
-      props.category === "omikuji" ||
+      props.category === "omikujis" ||
       (item.action !== "remove" && item.action !== "add")
   )
 );
@@ -104,11 +103,11 @@ const menuAction = (action: string) => {
 
 const getEntryByCategory = (category: ListCategory) => {
   switch (category) {
-    case "omikuji":
-      return props.omikujiEntry;
     case "rules":
       return props.rulesEntry;
-    case "place":
+    case "omikujis":
+      return props.omikujiEntry;
+    case "places":
       return props.placeEntry;
     default:
       return null;

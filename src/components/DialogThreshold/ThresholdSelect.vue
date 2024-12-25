@@ -22,7 +22,7 @@
 
 <script setup lang="ts">
 import { FunkThreshold } from '@/composables/FunkThreshold'
-import { ConditionType, ThresholdType } from '@/types';
+import { ConditionType, ThresholdType } from '@/type';
 
 const props = defineProps<{
   threshold: ThresholdType

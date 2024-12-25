@@ -59,7 +59,7 @@
   >
 
   <!-- テキストエディターダイアログを追加 -->
-  <DialogPlaceTextmode
+  <DialogPlaceTextMode
     v-if="currentItem"
     v-model="showTextEditor"
     :values="currentItem.values"
@@ -69,17 +69,16 @@
 
 <script setup lang="ts">
 import { computed, inject, ref, Ref, watch } from "vue";
-import DialogPlaceTextmode from "./DialogPlaceTextmode.vue";
-import DialogPlaceEditor from "./DialogPlaceEditor.vue";
-import type {
+import {
   PlaceType,
   PlaceValueType,
   OmikenEntry,
-  OmikenEntryType,
+  ListCategory,
   ListEntry,
   AppEditorType,
-  ListCategory,
-} from "@/types/index";
+} from "@/type";
+import DialogPlaceTextMode from "@/components/DialogPlaceTextMode.vue";
+import DialogPlaceEditor from "@/components/DialogPlaceEditor.vue";
 import Swal from "sweetalert2";
 
 const props = defineProps<{
@@ -87,7 +86,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: "update:Omiken", payload: OmikenEntry<OmikenEntryType>): void;
+  (e: "update:Omiken", payload: OmikenEntry<ListCategory>): void;
   (e: "open-editor", editorItem: ListEntry<ListCategory>): void;
 }>();
 

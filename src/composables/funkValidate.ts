@@ -5,7 +5,7 @@ import {
   SyokenCondition,
   TypesType,
   RulesType,
-} from "../types";
+} from "@/type";
 import { z } from "zod";
 import _ from "lodash";
 

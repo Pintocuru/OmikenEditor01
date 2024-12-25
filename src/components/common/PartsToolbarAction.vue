@@ -17,7 +17,7 @@
 </template>
 
 <script setup lang="ts">
-import { ListCategory, ListType, OmikenEntry, OmikenEntryType } from "@/types";
+import { ListCategory, ListType, OmikenEntry,  } from "@/type";
 import { cloneDeep } from "lodash";
 import Swal from "sweetalert2";
 
@@ -32,7 +32,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: "edit"): void;
-  (e: "update:Omiken", payload: OmikenEntry<OmikenEntryType>): void;
+  (e: "update:Omiken", payload: OmikenEntry<ListCategory>): void;
 }>();
 
 //

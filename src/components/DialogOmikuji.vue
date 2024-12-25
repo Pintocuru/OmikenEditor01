@@ -94,10 +94,9 @@ import { computed, inject, Ref, ref } from "vue";
 import type {
   OmikenEntry,
   ListEntry,
-  OmikenEntryType,
   ListCategory,
   AppEditorType,
-} from "@/types/index";
+} from "@/type";
 import DialogOmikujiPost from "@/components/DialogOmikujiPost.vue";
 import { FunkThreshold } from "@/composables/FunkThreshold";
 import { FunkOmikuji } from "@/composables/FunkOmikuji";
@@ -109,7 +108,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: "update:Omiken", payload: OmikenEntry<OmikenEntryType>): void;
+  (e: "update:Omiken", payload: OmikenEntry<ListCategory>): void;
   (e: "open-editor", editorItem: ListEntry<ListCategory>): void;
 }>();
 
