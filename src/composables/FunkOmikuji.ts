@@ -1,7 +1,7 @@
 // src/composables/FunkOmikuji.ts
 
 import { computed, inject, Ref } from 'vue';
-import { AppEditorType, OneCommePostType } from "@/type";
+import { AppEditorType, OneCommePostType } from "@type";
 
 export function FunkOmikuji() {
   // Inject

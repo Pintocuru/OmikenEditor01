@@ -6,7 +6,7 @@ import {
   OmikenTypeMap,
   OmikenEntry,
   PresetOmikenType,
-} from "@/type";
+} from "@type";
 
 export function FunkEmits(emit: any) {
   // ダイアログを表示するemit

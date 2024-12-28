@@ -126,7 +126,7 @@ import {
   OmikenEntry,
   PresetOmikenEditType,
   fetchJSONType,
-} from "@/type";
+} from "@type";
 import Swal from "sweetalert2";
 
 // props/emits

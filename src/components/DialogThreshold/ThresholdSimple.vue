@@ -70,7 +70,7 @@ import {
   SyokenCondition,
   AccessCondition,
   TypesType,
-} from "@/type";
+} from "@type";
 import {
   FunkThreshold,
   FunkThresholdInitial,

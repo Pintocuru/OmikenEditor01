@@ -5,7 +5,7 @@ import {
   SyokenCondition,
   TypesType,
   RulesType,
-} from "@/type";
+} from "@type";
 import { z } from "zod";
 import _ from "lodash";
 
@@ -137,24 +137,29 @@ export const omikujiPostSchema = z
 
 // omikujiのZodスキーマ
 const omikujiSchema = z.record(
-  baseSchema.merge(
-    z.object({
-      rank: z.number().int().nonnegative().default(1),
-      weight: z.number().int().nonnegative().default(1),
-      threshold: z.array(thresholdSchema).default([]),
-      status: z.string().optional(),
-      isDelete: z.boolean().default(false),
-      isSilent: z.boolean().default(false),
-      script: z
-        .object({
-          scriptId: z.string(),
-          parameter: z.string(),
-        })
-        .optional(),
-      placeIds: z.array(z.string()).default([]),
-      post: omikujiPostSchema.default([]),
+ baseSchema.merge(
+  z.object({
+   rank: z.number().int().nonnegative().default(1),
+   weight: z.number().int().nonnegative().default(1),
+   threshold: z.array(thresholdSchema).default([]),
+   status: z.string().optional(),
+   isSilent: z.boolean().default(false),
+   script: z
+    .object({
+     scriptId: z.string(),
+     parameter: z
+      .array(
+       z.object({
+        value: z.string() 
+       })
+      )
+      .default([]) 
     })
-  )
+    .optional(),
+   placeIds: z.array(z.string()).default([]),
+   post: omikujiPostSchema.default([])
+  })
+ )
 );
 
 // placeのZodスキーマ

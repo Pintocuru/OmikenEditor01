@@ -76,7 +76,7 @@ import {
   ListCategory,
   ListEntry,
   AppEditorType,
-} from "@/type";
+} from "@type";
 import DialogPlaceTextMode from "@/components/DialogPlaceTextMode.vue";
 import DialogPlaceEditor from "@/components/DialogPlaceEditor.vue";
 import Swal from "sweetalert2";

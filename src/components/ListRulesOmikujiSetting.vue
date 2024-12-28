@@ -59,7 +59,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import type { ListCategory, OmikenEntry, RulesType } from "@/type";
+import type { ListCategory, OmikenEntry, RulesType } from "@type";
 import { FunkRules } from "@/composables/FunkRules";
 
 const props = defineProps<{

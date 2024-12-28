@@ -49,7 +49,7 @@ import {
   FunkThreshold,
   FunkThresholdInitial,
 } from "@/composables/FunkThreshold";
-import { ThresholdType, TypesType } from "@/type";
+import { ThresholdType, TypesType } from "@type";
 
 const props = defineProps<{
   threshold: ThresholdType;

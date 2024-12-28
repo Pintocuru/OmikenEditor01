@@ -1,6 +1,6 @@
 // src/composables/funkJSON.ts
 import { ref } from 'vue';
-import { DataType, Mode, AppEditorType, OmikenType, ParamsType } from '@/type';
+import { DataType, Mode, AppEditorType, OmikenType, ParamsType } from '@type';
 import { configs } from '@/config';
 import { validateData } from '@/composables/FunkValidate';
 import _ from 'lodash';

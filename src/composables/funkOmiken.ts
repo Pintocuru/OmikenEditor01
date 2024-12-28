@@ -8,7 +8,7 @@ import type {
   ListCategory,
   PresetOmikenType,
   TypesType,
-} from "@/type";
+} from "@type";
 import { DataService, defaultAppEditor } from '@/composables/FunkJSON';
 import { validateData } from '@/composables/FunkValidate';
 import Swal from "sweetalert2";

@@ -31,7 +31,8 @@ export default defineConfig({
  define: { 'process.env': {} },
  resolve: {
   alias: {
-   '@': fileURLToPath(new URL('./src', import.meta.url))
+   '@': fileURLToPath(new URL('./src', import.meta.url)),
+   '@type': fileURLToPath(new URL('./src/type.ts', import.meta.url))
   },
   extensions: ['.ts', '.js', '.json', '.jsx', '.mjs', '.tsx', '.vue'],
   esbuild: {

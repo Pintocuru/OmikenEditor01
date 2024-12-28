@@ -44,7 +44,7 @@ import type {
   PresetType,
   CategoryActive,
   AppEditorType,
-} from "@/type";
+} from "@type";
 import { FunkEmits } from "@/composables/FunkEmits";
 
 // Props Emits

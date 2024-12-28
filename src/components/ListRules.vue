@@ -80,7 +80,7 @@ import  {
   ListEntry,
   CategoryActive,
   OmikenType,
-} from "@/type";
+} from "@type";
 import ListRulesOmikujiSetting from "@/components/ListRulesOmikujiSetting.vue";
 import ListRulesOmikujiView from "@/components/ListRulesOmikujiView.vue";
 import PartsToolbarAction from "@/components/common/PartsToolbarAction.vue";

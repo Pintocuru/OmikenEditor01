@@ -29,7 +29,7 @@ import type {
   AppEditorType,
   PlaceType,
   ListCategory,
-} from "@/type";
+} from "@type";
 import Swal from "sweetalert2";
 
 const props = defineProps<{

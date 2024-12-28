@@ -96,7 +96,7 @@ import type {
   ListEntry,
   ListCategory,
   AppEditorType,
-} from "@/type";
+} from "@type";
 import DialogOmikujiPost from "@/components/DialogOmikujiPost.vue";
 import { FunkThreshold } from "@/composables/FunkThreshold";
 import { FunkOmikuji } from "@/composables/FunkOmikuji";

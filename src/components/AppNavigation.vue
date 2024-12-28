@@ -41,7 +41,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { CategoryActive, OmikenType } from "@/type";
+import { CategoryActive, OmikenType } from "@type";
 
 // Props / Emit
 const props = defineProps<{

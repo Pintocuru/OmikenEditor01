@@ -109,7 +109,7 @@ import {
   OmikenEntry,
   OmikujiType,
   RulesType,
-} from "@/type";
+} from "@type";
 import PartsArrayAction from "@/components/common/PartsArrayAction.vue";
 import { FunkRules } from "@/composables/FunkRules";
 import { FunkOmikuji } from "@/composables/FunkOmikuji";

@@ -50,7 +50,7 @@ import type {
   AppEditorType,
   TypesType,
   RulesType,
-} from "@/type";
+} from "@type";
 import ThresholdMain from "@/components/DialogThreshold/ThresholdMain.vue";
 import DialogRulesColor from "@/components/DialogRulesColor.vue";
 import { FunkEmits } from "@/composables/FunkEmits";

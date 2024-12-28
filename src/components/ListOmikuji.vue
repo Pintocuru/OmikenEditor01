@@ -79,7 +79,7 @@ import type {
   OmikenEntry,
   OmikenType,
   CategoryActive,
-} from "@/type";
+} from "@type";
 import PartsArrayAction from "@/components/common/PartsArrayAction.vue";
 import { FunkOmikuji } from "@/composables/FunkOmikuji";
 import { FunkThreshold } from "@/composables/FunkThreshold";

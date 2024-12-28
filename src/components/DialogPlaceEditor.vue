@@ -51,7 +51,7 @@
 </template>
 
 <script setup lang="ts">
-import { PlaceValueType, PlaceType, ListEntry } from "@/type";
+import { PlaceValueType, PlaceType, ListEntry } from "@type";
 import PartsArrayRemovePlace from "@/components/common/PartsArrayRemovePlace.vue";
 import draggable from "vuedraggable";
 

@@ -21,7 +21,7 @@
 
 <script setup lang="ts">
 import { ref, defineProps, defineEmits, PropType } from "vue";
-import type { ListCategory } from "@/type";
+import type { ListCategory } from "@type";
 
 const props = defineProps({
   type: { type: String as PropType<ListCategory>, required: true }, // "omikuji" または "place"

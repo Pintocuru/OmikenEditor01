@@ -17,7 +17,7 @@
 </template>
 
 <script setup lang="ts">
-import { ListCategory, ListType, OmikenEntry,  } from "@/type";
+import { ListCategory, ListType, OmikenEntry,  } from "@type";
 import { cloneDeep } from "lodash";
 import Swal from "sweetalert2";
 

@@ -8,7 +8,7 @@ import {
   SyokenCondition,
   ThresholdType,
   TypesType,
-} from "@/type";
+} from "@type";
 
 // 設定項目一覧
 const THRESHOLD_ITEMS = [

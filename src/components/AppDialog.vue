@@ -49,7 +49,7 @@
 
 <script setup lang="ts">
 import { onMounted } from 'vue';
-import { ListEntry, ListCategory, OmikenEntry,  ListEntryCollect, OmikenType } from '@/type';
+import { ListEntry, ListCategory, OmikenEntry, ListEntryCollect, OmikenType } from '@/type';
 import DialogRules from '@/components/DialogRules.vue';
 import DialogOmikuji from '@/components/DialogOmikuji.vue';
 import DialogPlace from '@/components/DialogPlace.vue';
@@ -73,6 +73,7 @@ const { updateOmiken, openEditor } = FunkEmits(emit);
 // エディターコンポーネントを取得する関数
 const getEditComponent = (type: ListCategory, mode?: string | null) => {
  const editorMap: Record<ListCategory, any> = {
+  types: null,
   rules: DialogRules,
   omikujis: DialogOmikuji,
   places: DialogPlace
@@ -82,8 +83,8 @@ const getEditComponent = (type: ListCategory, mode?: string | null) => {
 
 // 同じ種類のアイテムリストを取得
 const getSiblingItems = (category: ListCategory, currentKey: string) => {
- if (category === 'rules') {
-  return props.Omiken.rulesOrder;
+ if (category === 'types') {
+  return [];
  } else {
   const items = Object.keys(props.Omiken[category]).sort((a, b) =>
    props.Omiken[category][a].name.localeCompare(props.Omiken[category][b].name)
@@ -107,6 +108,7 @@ const getSiblingKey = (category: ListCategory, currentKey: string, direction: 'p
 
 // アイテムの名前を取得
 const getSiblingName = (category: ListCategory, currentKey: string, direction: 'prev' | 'next') => {
+ if (category === 'types') return '';
  const nextKey = getSiblingKey(category, currentKey, direction);
  if (!nextKey) return '';
 
@@ -142,7 +144,8 @@ const closeDialog = (key: ListCategory) => {
 };
 
 // ダイアログの外部クリックで閉じる
-const closeClickOutside = (event: MouseEvent) => {
+onMounted(() => document.addEventListener('mousedown', closeClickOutside));
+function closeClickOutside(event: MouseEvent) {
  const target = event.target as Node;
  const dialogElement = event.currentTarget as HTMLElement;
  if (!dialogElement.contains(target)) {
@@ -152,10 +155,5 @@ const closeClickOutside = (event: MouseEvent) => {
    }
   });
  }
-};
-
-onMounted(() => {
- // 外部クリック時に起動
- document.addEventListener('mousedown', closeClickOutside);
-});
+}
 </script>

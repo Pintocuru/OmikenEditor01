@@ -80,7 +80,7 @@ import {
   OmikujiType,
   RulesType,
   ThresholdType,
-} from "@/type";
+} from "@type";
 import { FunkThreshold } from "../composables/FunkThreshold";
 import DialogThresholdInput from "./DialogThresholdInput.vue";
 

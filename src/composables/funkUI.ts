@@ -5,7 +5,7 @@ import type {
   ListCategory,
   ListEntry,
   ListEntryCollect,
-} from "@/type";
+} from "@type";
 
 export function FunkUI() {
   // UI
