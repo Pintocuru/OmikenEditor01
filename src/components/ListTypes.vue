@@ -19,14 +19,7 @@
           {{ Omiken.rules[ruleId]?.name }}
           <v-chip label class="ml-4"> {{ Omiken.rules[ruleId]?.enableIds.length }} items </v-chip>
          </v-toolbar-title>
-         <template #append>
-          <PartsToolbarAction
-           selectCategory="rules"
-           :item="Omiken.rules[ruleId]"
-           @edit="openEditorItem('rules', ruleId)"
-           @update:Omiken="updateOmiken"
-          />
-         </template>
+      
         </v-toolbar>
 
         <v-card-text class="list-group d-flex flex-wrap">

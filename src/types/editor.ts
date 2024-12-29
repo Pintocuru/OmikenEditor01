@@ -1,6 +1,6 @@
 // src/types/editor.ts
 import { OmikenTypeMap, OmikenType, TypesType } from './Omiken';
-import { CharaType, PresetType } from './preset';
+import { CharaType, PresetType, ScriptsType } from './preset';
 
 // エディター用型定義
 
@@ -9,7 +9,7 @@ export interface AppEditorType {
  Omiken: OmikenType;
  Presets: Record<string, OmikenType>; // preset:Omiken
  Charas: Record<string, CharaType>; // preset:Chara
- Scripts: Record<string, PresetType>; // preset:Script
+ Scripts: Record<string, ScriptsType>; // preset:Script
 }
 
 // メインカテゴリーの型

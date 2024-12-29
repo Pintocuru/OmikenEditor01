@@ -68,12 +68,6 @@ interface Section {
 // セクション情報の計算
 const sections = computed<Section[]>(() => [
   {
-    title: "モード",
-    icon: "",
-    itemCount: 0,
-    category: { main: "types" },
-  },
-  {
     title: "ルール",
     icon: "mdi-book-open-variant",
     itemCount:  Object.keys(props.Omiken.rules || {}).length,

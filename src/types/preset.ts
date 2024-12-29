@@ -35,6 +35,12 @@ export interface CharaType extends BaseType {
 
 // ---
 
+export interface ScriptsType {
+ func: (visit: visitDataType, game: GameType, comment?: Comment, params?: ScriptParam[]) => ScriptsReturnType;
+ scriptParams: ScriptParam[];
+ placeholders: ScriptParam[];
+}
+
 // Script全体の型定義
 export type ScriptsParamType = (
  visit: visitDataType,
@@ -44,20 +50,14 @@ export type ScriptsParamType = (
 ) => ScriptsReturnType;
 
 // Scriptの返り値
-export type ScriptsReturnType = {
- scriptParam?: ScriptParam[]; // ゲームパラメータ
+export interface ScriptsReturnType {
  postArray?: OneCommePostType[];
- placeholder: Placeholder; // プレースホルダー
+ placeholder: { [id: string]: string | number };
  game: GameType;
  visitData: visitDataType;
-};
+}
 
 // gameのパラメータ設定用
 export interface ScriptParam extends BaseType {
  value: string; // 入る値
 }
-
-type Placeholder = {
- message: string; // 全体のメッセージ
- [key: string]: string; // 任意のプレースホルダー（動的キー）
-};

@@ -15,7 +15,7 @@
           </v-text-field>
         </v-col>
         <v-col cols="4" sm="auto">
-          <DialogRulesColor
+          <PartsToolbarColor
             v-model="currentItem.color"
             @update:model-value="updateItem"
           />
@@ -52,7 +52,7 @@ import type {
   RulesType,
 } from "@type";
 import ThresholdMain from "@/components/DialogThreshold/ThresholdMain.vue";
-import DialogRulesColor from "@/components/DialogRulesColor.vue";
+import PartsToolbarColor from "@/components/common/PartsToolbarColor.vue";
 import { FunkEmits } from "@/composables/FunkEmits";
 
 // props/emits

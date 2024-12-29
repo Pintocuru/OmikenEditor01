@@ -1,6 +1,6 @@
-<!-- components/DialogRulesColor.vue -->
+<!-- components/common/PartsToolbarColor.vue -->
 <template>
-  <v-btn :color="modelValue" icon variant="elevated" @click="dialog = true">
+  <v-btn  class="ml-4" :color="modelValue" icon variant="flat" @click="dialog = true">
     <v-icon>mdi-palette</v-icon>
     <v-tooltip activator="parent" location="bottom">
       このルールに合う色を選びます。

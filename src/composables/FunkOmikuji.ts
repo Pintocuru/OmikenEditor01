@@ -12,12 +12,12 @@ export function FunkOmikuji() {
   const POST_TYPES: Record<PostTypeKey, { color: string; label: string }> = {
     onecomme: { color: "orange", label: "わんコメ" },
     party: { color: "deep-orange", label: "WordParty" },
-    toast: { color: "blue", label: "トースト" },
     speech: { color: "green", label: "スピーチ" },
+    error: { color: "red", label: "システムエラー" },
   };
 
   // 投稿タイプに応じた色を取得する関数
-  type PostTypeKey = "onecomme" | "party" | "toast" | "speech";
+  type PostTypeKey = OneCommePostType["type"];
   const getTypeColor = (type: PostTypeKey): string =>
     POST_TYPES[type]?.color || "grey";
   const getTypeLabel = (type: PostTypeKey): string =>

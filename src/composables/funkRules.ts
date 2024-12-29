@@ -1,129 +1,173 @@
 // src/composables/funkRules.ts
 
-import { computed, inject, Ref } from "vue";
-import { AppEditorType, OmikenType } from "@type";
+import { computed, inject, Ref } from 'vue';
+import { AppEditorType, OmikenType } from '@type';
 
 export function FunkRules() {
-  // inject
-  const AppEditor = inject<Ref<AppEditorType>>("AppEditorKey");
-  const omikuji = computed(() => AppEditor?.value.Omiken.omikujis ?? {});
+ // inject
+ const AppEditor = inject<Ref<AppEditorType>>('AppEditorKey');
+ const omikuji = computed(() => AppEditor?.value.Omiken.omikujis ?? {});
 
-  // 定数
-  const SWITCH_CONFIG = {
-    labels: ["無効", "だれでも", "メンバー", "モデレーター", "管理者"],
-    colors: ["", "yellow", "green", "blue", "red"],
-  };
+ // 定数
+ const SWITCH_CONFIG = {
+  labels: ['無効', 'だれでも', 'メンバー', 'モデレーター', '管理者'],
+  colors: ['', 'yellow', 'green', 'blue', 'red']
+ };
 
-  const COLORS = {
-    VERY_HIGH: "red",
-    HIGH: "orange",
-    SLIGHTLY_HIGH: "yellow",
-    MEDIUM: "green",
-    SLIGHTLY_LOW: "cyan",
-    LOW: "blue",
-    VERY_LOW: "purple",
-    ZERO: "gray",
-  };
+ const COLORS = {
+  VERY_HIGH: 'red',
+  HIGH: 'orange',
+  SLIGHTLY_HIGH: 'yellow',
+  MEDIUM: 'green',
+  SLIGHTLY_LOW: 'cyan',
+  LOW: 'blue',
+  VERY_LOW: 'purple',
+  ZERO: 'gray'
+ };
 
-  // switch名とカラーの取得
-  const getSwitchLabel = (switchValue: number) =>
-    SWITCH_CONFIG.labels[switchValue] || "Unknown";
-  const getSwitchColor = (switchValue: number) =>
-    SWITCH_CONFIG.colors[switchValue] || "";
+ // switch名とカラーの取得
+ const getSwitchLabel = (switchValue: number) => SWITCH_CONFIG.labels[switchValue] || 'Unknown';
+ const getSwitchColor = (switchValue: number) => SWITCH_CONFIG.colors[switchValue] || '';
 
-  // omikujiのリスト
-  const omikujiLists = computed(() => {
-    return Object.entries(omikuji.value || {}).map(([id, omikuji]) => ({
-      id,
-      name: omikuji.name,
-      weight: omikuji.weight,
-    }));
+ // omikujiのリスト
+ const omikujiLists = computed(() => {
+  return Object.entries(omikuji.value || {}).map(([id, omikuji]) => ({
+   id,
+   name: omikuji.name,
+   weight: omikuji.weight
+  }));
+ });
+
+ // 有効なomikujiのリスト
+ const enabledOmikujiLists = (enableIds: string[] = []) => {
+  const isAllEnabled = enableIds.length === 0;
+  return isAllEnabled ? omikujiLists.value : omikujiLists.value.filter((option) => enableIds.includes(option.id));
+ };
+
+ const chipColors = (enableIds: string[]) => {
+  return Object.keys(omikuji).map((id) => ({
+   id,
+   color: weightColor.value(id, enableIds)
+  }));
+ };
+
+ // weight合計を計算
+ const weightTotal = computed(
+  () => (enableIds: string[], rank: number) =>
+   enableIds.reduce((sum, id) => {
+    const item = omikuji.value[id];
+    return item && item.rank === rank ? sum + (item.weight ?? 0) : sum;
+   }, 0)
+ );
+
+ // totalWeightの割合を計算
+ const weightPercentage = computed(() => (optionId: string, enableIds: string[]) => {
+  const item = omikuji.value[optionId];
+  if (!item) return 0; // 該当するエントリがない場合は0を返す
+  const rank = item.rank;
+  const weight = item.weight ?? 0;
+  const total = weightTotal.value(enableIds, rank);
+
+  // Thresholdがすべて空の場合、一番高いRank以外のWeightを0%とする
+  if (isAllThresholdEmpty(optionId)) {
+   // 最も高いRankのWeight以外を0にする処理
+   const maxRank = Math.max(...enableIds.map((id) => omikuji.value[id]?.rank).filter((rank) => rank !== undefined));
+   if (item.rank !== maxRank) {
+    return 0;
+   }
+  }
+  return total > 0 ? parseFloat(((weight / total) * 100).toFixed(1)) : 0;
+ });
+
+ // rankの異なる種類の数を計算
+ const rankCount = computed(() => (enableIds: string[]) => {
+  const ranks = new Set<number>(); // ユニークなrankを保持するSet
+  enableIds.forEach((id) => {
+   const item = omikuji.value[id];
+   if (item?.rank !== undefined) {
+    ranks.add(item.rank);
+   }
+  });
+  return ranks.size; // ユニークなrankの数を返す
+ });
+
+ // rankの順位を計算
+ const rankPositions = computed(() => (enableIds: string[]) => {
+  const ranks = Array.from(
+   new Set(enableIds.map((id) => omikuji.value[id]?.rank).filter((rank) => rank !== undefined))
+  ).sort((a, b) => a! - b!); // 重複を排除し、昇順にソート
+
+  const rankMap: Record<number, number> = {};
+  ranks.forEach((rank, index) => {
+   if (rank !== undefined) {
+    rankMap[rank] = index + 1; // 最も低いrankを1位とする
+   }
   });
 
-  // 有効なomikujiのリスト
-  const enabledOmikujiLists = (enableIds: string[] = []) => {
-    const isAllEnabled = enableIds.length === 0;
-    return isAllEnabled
-      ? omikujiLists.value
-      : omikujiLists.value.filter((option) => enableIds.includes(option.id));
-  };
+  return rankMap; // { rank値: 順位 } のオブジェクトを返す
+ });
 
-  const chipColors = (enableIds: string[]) => {
-    return Object.keys(omikuji).map((id) => ({
-      id,
-      color: weightColor.value(id, enableIds),
-    }));
-  };
+ // 現在のrankが何位かを取得
+ const rankPositionGet = computed(() => (optionId: string, enableIds: string[]) => {
+  const item = omikuji.value[optionId];
+  if (!item) return null; // 該当するエントリがない場合はnullを返す
+  const rank = item.rank;
+  const rankPositionsMap = rankPositions.value(enableIds);
+  return rankPositionsMap[rank] ?? null; // rankの順位を返す
+ });
 
-  // weight合計を計算
-  const weightTotal = computed(
-    () => (enableIds: string[]) =>
-      enableIds.reduce((sum, id) => sum + (omikuji.value[id]?.weight ?? 0), 0)
-  );
+ // すべてのthresholdが空かどうかをチェック
+ function isAllThresholdEmpty(omikujiId: string): boolean {
+    const thresholds = omikuji.value[omikujiId]?.threshold ?? [];
+    return thresholds.every((threshold) => threshold === null || threshold === undefined);
+  }
 
-  // totalWeightの割合を計算
-  const weightPercentage = computed(
-    () => (optionId: string, enableIds: string[]) => {
-      const weight = omikuji.value[optionId]?.weight ?? 0;
-      const total = weightTotal.value(enableIds);
-      return total > 0 ? parseFloat(((weight / total) * 100).toFixed(1)) : 0;
-    }
-  );
+ // v-chipに色を付与
+ const weightColor = computed(() => (optionId: string, enableIds: string[]) => {
+  const percentage = weightPercentage.value(optionId, enableIds);
+  if (percentage === 0) return COLORS.ZERO;
 
-  // v-chipに色を付与
-  const weightColor = computed(
-    () => (optionId: string, enableIds: string[]) => {
-      const percentage = weightPercentage.value(optionId, enableIds);
-      if (percentage === 0) return COLORS.ZERO;
+  const weights = enableIds.map((id) => weightPercentage.value(id, enableIds)).filter((w) => w > 0);
+  const avg = weights.reduce((sum, w) => sum + w, 0) / weights.length;
+  const std = Math.sqrt(weights.reduce((sum, w) => sum + Math.pow(w - avg, 2), 0) / weights.length);
 
-      const weights = enableIds
-        .map((id) => weightPercentage.value(id, enableIds))
-        .filter((w) => w > 0);
-      const avg = weights.reduce((sum, w) => sum + w, 0) / weights.length;
-      const std = Math.sqrt(
-        weights.reduce((sum, w) => sum + Math.pow(w - avg, 2), 0) /
-          weights.length
-      );
+  if (percentage >= avg + std * 2.4) return COLORS.VERY_HIGH;
+  if (percentage >= avg + std * 1.6) return COLORS.HIGH;
+  if (percentage >= avg + std * 0.8) return COLORS.SLIGHTLY_HIGH;
+  if (percentage >= avg - std * 0.8) return COLORS.MEDIUM;
+  if (percentage >= avg - std * 1.6) return COLORS.SLIGHTLY_LOW;
+  if (percentage >= avg - std * 2.4) return COLORS.LOW;
+  return COLORS.VERY_LOW;
+ });
 
-      if (percentage >= avg + std * 2.4) return COLORS.VERY_HIGH;
-      if (percentage >= avg + std * 1.6) return COLORS.HIGH;
-      if (percentage >= avg + std * 0.8) return COLORS.SLIGHTLY_HIGH;
-      if (percentage >= avg - std * 0.8) return COLORS.MEDIUM;
-      if (percentage >= avg - std * 1.6) return COLORS.SLIGHTLY_LOW;
-      if (percentage >= avg - std * 2.4) return COLORS.LOW;
-      return COLORS.VERY_LOW;
-    }
-  );
+ // rulesのenableIds に入っているomikujiのプレースホルダーを探す
+ const rulesOfPlaces = (Omiken: OmikenType, enableIds?: string[]) =>
+  computed(() => {
+   if (!enableIds) return Object.values(Omiken.places);
 
-  // rulesのenableIds に入っているomikujiのプレースホルダーを探す
-  const rulesOfPlaces = (Omiken: OmikenType, enableIds?: string[]) =>
-    computed(() => {
-      if (!enableIds) return Object.values(Omiken.places);
-
-      const usedPlaceNames = enableIds
-        .flatMap((id) => Omiken.omikujis[id]?.post ?? [])
-        .flatMap((post) => {
-          const matches = post.content?.match(/<<([^>>]+)>>/g) ?? [];
-          return matches.map((m) => m.replace(/<<|>>/g, ""));
-        });
-
-      return Object.values(Omiken.places).filter((place) =>
-        usedPlaceNames.includes(place.name)
-      );
+   const usedPlaceNames = enableIds
+    .flatMap((id) => Omiken.omikujis[id]?.post ?? [])
+    .flatMap((post) => {
+     const matches = post.content?.match(/<<([^>>]+)>>/g) ?? [];
+     return matches.map((m) => m.replace(/<<|>>/g, ''));
     });
 
-  return {
-    chipColors,
-    switchLabels: Object.fromEntries(
-      SWITCH_CONFIG.labels.map((label, i) => [i, label])
-    ),
-    weightTotal,
-    weightPercentage,
-    getSwitchLabel,
-    getSwitchColor,
-    omikujiLists,
-    enabledOmikujiLists,
-    weightColor,
-    rulesOfPlaces,
-  };
+   return Object.values(Omiken.places).filter((place) => usedPlaceNames.includes(place.name));
+  });
+
+ return {
+  chipColors,
+  switchLabels: Object.fromEntries(SWITCH_CONFIG.labels.map((label, i) => [i, label])),
+  weightTotal,
+  weightPercentage,
+  rankCount,
+  rankPositionGet,
+  isAllThresholdEmpty,
+  getSwitchLabel,
+  getSwitchColor,
+  omikujiLists,
+  enabledOmikujiLists,
+  weightColor,
+  rulesOfPlaces
+ };
 }

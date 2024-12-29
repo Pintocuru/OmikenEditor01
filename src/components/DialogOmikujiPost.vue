@@ -182,7 +182,7 @@ const updateOmikenOmikuji = () => {
  if (props.currentItem) {
   emit('update:Omiken', {
    type: 'omikujis',
-   update: { [props.currentItem.id]: props.currentItem }
+   update: props.currentItem 
   });
  }
 };
