@@ -83,6 +83,7 @@ declare module 'vue' {
     PartsArrayRemove: typeof import('./src/components/common/PartsArrayRemove.vue')['default']
     PartsArrayRemovePlace: typeof import('./src/components/common/PartsArrayRemovePlace.vue')['default']
     PartsArrayRemoveRules: typeof import('./src/components/common/PartsArrayRemoveRules.vue')['default']
+    PartsNameEditor: typeof import('./src/components/common/PartsNameEditor.vue')['default']
     PartsToolbarAction: typeof import('./src/components/common/PartsToolbarAction.vue')['default']
     PartsToolbarColor: typeof import('./src/components/common/PartsToolbarColor.vue')['default']
     PartsToolbarMove: typeof import('./src/components/common/PartsToolbarMove.vue')['default']

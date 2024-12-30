@@ -1,23 +1,22 @@
 <!-- src/components/DialogOmikuji/DialogOmikujiPost.vue -->
 <template>
  <!-- プレースホルダーの説明 -->
- <DialogOmikujiPostDescription :currentItem="currentItem"    @open-editor="openEditor" />
+ <DialogOmikujiPostDescription :currentItem="currentItem" @open-editor="openEditor" />
 
  <!-- postメイン -->
  <v-expansion-panels multiple>
   <v-expansion-panel v-for="(post, index) in currentItem.post" :key="index">
    <v-expansion-panel-title hide-actions :color="getPostColor(post)">
     <v-toolbar density="compact" color="transparent">
+     <!-- post種類 -->
      <v-chip variant="flat" :color="getTypeColor(post.type)">
       {{ getTypeLabel(post.type) }}
      </v-chip>
-
+     <!-- 画像がある場合 -->
      <v-img v-if="isCharacterPost(post.type)" :src="getCharaImage(post)" max-height="80" max-width="80" class="ml-2" />
-
-     <v-toolbar-title>
-      {{ post.content }}
-     </v-toolbar-title>
-
+     <!-- postタイトル -->
+     <v-toolbar-title> {{ post.content }} </v-toolbar-title>
+     <!-- 遅延 -->
      <v-chip variant="flat" color="while">
       <v-icon class="mr-2">mdi-clock-outline</v-icon>
       <span class="font-weight-bold">{{ post.delaySeconds }}秒</span>
@@ -27,6 +26,7 @@
    <v-expansion-panel-text>
     <v-row dense>
      <v-col cols="6" sm="3">
+      <!-- 種類セレクト -->
       <v-select
        v-model="post.type"
        :items="onecommeTypeItems"
@@ -39,6 +39,7 @@
       </v-select>
      </v-col>
      <v-col cols="6" sm="3" v-if="isCharacterPost(post.type)">
+      <!-- Botキー -->
       <v-select
        v-model="post.botKey"
        :items="botKeyItems"
@@ -51,6 +52,7 @@
       </v-select>
      </v-col>
      <v-col cols="6" sm="3" v-if="isCharacterPost(post.type)">
+      <!-- アイコンキー -->
       <v-select
        v-model="post.iconKey"
        :items="getIconKeyItems(post.botKey)"
@@ -63,6 +65,7 @@
       </v-select>
      </v-col>
      <v-col cols="12" sm="3">
+      <!-- 遅延設定 -->
       <v-text-field
        v-model.number="post.delaySeconds"
        label="遅延時間(秒)"
@@ -76,6 +79,7 @@
      </v-col>
     </v-row>
     <v-sheet>
+     <!-- メッセージ内容編集 -->
      <v-text-field
       v-model="post.content"
       label="内容"
@@ -83,7 +87,7 @@
       auto-grow
       @input="updateOmikenEntry('omikujis', currentItem)"
      />
-
+     <!-- 遅延編集スライダー -->
      <v-slider
       v-model.number="post.delaySeconds"
       prepend-icon="mdi-alarm"
@@ -97,25 +101,32 @@
      />
     </v-sheet>
 
+    <!-- 発動するWordParty -->
+    <v-select
+     v-if="isCharacterPost(post.type)"
+     v-model="post.party"
+     :items="charaParty(post.botKey) ?? []"
+     label="発動するWordParty"
+     item-title="text"
+     item-value="value"
+     density="compact"
+     @update:modelValue="updateOmikenEntry('omikujis', currentItem)"
+    >
+    </v-select>
+
+    <!-- マニアック:BOTのメッセージを読み上げない -->
+    <v-switch label="消音モード" v-model="post.isSilent"></v-switch>
+
+    <!-- マニアック:ジェネレーターに渡す引数編集 -->
+    <v-text-field
+     v-model="post.generatorParam"
+     label="ジェネレーターに渡す引数"
+     rows="2"
+     auto-grow
+     @input="updateOmikenEntry('omikujis', currentItem)"
+    />
+
     <v-sheet class="d-flex justify-space-between align-center">
-     <v-tooltip
-      v-for="(name, index) in extractValidPlaceholders(post.content).validPlaceholders"
-      :key="index"
-      text="クリックでエディターを開く"
-      location="bottom"
-     >
-      <template v-slot:activator="{ props: tooltipProps }">
-       <v-chip
-        v-bind="tooltipProps"
-        class="me-2"
-        color="primary"
-        variant="outlined"
-        @click="openEditorItem('places', extractValidPlaceholders(post.content).placeholderIds[index])"
-       >
-        {{ name }}
-       </v-chip>
-      </template>
-     </v-tooltip>
      <!-- 複製・削除ボタン -->
      <PartsArrayRemove
       type="omikujis"
@@ -137,7 +148,7 @@
 
 <script setup lang="ts">
 import { inject, Ref } from 'vue';
-import type { ListCategory, ListEntry, OmikujiType, OmikenEntry, OneCommePostType, AppEditorType } from '@/type';
+import { ListCategory, ListEntry, OmikujiType, OmikenEntry, OneCommePostType, AppEditorType } from '@/type';
 import DialogOmikujiPostDescription from '@/components/DialogOmikuji/DialogOmikujiPostDescription.vue';
 import PartsArrayRemove from '@/components/common/PartsArrayRemove.vue';
 import { FunkOmikuji } from '@/composables/FunkOmikuji';
@@ -154,12 +165,10 @@ const emit = defineEmits<{
 
 // inject
 const AppEditor = inject<Ref<AppEditorType>>('AppEditorKey');
-const places = AppEditor?.value.Omiken.places;
 const Charas = AppEditor?.value.Charas;
-const Scripts = AppEditor?.value.Scripts;
 
 // コンポーザブル:FunkEmits
-const { updateOmiken, openEditorItem, openEditor,updateOmikenEntry } = FunkEmits(emit);
+const { updateOmiken,  openEditor, updateOmikenEntry } = FunkEmits(emit);
 
 const {
  // Post type utilities
@@ -176,6 +185,12 @@ const {
 
  extractValidPlaceholders
 } = FunkOmikuji();
+
+// CharaParty
+const charaParty = (botKey?: string) => {
+  if (!botKey || !Charas?.[botKey]?.party) return [];
+  return Charas[botKey].party;
+};
 
 // postに追加
 const addPost = (position = 'bottom') => {

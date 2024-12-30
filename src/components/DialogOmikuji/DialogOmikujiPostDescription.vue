@@ -11,9 +11,9 @@
         :class="{ 'cursor-pointer': placeholder.isEditable }"
         @click="placeholder.isEditable && openEditorItem('places', placeholder.key)"
        >
-        {{ placeholder.id }}
+        <<{{ placeholder.id }}>>
        </span>
-       <span class="pa-2 mt-2">>></span>
+       <span class="pa-2 mt-2"> : </span>
        <i>{{ placeholder.value }}</i>
       </v-list-item-title>
       <v-list-item-subtitle>{{ placeholder.description }}</v-list-item-subtitle>

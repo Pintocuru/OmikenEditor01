@@ -1,8 +1,12 @@
 <!-- src/components/DialogOmikuji/DialogOmikuji.vue -->
 <template>
  <v-card v-if="currentItem" style="max-height: 80vh; overflow-y: auto">
+  <!-- ツールバーの変更 -->
   <v-toolbar :color="themeColor">
-   <v-toolbar-title> {{ currentItem.name }} </v-toolbar-title>
+   <v-toolbar-title>
+    {{ currentItem.name }}
+    <PartsNameEditor type="omikujis" :currentItem="currentItem" @update:Omiken="updateOmiken" />
+   </v-toolbar-title>
    <template #append>
     {{ currentItem.description }}
    </template>
@@ -26,25 +30,6 @@
      />
     </v-tabs-window>
 
-    <!-- 基本情報 -->
-    <v-row dense>
-     <v-col cols="12" sm="4">
-      <v-text-field v-model="currentItem.name" label="結果名" @input="updateOmikenEntry('omikujis', currentItem)">
-       <v-tooltip activator="parent" location="bottom">
-        おみくじの結果の名称（ラベル）を入力してください。<br />
-        例: 「大吉」「中吉」「小吉」など。
-       </v-tooltip>
-      </v-text-field>
-     </v-col>
-
-     <v-col cols="12" sm="8">
-      <v-text-field
-       v-model="currentItem.description"
-       label="説明文"
-       @input="updateOmikenEntry('omikujis', currentItem)"
-      />
-     </v-col>
-    </v-row>
    </v-form>
   </v-card-text>
  </v-card>
@@ -59,6 +44,7 @@ import DialogOmikujiThreshold from '@/components/DialogOmikuji/DialogOmikujiThre
 import DialogOmikujiStatus from '@/components/DialogOmikuji/DialogOmikujiStatus.vue';
 import DialogOmikujiPlaces from '@/components/DialogOmikuji/DialogOmikujiPlaces.vue';
 import DialogOmikujiScripts from '@/components/DialogOmikuji/DialogOmikujiScripts.vue';
+import PartsNameEditor from '@/components/common/PartsNameEditor.vue';
 import { FunkOmikuji } from '@/composables/FunkOmikuji';
 import { FunkEmits } from '@/composables/FunkEmits';
 
