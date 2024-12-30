@@ -60,7 +60,7 @@
     <!-- 条件タイプに応じたコンポーネント -->
     <component
      :is="getComponent"
-     :threshold="thresholds[currentIndex]"
+     :threshold="{ ...FunkThresholdInitial(), ...thresholds[currentIndex] }"
      :type="type"
      @update:threshold="updateThreshold"
     />
@@ -127,6 +127,7 @@ const getComponent = computed(() => {
   coolDown: ThresholdSimple,
   syoken: ThresholdSimple,
   access: ThresholdSimple,
+  gift: ThresholdSimple,
   count: ThresholdCount,
   match: ThresholdMatch
  };

@@ -126,7 +126,7 @@ export interface ThresholdType {
 }
 
 // condition選択用
-export type ConditionType = 'target' | 'coolDown' | 'syoken' | 'access' | 'count' | 'match';
+export type ConditionType = 'target' | 'coolDown' | 'syoken' | 'access' | 'gift' | 'count' | 'match';
 
 // syoken:初見・コメント履歴の種別
 export enum SyokenCondition {
