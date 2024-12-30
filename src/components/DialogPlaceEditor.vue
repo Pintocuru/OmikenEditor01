@@ -1,91 +1,60 @@
 <!-- src/components/DialogPlaceEditor.vue -->
 <template>
-  <v-list density="compact">
-    <draggable
-      :model-value="currentItem.values"
-      item-key="id"
-      handle=".handle"
-      @update:model-value="updateItem"
-      @end="handleDragEnd"
-    >
-      <template #item="{ element: value, index }">
-        <v-list-item>
-          <v-row align="center" no-gutters>
-            <v-col cols="auto" class="me-1">
-              <v-icon class="handle" color="grey">mdi-drag</v-icon>
-            </v-col>
-            <v-col
-              :cols="isWeightMode ? 2 : 0"
-              v-if="isWeightMode"
-              class="me-2"
-            >
-              <v-text-field
-                v-model.number="value.weight"
-                label="重み"
-                type="number"
-                @update:model-value="updateValue(index, 'weight', $event)"
-              />
-            </v-col>
-            <v-col>
-              <v-text-field
-                v-model="value.value"
-                label="値"
-                @update:model-value="updateValue(index, 'value', $event)"
-              />
-            </v-col>
-            <v-col cols="auto">
-              <PartsArrayRemovePlace
-                type="omikujis"
-                :currentItem="currentItem"
-                :index="index"
-                size="32"
-                v-model:array="currentItem.values"
-                @update:array="handleArrayUpdate(index, $event)"
-              />
-            </v-col>
-          </v-row>
-        </v-list-item>
-      </template>
-    </draggable>
-  </v-list>
+ <v-list density="compact">
+  <draggable
+   v-model="currentItem.values"
+   item-key="id"
+   handle=".handle"
+   @end="updateOmikenEntry('places', currentItem)"
+  >
+   <template #item="{ element: value, index }">
+    <v-list-item>
+     <v-row align="center" no-gutters>
+      <v-col cols="auto" class="me-1">
+       <v-icon class="handle" color="grey">mdi-drag</v-icon>
+      </v-col>
+      <v-col cols="2" class="me-2">
+       <v-text-field
+        v-model.number="value.weight"
+        label="重み"
+        type="number"
+        @update:model-value="updateOmikenEntry('places', currentItem)"
+       />
+      </v-col>
+      <v-col>
+       <v-text-field v-model="value.value" label="値" @update:model-value="updateOmikenEntry('places', currentItem)" />
+      </v-col>
+      <v-col cols="auto">
+       <PartsArrayRemovePlace
+        type="omikujis"
+        :currentItem="currentItem"
+        :index="index"
+        size="32"
+        v-model:array="currentItem.values"
+        @update:array="updateOmikenEntry('places', currentItem)"
+       />
+      </v-col>
+     </v-row>
+    </v-list-item>
+   </template>
+  </draggable>
+ </v-list>
 </template>
 
 <script setup lang="ts">
-import { PlaceValueType, PlaceType, ListEntry } from "@type";
-import PartsArrayRemovePlace from "@/components/common/PartsArrayRemovePlace.vue";
-import draggable from "vuedraggable";
+import { PlaceType, ListEntry, OmikenEntry, ListCategory } from '@type';
+import PartsArrayRemovePlace from '@/components/common/PartsArrayRemovePlace.vue';
+import { FunkEmits } from '@/composables/FunkEmits';
+import draggable from 'vuedraggable';
 
 const props = defineProps<{
-  entry: ListEntry<"places"> | null;
-  currentItem: PlaceType;
-  isWeightMode: boolean;
+ currentItem: PlaceType;
 }>();
 
 const emit = defineEmits<{
-  (e: "update:modelValue", value: PlaceValueType[]): void;
+ (e: 'update:Omiken', payload: OmikenEntry<ListCategory>): void;
 }>();
 
-// 値の更新処理を統合
-const updateItem = (updatedValues: PlaceValueType[]) => {
-  emit("update:modelValue", updatedValues);
-};
-
-// 各種ハンドラー
-const updateValue = (
-  index: number,
-  field: keyof PlaceValueType,
-  value: any
-) => {
-  const newValues = props.currentItem.values.map((item, i) =>
-    i === index ? { ...item, [field]: value } : item
-  );
-  emit("update:modelValue", newValues);
-};
-
-const handleDragEnd = () => {
-  emit("update:modelValue", [...props.currentItem.values]);
-};
-const handleArrayUpdate = (index: number, newArray: PlaceValueType[]) => {
-  emit("update:modelValue", newArray);
-};
+// コンポーザブル:FunkEmits
+const { updateOmikenEntry } = FunkEmits(emit);
 </script>

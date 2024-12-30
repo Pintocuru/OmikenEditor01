@@ -12,42 +12,48 @@ import {
 
 // 設定項目一覧
 const THRESHOLD_ITEMS = [
-  {
-    label: "多重投稿",
-    value: "target",
-    icon: "",
-    description: "前回と今回のおみくじが同じ人かを判定",
-  },
-  {
-    label: "クールダウン",
-    value: "coolDown",
-    icon: "",
-    description: "一定の時間(秒)経過していなければ対象",
-  },
-  {
-    label: "初見・久しぶり",
-    value: "syoken",
-    icon: "mdi-account-clock",
-    description: "初見判定ちゃん。配信枠の最初のコメントを判定",
-  },
-  {
-    label: "メンバー・モデレーター判定",
-    value: "access",
-    icon: "mdi-account-check",
-    description: "メンバーシップやモデレーター権限を判定",
-  },
-  {
-    label: "カウント・ギフト",
-    value: "count",
-    icon: "mdi-comment-multiple",
-    description: "ギフト金額や回数など、数に関する判定",
-  },
-  {
-    label: "キーワード",
-    value: "match",
-    icon: "mdi-text-search",
-    description: "コメントやステータスを判定",
-  },
+ {
+  label: '多重投稿',
+  value: 'target',
+  icon: 'mdi-account-multiple-check',
+  description: '前回と今回のおみくじが同じ人かを判定'
+ },
+ {
+  label: 'クールダウン',
+  value: 'coolDown',
+  icon: 'mdi-timer-sand',
+  description: '一定の時間(秒)経過していなければ対象'
+ },
+ {
+  label: '初見・久しぶり',
+  value: 'syoken',
+  icon: 'mdi-account-clock',
+  description: '初見判定ちゃん。配信枠の最初のコメントを判定'
+ },
+ {
+  label: 'メンバー・モデレーター判定',
+  value: 'access',
+  icon: 'mdi-account-check',
+  description: 'メンバーシップやモデレーター権限を判定'
+ },
+ {
+  label: 'ギフト',
+  value: 'gift',
+  icon: 'mdi-gift-outline',
+  description: 'ギフトやメンバー加入に関する判定'
+ },
+ {
+  label: 'カウント・ギフト',
+  value: 'count',
+  icon: 'mdi-comment-multiple',
+  description: 'おみくじ回数など、数に関する判定'
+ },
+ {
+  label: 'キーワード',
+  value: 'match',
+  icon: 'mdi-text-search',
+  description: 'コメントやステータスを判定'
+ }
 ];
 
 // 説明リスト

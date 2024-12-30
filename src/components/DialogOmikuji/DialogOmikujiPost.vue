@@ -25,7 +25,7 @@
    </v-expansion-panel-title>
    <v-expansion-panel-text>
     <v-row dense>
-     <v-col cols="6" sm="3">
+     <v-col cols="12" sm="3">
       <!-- 種類セレクト -->
       <v-select
        v-model="post.type"
@@ -33,12 +33,25 @@
        label="投稿の種類"
        item-title="text"
        item-value="value"
-       density="compact"
        @update:modelValue="updateOmikenEntry('omikujis', currentItem)"
       >
       </v-select>
      </v-col>
-     <v-col cols="6" sm="3" v-if="isCharacterPost(post.type)">
+
+     <v-col cols="12" sm="9">
+      <!-- メッセージ内容編集 -->
+      <v-text-field
+       v-model="post.content"
+       label="内容"
+       rows="2"
+       auto-grow
+       @input="updateOmikenEntry('omikujis', currentItem)"
+      />
+     </v-col>
+    </v-row>
+
+    <v-row dense v-if="isCharacterPost(post.type)">
+     <v-col cols="12" sm="4">
       <!-- Botキー -->
       <v-select
        v-model="post.botKey"
@@ -51,7 +64,7 @@
       >
       </v-select>
      </v-col>
-     <v-col cols="6" sm="3" v-if="isCharacterPost(post.type)">
+     <v-col cols="12" sm="4">
       <!-- アイコンキー -->
       <v-select
        v-model="post.iconKey"
@@ -63,6 +76,38 @@
        @update:modelValue="updateOmikenEntry('omikujis', currentItem)"
       >
       </v-select>
+     </v-col>
+     <v-col cols="12" sm="4">
+      <!-- 発動するWordParty -->
+      <v-select
+       v-if="isCharacterPost(post.type)"
+       v-model="post.party"
+       :items="charaParty(post.botKey) ?? []"
+       label="発動するWordParty"
+       item-title="text"
+       item-value="value"
+       density="compact"
+       clearable
+       @update:modelValue="updateOmikenEntry('omikujis', currentItem)"
+      >
+      </v-select>
+     </v-col>
+    </v-row>
+
+    <v-row dense>
+     <v-col cols="12" sm="9">
+      <!-- 遅延編集スライダー -->
+      <v-slider
+       v-model.number="post.delaySeconds"
+       prepend-icon="mdi-alarm"
+       :thumb-size="24"
+       thumb-label="always"
+       class="pa-2"
+       min="-1"
+       max="10"
+       step="0.1"
+       @update:modelValue="updateOmikenEntry('omikujis', currentItem)"
+      />
      </v-col>
      <v-col cols="12" sm="3">
       <!-- 遅延設定 -->
@@ -78,64 +123,55 @@
       </v-text-field>
      </v-col>
     </v-row>
-    <v-sheet>
-     <!-- メッセージ内容編集 -->
-     <v-text-field
-      v-model="post.content"
-      label="内容"
-      rows="2"
-      auto-grow
-      @input="updateOmikenEntry('omikujis', currentItem)"
-     />
-     <!-- 遅延編集スライダー -->
-     <v-slider
-      v-model.number="post.delaySeconds"
-      prepend-icon="mdi-alarm"
-      :thumb-size="24"
-      thumb-label="always"
-      class="pa-2"
-      min="-1"
-      max="10"
-      step="0.1"
-      @update:modelValue="updateOmikenEntry('omikujis', currentItem)"
-     />
-    </v-sheet>
 
-    <!-- 発動するWordParty -->
-    <v-select
-     v-if="isCharacterPost(post.type)"
-     v-model="post.party"
-     :items="charaParty(post.botKey) ?? []"
-     label="発動するWordParty"
-     item-title="text"
-     item-value="value"
-     density="compact"
-     @update:modelValue="updateOmikenEntry('omikujis', currentItem)"
-    >
-    </v-select>
+    <!-- 詳細設定セクション -->
+    <v-expand-transition>
+     <v-row dense v-show="showAdvanced">
+      <v-col cols="6">
+       <!-- マニアック:BOTのメッセージを読み上げない -->
+       <v-switch label="消音モード" v-model="post.isSilent"
+        :color="post.isSilent ? 'primary':''"
+       ></v-switch>
+      </v-col>
+      <v-col cols="6">
+       <!-- マニアック:ジェネレーターに渡す引数編集 -->
+       <v-text-field
+        v-model="post.generatorParam"
+        label="ジェネレーターに渡す引数"
+        rows="2"
+        auto-grow
+        @input="updateOmikenEntry('omikujis', currentItem)"
+       />
+      </v-col>
+     </v-row>
+    </v-expand-transition>
 
-    <!-- マニアック:BOTのメッセージを読み上げない -->
-    <v-switch label="消音モード" v-model="post.isSilent"></v-switch>
-
-    <!-- マニアック:ジェネレーターに渡す引数編集 -->
-    <v-text-field
-     v-model="post.generatorParam"
-     label="ジェネレーターに渡す引数"
-     rows="2"
-     auto-grow
-     @input="updateOmikenEntry('omikujis', currentItem)"
-    />
-
-    <v-sheet class="d-flex justify-space-between align-center">
-     <!-- 複製・削除ボタン -->
-     <PartsArrayRemove
-      type="omikujis"
-      :currentItem="currentItem"
-      :array="currentItem.post"
-      :index="index"
-      @update:Omiken="updateOmiken"
-     />
-    </v-sheet>
+    <v-row dense>
+     <v-col cols="6">
+      <v-sheet class="text-subtitle-1 d-flex align-center">
+       詳細設定
+       <v-btn
+        icon="mdi-cog"
+        class="ml-3"
+        :color="showAdvanced ? 'primary' : ''"
+        variant="elevated"
+        @click="showAdvanced = !showAdvanced"
+       />
+      </v-sheet>
+     </v-col>
+     <v-col cols="6">
+      <v-sheet class="d-flex justify-end">
+       <!-- 複製・削除ボタン -->
+       <PartsArrayRemove
+        type="omikujis"
+        :currentItem="currentItem"
+        :array="currentItem.post"
+        :index="index"
+        @update:Omiken="updateOmiken"
+       />
+      </v-sheet>
+     </v-col>
+    </v-row>
    </v-expansion-panel-text>
   </v-expansion-panel>
  </v-expansion-panels>
@@ -147,7 +183,7 @@
 </template>
 
 <script setup lang="ts">
-import { inject, Ref } from 'vue';
+import { inject, ref, Ref } from 'vue';
 import { ListCategory, ListEntry, OmikujiType, OmikenEntry, OneCommePostType, AppEditorType } from '@/type';
 import DialogOmikujiPostDescription from '@/components/DialogOmikuji/DialogOmikujiPostDescription.vue';
 import PartsArrayRemove from '@/components/common/PartsArrayRemove.vue';
@@ -168,7 +204,7 @@ const AppEditor = inject<Ref<AppEditorType>>('AppEditorKey');
 const Charas = AppEditor?.value.Charas;
 
 // コンポーザブル:FunkEmits
-const { updateOmiken,  openEditor, updateOmikenEntry } = FunkEmits(emit);
+const { updateOmiken, openEditor, updateOmikenEntry } = FunkEmits(emit);
 
 const {
  // Post type utilities
@@ -181,15 +217,16 @@ const {
  // Character utilities
  botKeyItems,
  getIconKeyItems,
- getCharaImage,
-
- extractValidPlaceholders
+ getCharaImage
 } = FunkOmikuji();
+
+// マニアックな設定を表示するか
+const showAdvanced = ref(false);
 
 // CharaParty
 const charaParty = (botKey?: string) => {
-  if (!botKey || !Charas?.[botKey]?.party) return [];
-  return Charas[botKey].party;
+ if (!botKey || !Charas?.[botKey]?.party) return [];
+ return Charas[botKey].party;
 };
 
 // postに追加

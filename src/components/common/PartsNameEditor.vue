@@ -1,6 +1,6 @@
 <!-- src/components/common/PartsNameEditor.vue -->
 <template>
- <v-dialog v-model="dialog" max-width="600px">
+ <v-dialog v-model="dialog" persistent max-width="600px">
   <v-card>
    <v-card-title>基本情報の編集</v-card-title>
    <v-card-text>

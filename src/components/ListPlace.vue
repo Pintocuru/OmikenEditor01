@@ -2,7 +2,7 @@
 <template>
  <!-- Place List View -->
  <v-row dense>
-  <v-col v-for="place in placesNameSort" :key="place.id" cols="12" sm="6" md="4" lg="3">
+  <v-col v-for="place in placesNameSort" :key="place.id" cols="12" sm="4" md="3">
    <v-card variant="tonal">
     <!-- タイトルバーと操作ボタン -->
     <v-toolbar density="compact">
@@ -22,7 +22,7 @@
     <!-- プレースホルダー内容 -->
     <v-card-text class="py-4">
      <div class="list-group d-flex flex-wrap">
-      <template v-for="(value, index) in getRandomValues(place.values, 3)" :key="index">
+      <template v-for="(value, index) in getRandomValues(place.values, 1)" :key="index">
        <span class="mr-2">{{ value }}</span>
       </template>
      </div>
@@ -40,12 +40,13 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import type { ListCategory, ListEntry,  OmikenEntry, OmikenType, PlaceValueType } from '@/type';
+import { AppEditorType, CategoryActive, ListCategory, ListEntry, OmikenEntry, PlaceValueType } from '@/type';
 import PartsArrayAction from './common/PartsArrayAction.vue';
 import { FunkEmits } from '@/composables/FunkEmits';
 
 const props = defineProps<{
- Omiken: OmikenType;
+ AppEditor: AppEditorType;
+ categoryActive: CategoryActive;
 }>();
 
 const emit = defineEmits<{
@@ -58,7 +59,7 @@ const { updateOmiken, openEditorItem } = FunkEmits(emit);
 
 // placesをソートして取得
 const placesNameSort = computed(() => {
- return Object.values(props.Omiken.places).sort((a, b) => {
+ return Object.values(props.AppEditor.Omiken.places).sort((a, b) => {
   return (a.name || '').localeCompare(b.name || '');
  });
 });
@@ -71,9 +72,6 @@ const getRandomValues = (values: PlaceValueType[], count: number) => {
 
 // アイテムを追加
 const addItemPlace = () => {
- emit('update:Omiken', {
-  type: 'places',
-  addKeys: [{}]
- });
+ emit('update:Omiken', { type: 'places', addKeys: [{}] });
 };
 </script>

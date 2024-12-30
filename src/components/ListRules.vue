@@ -13,7 +13,7 @@
       <!-- enableIdsにあるアイテム数 -->
       <v-chip label class="ml-4"> {{ rule?.enableIds.length }} items </v-chip>
       <!-- rulesのカラー -->
-      <PartsToolbarColor v-model="rule.color" @update:model-value="updateItem(rule)" />
+      <PartsToolbarColor v-model="rule.color" @update:model-value="updateOmikenEntry('rules', rule)" />
       <!-- 展開状態を示すアイコン -->
       <v-icon class="ml-2">
        {{ expandedPanels.includes(rule.id) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
@@ -37,12 +37,7 @@
    <v-expand-transition>
     <div v-show="expandedPanels.includes(rule.id)">
      <!-- Threshold -->
-     <ThresholdMain
-      :Thresholds="rule.threshold"
-      :mode="'rule'"
-      :type="'comment'"
-      @update:Thresholds="updateItem(rule)"
-     />
+     <ThresholdMain :item="rule" mode="rules" type="comment" @update:Thresholds="updateOmikenEntry('rules', rule)" />
 
      <!-- 追加ボタン等 -->
      <ListRulesOmikujiSetting :rulesEntry="rule" :uiState="uiState" @update:Omiken="updateOmiken" />
@@ -51,7 +46,7 @@
        <!-- enableIds順におみくじを並べる -->
        <ListRulesOmikujiView
         :rule="rule"
-        :omikujis="Omiken.omikujis"
+        :omikujis="AppEditor.Omiken.omikujis"
         :uiState="uiState"
         @open-editor="openEditor"
         @update:Omiken="updateOmiken"
@@ -66,7 +61,16 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { OmikenEntry, ListCategory, ListEntry, CategoryActive, OmikenType, TypesType, RulesType } from '@type';
+import {
+ OmikenEntry,
+ ListCategory,
+ ListEntry,
+ CategoryActive,
+ OmikenType,
+ TypesType,
+ RulesType,
+ AppEditorType
+} from '@type';
 import ListRulesOmikujiSetting from '@/components/ListRulesOmikujiSetting.vue';
 import ListRulesOmikujiView from '@/components/ListRulesOmikujiView.vue';
 import ThresholdMain from '@/components/DialogThreshold/ThresholdMain.vue';
@@ -89,7 +93,7 @@ const togglePanel = (ruleId: string) => {
 };
 
 const props = defineProps<{
- Omiken: OmikenType;
+ AppEditor: AppEditorType;
  categoryActive: CategoryActive;
 }>();
 
@@ -98,15 +102,15 @@ const emit = defineEmits<{
  (e: 'open-editor', editorItem: ListEntry<ListCategory>): void;
 }>();
 
-const rules = computed(() => props.Omiken.rules);
+const rules = computed(() => props.AppEditor.Omiken.rules);
 
 // コンポーザブル:FunkEmits
-const { updateOmiken, openEditor, openEditorItem } = FunkEmits(emit);
+const { updateOmiken, openEditor, openEditorItem, updateOmikenEntry } = FunkEmits(emit);
 // コンポーザブル:funkThreshold
 const { getExampleText } = FunkThreshold();
 
 const findType = (id: string): { type: TypesType; index: number } | null => {
- for (const [type, ids] of Object.entries(props.Omiken.types)) {
+ for (const [type, ids] of Object.entries(props.AppEditor.Omiken.types)) {
   const index = ids.indexOf(id);
   if (index !== -1) {
    return { type: type as TypesType, index };
@@ -130,12 +134,4 @@ const uiState = ref({
  showEnabledIds: false,
  showWeightEditor: false
 });
-
-// 更新処理
-const updateItem = (rule: RulesType) => {
- emit('update:Omiken', {
-  type: 'rules',
-  update: rule
- });
-};
 </script>

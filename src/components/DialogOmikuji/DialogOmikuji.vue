@@ -11,6 +11,8 @@
     {{ currentItem.description }}
    </template>
   </v-toolbar>
+
+  <!-- タブ -->
   <v-tabs v-model="tab" align-tabs="center" stacked>
    <v-tab v-for="tabItem in tabs" :key="tabItem.value" :value="tabItem.value">
     <v-icon :icon="tabItem.icon"></v-icon>
@@ -29,7 +31,6 @@
       @open-editor="openEditor"
      />
     </v-tabs-window>
-
    </v-form>
   </v-card-text>
  </v-card>

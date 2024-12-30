@@ -105,10 +105,10 @@ const rulesSchema = z.record(
 export const omikujiPostSchema = z
  .array(
   z.object({
-   type: z.enum(['onecomme', 'party', 'speech']).default('onecomme'),
+   type: z.enum(['onecomme', 'party', 'speech', 'error']).default('onecomme'),
    botKey: z.string().default('mamono'),
    iconKey: z.string().default('Default'),
-   party: z.string().optional(),
+   party: z.string().nullable().optional(),
    isSilent: z.boolean().optional(),
    generatorParam: z.string().optional(),
    delaySeconds: z.number().default(0),

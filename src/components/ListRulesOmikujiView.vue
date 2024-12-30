@@ -82,7 +82,7 @@
           label="ランク"
           min="0"
           type="number"
-          @update:modelValue="updateOmikujiWeight(omikujis[omikujiId])"
+          @update:modelValue="updateOmikenEntry('omikujis', omikujis[omikujiId])"
          />
         </v-col>
         <v-col>
@@ -93,7 +93,7 @@
           label="出現割合"
           min="0"
           type="number"
-          @update:modelValue="updateOmikujiWeight(omikujis[omikujiId])"
+          @update:modelValue="updateOmikenEntry('omikujis', omikujis[omikujiId])"
          />
         </v-col>
        </v-row>
@@ -158,9 +158,5 @@ const updateRulesEnableIds = (enableIds: string[], ruleId: string) => {
   }
  };
  updateOmikenEntry('rules', updatedRule);
-};
-// omikuji.weight の更新
-const updateOmikujiWeight = (omikujiData: OmikujiType) => {
- updateOmikenEntry('omikujis', { [omikujiData.id]: omikujiData });
 };
 </script>

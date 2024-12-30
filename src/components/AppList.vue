@@ -3,9 +3,8 @@
  <!-- 各種リストコンポーネントの条件付きレンダリング -->
  <component
   :is="currentListComponent"
+  :AppEditor="AppEditor"
   :categoryActive="categoryActive"
-  :Omiken="AppEditor.Omiken"
-  :Presets="AppEditor.Presets"
   @update:Omiken="updateOmiken"
   @update:OmikenPreset="updateOmikenPreset"
   @open-editor="openEditor"

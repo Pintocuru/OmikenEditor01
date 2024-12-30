@@ -52,9 +52,6 @@
   <v-card v-if="currentIndex !== null">
    <v-card-title class="text-h6">
     条件の編集
-    <v-btn icon variant="text" @click="dialog = false" class="float-right">
-     <v-icon>mdi-close</v-icon>
-    </v-btn>
    </v-card-title>
    <v-card-text>
     <!-- 条件リスト(ボタン選択) -->
@@ -78,28 +75,40 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { ThresholdType, ConditionType, TypesType } from '@type';
+import {
+ ThresholdType,
+ ConditionType,
+ TypesType,
+ RulesType,
+ OmikujiType,
+ OmikenEntry,
+ ListCategory
+} from '@type';
 import { FunkThresholdInitial, FunkThreshold } from '@/composables/FunkThreshold';
 
 import ThresholdSelect from './ThresholdSelect.vue';
 import ThresholdSimple from './ThresholdSimple.vue';
 import ThresholdCount from './ThresholdCount.vue';
 import ThresholdMatch from './ThresholdMatch.vue';
+import { FunkEmits } from '@/composables/FunkEmits';
 
 const props = defineProps<{
- Thresholds: ThresholdType[];
+ item: RulesType | OmikujiType;
  type: TypesType;
- mode: 'rule' | 'omikuji';
+ mode: 'rules' | 'omikujis';
 }>();
 // typeのdefaultはcomment
-const maxArray = computed(() => (props.mode === 'rule' ? 3 : 1));
-const minArray = computed(() => (props.mode === 'rule' ? 1 : 0));
+const maxArray = computed(() => (props.mode === 'rules' ? 3 : 1));
+const minArray = computed(() => (props.mode === 'rules' ? 1 : 0));
 
 const emit = defineEmits<{
- (e: 'update:Thresholds', value: ThresholdType[]): void;
+ (e: 'update:Omiken', payload: OmikenEntry<ListCategory>): void;
 }>();
 
 const dialog = ref(false);
+
+// コンポーザブル:FunkEmits
+const { updateOmiken, openEditor, openEditorItem, updateOmikenEntry } = FunkEmits(emit);
 
 const { getExampleText } = FunkThreshold();
 
@@ -107,7 +116,7 @@ const { getExampleText } = FunkThreshold();
 const currentIndex = ref<number | null>(null);
 
 // しきい値リスト
-const thresholds = ref<ThresholdType[]>(props.Thresholds);
+const thresholds = ref<ThresholdType[]>(props.item.threshold);
 
 // 条件タイプに応じたコンポーネントを動的に選択
 const getComponent = computed(() => {
@@ -158,13 +167,13 @@ const updateConditionType = (condition: ConditionType) => {
 const updateThreshold = (updatedThreshold: ThresholdType) => {
  if (currentIndex.value !== null) {
   thresholds.value[currentIndex.value] = updatedThreshold;
-  emitUpdate();
+  emitUpdate()
  }
 };
 
 // 親コンポーネントへ更新を通知
 const emitUpdate = () => {
- emit('update:Thresholds', thresholds.value);
+ updateOmikenEntry(props.mode, { ...props.item, threshold: thresholds.value });
 };
 
 // 初期状態で最初のしきい値を選択
