@@ -133,10 +133,10 @@ const omikujiValueSchema = z.object({
  rank: z.number().int().nonnegative().default(1),
  weight: z.number().int().nonnegative().default(1),
  threshold: z.array(thresholdSchema).default([]),
- status: z.string().optional(),
+ status: z.string().nullable().optional().default(''),
  script: z
   .object({
-   scriptId: z.string().default(''),
+   scriptId: z.string().nullable().default(''),
    params: z
     .array(
      baseSchema.merge(
@@ -197,8 +197,6 @@ export const validateData = <T extends keyof OmikenType>(
    const parsedData = schema.parse(data) as Record<TypesType, string[]>;
    return validateTypes(parsedData, additionalContext.rules) as OmikenType[T];
   }
-
-  // 既存データの構造を維持したままパース
   const parsed = schema.parse(data);
   return parsed as OmikenType[T];
  } catch (e) {
@@ -206,7 +204,6 @@ export const validateData = <T extends keyof OmikenType>(
   if (e instanceof ZodError) {
    console.error(e.errors);
   }
-  // 編集時はエラーを投げて、呼び出し元で適切に処理できるようにする
   throw e;
  }
 };

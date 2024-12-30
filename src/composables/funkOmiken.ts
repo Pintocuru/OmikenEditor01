@@ -74,7 +74,6 @@ export function FunkOmiken() {
     update?: Record<string, any>
   ) => {
     if (update) {
-      console.log(type);
       const validatedUpdate = validateData(type, update);
       Object.assign(state[type], validatedUpdate);
     }

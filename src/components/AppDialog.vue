@@ -51,7 +51,7 @@
 import { onMounted } from 'vue';
 import { ListEntry, ListCategory, OmikenEntry, ListEntryCollect, OmikenType } from '@/type';
 import DialogRules from '@/components/DialogRules.vue';
-import DialogOmikuji from '@/components/DialogOmikuji.vue';
+import DialogOmikuji from '@/components/DialogOmikuji/DialogOmikuji.vue';
 import DialogPlace from '@/components/DialogPlace.vue';
 import { FunkEmits } from '@/composables/FunkEmits';
 
