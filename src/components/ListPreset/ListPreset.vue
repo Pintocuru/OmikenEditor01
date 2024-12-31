@@ -1,10 +1,9 @@
-<!-- src/components/AppList.vue -->
+<!-- src/components/ListPreset/ListPreset.vue -->
 <template>
  <!-- 各種リストコンポーネントの条件付きレンダリング -->
  <component
   :is="currentListComponent"
   :AppEditor="AppEditor"
-  :categoryActive="categoryActive"
   @update:Omiken="updateOmiken"
   @update:OmikenPreset="updateOmikenPreset"
   @open-editor="openEditor"
@@ -12,12 +11,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-import ListRules from '@/components/ListRules.vue';
-import ListOmikuji from '@/components/ListOmikuji.vue';
-import ListPlace from '@/components/ListPlace.vue';
-import ListPreset from '@/components/ListPreset/ListPreset.vue';
-import { ListCategory, OmikenEntry, ListEntry, PresetType, CategoryActive, AppEditorType } from '@type';
+import { computed, ref } from 'vue';
+import { AppEditorType, CategoryActive, ListCategory, OmikenEntry, PresetType } from '@type';
+import ListPresetOmiken from './ListPresetOmiken.vue';
+import ListPresetCharas from './ListPresetCharas.vue';
+import ListPresetScripts from './ListPresetScripts.vue';
 import { FunkEmits } from '@/composables/FunkEmits';
 
 // Props Emits
@@ -29,7 +27,6 @@ const props = defineProps<{
 const emit = defineEmits<{
  (e: 'update:Omiken', payload: OmikenEntry<ListCategory>): void;
  (e: 'update:OmikenPreset', preset: PresetType): void;
- (e: 'open-editor', editorItem: ListEntry<ListCategory>): void;
 }>();
 
 // コンポーザブル:FunkEmits
@@ -37,14 +34,18 @@ const { updateOmiken, openEditor, updateOmikenPreset } = FunkEmits(emit);
 
 // 子コンポーネントの指定
 const currentListComponent = computed(() => {
+ // categoryActiveが存在しない場合は空のオブジェクトを返す
+ if (!props.categoryActive) return {};
+
  const componentMap = {
-  types: null,
-  rules: ListRules,
-  omikujis: ListOmikuji,
-  places: ListPlace,
-  presets: ListPreset
+  Omiken: ListPresetOmiken,
+  Charas: ListPresetCharas,
+  Scripts: ListPresetScripts
  } as const;
 
- return componentMap[props.categoryActive.main];
+ // categoryActiveが存在する場合にsubプロパティを安全に参照
+ const categorySub = props.categoryActive.sub;
+ if (!categorySub) return {};
+ return componentMap[categorySub] || null; // マップに存在しない場合はnullを返す
 });
 </script>

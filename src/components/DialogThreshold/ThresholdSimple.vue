@@ -51,18 +51,21 @@
   </v-slider>
 
   <!-- gift条件 -->
-<div   v-if="threshold.conditionType === 'gift'" class="d-flex flex-wrap gap-2">
-  <v-chip
+  <div v-if="threshold.conditionType === 'gift'" class="d-flex flex-wrap gap-2">
+   <v-chip
     v-for="item in SELECT_ITEMS[type].gift"
     class="ma-1"
     :key="item.value"
     :value="item.value"
     :class="{ 'bg-primary': currentItem.gift === item.value }"
-    @click="currentItem.gift = item.value; $emit('update:threshold', currentItem)"
-  >
+    @click="
+     currentItem.gift = item.value as GiftCondition;
+     $emit('update:threshold', currentItem);
+    "
+   >
     {{ item.title }}
-  </v-chip>
-</div>
+   </v-chip>
+  </div>
  </div>
 </template>
 
@@ -87,7 +90,7 @@ const { EXAMPLES, SELECT_ITEMS } = FunkThreshold();
 
 // computedプロパティで型安全な値を提供
 const currentItem = computed({
- get: () => props.threshold || FunkThresholdInitial('target'),
+ get: () => props.threshold,
  set: (value) => emit('update:threshold', value)
 });
 </script>

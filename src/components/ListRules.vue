@@ -73,7 +73,7 @@ import {
 } from '@type';
 import ListRulesOmikujiSetting from '@/components/ListRulesOmikujiSetting.vue';
 import ListRulesOmikujiView from '@/components/ListRulesOmikujiView.vue';
-import ThresholdMain from '@/components/DialogThreshold/ThresholdMain.vue';
+import ThresholdMain from '@/components/DialogThreshold/DialogThreshold.vue';
 import { FunkThreshold } from '@/composables/FunkThreshold';
 import { FunkEmits } from '@/composables/FunkEmits';
 import PartsToolbarColor from '@/components/common/PartsToolbarColor.vue';

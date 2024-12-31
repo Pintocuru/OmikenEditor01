@@ -1,4 +1,4 @@
-<!-- src/components/DialogThreshold/ThresholdMain.vue -->
+<!-- src/components/DialogThreshold/DialogThreshold.vue -->
 <template>
  <v-card-text>
   <!-- しきい値リスト -->
@@ -50,9 +50,7 @@
  <!-- 現在選択中のしきい値の詳細編集 -->
  <v-dialog v-model="dialog" max-width="800px" persistent :scrim="true">
   <v-card v-if="currentIndex !== null">
-   <v-card-title class="text-h6">
-    条件の編集
-   </v-card-title>
+   <v-card-title class="text-h6"> 条件の編集 </v-card-title>
    <v-card-text>
     <!-- 条件リスト(ボタン選択) -->
     <ThresholdSelect :threshold="thresholds[currentIndex]" @update:condition="updateConditionType" />
@@ -60,7 +58,7 @@
     <!-- 条件タイプに応じたコンポーネント -->
     <component
      :is="getComponent"
-     :threshold="{ ...FunkThresholdInitial(), ...thresholds[currentIndex] }"
+     :threshold="thresholds[currentIndex]"
      :type="type"
      @update:threshold="updateThreshold"
     />
@@ -75,15 +73,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import {
- ThresholdType,
- ConditionType,
- TypesType,
- RulesType,
- OmikujiType,
- OmikenEntry,
- ListCategory
-} from '@type';
+import { ThresholdType, ConditionType, TypesType, RulesType, OmikujiType, OmikenEntry, ListCategory } from '@type';
 import { FunkThresholdInitial, FunkThreshold } from '@/composables/FunkThreshold';
 
 import ThresholdSelect from './ThresholdSelect.vue';
@@ -158,17 +148,22 @@ const removeThreshold = (index: number) => {
 
 // 条件タイプ更新
 const updateConditionType = (condition: ConditionType) => {
- if (currentIndex.value !== null) {
-  thresholds.value[currentIndex.value].conditionType = condition;
+  if (currentIndex.value === null) return;
+
+  const currentThreshold = thresholds.value[currentIndex.value];
+  thresholds.value[currentIndex.value] = {
+    ...FunkThresholdInitial(condition),
+    ...currentThreshold,
+    conditionType: condition,
+  };
   emitUpdate();
- }
 };
 
 // しきい値更新
 const updateThreshold = (updatedThreshold: ThresholdType) => {
  if (currentIndex.value !== null) {
   thresholds.value[currentIndex.value] = updatedThreshold;
-  emitUpdate()
+  emitUpdate();
  }
 };
 

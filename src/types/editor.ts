@@ -1,13 +1,13 @@
 // src/types/editor.ts
 import { OmikenTypeMap, OmikenType, TypesType } from './Omiken';
-import { CharaType, PresetType, ScriptsType } from './preset';
+import { CharaType, PresetOmikenType,  ScriptsType } from './preset';
 
 // エディター用型定義
 
 // AppEditor
 export interface AppEditorType {
  Omiken: OmikenType;
- Presets: Record<string, OmikenType>; // preset:Omiken
+ Presets: Record<string, PresetOmikenType>; // preset:Omiken
  Charas: Record<string, CharaType>; // preset:Chara
  Scripts: Record<string, ScriptsType>; // preset:Script
 }
@@ -19,7 +19,7 @@ export type CategorySub = {
  rules: never;
  omikujis: never;
  places: never;
- presets: 'Omiken' | 'Chara' | 'Script';
+ presets: 'Omiken' | 'Charas' | 'Scripts';
 };
 export type CategoryActive<T extends CategoryMain = CategoryMain> = {
  main: T; // 現在選択されているメインカテゴリー
@@ -60,9 +60,3 @@ type AddKeysCategory = {
 
 // addItem用のPartial型(一部のキーだけでデータを作成できる)
 type PartialListItem<T extends ListCategory> = Partial<OmikenTypeMap[T]>;
-
-// おみくじデータ付きpresetデータ
-export interface PresetOmikenType extends PresetType {
- item: OmikenType;
- mode?: 'overwrite' | 'append'; // 追加方法(上書き/追加)
-}

@@ -75,16 +75,16 @@ const EXAMPLES: ExampleStructure = {
   },
   // gift
   gift: {
-   [GiftCondition.None]: 'ギフトなし', // ギフトがない状態
-   [GiftCondition.All]: '全てのギフト', // すべてのギフト（メンバー加入含む）
-   [GiftCondition.Blue]: '200円未満のギフト', // 200円未満のギフト
+   [GiftCondition.None]: 'ギフトではないコメント', // ギフトがない状態
+   [GiftCondition.All]: '全てのギフト（メンバー加入含む）', // すべてのギフト（メンバー加入含む）
+   [GiftCondition.Blue]: '200円未満', // 200円未満のギフト
    [GiftCondition.LightBlue]: '200円〜499円', // 200円〜499円のギフト
-   [GiftCondition.Green]: '500円〜999円のギフト', // 500円〜999円のギフト
-   [GiftCondition.Yellow]: '1,000円〜1,999円のギフト', // 1,000円〜1,999円のギフト
-   [GiftCondition.Orange]: '2,000円〜4,999円のギフト', // 2,000円〜4,999円のギフト
-   [GiftCondition.Pink]: '5,000円〜9,999円のギフト', // 5,000円〜9,999円のギフト
-   [GiftCondition.Red]: '10,000円以上のギフト', // 10,000円以上のギフト
-   [GiftCondition.Purple]: '20,000円以上のギフト' // 20,000円以上のギフト
+   [GiftCondition.Green]: '500円〜999円', // 500円〜999円のギフト
+   [GiftCondition.Yellow]: '1,000円〜1,999円', // 1,000円〜1,999円のギフト
+   [GiftCondition.Orange]: '2,000円〜4,999円', // 2,000円〜4,999円のギフト
+   [GiftCondition.Pink]: '5,000円〜9,999円', // 5,000円〜9,999円のギフト
+   [GiftCondition.Red]: '10,000円以上', // 10,000円以上のギフト
+   [GiftCondition.Purple]: '20,000円以上' // 20,000円以上のギフト
   },
   // count:数値を参照する
   unit: {

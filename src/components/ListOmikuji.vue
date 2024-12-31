@@ -22,18 +22,16 @@
 
     <!-- おみくじ内容 -->
     <v-card-text class="py-4">
-     <v-sheet class="pb-3" v-if="omikuji.post">
+     <div class="pb-3" v-if="omikuji.post">
       {{ getOnecommeContent(omikuji.post) }}
-     </v-sheet>
+     </div>
 
-     <v-sheet class="list-group d-flex flex-wrap">
+     <div class="list-group d-flex flex-wrap">
       <!-- 発動条件の表示 -->
       <v-chip v-if="omikuji?.threshold.length !== 0" density="compact" variant="outlined" color="yellow lighten-3">
        🔐 {{ getExampleText(omikuji.threshold) }}
       </v-chip>
-      <!-- 既存の出現割合表示 -->
-      <v-chip density="compact" variant="text"> 🎯 {{ omikuji.weight }} </v-chip>
-     </v-sheet>
+     </div>
     </v-card-text>
    </v-card>
   </v-col>
