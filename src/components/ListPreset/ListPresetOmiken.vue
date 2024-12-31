@@ -40,8 +40,6 @@ const emit = defineEmits<{
 
 const Presets = props.AppEditor.Presets;
 
-console.log(Presets);
-
 const presetSelect = async (preset: PresetOmikenType) => {
  try {
   const result = await Swal.fire({

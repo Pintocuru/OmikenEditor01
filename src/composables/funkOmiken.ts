@@ -55,6 +55,7 @@ export function FunkOmiken() {
   if (reTypes) handleReTypes(newState, type, reTypes);
 
   AppEditor.value.Omiken = newState;
+   console.log('保存フラグが立ったよ', AppEditor.value.Omiken);
  }
 
  // Presetからの更新

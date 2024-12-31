@@ -3,8 +3,6 @@ import { OmikenType, ListCategory, TypesType, PresetOmikenType } from '@type';
 import { validateData } from '@/composables/FunkValidate';
 
 export function FunkOmikenPreset() {
- const categories: ListCategory[] = ['rules', 'omikujis', 'places'];
-
  // IDの重複チェックと新しいID生成
  const resolveUniqueId = (key: string, existingIds: Set<string>) => {
   let newKey = key;
@@ -67,19 +65,17 @@ export function FunkOmikenPreset() {
  const processCategory = <T extends ListCategory>(
   state: OmikenType,
   type: T,
-  presetData: PresetOmikenType['item'],
+  presetData: OmikenType,
   isOverwrite: boolean
  ): OmikenType => {
   const validatedData = validateData(type, presetData[type]) as OmikenType[T];
   const newState = { ...state };
 
+  // 上書きモード
   if (isOverwrite) {
    newState[type] = validatedData;
-
-   if (type === 'rules') {
-    newState.types = validateData('types', Object.keys(validatedData));
-   }
   } else {
+   // 追加モード
    const updatedData = addNewItems(newState[type] as OmikenType[T], validatedData, type) as OmikenType[T];
    newState[type] = updatedData;
 
@@ -99,7 +95,7 @@ export function FunkOmikenPreset() {
  // メインの処理関数
  const handlePresetUpdate = (currentState: OmikenType, preset: PresetOmikenType): OmikenType => {
   let newState = { ...currentState };
-
+  const categories: ListCategory[] = ['types', 'rules', 'omikujis', 'places'];
   categories.forEach((category) => {
    const isOverwrite = preset.isOverwrite ?? false; // undefined の場合は false を使用
    newState = processCategory(newState, category, preset.item, isOverwrite);

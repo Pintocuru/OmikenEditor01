@@ -204,7 +204,19 @@ export const validateData = <T extends keyof OmikenType>(
   if (e instanceof ZodError) {
    console.error(e.errors);
   }
-  throw e;
+
+  // エラー時にデフォルト値を返す
+  try {
+   if (type === 'types' && additionalContext?.rules) {
+    // types用の特別なデフォルト処理
+    const defaultData = {} as Record<TypesType, string[]>;
+    return validateTypes(defaultData, additionalContext.rules) as OmikenType[T];
+   }
+   return validateDefault(type, {});
+  } catch (defaultError) {
+   console.error('Failed to create default data:', defaultError);
+   throw e;
+  }
  }
 };
 
@@ -221,6 +233,8 @@ const validateDefault = <T extends keyof OmikenType>(type: T, data: unknown): Om
    return schemas.places.safeParse(data).success
     ? (data as OmikenType[T])
     : (schemas.places.parse({}) as OmikenType[T]);
+  case 'types': // typesのケースを追加
+   return schemas.types.safeParse(data).success ? (data as OmikenType[T]) : (schemas.types.parse({}) as OmikenType[T]);
   default:
    throw new Error(`Unknown type: ${type}`);
  }

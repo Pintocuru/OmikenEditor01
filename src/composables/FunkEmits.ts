@@ -1,12 +1,6 @@
 // src/composables/FunkEmits.ts
 
-import {
-  ListCategory,
-  ListEntry,
-  OmikenTypeMap,
-  OmikenEntry,
-  PresetOmikenType,
-} from "@type";
+import { ListCategory, ListEntry, OmikenTypeMap, OmikenEntry, PresetOmikenType } from '@type';
 
 export function FunkEmits(emit: any) {
  // ダイアログを表示するemit
@@ -24,17 +18,17 @@ export function FunkEmits(emit: any) {
  const updateOmiken = (payload: OmikenEntry<ListCategory>) => emit('update:Omiken', payload);
 
  // Omiken のアップデート(アイテム)
-const updateOmikenEntry = <T extends keyof OmikenTypeMap>(
- type: T,
- update: Record<string, OmikenTypeMap[T]> | OmikenTypeMap[T]
-) => {
- const normalizedUpdate =
-  typeof update === 'object' && !(update instanceof Array) && 'id' in update
-   ? { [(update as any).id]: update }
-   : update;
+ const updateOmikenEntry = <T extends keyof OmikenTypeMap>(
+  type: T,
+  update: Record<string, OmikenTypeMap[T]> | OmikenTypeMap[T]
+ ) => {
+  const normalizedUpdate =
+   typeof update === 'object' && !(update instanceof Array) && 'id' in update
+    ? { [(update as any).id]: update }
+    : update;
 
- emit('update:Omiken', { type, update: normalizedUpdate });
-};
+  emit('update:Omiken', { type, update: normalizedUpdate });
+ };
 
  // Preset更新
  const updateOmikenPreset = (preset: PresetOmikenType) => emit('update:OmikenPreset', preset);
@@ -50,3 +44,24 @@ const updateOmikenEntry = <T extends keyof OmikenTypeMap>(
   updateOmikenPreset
  };
 }
+
+const hogedata: PresetOmikenType = {
+ id: 'presetNull',
+ name: 'presetNull',
+ description: 'リセット用',
+ version: '0.0.0',
+ item: {
+  types: {
+   comment: [],
+   timer: [],
+   meta: [],
+   waitingList: [],
+   setList: [],
+   reactions: [],
+   unused: []
+  },
+  rules: {},
+  omikujis: {},
+  places: {}
+ }
+};
