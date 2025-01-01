@@ -4,24 +4,51 @@
   <v-col cols="12">
    <v-card variant="outlined" class="pa-2 mt-2">
     <div class="text-subtitle-1 mb-2">使用できるプレースホルダー</div>
-    <v-list density="compact">
-     <v-list-item v-for="placeholder in availablePlaceholders" :key="placeholder.id">
-      <v-list-item-title>
-       <span
-        :class="{ 'cursor-pointer': placeholder.isEditable }"
-        @click="placeholder.isEditable && openEditorItem('places', placeholder.key)"
-       >
-        <<{{ placeholder.id }}>>
-       </span>
-       <span class="pa-2 mt-2"> : </span>
-       <i>{{ placeholder.value }}</i>
-      </v-list-item-title>
-      <v-list-item-subtitle>{{ placeholder.description }}</v-list-item-subtitle>
-     </v-list-item>
-     <div v-if="availablePlaceholders.length === 0">
-      【プレース】【スクリプト】から選ぶと、プレースホルダーを使用できるようになります。
-     </div>
-    </v-list>
+
+    <v-expansion-panels>
+     <!-- 基本のプレースホルダー -->
+     <v-expansion-panel>
+      <v-expansion-panel-title>
+       基本のプレースホルダー (クリックして表示)
+       <template v-slot:actions>
+        <v-icon icon="mdi-chevron-down"></v-icon>
+       </template>
+      </v-expansion-panel-title>
+      <v-expansion-panel-text>
+       <v-list density="compact">
+        <v-list-item v-for="placeholder in basicPlaceholders" :key="placeholder.id">
+         <v-list-item-title>
+          <span><<{{ placeholder.id }}>></span>
+          <span class="pa-2 mt-2"> : </span>
+          <i>{{ placeholder.value }}</i>
+         </v-list-item-title>
+         <v-list-item-subtitle>{{ placeholder.description }}</v-list-item-subtitle>
+        </v-list-item>
+       </v-list>
+      </v-expansion-panel-text>
+     </v-expansion-panel>
+
+    </v-expansion-panels>
+     <!-- その他のプレースホルダー（スクリプト、カスタム） -->
+     <v-list density="compact" class="mt-4">
+      <v-list-item v-for="placeholder in availablePlaceholders" :key="placeholder.id">
+       <v-list-item-title>
+        <span
+         :class="{ 'cursor-pointer': placeholder.isEditable }"
+         @click="placeholder.isEditable && openEditorItem('places', placeholder.key)"
+        >
+         <<{{ placeholder.id }}>>
+        </span>
+        <span class="pa-2 mt-2"> : </span>
+        <i>{{ placeholder.value }}</i>
+       </v-list-item-title>
+       <v-list-item-subtitle>{{ placeholder.description }}</v-list-item-subtitle>
+      </v-list-item>
+     </v-list>
+
+    <div v-if="availablePlaceholders.length === 0">
+     【プレース】【スクリプト】から選ぶと、プレースホルダーを使用できるようになります。
+    </div>
    </v-card>
   </v-col>
  </v-row>
@@ -48,6 +75,18 @@ const Scripts = AppEditor?.value.Scripts;
 
 // コンポーザブル:FunkEmits
 const { openEditorItem } = FunkEmits(emit);
+
+// 基本のプレースホルダーのみを返すcomputed
+const basicPlaceholders = [
+ { id: 'gameDraws', value: 1, description: 'おみくじを起動した回数', isEditable: false, key: '' },
+ { id: 'gameTotalDraws', value: 12, description: 'おみくじを起動した総回数', isEditable: false, key: '' },
+ { id: 'draws', value: 1, description: 'ユーザーがおみくじを起動した回数', isEditable: false, key: '' },
+ { id: 'totalDraws', value: 12, description: 'ユーザーがおみくじを起動した総回数', isEditable: false, key: '' },
+ { id: 'user', value: 'テストユーザー', description: 'ユーザー名', isEditable: false, key: '' },
+ { id: 'tc', value: 201, description: 'ユーザーがこれまでコメントした数', isEditable: false, key: '' },
+ { id: 'lc', value: 2, description: '配信枠のコメント総数', isEditable: false, key: '' },
+ { id: 'round', value: 18, description: 'ユーザーがこれまでコメントした配信枠の数', isEditable: false, key: '' }
+];
 
 // 使用可能なプレースホルダーをまとめて取得
 const availablePlaceholders = computed(() => {

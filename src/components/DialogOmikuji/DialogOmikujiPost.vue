@@ -221,7 +221,11 @@ const {
 } = FunkOmikuji();
 
 // マニアックな設定を表示するか
-const showAdvanced = ref(false);
+const showAdvanced = ref(props.currentItem.post.some(isAdvancedData));
+
+function isAdvancedData(post: OneCommePostType) {
+  return post.isSilent || post.generatorParam;
+}
 
 // CharaParty
 const charaParty = (botKey?: string) => {

@@ -13,12 +13,18 @@
   </v-toolbar>
 
   <!-- タブ -->
-  <v-tabs v-model="tab" align-tabs="center" stacked>
-   <v-tab v-for="tabItem in tabs" :key="tabItem.value" :value="tabItem.value">
-    <v-icon :icon="tabItem.icon"></v-icon>
-    {{ tabItem.label }}
-   </v-tab>
-  </v-tabs>
+<v-tabs v-model="tab" align-tabs="center" stacked>
+  <v-tab v-for="tabItem in tabs" :key="tabItem.value" :value="tabItem.value">
+    <v-badge
+      :content="getBadgeContent(tabItem.value)"
+      :model-value="hasContent(tabItem.value)"
+      color="primary"
+    >
+      <v-icon :icon="tabItem.icon"></v-icon>
+    </v-badge>
+      {{ tabItem.label }}
+  </v-tab>
+</v-tabs>
 
   <v-card-text>
    <v-form @submit.prevent>
@@ -94,6 +100,45 @@ const currentListComponent = computed(() => {
 
 // propsからデータを解読
 const currentItem = computed(() => (props.entry?.key && omikujis ? omikujis[props.entry.key as string] : null));
+
+// バッジの内容を取得する関数
+const getBadgeContent = (tabValue: string): string | number => {
+  if (!currentItem.value) return '';
+  
+  switch (tabValue) {
+    case 'post':
+      return currentItem.value.post?.length || 0;
+    case 'places':
+      return currentItem.value.placeIds?.length || 0;
+    case 'threshold':
+    case 'status':
+    case 'scripts':
+      return '';
+    default:
+      return '';
+  }
+};
+
+// バッジを表示するかどうかを判定する関数
+const hasContent = (tabValue: string): boolean => {
+  if (!currentItem.value) return false;
+  
+  switch (tabValue) {
+    case 'post':
+      return (currentItem.value.post?.length || 0) > 0;
+    case 'places':
+      return (currentItem.value.placeIds?.length || 0) > 0;
+    case 'threshold':
+      return !!currentItem.value.threshold?.length;
+    case 'status':
+      return !!currentItem.value.status;
+    case 'scripts':
+      return !!currentItem.value.script?.scriptId;
+    default:
+      return false;
+  }
+};
+
 
 // postのonecommeで使われているBotKeyの色を取得する
 const key = props.entry?.key;
