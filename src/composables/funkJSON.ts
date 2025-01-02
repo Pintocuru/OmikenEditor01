@@ -3,7 +3,6 @@ import { ref } from 'vue';
 import { DataType, Mode, AppEditorType, OmikenType, ParamsType } from '@type';
 import { configs } from '@/config';
 import { validateData } from '@/composables/FunkValidate';
-import _ from 'lodash';
 import Swal from 'sweetalert2';
 import OneSDK from '@onecomme.com/onesdk';
 import { AxiosRequestConfig } from 'axios';

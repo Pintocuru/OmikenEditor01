@@ -20,7 +20,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineProps, defineEmits, PropType } from "vue";
+import { ref,   PropType } from "vue";
 import type { ListCategory } from "@type";
 
 const props = defineProps({

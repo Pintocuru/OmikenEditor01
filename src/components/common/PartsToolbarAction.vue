@@ -18,7 +18,6 @@
 
 <script setup lang="ts">
 import { ListCategory, ListType, OmikenEntry,  } from "@type";
-import { cloneDeep } from "lodash";
 import Swal from "sweetalert2";
 
 type ItemOrGroup = ListType | { name: string; items: ListType[] };
@@ -63,7 +62,7 @@ function duplicateItem() {
   const itemsToDuplicate = isGroup ? item.items : [item as ListType];
 
   const duplicatedItems = itemsToDuplicate.map((originalItem) => {
-    const newItem = cloneDeep(originalItem);
+    const newItem = JSON.parse(JSON.stringify(originalItem));
     delete (newItem as any).id;
     newItem.name = `${newItem.name} のコピー`;
     return newItem;

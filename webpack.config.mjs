@@ -1,21 +1,13 @@
-// webpack.config.mjs
 import path from 'path';
 import { VueLoaderPlugin } from 'vue-loader';
-import HtmlWebpackPlugin from 'html-webpack-plugin';
-import { ENV } from './webpackENV.js';
 import { fileURLToPath } from 'url';
 
-// 現在のファイルのURLを基に、ディレクトリパスを取得
 const __filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(__filename);
 
-// 個別用
 export default (env, argv) => {
- const mode = argv.mode || 'development';
- const envConfig = ENV[mode];
-
  return {
-  mode: mode, // モード
+  mode: 'production', // 本番モード
   entry: './main.ts', // エントリーポイント
   context: path.resolve(dirname, 'src'), // 対象フォルダ
   output: {
@@ -24,59 +16,42 @@ export default (env, argv) => {
    clean: true // 出力ディレクトリをクリーンアップ
   },
   plugins: [
-   // Vue用のWebpackプラグイン
-   new VueLoaderPlugin(),
-   // HTML
-   new HtmlWebpackPlugin({
-    template: './index.ejs',
-    filename: 'index.html',
-    inject: 'body',
-    templateParameters: envConfig,
-    minify: false // コード量を軽減する
-   })
+   new VueLoaderPlugin() // Vue用プラグイン
   ],
   resolve: {
-   extensions: ['.ts', '.js', '.vue'] // 省略可能な拡張子
-  },
-  alias: {
-   '@': path.resolve(__dirname, 'src') 
+   extensions: ['.ts', '.js', '.vue'], // 拡張子の省略
+   alias: {
+    '@': fileURLToPath(new URL('./src', import.meta.url)),
+    '@type': fileURLToPath(new URL('./src/type.ts', import.meta.url))
+   }
   },
   module: {
    rules: [
-    // Vueファイルを処理
+    // Vueファイル
     {
      test: /\.vue$/,
      loader: 'vue-loader'
     },
-    // TypeScriptファイルを処理
+    // TypeScriptファイル
     {
      test: /\.ts$/,
      loader: 'ts-loader',
      exclude: /node_modules/,
      options: {
-      transpileOnly: true // 型チェックを除外
+      transpileOnly: false // 型チェックを有効化（必要に応じて true に変更）
      }
     },
+    // CSSファイル
     {
      test: /\.css$/,
      use: ['style-loader', 'css-loader']
     }
    ]
   },
-  // 外部で使用するもの
-  externals: {
-   vue: 'Vue',
-   vuetify: 'Vuetify',
-   lodash: 'lodash',
-   sweetalert2: 'Swal',
-   vuedraggable: 'vuedraggable',
-   zod: 'Zod',
-  },
   optimization: {
-   minimize: false, // コードの最小化
+   minimize: true, // コードを最小化
    usedExports: true, // 使用されていないエクスポートを削除
-   sideEffects: true // サイドエフェクトがない場合、不要なコードを削除
-  },
-
+   sideEffects: true // サイドエフェクトがないコードを削除
+  }
  };
 };

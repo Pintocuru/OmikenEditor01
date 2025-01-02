@@ -1,7 +1,6 @@
 // src/composables/funkValidate.ts
 import { AccessCondition, OmikenType, SyokenCondition, TypesType, RulesType } from '@type';
 import { z, ZodError } from 'zod';
-import _ from 'lodash';
 
 // threshold共通の数値変換
 const thresholdValueTransform = z.number().transform((val) => {
