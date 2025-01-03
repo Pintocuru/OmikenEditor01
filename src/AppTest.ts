@@ -1,5 +1,5 @@
 // src/composables/AppTest.ts
-import { ListCategory, ListEntry, OmikenTypeMap, OmikenEntry, PresetOmikenType } from '@type';
+import {  PresetOmikenType } from '@type';
 
 // JSONデータ作成用ファイルです
 

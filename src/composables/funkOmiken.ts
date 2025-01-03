@@ -52,7 +52,7 @@ export function FunkOmiken() {
   handleUpdate(newState, type, update);
   handleAddItems(newState, type, addKeys);
   handleDeleteItems(newState, type, delKeys);
-  if (reTypes) handleReTypes(newState, type, reTypes);
+  if (reTypes) handleReTypes(newState, reTypes);
 
   AppEditor.value.Omiken = newState;
    console.log('保存フラグが立ったよ', AppEditor.value.Omiken);

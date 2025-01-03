@@ -1,18 +1,15 @@
-import path from 'path';
+// webpack.config.mjs
+import { fileURLToPath, URL } from 'url';
 import { VueLoaderPlugin } from 'vue-loader';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const dirname = path.dirname(__filename);
 
 export default (env, argv) => {
  return {
   mode: 'production', // 本番モード
   entry: './main.ts', // エントリーポイント
-  context: path.resolve(dirname, 'src'), // 対象フォルダ
+  context: new URL('./src', import.meta.url).pathname, // 対象フォルダ
   output: {
    filename: 'script.js', // 出力ファイル名
-   path: path.resolve(dirname, 'dist'), // 出力ディレクトリ
+   path: fileURLToPath(new URL('./dist', import.meta.url)), // 出力ディレクトリ
    clean: true // 出力ディレクトリをクリーンアップ
   },
   plugins: [

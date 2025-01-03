@@ -29,7 +29,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import type { ListCategory, OmikenEntry, PlaceType, PlaceValueType } from '@/type';
+import type { ListCategory, OmikenEntry, PlaceType, PlaceValueType } from '@type';
 import { FunkEmits } from '@/composables/FunkEmits';
 
 const props = defineProps<{

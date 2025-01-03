@@ -11,8 +11,8 @@
      </v-toolbar-title>
      <template #append>
       <PartsArrayAction
-       category="places"
-       :placeEntry="place"
+       editMode="place"
+       :entry="place"
        @edit="openEditorItem('places', place.id)"
        @update:Omiken="updateOmiken"
       />
@@ -40,7 +40,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { AppEditorType, CategoryActive, ListCategory, ListEntry, OmikenEntry, PlaceValueType } from '@/type';
+import { AppEditorType, CategoryActive, ListCategory, ListEntry, OmikenEntry, PlaceValueType } from '@type';
 import PartsArrayAction from './common/PartsArrayAction.vue';
 import { FunkEmits } from '@/composables/FunkEmits';
 

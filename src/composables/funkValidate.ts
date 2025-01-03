@@ -252,13 +252,24 @@ const validateTypes = (
   validatedTypes[typeKey] = Array.from(new Set(validatedTypes[typeKey])).filter(
    (ruleId): ruleId is string => typeof ruleId === 'string' && ruleId in rules
   );
+ });
 
-  // どの配列にもrulesのidが入っていない場合、'unused'に'unused'を追加
-  if (validatedTypes[typeKey].length === 0 && typeKey !== 'unused') {
-   validatedTypes[typeKey] = ['unused'];
+ // どの配列にも存在しないrulesのidを'unused'に追加
+ const allUsedIds = new Set<string>();
+
+ // 型ガードでtypeArrayがstring[]であることを確認
+ Object.values(validatedTypes).forEach((typeArray) => {
+  if (Array.isArray(typeArray)) {
+   typeArray.forEach((id) => allUsedIds.add(id));
   }
  });
 
- // 'unused'が空の場合は空配列のまま
+ // 'unused' に追加すべきIDを決定
+ const unusedIds = Object.keys(rules).filter((ruleId) => !allUsedIds.has(ruleId));
+
+ // 'unused' に追加
+ validatedTypes.unused = [...validatedTypes.unused, ...unusedIds];
+
  return validatedTypes;
 };
+

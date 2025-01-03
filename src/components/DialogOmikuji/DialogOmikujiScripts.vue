@@ -42,7 +42,7 @@
 
 <script setup lang="ts">
 import { computed, inject, ref, Ref } from 'vue';
-import type { ListCategory, ListEntry, OmikujiType, OmikenEntry, AppEditorType, ScriptsType } from '@/type';
+import type { ListCategory, ListEntry, OmikujiType, OmikenEntry, AppEditorType, ScriptsType } from '@type';
 import { FunkEmits } from '@/composables/FunkEmits';
 
 const props = defineProps<{

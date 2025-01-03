@@ -23,9 +23,9 @@
       <template #append>
        <!-- バーガーメニュー -->
        <PartsArrayAction
-        category="omikujis"
-        :rulesEntry="currentItem"
-        :omikujiEntry="omikujis[omikujiId]"
+        editMode="omikujiRemove"
+        :entry="omikujis[omikujiId]"
+        :optionRules="currentItem"
         @edit="openEditorItem('omikujis', omikujiId)"
         @update:Omiken="updateOmiken"
        />

@@ -12,8 +12,11 @@
       </v-tooltip>
      </v-text-field>
 
-     <v-text-field v-model="localItem.description" label="説明文" />
-    </v-form>
+<v-textarea 
+  v-model="localItem.description" 
+  label="説明文" 
+  rows="4"
+/>    </v-form>
    </v-card-text>
    <v-card-actions>
     <v-spacer />
@@ -24,19 +27,19 @@
  </v-dialog>
 
  <!-- 編集ボタン-->
- <v-btn icon size="small" @click="dialog = true">
+ <v-btn icon size="small" @click.stop="dialog = true">
   <v-icon>mdi-pencil</v-icon>
  </v-btn>
 </template>
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import { OmikenEntry, ListCategory } from '@/type';
+import { OmikenEntry, ListCategory, RulesType, OmikujiType, PlaceType } from '@type';
 import { FunkEmits } from '@/composables/FunkEmits';
 
 const props = defineProps<{
  type: ListCategory;
- currentItem: any;
+ currentItem: RulesType | OmikujiType | PlaceType;
 }>();
 
 const emit = defineEmits<{

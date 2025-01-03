@@ -184,7 +184,7 @@
 
 <script setup lang="ts">
 import { inject, ref, Ref } from 'vue';
-import { ListCategory, ListEntry, OmikujiType, OmikenEntry, OneCommePostType, AppEditorType } from '@/type';
+import { ListCategory, ListEntry, OmikujiType, OmikenEntry, OneCommePostType, AppEditorType } from '@type';
 import DialogOmikujiPostDescription from '@/components/DialogOmikuji/DialogOmikujiPostDescription.vue';
 import PartsArrayRemove from '@/components/common/PartsArrayRemove.vue';
 import { FunkOmikuji } from '@/composables/FunkOmikuji';

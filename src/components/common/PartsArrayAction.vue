@@ -7,7 +7,7 @@
    </v-btn>
   </template>
   <v-list>
-   <v-list-item v-for="item in menuItems" :key="item.action" @click="menuAction(item.action)">
+   <v-list-item v-for="item in currentMenuItems" :key="item.action" @click="handleMenuAction(item.action)">
     <v-icon :class="item.iconClass">{{ item.icon }}</v-icon>
     <span :class="`${item.iconClass} pl-6`">{{ item.label }}</span>
    </v-list-item>
@@ -16,15 +16,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, inject, Ref } from 'vue';
-import type { OmikenEntry, OmikujiType, RulesType, AppEditorType, PlaceType, ListCategory } from '@type';
+import { ref, computed, inject, type Ref } from 'vue';
+import { OmikenEntry, OmikujiType, RulesType, AppEditorType, PlaceType, ListCategory, OmikenTypeMap } from '@type';
 import Swal from 'sweetalert2';
+import { FunkEmits } from '@/composables/FunkEmits';
 
 const props = defineProps<{
- category: ListCategory;
- rulesEntry?: RulesType;
- omikujiEntry?: OmikujiType;
- placeEntry?: PlaceType;
+ editMode: 'rule' | 'omikujiRemove' | 'omikujiAdd' | 'place';
+ entry: RulesType | OmikujiType | PlaceType;
+ optionRules?: RulesType;
 }>();
 
 const emit = defineEmits<{
@@ -33,169 +33,176 @@ const emit = defineEmits<{
 }>();
 
 const menu = ref(false);
-
-// Inject
 const AppEditor = inject<Ref<AppEditorType>>('AppEditorKey');
 
-/**
- * メニュー項目の定義
- */
-const menuItems = computed(() =>
- [
-  {
-   action: 'edit',
-   icon: 'mdi-pencil',
-   iconClass: 'text-primary',
-   label: '編集'
-  },
-  {
-   action: 'duplicate',
-   icon: 'mdi-content-copy',
-   iconClass: 'text-info',
-   label: '複製'
-  },
-  {
-   action: props.rulesEntry ? 'remove' : 'add',
-   icon: props.rulesEntry ? 'mdi-playlist-remove' : 'mdi-playlist-plus',
-   iconClass: 'text-warning',
-   label: props.rulesEntry ? 'リストから除外' : 'リストに追加'
-  },
-  {
-   action: 'delete',
-   icon: 'mdi-delete',
-   iconClass: 'text-error',
-   label: 'データの削除'
-  }
- ].filter((item) => props.category === 'omikujis' || (item.action !== 'remove' && item.action !== 'add'))
+// コンポーザブル:FunkEmits
+const {  updateOmikenEntry } = FunkEmits(emit);
+
+interface MenuItem {
+ action: 'edit' | 'duplicate' | 'remove' | 'add' | 'delete';
+ icon: string;
+ iconClass: string;
+ label: string;
+}
+
+interface MenuConfig {
+ [key: string]: MenuItem[]; // 各カテゴリのキーに対して、MenuItemの配列を持つ
+}
+
+// 共通アクションを定義
+const createMenuItem = (
+ action: MenuItem['action'], // actionの型を MenuItem['action'] に変更
+ icon: string,
+ iconClass: string,
+ label: string
+): MenuItem => ({ action, icon, iconClass, label });
+
+const COMMON_ACTIONS: Record<string, MenuItem> = {
+ edit: createMenuItem('edit', 'mdi-pencil', 'text-primary', '編集'),
+ duplicate: createMenuItem('duplicate', 'mdi-content-copy', 'text-info', '複製'),
+ delete: createMenuItem('delete', 'mdi-delete', 'text-error', 'データの削除'),
+ remove: createMenuItem('remove', 'mdi-playlist-remove', 'text-warning', 'リストから除外'),
+ add: createMenuItem('add', 'mdi-playlist-plus', 'text-warning', 'リストに追加')
+};
+
+// 各カテゴリのアクションを定義
+const CATEGORY_ACTIONS: Record<string, (keyof typeof COMMON_ACTIONS)[]> = {
+ rule: ['duplicate', 'delete'],
+ omikujiRemove: ['edit', 'duplicate', 'remove', 'delete'],
+ omikujiAdd: ['edit', 'duplicate', 'add', 'delete'],
+ place: ['edit', 'duplicate', 'delete']
+};
+
+// MENU_CONFIGS を動的に生成
+const MENU_CONFIGS: MenuConfig = Object.fromEntries(
+ Object.entries(CATEGORY_ACTIONS).map(([key, actions]) => [key, actions.map((action) => COMMON_ACTIONS[action])])
 );
 
-/**
- * メニューアクションのハンドラー
- */
-const menuAction = (action: string) => {
- const actionMap: Record<string, () => void> = {
-  edit: editItem,
-  duplicate: duplicateItem,
-  remove: removeList,
-  add: addList,
-  delete: deleteItem
+const currentMenuItems = computed(() => {
+ return MENU_CONFIGS[props.editMode] || [];
+});
+
+const handleMenuAction = async (action: string) => {
+ const actionHandlers = {
+  edit: handleEdit,
+  duplicate: handleDuplicate,
+  remove: handleEnableIdsRemove,
+  add: handleEnableIdsAdd,
+  delete: handleDelete
  };
 
- actionMap[action]();
+ if (action in actionHandlers) {
+  await actionHandlers[action as keyof typeof actionHandlers]();
+ }
+
  menu.value = false;
 };
 
-const getEntryByCategory = (category: ListCategory) => {
- switch (category) {
-  case 'rules':
-   return props.rulesEntry;
-  case 'omikujis':
-   return props.omikujiEntry;
-  case 'places':
-   return props.placeEntry;
-  default:
-   return null;
- }
-};
-
-/**
- * 編集アクション
- */
-const editItem = () => {
+const handleEdit = () => {
  emit('edit');
 };
 
-// 項目の複製
-const duplicateItem = () => {
- const entry = getEntryByCategory(props.category);
- if (!entry) return;
+// データの複製
+const handleDuplicate = () => {
+ if (!props.entry) return;
+ const type = getEntryType();
 
- const duplicatedItem = JSON.parse(JSON.stringify(entry));
- duplicatedItem.name = `${duplicatedItem.name} (コピー)`;
- // rulesEntryがあるならrules.enableIdsにも入れる
- if (props.rulesEntry) duplicatedItem.rulesId = props.rulesEntry.id;
+ let optionId;
+ if (type === 'rules') optionId = props.entry ? props.entry.id : undefined;
+ if (type === 'omikujis') optionId = props.optionRules ? props.optionRules.id : undefined;
 
- emit('update:Omiken', {
-  type: props.category,
-  addKeys: duplicatedItem
- });
-};
-
-// 項目の削除
-const deleteItem = () => {
- const entry = getEntryByCategory(props.category);
- if (!entry) return;
-
- Swal.fire({
-  title: `${entry.name} を削除する`,
-  text: 'この設定を削除しますか？',
-  icon: 'warning',
-  confirmButtonText: 'OK',
-  confirmButtonColor: '',
-  showDenyButton: true,
-  denyButtonColor: '',
-  denyButtonText: 'キャンセル'
- }).then((result) => {
-  if (result.isConfirmed) {
-   emit('update:Omiken', {
-    type: props.category,
-    delKeys: [entry.id]
-   });
-  }
- });
-};
-
-// リストからの除外 (omikuji)
-const removeList = () => {
- if (!props.rulesEntry || !props.omikujiEntry) return;
- const update: Record<string, RulesType> = {
-  [props.rulesEntry.id]: {
-   ...props.rulesEntry,
-   enableIds: props.rulesEntry.enableIds.filter((id: string) => id !== props.omikujiEntry?.id)
+ const payload: OmikenEntry<ListCategory> = {
+  type,
+  addKeys: {
+   ...JSON.parse(JSON.stringify(props.entry)),
+   name: `${props.entry.name} (コピー)`,
+   optionId
   }
  };
-
- emit('update:Omiken', {
-  type: 'rules',
-  update
- });
+ emit('update:Omiken', payload);
 };
 
-// rules選択リストの生成 (omikuji)
-const rulesList = computed(() => {
- if (!AppEditor?.value.Omiken.rules) return [];
+// データを削除
+const handleDelete = async () => {
+ if (!props.entry) return;
 
- return Object.entries(AppEditor.value.Omiken.rules).map(([id, rule]) => ({
-  id,
-  name: rule.name
- }));
-});
-
-// リストへの追加 (omikuji)
-const addList = async () => {
- const { value: ruleId } = await Swal.fire({
-  title: 'ルールを選択',
-  input: 'select',
-  inputOptions: Object.fromEntries(rulesList.value.map((rule) => [rule.id, rule.name])),
+ const result = await Swal.fire({
+  title: `${props.entry.name} を削除する`,
+  text: 'この設定を削除しますか？',
+  icon: 'warning',
   showCancelButton: true,
-  inputPlaceholder: 'ルールを選択してください',
   confirmButtonText: 'OK',
   cancelButtonText: 'キャンセル'
  });
 
- if (ruleId) {
-  const rulesEntry = AppEditor?.value.Omiken.rules[ruleId];
-  if (!rulesEntry) return;
-  if (!props.omikujiEntry) return;
+ if (result.isConfirmed) {
   emit('update:Omiken', {
-   type: 'rules',
-   update: {
-    [ruleId]: {
-     ...rulesEntry,
-     enableIds: [...rulesEntry.enableIds, props.omikujiEntry.id]
-    }
-   }
+   type: getEntryType(),
+   delKeys: [props.entry.id]
   });
  }
 };
+
+// omikujiをrulesのリストから除外
+const handleEnableIdsRemove = () => {
+ const type = getEntryType();
+ if (type !== 'omikujis' || !props.optionRules || !props.entry) return;
+
+ const updatedEntry: RulesType = {
+  ...props.optionRules,
+  enableIds: props.optionRules.enableIds.filter((id) => id !== props.entry.id)
+ };
+
+ updateOmikenEntry('rules', updatedEntry);
+};
+
+// omikujiをrulesのリストに追加
+const handleEnableIdsAdd = async () => {
+  if (!AppEditor?.value?.Omiken.rules) return;
+
+  const rulesList = Object.entries(AppEditor.value.Omiken.rules).map(([id, rule]) => ({
+    id,
+    name: rule.name
+  }));
+
+  const { value: selectedRuleId } = await Swal.fire({
+    title: 'ルールを選択',
+    input: 'select',
+    inputOptions: Object.fromEntries(rulesList.map((rule) => [rule.id, rule.name])),
+    showCancelButton: true,
+    inputPlaceholder: 'ルールを選択してください',
+    confirmButtonText: 'OK',
+    cancelButtonText: 'キャンセル'
+  });
+
+  if (selectedRuleId) {
+    const rulesEntry = AppEditor.value.Omiken.rules[selectedRuleId];
+    if (!rulesEntry) return;
+
+    // enableIds に props.entry.id が含まれていない場合のみ追加
+    const updatedEnableIds = rulesEntry.enableIds.includes(props.entry.id)
+      ? rulesEntry.enableIds
+      : [...rulesEntry.enableIds, props.entry.id];
+
+    updateOmikenEntry('rules', {
+      ...rulesEntry,
+      enableIds: updatedEnableIds
+    });
+  }
+};
+
+// Utility functions
+function getEntryType(): ListCategory {
+ switch (props.editMode) {
+  case 'rule':
+   return 'rules';
+  case 'place':
+   return 'places';
+  case 'omikujiAdd':
+  case 'omikujiRemove':
+   return 'omikujis';
+  default:
+   throw new Error('Invalid editMode');
+ }
+}
 </script>

@@ -100,7 +100,7 @@ const updateRulesEnabledIds = (enableIds: string[], ruleId: string) => {
   const updatedRule = {
     ...props.rulesEntry,
     enableIds,
-  };
+  } as RulesType;
 
   emit("update:Omiken", {
     type: "rules",

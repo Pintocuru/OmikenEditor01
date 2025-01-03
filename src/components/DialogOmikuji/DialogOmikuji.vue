@@ -5,6 +5,7 @@
   <v-toolbar :color="themeColor">
    <v-toolbar-title>
     {{ currentItem.name }}
+    <!-- 名前・説明の編集 -->
     <PartsNameEditor type="omikujis" :currentItem="currentItem" @update:Omiken="updateOmiken" />
    </v-toolbar-title>
    <template #append>

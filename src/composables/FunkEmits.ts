@@ -44,24 +44,3 @@ export function FunkEmits(emit: any) {
   updateOmikenPreset
  };
 }
-
-const hogedata: PresetOmikenType = {
- id: 'presetNull',
- name: 'presetNull',
- description: 'リセット用',
- version: '0.0.0',
- item: {
-  types: {
-   comment: [],
-   timer: [],
-   meta: [],
-   waitingList: [],
-   setList: [],
-   reactions: [],
-   unused: []
-  },
-  rules: {},
-  omikujis: {},
-  places: {}
- }
-};

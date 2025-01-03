@@ -12,8 +12,8 @@
      </v-toolbar-title>
      <template #append>
       <PartsArrayAction
-       category="omikujis"
-       :omikujiEntry="omikuji"
+       editMode="omikujiAdd"
+       :entry="omikuji"
        @edit="openEditorItem('omikujis', omikuji.id)"
        @update:Omiken="updateOmiken"
       />

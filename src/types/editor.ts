@@ -49,12 +49,12 @@ export type OmikenEntry<T extends ListCategory> = {
  reTypes?: T extends 'types' ? Record<TypesType, string[]> : never;
 };
 
-type AddKeysCategory = {
+export type AddKeysCategory = {
  types: never;
- rules: PartialListItem<'rules'> & { types?: TypesType };
+ rules: PartialListItem<'rules'> & { optionId?: TypesType };
  omikujis:
-  | (PartialListItem<'omikujis'> & { rulesId?: string })
-  | (PartialListItem<'omikujis'> & { rulesId?: string })[];
+  | (PartialListItem<'omikujis'> & { optionId?: string })
+  | (PartialListItem<'omikujis'> & { optionId?: string })[];
  places: PartialListItem<'places'> | PartialListItem<'places'>[];
 };
 

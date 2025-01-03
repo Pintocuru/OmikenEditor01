@@ -9,7 +9,7 @@
 </template>
 
 <script setup lang="ts">
-import { ListCategory, ListEntry, OmikujiType, OmikenEntry, AppEditorType, ScriptsType } from '@/type';
+import { ListCategory, ListEntry, OmikujiType, OmikenEntry, AppEditorType, ScriptsType } from '@type';
 import { FunkEmits } from '@/composables/FunkEmits';
 import DialogThreshold from '@/components/DialogThreshold/DialogThreshold.vue';
 

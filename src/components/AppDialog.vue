@@ -49,7 +49,7 @@
 
 <script setup lang="ts">
 import { onMounted } from 'vue';
-import { ListEntry, ListCategory, OmikenEntry, ListEntryCollect, OmikenType } from '@/type';
+import { ListEntry, ListCategory, OmikenEntry, ListEntryCollect, OmikenType } from '@type';
 import DialogRules from '@/components/DialogRules.vue';
 import DialogOmikuji from '@/components/DialogOmikuji/DialogOmikuji.vue';
 import DialogPlace from '@/components/DialogPlace.vue';

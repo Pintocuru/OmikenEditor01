@@ -6,10 +6,15 @@
    <v-card elevation="0" class="w-100" @click="togglePanel(rule.id)" :class="{ 'cursor-pointer': true }">
     <v-toolbar :color="rule?.color">
      <v-toolbar-title class="ml-2">
-      <v-icon class="mx-2">
-       {{ TYPE_ICON_MAP[findType(rule.id)?.type || 'unused'] }}
-      </v-icon>
+      <DialogTypes
+       :Omiken="AppEditor.Omiken"
+       :type="findType(rule.id)?.type || 'unused'"
+       @update:Omiken="updateOmiken"
+      />
       {{ rule?.name }}
+      <!-- 名前・説明の編集 -->
+      <PartsNameEditor type="rules" :currentItem="rule" @update:Omiken="updateOmiken" />
+
       <!-- enableIdsにあるアイテム数 -->
       <v-chip label class="ml-4"> {{ rule?.enableIds.length }} items </v-chip>
       <!-- rulesのカラー -->
@@ -20,12 +25,8 @@
       </v-icon>
      </v-toolbar-title>
      <template #append>
-      <PartsToolbarAction
-       selectCategory="rules"
-       :item="rule"
-       @edit="openEditorItem('rules', rule.id)"
-       @update:Omiken="updateOmiken"
-      />
+      <!-- バーガーメニュー -->
+      <PartsArrayAction editMode="rule" :entry="rule" @update:Omiken="updateOmiken" />
      </template>
     </v-toolbar>
     <v-card-text class="list-group d-flex flex-wrap">
@@ -61,23 +62,16 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import {
- OmikenEntry,
- ListCategory,
- ListEntry,
- CategoryActive,
- OmikenType,
- TypesType,
- RulesType,
- AppEditorType
-} from '@type';
+import { OmikenEntry, ListCategory, ListEntry, CategoryActive, TypesType, AppEditorType } from '@type';
+import PartsArrayAction from '@/components/common/PartsArrayAction.vue';
+import DialogTypes from '@/components/DialogTypes.vue';
 import ListRulesOmikujiSetting from '@/components/ListRulesOmikujiSetting.vue';
 import ListRulesOmikujiView from '@/components/ListRulesOmikujiView.vue';
 import ThresholdMain from '@/components/DialogThreshold/DialogThreshold.vue';
+import PartsNameEditor from '@/components/common/PartsNameEditor.vue';
 import { FunkThreshold } from '@/composables/FunkThreshold';
 import { FunkEmits } from '@/composables/FunkEmits';
 import PartsToolbarColor from '@/components/common/PartsToolbarColor.vue';
-import PartsToolbarAction from '@/components/common/PartsToolbarAction.vue';
 
 // 展開状態を管理する配列
 const expandedPanels = ref<string[]>([]);
@@ -117,16 +111,6 @@ const findType = (id: string): { type: TypesType; index: number } | null => {
   }
  }
  return null; // 見つからなかった場合
-};
-
-const TYPE_ICON_MAP: Record<TypesType, string> = {
- comment: 'mdi-comment-outline',
- timer: 'mdi-timer-outline',
- meta: 'mdi-information-outline',
- waitingList: 'mdi-format-list-bulleted',
- setList: 'mdi-checkbox-multiple-marked-outline',
- reactions: 'mdi-emoticon-outline',
- unused: 'mdi-cancel'
 };
 
 // UIの各種ref
