@@ -1,5 +1,5 @@
 // src/composables/funkValidate.ts
-import { AccessCondition, OmikenType, SyokenCondition, TypesType, RulesType } from '@type';
+import { AccessCondition, OmikenType, SyokenCondition, TypesType, RulesType, GiftCondition } from '@type';
 import { z, ZodError } from 'zod';
 
 // threshold共通の数値変換
@@ -41,6 +41,7 @@ const thresholdSchema = z
   coolDown: z.number().default(3).optional(),
   syoken: z.nativeEnum(SyokenCondition).optional(),
   access: z.nativeEnum(AccessCondition).optional(),
+  gift: z.nativeEnum(GiftCondition).optional(),
   match: thresholdMatchSchema.optional(),
   count: thresholdCountSchema.optional()
  })
@@ -56,6 +57,8 @@ const thresholdSchema = z
     return { ...result, syoken: data.syoken }; // syokenのみ保持
    case 'access':
     return { ...result, access: data.access }; // accessのみ保持
+   case 'gift':
+    return { ...result, gift: data.gift }; // accessのみ保持
    case 'match':
     return { ...result, match: data.match }; // matchのみ保持
    case 'count':
@@ -64,12 +67,6 @@ const thresholdSchema = z
     return result;
   }
  });
-
-// rulesOrder/enableIdsの配列用スキーマ
-const arraySchema = z.array(z.string()).transform((ids) => {
- // 重複を除去して返す
- return [...new Set(ids)];
-});
 
 // BaseType をマージして定義
 const baseSchema = z.object({
@@ -272,4 +269,3 @@ const validateTypes = (
 
  return validatedTypes;
 };
-

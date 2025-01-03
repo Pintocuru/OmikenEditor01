@@ -25,7 +25,8 @@
 
 <script setup lang="ts">
 import { computed, inject, ref, Ref } from 'vue';
-import { AppEditorType, ListCategory, OmikenEntry, PresetOmikenType } from '@type';
+import { AppEditorType, CategoryActive, ListCategory, ListEntry, OmikenEntry, PresetOmikenType } from '@type';
+import { FunkEmits } from '@/composables/FunkEmits';
 import Swal from 'sweetalert2';
 
 // props/emits
@@ -36,7 +37,10 @@ const props = defineProps<{
 const emit = defineEmits<{
  (e: 'update:Omiken', payload: OmikenEntry<ListCategory>): void;
  (e: 'update:OmikenPreset', preset: PresetOmikenType): void;
+ (e: 'update:category', value: CategoryActive): void;
 }>();
+// コンポーザブル:FunkEmits
+const { openList, openEditor, openEditorItem } = FunkEmits(emit);
 
 const Presets = props.AppEditor.Presets;
 
@@ -68,6 +72,9 @@ const presetSelect = async (preset: PresetOmikenType) => {
   if (result.isConfirmed || result.isDenied) {
    const isOverwrite = result.isConfirmed;
    emit('update:OmikenPreset', { ...preset, isOverwrite });
+
+   // ListRules を開く
+   openList({ main: 'rules' });
 
    await Swal.fire({
     icon: 'success',

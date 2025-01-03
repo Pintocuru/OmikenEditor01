@@ -1,15 +1,10 @@
 <!-- src/components/DialogOmikuji/DialogOmikujiThreshold.vue -->
 <template>
- <DialogThreshold
-  :item="currentItem"
-  type="comment"
-  mode="omikujis"
-  @update:Thresholds="updateOmikenEntry('omikujis', currentItem)"
- />
+ <DialogThreshold :item="currentItem" type="comment" mode="omikujis" @update:Omiken="updateOmiken" />
 </template>
 
 <script setup lang="ts">
-import { ListCategory, ListEntry, OmikujiType, OmikenEntry, AppEditorType, ScriptsType } from '@type';
+import { ListCategory, ListEntry, OmikujiType, OmikenEntry } from '@type';
 import { FunkEmits } from '@/composables/FunkEmits';
 import DialogThreshold from '@/components/DialogThreshold/DialogThreshold.vue';
 
@@ -23,5 +18,5 @@ const emit = defineEmits<{
 }>();
 
 // コンポーザブル:FunkEmits
-const { updateOmikenEntry } = FunkEmits(emit);
+const { updateOmiken } = FunkEmits(emit);
 </script>

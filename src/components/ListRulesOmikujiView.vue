@@ -50,18 +50,8 @@
         🔐 {{ getExampleText(omikujis[omikujiId].threshold) }}
        </v-chip>
        <v-chip density="compact" variant="elevated" label :color="weightColor(omikujiId, currentItem.enableIds)">
-        <!-- ランク表示 -->
-        <span>
-         🌟 {{ omikujis[omikujiId]?.rank }} (優先度: {{ rankPositionGet(omikujiId, currentItem.enableIds) }}/
-         {{ rankCount(currentItem.enableIds) }} )
-        </span>
-        <!-- 出現割合表示 -->
-        <span class="pl-4">
-         🎯 {{ omikujis[omikujiId]?.weight }}/{{ weightTotal(currentItem.enableIds, omikujis[omikujiId]?.rank) }}
-         <span class="ml-2">({{ weightPercentage(omikujiId, currentItem.enableIds) }}%)</span>
-        </span>
         <!-- rankCountが1でない、かつすべてのthresholdが空の場合にビックリマークとツールチップを表示 -->
-        <template v-if="rankCount(currentItem.enableIds) !== 1 && isAllThresholdEmpty(omikujiId)">
+        <template v-if="rankCount(currentItem.enableIds) !== 1 && isAllThresholdEmpty(currentItem.enableIds)">
          <v-tooltip>
           <template #activator="{ props }">
            <span v-bind="props" class="ml-2" style="color: red; font-size: 20px">❗</span>
@@ -69,6 +59,15 @@
           <span>おみくじに条件が設置されていないため、<br>ランクが最高のものしか選ばれません。</span>
          </v-tooltip>
         </template>
+        <!-- ランク表示 -->
+        <span>
+         🌟 {{ omikujis[omikujiId]?.rank }} (Lv{{ rankPositionGet(omikujiId, currentItem.enableIds) }}/{{ rankCount(currentItem.enableIds) }})
+        </span>
+        <!-- 出現割合表示 -->
+        <span class="pl-2">
+         🎯{{ omikujis[omikujiId]?.weight }}/{{ weightTotal(currentItem.enableIds, omikujis[omikujiId]?.rank) }}
+         <span class="ml-0">({{ weightPercentage(omikujiId, currentItem.enableIds) }}%)</span>
+        </span>
        </v-chip>
       </div>
       <!-- ランク・出現割合の編集 -->

@@ -7,6 +7,7 @@
   :categoryActive="categoryActive"
   @update:Omiken="updateOmiken"
   @update:OmikenPreset="updateOmikenPreset"
+  @update:category="openList"
   @open-editor="openEditor"
  />
 </template>
@@ -17,7 +18,7 @@ import ListRules from '@/components/ListRules.vue';
 import ListOmikuji from '@/components/ListOmikuji.vue';
 import ListPlace from '@/components/ListPlace.vue';
 import ListPreset from '@/components/ListPreset/ListPreset.vue';
-import { ListCategory, OmikenEntry, ListEntry, PresetType, CategoryActive, AppEditorType } from '@type';
+import { ListCategory, OmikenEntry, ListEntry, PresetType, CategoryActive, AppEditorType, PresetOmikenType } from '@type';
 import { FunkEmits } from '@/composables/FunkEmits';
 
 // Props Emits
@@ -28,12 +29,13 @@ const props = defineProps<{
 
 const emit = defineEmits<{
  (e: 'update:Omiken', payload: OmikenEntry<ListCategory>): void;
- (e: 'update:OmikenPreset', preset: PresetType): void;
+ (e: 'update:OmikenPreset', preset: PresetOmikenType): void;
+  (e: 'update:category', value: CategoryActive): void;
  (e: 'open-editor', editorItem: ListEntry<ListCategory>): void;
 }>();
 
 // コンポーザブル:FunkEmits
-const { updateOmiken, openEditor, updateOmikenPreset } = FunkEmits(emit);
+const { openList, updateOmiken, openEditor, updateOmikenPreset } = FunkEmits(emit);
 
 // 子コンポーネントの指定
 const currentListComponent = computed(() => {

@@ -32,7 +32,7 @@
  </v-row>
 
  <v-sheet>
-  <v-btn block @click="addItemPlace" color="primary" variant="flat" class="mt-6">
+  <v-btn block @click="addItem('places')" color="primary" variant="flat" class="mt-6">
    <v-icon left>mdi-plus</v-icon> 📍 プレースホルダーの追加
   </v-btn>
  </v-sheet>
@@ -71,7 +71,7 @@ const getRandomValues = (values: PlaceValueType[], count: number) => {
 };
 
 // アイテムを追加
-const addItemPlace = () => {
- emit('update:Omiken', { type: 'places', addKeys: [{}] });
+const addItem = (type:ListCategory) => {
+ emit('update:Omiken', { type, addKeys: [{name:'新しいプレースホルダー'}] });
 };
 </script>

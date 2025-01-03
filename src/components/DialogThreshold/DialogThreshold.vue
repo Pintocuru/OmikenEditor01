@@ -4,16 +4,14 @@
   <!-- しきい値リスト -->
   <v-row>
    <v-col v-for="(threshold, index) in thresholds" :key="index" cols="12" :sm="maxArray === 1 ? 12 : 4">
-    <!-- 内容 -->
     <v-card
      elevation="2"
      class="pa-4 position-relative cursor-pointer"
      variant="elevated"
      color="yellow lighten-3"
      :height="maxArray === 1 ? 70 : 100"
-     @click="dialog = true"
+     @click="openDialog(index)"
     >
-     <!-- 閉じるボタン -->
      <v-btn
       icon
       size="small"
@@ -39,7 +37,7 @@
      @click="addThreshold"
     >
      <div class="text-center">
-      <v-icon size="32" color="primary" class="mb-2"> mdi-plus-circle </v-icon>
+      <v-icon size="32" color="primary" class="mb-2">mdi-plus-circle</v-icon>
       <div class="text-primary">条件を追加</div>
      </div>
     </v-card>
@@ -50,29 +48,22 @@
  <!-- 現在選択中のしきい値の詳細編集 -->
  <v-dialog v-model="dialog" max-width="800px" persistent :scrim="true">
   <v-card v-if="currentIndex !== null">
-   <v-card-title class="text-h6"> 条件の編集 </v-card-title>
+   <v-card-title class="text-h6">条件の編集</v-card-title>
    <v-card-text>
-    <!-- 条件リスト(ボタン選択) -->
-    <ThresholdSelect :threshold="thresholds[currentIndex]" @update:condition="updateConditionType" />
-
-    <!-- 条件タイプに応じたコンポーネント -->
-    <component
-     :is="getComponent"
-     :threshold="thresholds[currentIndex]"
-     :type="type"
-     @update:threshold="updateThreshold"
-    />
+    <ThresholdSelect :threshold="editingThreshold" @update:condition="updateConditionType" />
+    <component :is="getComponent" :threshold="editingThreshold" :type="type" @update:threshold="tempUpdateThreshold" />
    </v-card-text>
    <v-card-actions>
-    <v-spacer></v-spacer>
-    <v-btn color="primary" variant="text" @click="dialog = false"> 閉じる </v-btn>
+    <v-spacer />
+    <v-btn color="primary" @click="saveChanges">保存</v-btn>
+    <v-btn @click="dialog = false">キャンセル</v-btn>
    </v-card-actions>
   </v-card>
  </v-dialog>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { ThresholdType, ConditionType, TypesType, RulesType, OmikujiType, OmikenEntry, ListCategory } from '@type';
 import { FunkThresholdInitial, FunkThreshold } from '@/composables/FunkThreshold';
 
@@ -87,79 +78,79 @@ const props = defineProps<{
  type: TypesType;
  mode: 'rules' | 'omikujis';
 }>();
-// typeのdefaultはcomment
-const maxArray = computed(() => (props.mode === 'rules' ? 3 : 1));
-const minArray = computed(() => (props.mode === 'rules' ? 1 : 0));
 
 const emit = defineEmits<{
  (e: 'update:Omiken', payload: OmikenEntry<ListCategory>): void;
 }>();
 
-const dialog = ref(false);
-
 // コンポーザブル:FunkEmits
-const { updateOmiken, openEditor, openEditorItem, updateOmikenEntry } = FunkEmits(emit);
+const { updateOmikenEntry } = FunkEmits(emit);
 
 const { getExampleText } = FunkThreshold();
 
-// 現在編集中のしきい値のインデックス
-const currentIndex = ref<number | null>(null);
+// 状態管理
+const dialog = ref(false);
+const currentIndex = ref<number | null>(0);
+const thresholds = ref<ThresholdType[]>([...props.item.threshold]);
+const editingThreshold = ref<ThresholdType>(FunkThresholdInitial());
 
-// しきい値リスト
-const thresholds = ref<ThresholdType[]>(props.item.threshold);
+// Props の監視
+watch(
+ () => props.item,
+ (newVal) => {
+  thresholds.value = [...newVal.threshold];
+  currentIndex.value = 0;
+ },
+ { deep: true, immediate: true }
+);
 
-// 条件タイプに応じたコンポーネントを動的に選択
+// 算出プロパティ
+const maxArray = computed(() => (props.mode === 'rules' ? 3 : 1));
+const minArray = computed(() => 0);
 const getComponent = computed(() => {
- if (currentIndex.value === null) return null;
-
- const conditionComponentMap = {
-  target: ThresholdSimple,
-  coolDown: ThresholdSimple,
-  syoken: ThresholdSimple,
-  access: ThresholdSimple,
-  gift: ThresholdSimple,
-  count: ThresholdCount,
-  match: ThresholdMatch
- };
-
- return conditionComponentMap[thresholds.value[currentIndex.value].conditionType];
+  const componentMap = {
+    target: ThresholdSimple,
+    coolDown: ThresholdSimple,
+    syoken: ThresholdSimple,
+    access: ThresholdSimple,
+    gift: ThresholdSimple,
+    count: ThresholdCount,
+    match: ThresholdMatch
+  };
+  return componentMap[editingThreshold.value.conditionType];
 });
 
-// しきい値追加
+// メソッド
+const openDialog = (index: number) => {
+ currentIndex.value = index;
+ editingThreshold.value = { ...thresholds.value[index] };
+ dialog.value = true;
+};
+
 const addThreshold = () => {
- if (thresholds.value.length < 3) {
+ if (thresholds.value.length < maxArray.value) {
   thresholds.value.push(FunkThresholdInitial());
   currentIndex.value = thresholds.value.length - 1;
   emitUpdate();
+  dialog.value = true;
  }
 };
 
-// しきい値削除
 const removeThreshold = (index: number) => {
  if (thresholds.value.length > minArray.value) {
   thresholds.value.splice(index, 1);
-  currentIndex.value =
-   currentIndex.value !== null && currentIndex.value >= thresholds.value.length
-    ? thresholds.value.length - 1
-    : currentIndex.value;
   emitUpdate();
  }
 };
 
-// 条件タイプ更新
 const updateConditionType = (condition: ConditionType) => {
-  if (currentIndex.value === null) return;
-
-  const currentThreshold = thresholds.value[currentIndex.value];
-  thresholds.value[currentIndex.value] = {
-    ...FunkThresholdInitial(condition),
-    ...currentThreshold,
-    conditionType: condition,
-  };
-  emitUpdate();
+ editingThreshold.value = {
+  ...FunkThresholdInitial(condition),
+  ...editingThreshold.value,
+  conditionType: condition
+ };
 };
 
-// しきい値更新
 const updateThreshold = (updatedThreshold: ThresholdType) => {
  if (currentIndex.value !== null) {
   thresholds.value[currentIndex.value] = updatedThreshold;
@@ -167,11 +158,19 @@ const updateThreshold = (updatedThreshold: ThresholdType) => {
  }
 };
 
-// 親コンポーネントへ更新を通知
+const tempUpdateThreshold = (updatedThreshold: ThresholdType) => {
+ editingThreshold.value = updatedThreshold;
+};
+
 const emitUpdate = () => {
  updateOmikenEntry(props.mode, { ...props.item, threshold: thresholds.value });
 };
 
-// 初期状態で最初のしきい値を選択
-currentIndex.value = 0;
+const saveChanges = () => {
+ if (currentIndex.value !== null) {
+  thresholds.value[currentIndex.value] = { ...editingThreshold.value };
+  emitUpdate();
+  dialog.value = false;
+ }
+};
 </script>

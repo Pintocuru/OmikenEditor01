@@ -57,9 +57,9 @@
     class="ma-1"
     :key="item.value"
     :value="item.value"
-    :class="{ 'bg-primary': currentItem.gift === item.value }"
+    :class="{ 'bg-primary': Number(currentItem.gift) === Number(item.value) }"
     @click="
-     currentItem.gift = item.value as GiftCondition;
+     currentItem.gift = Number(item.value) as GiftCondition;
      $emit('update:threshold', currentItem);
     "
    >

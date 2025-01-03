@@ -49,26 +49,28 @@ export function FunkOmikuji() {
   });
 
   // postからonecommeを探し色を取得する
-  const getPostTypeColor = (
-    post: OneCommePostType[],
-    isBotColor?: boolean
-  ): string => {
-    const onecommePost = post.find((p) => p.type === "onecomme");
-    if (onecommePost?.botKey && isBotColor) {
-      return getCharaColor(onecommePost.botKey) ?? "grey";
-    }
+const getPostTypeColor = (post: OneCommePostType[], isBotColor?: boolean): string => {
+ // postが空の場合、デフォルトの色を返す
+ if (post.length === 0) {
+  return ''; // 空の配列の場合に返す色
+ }
 
-    // 'onecomme'がなければ、最初のtypeを判断して色を返す
-    const firstPost = post[0];
-    switch (firstPost.type) {
-      case "party":
-        return "deep-orange";
-      case "speech":
-        return "green";
-      default:
-        return "";
-    }
-  };
+ const onecommePost = post.find((p) => p.type === 'onecomme');
+ if (onecommePost?.botKey && isBotColor) {
+  return getCharaColor(onecommePost.botKey) ?? 'grey';
+ }
+
+ // 'onecomme'がなければ、最初のtypeを判断して色を返す
+ const firstPost = post[0];
+ switch (firstPost.type) {
+  case 'party':
+   return 'deep-orange';
+  case 'speech':
+   return 'green';
+  default:
+   return '';
+ }
+};
 
   // アイコンキーアイテムの取得
   const getIconKeyItems = (botKey: string | undefined) => {

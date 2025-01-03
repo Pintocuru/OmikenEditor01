@@ -35,46 +35,37 @@ export function FunkOmikenUpdater() {
 
    Object.assign(state[type], validatedItem);
 
-   // rulesの場合はtypesにも追加(optionIdがある場合)
-   if (type === 'rules' && hasOptionId(item)) {
-    const optionId = item.optionId;
+   // rulesの場合はtypesにも追加
+   if (type === 'rules') {
+    const optionId = 'optionId' in item ? item.optionId : null;
 
     // 一致フラグ
     let matched = false;
 
-    // `types` の各配列をチェック
-    for (const key in state.types) {
-     const typeKey = key as TypesType; // 明示的に型をアサート
-     if (state.types[typeKey].includes(optionId)) {
-      // デバッグ: state.types[typeKey]が正しいか確認
-      console.log(`TypeKey: ${typeKey}, state.types[${typeKey}]:`, state.types[typeKey]);
+    // optionIdがstringであることを確認
+    if (typeof optionId === 'string') {
+     // `types` の各配列をチェック
+     for (const key in state.types) {
+      const typeKey = key as TypesType; // 明示的に型をアサート
+      if (state.types[typeKey].includes(optionId)) {
+       // newKeyをpush
+       state.types[typeKey].push(newKey);
 
-      // newKeyをpushする前の状態を確認
-      console.log('Before push:', state.types[typeKey]);
-
-      // newKeyをpush
-      state.types[typeKey].push(newKey);
-
-      // push後の状態を確認
-      console.log('After push:', state.types[typeKey]);
-      matched = true;
-      break;
+       // push後の状態を確認
+       matched = true;
+       break;
+      }
      }
     }
 
-    // どこにも一致しなかった場合
-    if (!matched) {
-     console.error(`Option ID '${optionId}' not found in any types. Moving to 'unused'.`);
-     state.types.unused.push(newKey); // `unused` に追加
-    }
+    // どこにも一致しなかった場合 `unused` に追加
+    if (!matched) state.types.unused.push(newKey);
 
     // データの検証と更新
     state.types = validateData('types', state.types, {
      rules: state.rules
     });
    }
-   // 追加後の確認
-   console.log('ここか？:', state.types);
 
    // omikujisの場合はrulesのenableIdsにも追加(optionIdがある場合)
    if (type === 'omikujis' && hasOptionId(item)) {
@@ -94,38 +85,38 @@ export function FunkOmikenUpdater() {
   Object.assign(state.rules, updatedRule);
  };
 
-const handleDeleteItems = (state: OmikenType, type: ListCategory, delKeys?: string | string[]) => {
- // typesの場合は処理をスキップ
- if (type === 'types') return;
+ const handleDeleteItems = (state: OmikenType, type: ListCategory, delKeys?: string | string[]) => {
+  // typesの場合は処理をスキップ
+  if (type === 'types') return;
 
- const delItems = Array.isArray(delKeys) ? delKeys : delKeys ? [delKeys] : [];
+  const delItems = Array.isArray(delKeys) ? delKeys : delKeys ? [delKeys] : [];
 
- delItems.forEach((key) => {
-  delete state[type][key];
+  delItems.forEach((key) => {
+   delete state[type][key];
 
-  switch (type) {
-   case 'rules':
-    Object.values(state.types).forEach((typeArray) => {
-     // typeArrayの内容を直接変更
-     const index = typeArray.indexOf(key);
-     if (index !== -1) {
-      typeArray.splice(index, 1); // 元の配列から削除
-     }
-    });
-    break;
+   switch (type) {
+    case 'rules':
+     Object.values(state.types).forEach((typeArray) => {
+      // typeArrayの内容を直接変更
+      const index = typeArray.indexOf(key);
+      if (index !== -1) {
+       typeArray.splice(index, 1); // 元の配列から削除
+      }
+     });
+     break;
 
-   case 'omikujis':
-    Object.values(state.rules).forEach((rule) => {
-     // enableIds配列を直接変更
-     const index = rule.enableIds.indexOf(key);
-     if (index !== -1) {
-      rule.enableIds.splice(index, 1); // 元の配列から削除
-     }
-    });
-    break;
-  }
- });
-};
+    case 'omikujis':
+     Object.values(state.rules).forEach((rule) => {
+      // enableIds配列を直接変更
+      const index = rule.enableIds.indexOf(key);
+      if (index !== -1) {
+       rule.enableIds.splice(index, 1); // 元の配列から削除
+      }
+     });
+     break;
+   }
+  });
+ };
 
  // 順序の再編成
  const handleReTypes = (state: OmikenType, reTypes: Record<TypesType, string[]>) => {

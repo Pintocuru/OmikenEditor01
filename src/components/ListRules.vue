@@ -1,6 +1,5 @@
 <!-- src/components/ListRules.vue -->
 <template>
- <div class="pt-2">
   <div v-for="(rule, index) in rules" :key="rule.id" class="mb-2">
    <!-- ヘッダー部分 -->
    <v-card elevation="0" class="w-100" @click="togglePanel(rule.id)" :class="{ 'cursor-pointer': true }">
@@ -38,7 +37,7 @@
    <v-expand-transition>
     <div v-show="expandedPanels.includes(rule.id)">
      <!-- Threshold -->
-     <ThresholdMain :item="rule" mode="rules" type="comment" @update:Thresholds="updateOmikenEntry('rules', rule)" />
+     <ThresholdMain :item="rule" mode="rules" type="comment" @update:Omiken="updateOmiken" />
 
      <!-- 追加ボタン等 -->
      <ListRulesOmikujiSetting :rulesEntry="rule" :uiState="uiState" @update:Omiken="updateOmiken" />
@@ -57,7 +56,11 @@
     </div>
    </v-expand-transition>
   </div>
- </div>
+ <v-sheet>
+  <v-btn block @click="addItem('rules')" color="primary" variant="flat" class="mt-6">
+   <v-icon left>mdi-plus</v-icon>  ルールの追加
+  </v-btn>
+ </v-sheet>
 </template>
 
 <script setup lang="ts">
@@ -99,7 +102,7 @@ const emit = defineEmits<{
 const rules = computed(() => props.AppEditor.Omiken.rules);
 
 // コンポーザブル:FunkEmits
-const { updateOmiken, openEditor, openEditorItem, updateOmikenEntry } = FunkEmits(emit);
+const { updateOmiken, openEditor,  updateOmikenEntry } = FunkEmits(emit);
 // コンポーザブル:funkThreshold
 const { getExampleText } = FunkThreshold();
 
@@ -118,4 +121,11 @@ const uiState = ref({
  showEnabledIds: false,
  showWeightEditor: false
 });
+
+// アイテムを追加
+const addItem = (type:ListCategory) => {
+ emit('update:Omiken', { type, addKeys: [{
+  name:'新しいルール'
+ }] });
+};
 </script>

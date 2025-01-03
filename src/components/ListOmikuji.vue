@@ -38,7 +38,7 @@
  </v-row>
 
  <v-sheet>
-  <v-btn block @click="addItemOmikuji" color="primary" variant="flat" class="mt-6">
+  <v-btn block @click="addItem('omikujis')" color="primary" variant="flat" class="mt-6">
    <v-icon left>mdi-plus</v-icon> 🥠 おみくじの追加
   </v-btn>
  </v-sheet>
@@ -77,10 +77,7 @@ const omikujisNameSort = computed(() => {
 });
 
 // アイテムを追加
-const addItemOmikuji = () => {
- emit('update:Omiken', {
-  type: 'omikujis',
-  addKeys: [{}]
- });
+const addItem = (type:ListCategory) => {
+ emit('update:Omiken', { type, addKeys: [{name:'新しいおみくじ'}] });
 };
 </script>

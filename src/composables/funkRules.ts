@@ -6,7 +6,8 @@ import { AppEditorType, OmikenType } from '@type';
 export function FunkRules() {
  // inject
  const AppEditor = inject<Ref<AppEditorType>>('AppEditorKey');
- const omikuji = computed(() => AppEditor?.value.Omiken.omikujis ?? {});
+ const rules = computed(() => AppEditor?.value.Omiken.rules ?? {});
+ const omikujis = computed(() => AppEditor?.value.Omiken.omikujis ?? {});
 
  // 定数
  const SWITCH_CONFIG = {
@@ -31,7 +32,7 @@ export function FunkRules() {
 
  // omikujiのリスト
  const omikujiLists = computed(() => {
-  return Object.entries(omikuji.value || {}).map(([id, omikuji]) => ({
+  return Object.entries(omikujis.value || {}).map(([id, omikuji]) => ({
    id,
    name: omikuji.name,
    weight: omikuji.weight
@@ -45,7 +46,7 @@ export function FunkRules() {
  };
 
  const chipColors = (enableIds: string[]) => {
-  return Object.keys(omikuji).map((id) => ({
+  return Object.keys(omikujis).map((id) => ({
    id,
    color: weightColor.value(id, enableIds)
   }));
@@ -55,23 +56,23 @@ export function FunkRules() {
  const weightTotal = computed(
   () => (enableIds: string[], rank: number) =>
    enableIds.reduce((sum, id) => {
-    const item = omikuji.value[id];
+    const item = omikujis.value[id];
     return item && item.rank === rank ? sum + (item.weight ?? 0) : sum;
    }, 0)
  );
 
  // totalWeightの割合を計算
  const weightPercentage = computed(() => (optionId: string, enableIds: string[]) => {
-  const item = omikuji.value[optionId];
+  const item = omikujis.value[optionId];
   if (!item) return 0; // 該当するエントリがない場合は0を返す
   const rank = item.rank;
   const weight = item.weight ?? 0;
   const total = weightTotal.value(enableIds, rank);
 
   // Thresholdがすべて空の場合、一番高いRank以外のWeightを0%とする
-  if (isAllThresholdEmpty(optionId)) {
+  if (isAllThresholdEmpty.value(enableIds)) {
    // 最も高いRankのWeight以外を0にする処理
-   const maxRank = Math.max(...enableIds.map((id) => omikuji.value[id]?.rank).filter((rank) => rank !== undefined));
+   const maxRank = Math.max(...enableIds.map((id) => omikujis.value[id]?.rank).filter((rank) => rank !== undefined));
    if (item.rank !== maxRank) {
     return 0;
    }
@@ -83,7 +84,7 @@ export function FunkRules() {
  const rankCount = computed(() => (enableIds: string[]) => {
   const ranks = new Set<number>(); // ユニークなrankを保持するSet
   enableIds.forEach((id) => {
-   const item = omikuji.value[id];
+   const item = omikujis.value[id];
    if (item?.rank !== undefined) {
     ranks.add(item.rank);
    }
@@ -94,7 +95,7 @@ export function FunkRules() {
  // rankの順位を計算
  const rankPositions = computed(() => (enableIds: string[]) => {
   const ranks = Array.from(
-   new Set(enableIds.map((id) => omikuji.value[id]?.rank).filter((rank) => rank !== undefined))
+   new Set(enableIds.map((id) => omikujis.value[id]?.rank).filter((rank) => rank !== undefined))
   ).sort((a, b) => a! - b!); // 重複を排除し、昇順にソート
 
   const rankMap: Record<number, number> = {};
@@ -109,7 +110,7 @@ export function FunkRules() {
 
  // 現在のrankが何位かを取得
  const rankPositionGet = computed(() => (optionId: string, enableIds: string[]) => {
-  const item = omikuji.value[optionId];
+  const item = omikujis.value[optionId];
   if (!item) return null; // 該当するエントリがない場合はnullを返す
   const rank = item.rank;
   const rankPositionsMap = rankPositions.value(enableIds);
@@ -117,10 +118,14 @@ export function FunkRules() {
  });
 
  // すべてのthresholdが空かどうかをチェック
- function isAllThresholdEmpty(omikujiId: string): boolean {
-    const thresholds = omikuji.value[omikujiId]?.threshold ?? [];
-    return thresholds.every((threshold) => threshold === null || threshold === undefined);
-  }
+ const isAllThresholdEmpty = computed(() => (enableIds: string[]): boolean => {
+  // enableIdsの各omikujiをチェック
+  return enableIds.every((omikujiId) => {
+   const omikuji = omikujis.value[omikujiId]; // omikujiを取得
+   const thresholds = omikuji?.threshold ?? []; // omikujiのthresholdを取得
+   return thresholds.length === 0 || thresholds.every((threshold) => threshold === null || threshold === undefined);
+  });
+ });
 
  // v-chipに色を付与
  const weightColor = computed(() => (optionId: string, enableIds: string[]) => {

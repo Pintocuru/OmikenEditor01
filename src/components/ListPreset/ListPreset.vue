@@ -6,13 +6,13 @@
   :AppEditor="AppEditor"
   @update:Omiken="updateOmiken"
   @update:OmikenPreset="updateOmikenPreset"
-  @open-editor="openEditor"
+  @update:category="openList"
  />
 </template>
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { AppEditorType, CategoryActive, ListCategory, OmikenEntry, PresetType } from '@type';
+import { AppEditorType, CategoryActive, ListCategory, ListEntry, OmikenEntry, PresetType } from '@type';
 import ListPresetOmiken from './ListPresetOmiken.vue';
 import ListPresetCharas from './ListPresetCharas.vue';
 import ListPresetScripts from './ListPresetScripts.vue';
@@ -27,10 +27,11 @@ const props = defineProps<{
 const emit = defineEmits<{
  (e: 'update:Omiken', payload: OmikenEntry<ListCategory>): void;
  (e: 'update:OmikenPreset', preset: PresetType): void;
+ (e: 'update:category', value: CategoryActive): void;
 }>();
 
 // コンポーザブル:FunkEmits
-const { updateOmiken, openEditor, updateOmikenPreset } = FunkEmits(emit);
+const { openList, updateOmiken, openEditor, updateOmikenPreset } = FunkEmits(emit);
 
 // 子コンポーネントの指定
 const currentListComponent = computed(() => {

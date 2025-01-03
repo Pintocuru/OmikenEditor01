@@ -5,6 +5,7 @@
   :key="key"
   :model-value="entry.isOpen"
   @update:model-value="(value) => updateDialog(key, value)"
+  @click:outside="() => updateDialog(key,false)"
   max-width="800px"
  >
   <v-card>
@@ -16,27 +17,27 @@
    />
    <v-card-actions>
     <v-tooltip
-     v-if="getSiblingItems(key as ListCategory, entry.key as string).length > 1"
-     :text="getSiblingName(key as ListCategory, entry.key as string, 'prev')"
+     v-if="getSiblingItems(key, entry.key as string).length > 1"
+     :text="getSiblingName(key, entry.key as string, 'prev')"
      location="top"
     >
      <template v-slot:activator="{ props }">
-      <v-btn color="grey" v-bind="props" @click="navigateToItem(key as ListCategory, entry.key as string, 'prev')">
+      <v-btn color="grey" v-bind="props" @click="navigateToItem(key, entry.key as string, 'prev')">
        <v-icon start>mdi-chevron-left</v-icon>
        前へ
       </v-btn>
      </template>
     </v-tooltip>
     <v-spacer></v-spacer>
-    <v-btn color="blue darken-1" @click="() => closeDialog(key)">閉じる</v-btn>
+    <v-btn color="blue darken-1" @click="() => updateDialog(key,false)">閉じる</v-btn>
     <v-spacer></v-spacer>
     <v-tooltip
-     v-if="getSiblingItems(key as ListCategory, entry.key as string).length > 1"
-     :text="getSiblingName(key as ListCategory, entry.key as string, 'next')"
+     v-if="getSiblingItems(key, entry.key as string).length > 1"
+     :text="getSiblingName(key, entry.key as string, 'next')"
      location="top"
     >
      <template v-slot:activator="{ props }">
-      <v-btn color="grey" v-bind="props" @click="navigateToItem(key as ListCategory, entry.key as string, 'next')">
+      <v-btn color="grey" v-bind="props" @click="navigateToItem(key, entry.key as string, 'next')">
        次へ
        <v-icon start>mdi-chevron-right</v-icon>
       </v-btn>
@@ -107,20 +108,14 @@ const getSiblingKey = (category: ListCategory, currentKey: string, direction: 'p
 };
 
 // アイテムの名前を取得
-const getSiblingName = (category: ListCategory, currentKey: string, direction: 'prev' | 'next') => {
- if (category === 'types') return '';
- const nextKey = getSiblingKey(category, currentKey, direction);
- if (!nextKey) return '';
-
- const items = props.Omiken[category];
- return items[nextKey]?.name || nextKey;
-};
+const getSiblingName = (category: ListCategory, currentKey: string, direction: 'prev' | 'next') =>
+ category === 'types' ? '' : props.Omiken[category][getSiblingKey(category, currentKey, direction) || '']?.name || '';
 
 // アイテム間移動（修正版）
 const navigateToItem = (category: ListCategory, currentKey: string, direction: 'prev' | 'next') => {
  const nextKey = getSiblingKey(category, currentKey, direction);
  if (nextKey) {
-  closeDialog(category);
+  updateDialog(category, false);
   openEditor({
    isOpen: true,
    type: category,
@@ -137,23 +132,4 @@ const updateDialog = (key: ListCategory, isOpen: boolean) => {
   [key]: { ...props.listEntry[key], isOpen }
  });
 };
-
-// ダイアログを閉じる
-const closeDialog = (key: ListCategory) => {
- updateDialog(key, false);
-};
-
-// ダイアログの外部クリックで閉じる
-onMounted(() => document.addEventListener('mousedown', closeClickOutside));
-function closeClickOutside(event: MouseEvent) {
- const target = event.target as Node;
- const dialogElement = event.currentTarget as HTMLElement;
- if (!dialogElement.contains(target)) {
-  Object.entries(props.listEntry).forEach(([key, entry]) => {
-   if (entry.isOpen) {
-    closeDialog(key as ListCategory);
-   }
-  });
- }
-}
 </script>

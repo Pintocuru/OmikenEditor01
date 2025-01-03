@@ -12,11 +12,8 @@
       </v-tooltip>
      </v-text-field>
 
-<v-textarea 
-  v-model="localItem.description" 
-  label="説明文" 
-  rows="4"
-/>    </v-form>
+     <v-textarea v-model="localItem.description" label="説明文" rows="4" />
+    </v-form>
    </v-card-text>
    <v-card-actions>
     <v-spacer />

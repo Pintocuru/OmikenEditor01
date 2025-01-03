@@ -22,7 +22,7 @@
     :item="currentItem"
     type="comment"
     mode="rules"
-    @update:Thresholds="updateOmikenEntry('rules', currentItem)"
+     @update:Omiken="updateOmiken"
    />
   </v-card-text>
  </v-card>
@@ -55,7 +55,7 @@ const rules = AppEditor?.value.Omiken.rules;
 const type = computed(() => findRuleType(types || {}, (props.entry?.key as string) || ''));
 
 // コンポーザブル:FunkEmits
-const { updateOmikenEntry } = FunkEmits(emit);
+const { updateOmiken,updateOmikenEntry } = FunkEmits(emit);
 
 // propsからデータを解読
 const currentItem = computed(() => (props.entry?.key && rules ? rules[props.entry.key as string] : null));
