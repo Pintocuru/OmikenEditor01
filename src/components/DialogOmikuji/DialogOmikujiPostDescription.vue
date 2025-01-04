@@ -27,27 +27,34 @@
        </v-list>
       </v-expansion-panel-text>
      </v-expansion-panel>
-
     </v-expansion-panels>
-     <!-- その他のプレースホルダー（スクリプト、カスタム） -->
-     <v-list density="compact" class="mt-4">
-      <v-list-item v-for="placeholder in availablePlaceholders" :key="placeholder.id">
-       <v-list-item-title>
-        <span
-         :class="{ 'cursor-pointer': placeholder.isEditable }"
-         @click="placeholder.isEditable && openEditorItem('places', placeholder.key)"
-        >
-         <<{{ placeholder.id }}>>
-        </span>
-        <span class="pa-2 mt-2"> : </span>
-        <i>{{ placeholder.value }}</i>
-       </v-list-item-title>
-       <v-list-item-subtitle>{{ placeholder.description }}</v-list-item-subtitle>
-      </v-list-item>
-     </v-list>
+    <!-- その他のプレースホルダー（スクリプト、カスタム） -->
+    <v-list density="compact" class="mt-4">
+     <v-list-item v-for="placeholder in availablePlaceholders" :key="placeholder.id">
+      <v-list-item-title>
+       <span
+        :class="{ 'cursor-pointer': placeholder.isEditable }"
+        @click="placeholder.isEditable && openEditorItem('places', placeholder.key)"
+       >
+        <<{{ placeholder.id }}>>
+       </span>
+       <span class="pa-2 mt-2"> : </span>
+       <i>{{ placeholder.value }}</i>
+      </v-list-item-title>
+      <v-list-item-subtitle>{{ placeholder.description }}</v-list-item-subtitle>
+     </v-list-item>
+    </v-list>
 
     <div v-if="availablePlaceholders.length === 0">
-     【プレース】【スクリプト】から選ぶと、プレースホルダーを使用できるようになります。
+  <span 
+      @click="$emit('update:modelValue', 'places')"
+      class="clickable-tag text-primary font-weight-medium pa-1 rounded mx-1"
+    >【プレース】</span>
+    <span 
+      @click="$emit('update:modelValue', 'scripts')"
+      class="clickable-tag text-primary font-weight-medium pa-1 rounded mx-1"
+    >【スクリプト】</span>
+    から選ぶと、プレースホルダーを使用できるようになります。
     </div>
    </v-card>
   </v-col>
@@ -61,9 +68,11 @@ import { FunkEmits } from '@/composables/FunkEmits';
 
 const props = defineProps<{
  currentItem: OmikujiType;
+ modelValue: 'places' | 'post' | 'threshold' | 'status' | 'scripts';
 }>();
 
 const emit = defineEmits<{
+ (e: 'update:modelValue', value: 'places' | 'post' | 'threshold' | 'status' | 'scripts'): void;
  (e: 'update:Omiken', payload: OmikenEntry<ListCategory>): void;
  (e: 'open-editor', editorItem: ListEntry<ListCategory>): void;
 }>();
@@ -89,7 +98,7 @@ const basicPlaceholders = [
 ];
 
 // 使用可能なプレースホルダーをまとめて取得
-const availablePlaceholders = (() => {
+const availablePlaceholders = computed(() => {
  const placeholders = [];
 
  // スクリプトのプレースホルダー
@@ -144,5 +153,24 @@ const weightedRandom = (values: PlaceValueType[]): string => {
 
 .cursor-pointer:hover {
  opacity: 0.8;
+}
+
+.clickable-tag {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  background-color: rgba(25, 118, 210, 0.05);
+}
+
+.clickable-tag:hover {
+  background-color: rgba(25, 118, 210, 0.1);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.clickable-tag:active {
+  transform: translateY(0px);
+  background-color: rgba(25, 118, 210, 0.15);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 </style>

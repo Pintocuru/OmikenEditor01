@@ -88,14 +88,13 @@ const EXAMPLES: ExampleStructure = {
   },
   // count:数値を参照する
   unit: {
-   draws: 'おみくじの回数(個人)',
-   totalDraws: 'おみくじの回数(合計)',
-   gameDraws: 'おみくじの総回数(個人)',
-   gameTotalDraws: 'おみくじの総回数(合計)',
-   gift: 'ギフト金額',
+   draws: '個人:配信内のおみくじ回数',
+   totalDraws: '個人:過去すべてのおみくじ回数',
+   gameDraws: '総数:配信内のおみくじ回数',
+   gameTotalDraws: '総数:過去すべてのおみくじ回数',
    lc: '配信枠のコメント数',
-   tc: '総個人コメント数',
-   interval: '前回のコメントからの経過時間(ミリ秒)'
+   tc: '個人の総コメント数',
+   interval: '前回のコメントからの経過時間(秒)'
   },
   comparison: {
    min: '以下',
@@ -195,7 +194,7 @@ export function FunkThreshold() {
    [GiftCondition.Purple]: '20,000円以上のギフト'
   };
 
-  return giftExamples[gift] || '不明なギフトランク';
+  return giftExamples[gift] || '不明なギフト';
  };
 
  // count 用説明文

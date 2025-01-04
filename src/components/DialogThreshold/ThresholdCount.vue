@@ -1,20 +1,20 @@
 <!-- src/components/DialogThreshold/ThresholdCount.vue -->
 <template>
  <v-sheet v-if="currentItem">
-  <v-sheet class="d-flex align-center ga-2">
-   <v-select
-    v-model="currentItem.count!.comparison"
-    :items="SELECT_ITEMS[type].comparison"
-    label="比較方法"
-    @update:modelValue="$emit('update:threshold', currentItem)"
-   />
-  </v-sheet>
-
   <v-sheet>
    <v-select
     v-model="currentItem.count!.unit"
     :items="SELECT_ITEMS[type].unit"
     label="単位"
+    @update:modelValue="$emit('update:threshold', currentItem)"
+   />
+  </v-sheet>
+
+  <v-sheet class="d-flex align-center ga-2">
+   <v-select
+    v-model="currentItem.count!.comparison"
+    :items="SELECT_ITEMS[type].comparison"
+    label="比較方法"
     @update:modelValue="$emit('update:threshold', currentItem)"
    />
   </v-sheet>
@@ -45,7 +45,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { FunkThreshold, FunkThresholdInitial } from '@/composables/FunkThreshold';
+import { FunkThreshold } from '@/composables/FunkThreshold';
 import { ThresholdType, TypesType } from '@type';
 
 const props = defineProps<{

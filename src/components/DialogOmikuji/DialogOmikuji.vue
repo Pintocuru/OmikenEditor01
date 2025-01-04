@@ -34,6 +34,8 @@
       :is="currentListComponent"
       :key="tab"
       :currentItem="currentItem"
+      v-model="tab"
+      @update:modelValue="tab = $event"
       @update:Omiken="updateOmiken"
       @open-editor="openEditor"
      />

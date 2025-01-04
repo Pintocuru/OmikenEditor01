@@ -1,7 +1,12 @@
 <!-- src/components/DialogOmikuji/DialogOmikujiPost.vue -->
 <template>
  <!-- プレースホルダーの説明 -->
- <DialogOmikujiPostDescription :currentItem="currentItem" @open-editor="openEditor" />
+ <DialogOmikujiPostDescription
+  :currentItem="currentItem"
+  v-model="tab"
+  @update:modelValue="$emit('update:modelValue',$event)"
+  @open-editor="openEditor"
+ />
 
  <!-- postメイン -->
  <v-expansion-panels multiple>
@@ -129,9 +134,7 @@
      <v-row dense v-show="showAdvanced">
       <v-col cols="6">
        <!-- マニアック:BOTのメッセージを読み上げない -->
-       <v-switch label="消音モード" v-model="post.isSilent"
-        :color="post.isSilent ? 'primary':''"
-       ></v-switch>
+       <v-switch label="消音モード" v-model="post.isSilent" :color="post.isSilent ? 'primary' : ''"></v-switch>
       </v-col>
       <v-col cols="6">
        <!-- マニアック:ジェネレーターに渡す引数編集 -->
@@ -192,9 +195,11 @@ import { FunkEmits } from '@/composables/FunkEmits';
 
 const props = defineProps<{
  currentItem: OmikujiType;
+ modelValue: 'places' | 'post' | 'threshold' | 'status' | 'scripts';
 }>();
 
 const emit = defineEmits<{
+ (e: 'update:modelValue', value: 'places' | 'post' | 'threshold' | 'status' | 'scripts'): void;
  (e: 'update:Omiken', payload: OmikenEntry<ListCategory>): void;
  (e: 'open-editor', editorItem: ListEntry<ListCategory>): void;
 }>();
@@ -205,6 +210,8 @@ const Charas = AppEditor?.value.Charas;
 
 // コンポーザブル:FunkEmits
 const { updateOmiken, openEditor, updateOmikenEntry } = FunkEmits(emit);
+
+const tab = ref<'post' | 'threshold' | 'status' | 'places' | 'scripts'>(props.modelValue); // タブの状態管理
 
 const {
  // Post type utilities
@@ -224,7 +231,7 @@ const {
 const showAdvanced = ref(props.currentItem.post.some(isAdvancedData));
 
 function isAdvancedData(post: OneCommePostType) {
-  return post.isSilent || post.generatorParam;
+ return post.isSilent || post.generatorParam;
 }
 
 // CharaParty
@@ -244,12 +251,7 @@ const addPost = (position = 'bottom') => {
   content: '<<user>>の新しいメッセージ',
   party: ''
  };
-
- if (position === 'top') {
-  props.currentItem.post.unshift(newPost);
- } else {
-  props.currentItem.post.push(newPost);
- }
+ props.currentItem.post.push(newPost);
 
  updateOmikenEntry('omikujis', props.currentItem);
 };

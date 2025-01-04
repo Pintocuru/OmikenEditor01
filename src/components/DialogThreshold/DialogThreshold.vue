@@ -66,7 +66,6 @@
 import { ref, computed, watch } from 'vue';
 import { ThresholdType, ConditionType, TypesType, RulesType, OmikujiType, OmikenEntry, ListCategory } from '@type';
 import { FunkThresholdInitial, FunkThreshold } from '@/composables/FunkThreshold';
-
 import ThresholdSelect from './ThresholdSelect.vue';
 import ThresholdSimple from './ThresholdSimple.vue';
 import ThresholdCount from './ThresholdCount.vue';
@@ -85,7 +84,6 @@ const emit = defineEmits<{
 
 // コンポーザブル:FunkEmits
 const { updateOmikenEntry } = FunkEmits(emit);
-
 const { getExampleText } = FunkThreshold();
 
 // 状態管理
@@ -127,6 +125,7 @@ const openDialog = (index: number) => {
  dialog.value = true;
 };
 
+// 条件追加
 const addThreshold = () => {
  if (thresholds.value.length < maxArray.value) {
   thresholds.value.push(FunkThresholdInitial());
@@ -136,6 +135,7 @@ const addThreshold = () => {
  }
 };
 
+// 条件削除
 const removeThreshold = (index: number) => {
  if (thresholds.value.length > minArray.value) {
   thresholds.value.splice(index, 1);
@@ -143,6 +143,7 @@ const removeThreshold = (index: number) => {
  }
 };
 
+// 条件タイプの更新
 const updateConditionType = (condition: ConditionType) => {
  editingThreshold.value = {
   ...FunkThresholdInitial(condition),
@@ -151,21 +152,17 @@ const updateConditionType = (condition: ConditionType) => {
  };
 };
 
-const updateThreshold = (updatedThreshold: ThresholdType) => {
- if (currentIndex.value !== null) {
-  thresholds.value[currentIndex.value] = updatedThreshold;
-  emitUpdate();
- }
-};
-
+// 条件の更新
 const tempUpdateThreshold = (updatedThreshold: ThresholdType) => {
  editingThreshold.value = updatedThreshold;
 };
 
+// 更新イベントの発火
 const emitUpdate = () => {
  updateOmikenEntry(props.mode, { ...props.item, threshold: thresholds.value });
 };
 
+// 条件の保存
 const saveChanges = () => {
  if (currentIndex.value !== null) {
   thresholds.value[currentIndex.value] = { ...editingThreshold.value };

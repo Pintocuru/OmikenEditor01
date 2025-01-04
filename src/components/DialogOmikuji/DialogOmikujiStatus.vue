@@ -19,6 +19,7 @@ import { FunkEmits } from '@/composables/FunkEmits';
 
 const props = defineProps<{
  currentItem: OmikujiType;
+ modelValue: "places" | "post" | "threshold" | "status" | "scripts";
 }>();
 
 const emit = defineEmits<{

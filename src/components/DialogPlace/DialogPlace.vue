@@ -59,7 +59,7 @@ const AppEditor = inject<Ref<AppEditorType>>('AppEditorKey');
 const places = computed(() => AppEditor?.value.Omiken.places || {});
 
 // コンポーザブル:FunkEmits
-const { updateOmiken, updateOmikenEntry } = FunkEmits(emit);
+const { updateOmiken,  } = FunkEmits(emit);
 
 // props のidから読み込み
 const currentItem = computed(() => (props.entry?.key && places ? places.value[props.entry.key as string] : null));

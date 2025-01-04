@@ -10,6 +10,7 @@ import DialogThreshold from '@/components/DialogThreshold/DialogThreshold.vue';
 
 const props = defineProps<{
  currentItem: OmikujiType;
+ modelValue: "places" | "post" | "threshold" | "status" | "scripts";
 }>();
 
 const emit = defineEmits<{
