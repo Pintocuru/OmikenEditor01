@@ -1,4 +1,4 @@
-<!-- src/components/DialogPlaceTextMode.vue -->
+<!-- src/components/DialogPlace/DialogPlaceTextMode.vue -->
 <template>
  <v-dialog v-model="dialog" persistent>
   <v-card>
@@ -21,9 +21,9 @@
  </v-dialog>
 
  <!-- テキストエディター -->
- <v-btn variant="outlined" class="me-2" @click="dialog = true">
+ <v-btn icon   color="primary" class="me-2" @click="dialog = true">
   <v-icon>mdi-text</v-icon>
-  <v-tooltip activator="parent" location="bottom">テキストエディター</v-tooltip>
+  <v-tooltip activator="parent" location="bottom">テキストエディターモード</v-tooltip>
  </v-btn>
 </template>
 

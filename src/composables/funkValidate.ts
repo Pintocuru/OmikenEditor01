@@ -126,7 +126,7 @@ export const omikujiPostSchema = z
 // omikujiのZodスキーマ
 const omikujiValueSchema = z.object({
  ...baseSchema.shape, // baseSchemaのフィールドを展開
- rank: z.number().int().nonnegative().default(1),
+ rank: z.number().int().nonnegative().default(0),
  weight: z.number().int().nonnegative().default(1),
  threshold: z.array(thresholdSchema).default([]),
  status: z.string().nullable().optional().default(''),

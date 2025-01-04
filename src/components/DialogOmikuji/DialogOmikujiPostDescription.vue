@@ -89,7 +89,7 @@ const basicPlaceholders = [
 ];
 
 // 使用可能なプレースホルダーをまとめて取得
-const availablePlaceholders = computed(() => {
+const availablePlaceholders = (() => {
  const placeholders = [];
 
  // スクリプトのプレースホルダー

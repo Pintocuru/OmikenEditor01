@@ -17,12 +17,12 @@
 
 <script setup lang="ts">
 import { ref, computed, inject, type Ref } from 'vue';
-import { OmikenEntry, OmikujiType, RulesType, AppEditorType, PlaceType, ListCategory, OmikenTypeMap } from '@type';
-import Swal from 'sweetalert2';
+import { OmikenEntry, OmikujiType, RulesType, AppEditorType, PlaceType, ListCategory } from '@type';
 import { FunkEmits } from '@/composables/FunkEmits';
+import { MySwal } from '@/config';
 
 const props = defineProps<{
- editMode: 'rule' | 'omikujiRemove' | 'omikujiAdd' | 'place';
+ editMode: 'rule' | 'omikujiRemove' | 'omikujiAdd' | 'omikujiAddDialog' | 'place' | 'placeDialog';
  entry: RulesType | OmikujiType | PlaceType;
  optionRules?: RulesType;
 }>();
@@ -36,7 +36,7 @@ const menu = ref(false);
 const AppEditor = inject<Ref<AppEditorType>>('AppEditorKey');
 
 // コンポーザブル:FunkEmits
-const {  updateOmikenEntry } = FunkEmits(emit);
+const { updateOmikenEntry } = FunkEmits(emit);
 
 interface MenuItem {
  action: 'edit' | 'duplicate' | 'remove' | 'add' | 'delete';
@@ -70,7 +70,9 @@ const CATEGORY_ACTIONS: Record<string, (keyof typeof COMMON_ACTIONS)[]> = {
  rule: ['duplicate', 'delete'],
  omikujiRemove: ['edit', 'duplicate', 'remove', 'delete'],
  omikujiAdd: ['edit', 'duplicate', 'add', 'delete'],
- place: ['edit', 'duplicate', 'delete']
+ omikujiAddDialog: ['duplicate', 'add', 'delete'],
+ place: ['edit', 'duplicate', 'delete'],
+ placeDialog: [ 'duplicate', 'delete']
 };
 
 // MENU_CONFIGS を動的に生成
@@ -126,7 +128,7 @@ const handleDuplicate = () => {
 const handleDelete = async () => {
  if (!props.entry) return;
 
- const result = await Swal.fire({
+ const result = await MySwal.fire({
   title: `${props.entry.name} を削除する`,
   text: 'この設定を削除しますか？',
   icon: 'warning',
@@ -158,37 +160,37 @@ const handleEnableIdsRemove = () => {
 
 // omikujiをrulesのリストに追加
 const handleEnableIdsAdd = async () => {
-  if (!AppEditor?.value?.Omiken.rules) return;
+ if (!AppEditor?.value?.Omiken.rules) return;
 
-  const rulesList = Object.entries(AppEditor.value.Omiken.rules).map(([id, rule]) => ({
-    id,
-    name: rule.name
-  }));
+ const rulesList = Object.entries(AppEditor.value.Omiken.rules).map(([id, rule]) => ({
+  id,
+  name: rule.name
+ }));
 
-  const { value: selectedRuleId } = await Swal.fire({
-    title: 'ルールを選択',
-    input: 'select',
-    inputOptions: Object.fromEntries(rulesList.map((rule) => [rule.id, rule.name])),
-    showCancelButton: true,
-    inputPlaceholder: 'ルールを選択してください',
-    confirmButtonText: 'OK',
-    cancelButtonText: 'キャンセル'
+ const { value: selectedRuleId } = await MySwal.fire({
+  title: 'ルールを選択',
+  input: 'select',
+  inputOptions: Object.fromEntries(rulesList.map((rule) => [rule.id, rule.name])),
+  showCancelButton: true,
+  inputPlaceholder: 'ルールを選択してください',
+  confirmButtonText: 'OK',
+  cancelButtonText: 'キャンセル'
+ });
+
+ if (selectedRuleId) {
+  const rulesEntry = AppEditor.value.Omiken.rules[selectedRuleId];
+  if (!rulesEntry) return;
+
+  // enableIds に props.entry.id が含まれていない場合のみ追加
+  const updatedEnableIds = rulesEntry.enableIds.includes(props.entry.id)
+   ? rulesEntry.enableIds
+   : [...rulesEntry.enableIds, props.entry.id];
+
+  updateOmikenEntry('rules', {
+   ...rulesEntry,
+   enableIds: updatedEnableIds
   });
-
-  if (selectedRuleId) {
-    const rulesEntry = AppEditor.value.Omiken.rules[selectedRuleId];
-    if (!rulesEntry) return;
-
-    // enableIds に props.entry.id が含まれていない場合のみ追加
-    const updatedEnableIds = rulesEntry.enableIds.includes(props.entry.id)
-      ? rulesEntry.enableIds
-      : [...rulesEntry.enableIds, props.entry.id];
-
-    updateOmikenEntry('rules', {
-      ...rulesEntry,
-      enableIds: updatedEnableIds
-    });
-  }
+ }
 };
 
 // Utility functions
@@ -196,11 +198,13 @@ function getEntryType(): ListCategory {
  switch (props.editMode) {
   case 'rule':
    return 'rules';
-  case 'place':
-   return 'places';
   case 'omikujiAdd':
+  case 'omikujiAddDialog':
   case 'omikujiRemove':
    return 'omikujis';
+  case 'place':
+  case 'placeDialog':
+   return 'places';
   default:
    throw new Error('Invalid editMode');
  }

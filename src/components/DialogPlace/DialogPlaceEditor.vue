@@ -1,4 +1,4 @@
-<!-- src/components/DialogPlaceEditor.vue -->
+<!-- src/components/DialogPlace/DialogPlaceEditor.vue -->
 <template>
  <v-list density="compact">
   <draggable

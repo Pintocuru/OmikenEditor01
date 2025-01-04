@@ -55,23 +55,23 @@
  </v-dialog>
 
  <v-btn icon @click.stop="dialog = true">
-  <v-icon>{{ TYPE_DESCRIPTIONS[type].icon }}</v-icon>
-      <v-tooltip activator="parent" location="bottom">
-      このルールの起動方法を変更したり、発動する順番を入れ替えます。
-    </v-tooltip>
+  <v-icon>{{ TYPE_DESCRIPTIONS[findType()].icon }}</v-icon>
+  <v-tooltip activator="parent" location="bottom">
+   このルールの起動方法を変更したり、発動する順番を入れ替えます。
+  </v-tooltip>
  </v-btn>
 </template>
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-import { OmikenEntry, ListCategory, ListEntry, TypesType, OmikenType } from '@type';
+import { OmikenEntry, ListCategory, ListEntry, TypesType, OmikenType, RulesType } from '@type';
 import { FunkEmits } from '@/composables/FunkEmits';
 import { FunkTypes } from '@/composables/FunkTypes';
 import Draggable from 'vuedraggable';
 
 const props = defineProps<{
+ rule: RulesType;
  Omiken: OmikenType;
- type: TypesType;
 }>();
 
 const emit = defineEmits<{
@@ -97,19 +97,19 @@ const localTypes = ref<Record<TypesType, string[]>>({
 });
 
 watch(
-  () => props.Omiken.types,
-  (newTypes) => {
-    localTypes.value = {
-      comment: [...(newTypes.comment ?? [])],
-      timer: [...(newTypes.timer ?? [])],
-      unused: [...(newTypes.unused ?? [])],
-      meta: [...(newTypes.meta ?? [])],
-      waitingList: [...(newTypes.waitingList ?? [])],
-      setList: [...(newTypes.setList ?? [])],
-      reactions: [...(newTypes.reactions ?? [])]
-    };
-  },
-  { immediate: true } // 初期値の設定を行うため、即時実行
+ () => props.Omiken.types,
+ (newTypes) => {
+  localTypes.value = {
+   comment: [...(newTypes.comment ?? [])],
+   timer: [...(newTypes.timer ?? [])],
+   unused: [...(newTypes.unused ?? [])],
+   meta: [...(newTypes.meta ?? [])],
+   waitingList: [...(newTypes.waitingList ?? [])],
+   setList: [...(newTypes.setList ?? [])],
+   reactions: [...(newTypes.reactions ?? [])]
+  };
+ },
+ { immediate: true } // 初期値の設定を行うため、即時実行
 );
 
 const draggableRules = computed<Record<TypesType, string[]>>({
@@ -119,11 +119,16 @@ const draggableRules = computed<Record<TypesType, string[]>>({
  }
 });
 
+// idからtypeを探す関数
+const findType = computed(() => (): TypesType => {
+ for (const [type, ids] of Object.entries(props.Omiken.types)) {
+  if (ids.includes(props.rule.id)) return type as TypesType;
+ }
+ return 'unused'; // 見つからなかった場合のデフォルト値
+});
+
 const saveChanges = () => {
- emit('update:Omiken', {
-  type: 'types',
-  reTypes: localTypes.value 
- });
+ emit('update:Omiken', { type: 'types', reTypes: localTypes.value });
  dialog.value = false;
 };
 </script>

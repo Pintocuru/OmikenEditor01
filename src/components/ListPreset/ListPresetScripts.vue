@@ -27,6 +27,7 @@
 import { computed, inject, ref, Ref } from 'vue';
 import { AppEditorType, ListCategory, OmikenEntry, PresetOmikenType, PresetType } from '@type';
 import Swal from 'sweetalert2';
+import { MySwal } from '@/config';
 
 // props/emits
 const props = defineProps<{
@@ -69,7 +70,7 @@ const presetSelect = async (preset: PresetOmikenType) => {
    const isOverwrite = result.isConfirmed ;
    emit('update:OmikenPreset', { ...preset, isOverwrite });
 
-   await Swal.fire({
+   await MySwal.fire({
     icon: 'success',
     title: '適用完了',
     text: `${preset.name}を${isOverwrite ? '上書き' : '追加'}で適用しました`,
@@ -78,7 +79,7 @@ const presetSelect = async (preset: PresetOmikenType) => {
    });
   }
  } catch (error) {
-  await Swal.fire({
+  await MySwal.fire({
    icon: 'error',
    title: 'エラー',
    text: '設定の適用に失敗しました'

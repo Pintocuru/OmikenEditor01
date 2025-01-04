@@ -49,11 +49,9 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue';
 import { ListEntry, ListCategory, OmikenEntry, ListEntryCollect, OmikenType } from '@type';
-import DialogRules from '@/components/DialogRules.vue';
 import DialogOmikuji from '@/components/DialogOmikuji/DialogOmikuji.vue';
-import DialogPlace from '@/components/DialogPlace.vue';
+import DialogPlace from '@/components/DialogPlace/DialogPlace.vue';
 import { FunkEmits } from '@/composables/FunkEmits';
 
 // Props / emit
@@ -75,7 +73,7 @@ const { updateOmiken, openEditor } = FunkEmits(emit);
 const getEditComponent = (type: ListCategory, mode?: string | null) => {
  const editorMap: Record<ListCategory, any> = {
   types: null,
-  rules: DialogRules,
+  rules: null,
   omikujis: DialogOmikuji,
   places: DialogPlace
  };

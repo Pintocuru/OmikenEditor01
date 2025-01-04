@@ -2,16 +2,19 @@
 <template>
  <v-card v-if="currentItem" style="max-height: 80vh; overflow-y: auto">
   <!-- ツールバーの変更 -->
-  <v-toolbar :color="themeColor">
+  <v-toolbar :color="themeColor" density="comfortable">
    <v-toolbar-title>
     {{ currentItem.name }}
     <!-- 名前・説明の編集 -->
     <PartsNameEditor type="omikujis" :currentItem="currentItem" @update:Omiken="updateOmiken" />
    </v-toolbar-title>
    <template #append>
-    {{ currentItem.description }}
+    <PartsArrayAction editMode="omikujiAddDialog" :entry="currentItem" @update:Omiken="updateOmiken" />
    </template>
   </v-toolbar>
+  <v-card-text v-if="currentItem.description" class="text-subtitle-2">
+   {{ currentItem.description }}
+  </v-card-text>
 
   <!-- タブ -->
   <v-tabs v-model="tab" align-tabs="center" stacked>
@@ -44,6 +47,7 @@
 <script setup lang="ts">
 import { computed, inject, Ref, ref } from 'vue';
 import { OmikenEntry, ListEntry, ListCategory, AppEditorType } from '@type';
+import PartsArrayAction from '@/components/common/PartsArrayAction.vue';
 import DialogOmikujiPost from '@/components/DialogOmikuji/DialogOmikujiPost.vue';
 import DialogOmikujiThreshold from '@/components/DialogOmikuji/DialogOmikujiThreshold.vue';
 import DialogOmikujiStatus from '@/components/DialogOmikuji/DialogOmikujiStatus.vue';

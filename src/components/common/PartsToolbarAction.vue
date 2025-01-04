@@ -17,6 +17,7 @@
 </template>
 
 <script setup lang="ts">
+import { MySwal } from "@/config";
 import { ListCategory, ListType, OmikenEntry,  } from "@type";
 import Swal from "sweetalert2";
 
@@ -93,7 +94,7 @@ function deleteItem() {
   const itemsToDelete = isGroup ? item.items : [item];
   const itemNames = isGroup ? `${item.name} グループ` : (item as ListType).name;
 
-  Swal.fire({
+  MySwal.fire({
     title: `${itemNames} を削除する`,
     text: isGroup
       ? "このグループ内のすべての項目を削除しますか？"

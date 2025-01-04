@@ -5,6 +5,7 @@ import { DataService, defaultAppEditor } from '@/composables/FunkJSON';
 import { FunkOmikenUpdater } from './FunkOmikenUpdater';
 import { FunkOmikenPreset } from './FunkOmikenPreset';
 import Swal from 'sweetalert2';
+import { MySwal } from '@/config';
 
 export function FunkOmiken() {
  const AppEditor = ref<AppEditorType>(defaultAppEditor);
@@ -23,7 +24,7 @@ export function FunkOmiken() {
    AppEditor.value = await DataService.fetchInitialData();
    isAppEditorLoading.value = false; // ローディング完了
    // データ読み込み成功の通知
-   await Swal.fire({
+   await MySwal.fire({
     title: '読み込み完了',
     text: 'データの読み込みが完了しました。',
     icon: 'success',
@@ -33,7 +34,7 @@ export function FunkOmiken() {
    console.error('Initialization failed', error);
    const errorMessage = error instanceof Error ? error.message : 'データの読み込みに失敗しました。';
 
-   await Swal.fire({
+   await MySwal.fire({
     title: '読み込み失敗',
     text: errorMessage,
     icon: 'error',

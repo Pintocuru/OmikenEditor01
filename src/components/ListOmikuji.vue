@@ -46,7 +46,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import type { ListCategory, ListEntry, OmikenEntry, OmikenType, CategoryActive, AppEditorType } from '@type';
+import  { ListCategory, ListEntry, OmikenEntry,  CategoryActive, AppEditorType } from '@type';
 import PartsArrayAction from '@/components/common/PartsArrayAction.vue';
 import { FunkOmikuji } from '@/composables/FunkOmikuji';
 import { FunkThreshold } from '@/composables/FunkThreshold';

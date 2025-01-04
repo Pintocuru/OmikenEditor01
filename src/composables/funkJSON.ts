@@ -1,7 +1,7 @@
 // src/composables/funkJSON.ts
 import { ref } from 'vue';
 import { DataType, Mode, AppEditorType, OmikenType, ParamsType } from '@type';
-import { configs } from '@/config';
+import { configs, MySwal } from '@/config';
 import { validateData } from '@/composables/FunkValidate';
 import Swal from 'sweetalert2';
 import OneSDK from '@onecomme.com/onesdk';
@@ -36,7 +36,7 @@ export function funkJSON() {
   try {
    const response = await ApiClient.request('POST', Mode.Backup, DataType.Omiken, Omiken);
    // PluginのAPIにPOST送信
-   await Swal.fire({
+   await MySwal.fire({
     title: '保存したよ',
     text: 'データの保存に成功したよ。',
     icon: 'success',
@@ -47,7 +47,7 @@ export function funkJSON() {
    //if (!response.ok) throw new Error("Network response was not ok");
   } catch (error) {
    console.error('Error saving data:', error);
-   await Swal.fire({
+   await MySwal.fire({
     title: '保存失敗',
     text: 'データの保存に失敗しました。',
     icon: 'error',
@@ -61,7 +61,7 @@ export function funkJSON() {
 
  // Sweetalert2を使用したトースト的な通知
  const showToast = (message: string, type: 'success' | 'error' | 'warning' | 'info' = 'info') => {
-  Swal.fire({
+  MySwal.fire({
    toast: true,
    position: 'top-end',
    showConfirmButton: false,
