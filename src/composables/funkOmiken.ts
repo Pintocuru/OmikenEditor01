@@ -4,7 +4,6 @@ import { OmikenType, OmikenEntry, AppEditorType, ListCategory, PresetOmikenType 
 import { DataService, defaultAppEditor } from '@/composables/FunkJSON';
 import { FunkOmikenUpdater } from './FunkOmikenUpdater';
 import { FunkOmikenPreset } from './FunkOmikenPreset';
-import Swal from 'sweetalert2';
 import { MySwal } from '@/config';
 
 export function FunkOmiken() {
@@ -50,13 +49,15 @@ export function FunkOmiken() {
 
   const newState: OmikenType = JSON.parse(JSON.stringify(AppEditor.value.Omiken));
 
-  handleUpdate(newState, type, update);
-  handleAddItems(newState, type, addKeys);
-  handleDeleteItems(newState, type, delKeys);
+  if (type !== 'types') {
+   handleUpdate(newState, type, update);
+   handleAddItems(newState, type, addKeys);
+   handleDeleteItems(newState, type, delKeys);
+  }
   if (reTypes) handleReTypes(newState, reTypes);
 
   AppEditor.value.Omiken = newState;
-   console.log('保存フラグが立ったよ', AppEditor.value.Omiken);
+  console.log('保存フラグが立ったよ', AppEditor.value.Omiken);
  }
 
  // Presetからの更新

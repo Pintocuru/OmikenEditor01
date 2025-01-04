@@ -113,14 +113,15 @@ const handleDuplicate = () => {
  if (type === 'rules') optionId = props.entry ? props.entry.id : undefined;
  if (type === 'omikujis') optionId = props.optionRules ? props.optionRules.id : undefined;
 
- const payload: OmikenEntry<ListCategory> = {
+const { id, ...rest } = JSON.parse(JSON.stringify(props.entry));
+const payload: OmikenEntry<ListCategory> = {
   type,
   addKeys: {
-   ...JSON.parse(JSON.stringify(props.entry)),
-   name: `${props.entry.name} (コピー)`,
-   optionId
+    ...rest,
+    name: `${props.entry.name} (コピー)`,
+    optionId
   }
- };
+};
  emit('update:Omiken', payload);
 };
 

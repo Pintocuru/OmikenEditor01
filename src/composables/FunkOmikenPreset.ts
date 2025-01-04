@@ -2,6 +2,15 @@
 import { OmikenType, ListCategory, TypesType, PresetOmikenType } from '@type';
 import { validateData } from '@/composables/FunkValidate';
 
+
+// 重複チェック用の関数を追加
+const isDuplicateItem = (
+  existingData: Record<string, any>,
+  newItem: any,
+  key: string
+): boolean => {
+  return Object.keys(existingData).includes(key);
+};
 export function FunkOmikenPreset() {
  // IDの重複チェックと新しいID生成
  const resolveUniqueId = (key: string, existingIds: Set<string>) => {
@@ -42,62 +51,78 @@ export function FunkOmikenPreset() {
   newData: Record<string, any>,
   type: ListCategory
  ): Record<string, any> => {
-  const existingIds = new Set(Object.keys(existingData));
   const renamedData: Record<string, any> = {};
 
   Object.entries(newData).forEach(([key, value]) => {
-   const { newKey, counter } = resolveUniqueId(key, existingIds);
+   // 重複チェック
+   if (isDuplicateItem(existingData, value, key)) {
+    return; // 重複する場合はスキップ
+   }
 
    const baseItem = {
     ...value,
-    id: newKey,
-    name: `${value.name}${counter > 1 ? ` (${counter - 1})` : ''}`
+    id: key,
+    name: value.name
    };
 
-   renamedData[newKey] = processItemByType(baseItem, type, value);
-   existingIds.add(newKey);
+   renamedData[key] = processItemByType(baseItem, type, value);
   });
 
   return { ...existingData, ...renamedData };
  };
 
- // カテゴリ別の処理
- const processCategory = <T extends ListCategory>(
-  state: OmikenType,
-  type: T,
-  presetData: OmikenType,
-  isOverwrite: boolean
- ): OmikenType => {
-  const validatedData = validateData(type, presetData[type]) as OmikenType[T];
-  const newState = { ...state };
+ // types の処理を専用の関数として分離
+ const processTypes = (
+  currentTypes: Record<TypesType, string[]>,
+  newTypes: Record<TypesType, string[]>
+ ): Record<TypesType, string[]> => {
+  const result = { ...currentTypes };
 
-  // 上書きモード
-  if (isOverwrite) {
-   newState[type] = validatedData;
-  } else {
-   // 追加モード
-   const updatedData = addNewItems(newState[type] as OmikenType[T], validatedData, type) as OmikenType[T];
-   newState[type] = updatedData;
-
-   if (type === 'rules') {
-    const newKeys = Object.keys(updatedData).filter((key): key is TypesType => key in newState.types);
-
-    newState.types = validateData('types', {
-     ...newState.types,
-     ...Object.fromEntries(newKeys.map((key) => [key, newState.types[key]]))
-    });
+  Object.entries(newTypes).forEach(([key, values]) => {
+   if (key in result) {
+    // 既存の配列と新しい配列を結合し、重複を除去
+    result[key as TypesType] = [...new Set([...result[key as TypesType], ...values])];
+   } else {
+    result[key as TypesType] = values;
    }
-  }
+  });
 
-  return newState;
+  return result;
  };
+
+ // カテゴリ別の処理
+const processCategory = <T extends ListCategory>(
+ state: OmikenType,
+ type: T,
+ presetData: OmikenType,
+ isOverwrite: boolean
+): OmikenType => {
+ const validatedData = validateData(type, presetData[type]) as OmikenType[T];
+ const newState = { ...state };
+
+ if (type === 'types') {
+  newState.types = isOverwrite
+   ? (validatedData as Record<TypesType, string[]>)
+   : processTypes(newState.types as Record<TypesType, string[]>, validatedData as Record<TypesType, string[]>);
+  return newState;
+ }
+
+ if (isOverwrite) {
+  newState[type] = validatedData;
+ } else {
+  const updatedData = addNewItems(newState[type] as OmikenType[T], validatedData, type) as OmikenType[T];
+  newState[type] = updatedData;
+ }
+
+ return newState;
+};
 
  // メインの処理関数
  const handlePresetUpdate = (currentState: OmikenType, preset: PresetOmikenType): OmikenType => {
   let newState = { ...currentState };
   const categories: ListCategory[] = ['types', 'rules', 'omikujis', 'places'];
   categories.forEach((category) => {
-   const isOverwrite = preset.isOverwrite ?? false; // undefined の場合は false を使用
+   const isOverwrite = preset.isOverwrite ?? false;
    newState = processCategory(newState, category, preset.item, isOverwrite);
   });
 

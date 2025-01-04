@@ -1,65 +1,64 @@
 <!-- src/components/common/PartsArrayRemove.vue -->
 <template>
-  <v-menu v-model="menu" :close-on-content-click="false">
-    <template v-slot:activator="{ props }">
-      <v-btn v-bind="props" color="info" :size="size">
-        <v-icon>{{ icon }}</v-icon>
-      </v-btn>
-    </template>
-    <v-list>
-      <v-list-item @click="postDuplicate(index)">
-        <v-icon class="text-info">mdi-content-copy</v-icon>
-        <span class="text-info pl-6">複製</span>
-      </v-list-item>
-      <v-list-item @click="postRemove(index)">
-        <v-icon class="text-error">mdi-delete</v-icon>
-        <span class="text-error pl-6">削除</span>
-      </v-list-item>
-    </v-list>
-  </v-menu>
+ <v-menu v-model="menu" :close-on-content-click="false">
+  <template v-slot:activator="{ props }">
+   <v-btn v-bind="props" color="info" size="default">
+    <v-icon>mdi-dots-vertical</v-icon>
+   </v-btn>
+  </template>
+  <v-list>
+   <v-list-item @click="postDuplicate(index)">
+    <v-icon class="text-info">mdi-content-copy</v-icon>
+    <span class="text-info pl-6">複製</span>
+   </v-list-item>
+   <v-list-item @click="postRemove(index)">
+    <v-icon class="text-error">mdi-delete</v-icon>
+    <span class="text-error pl-6">削除</span>
+   </v-list-item>
+  </v-list>
+ </v-menu>
 </template>
 
 <script setup lang="ts">
-import { ref,   PropType } from "vue";
-import type { OmikenEntry, ListCategory, OmikenTypeMap } from "@type";
+import { ref, PropType, computed } from 'vue';
+import { OmikenEntry, ListCategory, OmikenTypeMap, OmikujiType, PlaceType, RulesType } from '@type';
+import { FunkEmits } from '@/composables/FunkEmits';
+import { FunkTypes } from '@/composables/FunkTypes';
 
-const props = defineProps({
-  type: { type: String as PropType<ListCategory>, required: true }, // "omikuji" または "place"
-  currentItem: { type: Object, required: true },
-  array: { type: Array, required: true },
-  index: { type: Number, required: true },
-  icon: { type: String, default: "mdi-dots-vertical" },
-  size: { type: String, default: "default" },
-});
-const emit =
-  defineEmits<
-    (e: "update:Omiken", payload: OmikenEntry<ListCategory>) => void
-  >();
+const props = defineProps<{
+ type: 'omikujis' | 'places';
+ currentItem: OmikujiType | PlaceType;
+ index: number;
+}>();
+
+const emit = defineEmits<{
+ (e: 'update:Omiken', payload: OmikenEntry<ListCategory>): void;
+}>();
 
 const menu = ref(false);
 
-function updateOmiken() {
-  if (props.currentItem) {
-    const update = {
-      type: props.type as ListCategory,
-      update: {
-        [String(props.currentItem.id)]: props.currentItem,
-        // @ts-ignore preferences preset ではこのコンポーネントを使わないので
-      } as OmikenTypeMap[typeof props.type],
-    } satisfies OmikenEntry<typeof props.type>;
+// コンポーザブル:FunkEmits
+const { updateOmikenEntry } = FunkEmits(emit);
+const { isListType } = FunkTypes();
 
-    emit("update:Omiken", update);
-  }
-}
+const array = computed(() => {
+ if (props.type === 'omikujis' && isListType(props.currentItem, props.type)) {
+  return props.currentItem.post;
+ } else if (props.type === 'places' && isListType(props.currentItem, props.type)) {
+  return props.currentItem.values;
+ } else {
+  return [];
+ }
+});
 
 function postDuplicate(index: number) {
-  const newPost = JSON.parse(JSON.stringify(props.array[index]));
-  props.array.splice(index + 1, 0, newPost);
-  updateOmiken();
+ const newPost = JSON.parse(JSON.stringify(array.value[index]));
+ array.value.splice(index + 1, 0, newPost);
+ updateOmikenEntry(props.type, props.currentItem);
 }
 
 function postRemove(index: number) {
-  props.array.splice(index, 1);
-  updateOmiken();
+ array.value.splice(index, 1);
+ updateOmikenEntry(props.type, props.currentItem);
 }
 </script>

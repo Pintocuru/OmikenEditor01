@@ -41,6 +41,7 @@ declare module 'vue' {
     PartsToolbarAction: typeof import('./src/components/common/PartsToolbarAction.vue')['default']
     PartsToolbarColor: typeof import('./src/components/common/PartsToolbarColor.vue')['default']
     PekeDialogRules: typeof import('./src/components/peke-DialogRules.vue')['default']
+    PekePartsToolbarAction: typeof import('./src/components/common/peke-PartsToolbarAction.vue')['default']
     ThresholdCount: typeof import('./src/components/DialogThreshold/ThresholdCount.vue')['default']
     ThresholdMatch: typeof import('./src/components/DialogThreshold/ThresholdMatch.vue')['default']
     ThresholdSelect: typeof import('./src/components/DialogThreshold/ThresholdSelect.vue')['default']

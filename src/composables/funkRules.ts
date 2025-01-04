@@ -6,7 +6,6 @@ import { AppEditorType, OmikenType } from '@type';
 export function FunkRules() {
  // inject
  const AppEditor = inject<Ref<AppEditorType>>('AppEditorKey');
- const rules = computed(() => AppEditor?.value.Omiken.rules ?? {});
  const omikujis = computed(() => AppEditor?.value.Omiken.omikujis ?? {});
 
  // 定数
