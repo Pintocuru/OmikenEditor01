@@ -1,197 +1,117 @@
 // src/composables/funkValidate.ts
-import { AccessCondition, OmikenType, SyokenCondition, TypesType, RulesType, GiftCondition } from '@type';
-import { z, ZodError } from 'zod';
+import { OmikenType, TypesType, RulesType, ThresholdType, OmikujiType, PlaceType } from '@type';
+import { OmikenSchema, omikujiSchema, ruleSchema, thresholdSchema } from '@/types/OmikenSchemas';
+import { ZodError } from 'zod';
 
-// threshold共通の数値変換
-const thresholdValueTransform = z.number().transform((val) => {
- return typeof val !== 'number' || val < 0 ? 0 : val;
-});
+// Omikenのバリデーション
+export function OmikenValidate(data: Partial<OmikenType>): OmikenType {
+ try {
+  return {
+   types: OmikenTypesValidate(data.types, data.rules),
+   rules: OmikenRulesValidate(data.rules, data.omikujis),
+   omikujis: OmikenOmikujisValidate(data.omikujis),
+   places: OmikenPlacesValidate(data.places)
+  };
+ } catch (error) {
+  console.error('Omiken fetch failed:', error);
+  return OmikenSchema.parse({});
+ }
+}
 
-// value1とvalue2のチェック関数
-const thresholdValueRangeSwap = (schema: any) =>
- schema.transform((data: any) => {
-  if (data.comparison === 'range' && data.value1 > data.value2) {
-   [data.value1, data.value2] = [data.value2, data.value1];
-  }
-  return data;
- });
+// Rules のバリデーション
+const OmikenRulesValidate = (
+ rulesRaw: Partial<Record<string, RulesType>>,
+ omikujis: Record<string, OmikujiType>
+): Record<string, RulesType> => {
+ try {
+   return Object.entries(rulesRaw).reduce(
+    (acc, [key, item]) => {
+     if (!item) return acc;
 
-// threshold.countスキーマ
-const thresholdCountSchema = thresholdValueRangeSwap(
- z.object({
-  comparison: z.enum(['min', 'equal', 'max', 'loop', 'range']),
-  unit: z.enum(['draws', 'gift', 'lc', 'no', 'tc', 'interval']),
-  value1: thresholdValueTransform,
-  value2: thresholdValueTransform.optional()
- })
-);
+     // キー名とIDの整合性を確認し、新しいキーを生成
+     const newKey = OmikenIdValidate(key, item.id);
 
-// threshold.matchスキーマ
-const thresholdMatchSchema = z.object({
- target: z.enum(['status', 'comment', 'name', 'displayName']),
- case: z.enum(['exact', 'starts', 'include']),
- value: z.array(z.string()).default([])
-});
+     // enableIdsの重複除去とomikujisとの整合性チェック
+     item.enableIds = [...new Set(item.enableIds.filter((id) => omikujis[id]))];
 
-// thresholdスキーマ
-const thresholdSchema = z
- .object({
-  conditionType: z.enum(['target', 'coolDown', 'syoken', 'access', 'gift', 'count', 'match']).default('match'),
-  target: z.literal(null).optional(),
-  coolDown: z.number().default(3).optional(),
-  syoken: z.nativeEnum(SyokenCondition).optional(),
-  access: z.nativeEnum(AccessCondition).optional(),
-  gift: z.nativeEnum(GiftCondition).optional(),
-  match: thresholdMatchSchema.optional(),
-  count: thresholdCountSchema.optional()
- })
- .transform((data) => {
-  const result = { conditionType: data.conditionType };
-  // conditionTypeに応じて必要なキーのみを残す
-  switch (data.conditionType) {
-   case 'target':
-    return { ...result, target: data.target }; // targetのみ保持
-   case 'coolDown':
-    return { ...result, coolDown: data.coolDown }; // coolDownのみ保持
-   case 'syoken':
-    return { ...result, syoken: data.syoken }; // syokenのみ保持
-   case 'access':
-    return { ...result, access: data.access }; // accessのみ保持
-   case 'gift':
-    return { ...result, gift: data.gift }; // accessのみ保持
-   case 'match':
-    return { ...result, match: data.match }; // matchのみ保持
-   case 'count':
-    return { ...result, count: data.count }; // countのみ保持
-   default:
-    return result;
-  }
- });
+     // thresholdの検証
+     item.threshold = OmikenThresholdValidate(item.threshold);
 
-// BaseType をマージして定義
-const baseSchema = z.object({
- id: z.string(),
- name: z.string().default(''),
- description: z.string().default('')
-});
+     // Zodスキーマによる検証と結果の格納
+     acc[newKey] = ruleSchema.parse(item);
+     return acc;
+    },
+    {} as Record<string, RulesType>
+   );
+ } catch (error) {
+  // zodのエラーはすべてcatchして値を返してるのでここへは来れないはず
+  console.error('Rules validation error:', error);
+  throw error instanceof Error ? error : new Error(String(error));
+ }
+};
 
-// rulesのZodスキーマ
-const rulesSchema = z.record(
- baseSchema.merge(
-  z.object({
-   color: z.string().default('#66FFFF'),
-   enableIds: z.array(z.string()).default([]),
-   threshold: z.array(thresholdSchema).default([
-    {
-     conditionType: 'match',
-     match: { target: 'comment', case: 'starts', value: ['おみくじ'] }
-    }
-   ]),
-   timerConfig: z
-    .object({
-     minutes: z.number().int().nonnegative(), // 分単位
-     isBaseZero: z.boolean() // ベースがゼロかどうか
-    })
-    .optional()
-  })
- )
-);
+// ---
 
-// omikuji.postスキーマ
-export const omikujiPostSchema = z
- .array(
-  z.object({
-   type: z.enum(['onecomme', 'party', 'speech', 'error']).default('onecomme'),
-   botKey: z.string().default('mamono'),
-   iconKey: z.string().default('Default'),
-   party: z.string().nullable().optional(),
-   isSilent: z.boolean().optional(),
-   generatorParam: z.string().optional(),
-   delaySeconds: z.number().default(0),
-   content: z.string().default('<<user>>さんの運勢は【大吉】<<random>>')
-  })
- )
- .transform((posts) =>
-  posts.sort((a, b) => {
-   // delaySecondsで昇順ソート
-   if (a.delaySeconds !== b.delaySeconds) {
-    return a.delaySeconds - b.delaySeconds;
-   }
-   // delaySecondsが同じ場合はtypeの順序でソート
-   const typeOrder = ['onecomme', 'party', 'speech'];
-   return typeOrder.indexOf(a.type) - typeOrder.indexOf(b.type);
-  })
- );
+// omikujis のバリデーション
+const OmikenOmikujisValidate = (
+ omikujisRaw: Partial<Record<string, OmikujiType>>,
+ places: Record<string, PlaceType>
+): Record<string, OmikujiType> => {
+ try {
+  return Object.entries(omikujisRaw).reduce(
+   (acc, [key, item]) => {
+    if (!item) return acc;
 
-// omikujiのZodスキーマ
-const omikujiValueSchema = z.object({
- ...baseSchema.shape, // baseSchemaのフィールドを展開
- rank: z.number().int().nonnegative().default(0),
- weight: z.number().int().nonnegative().default(1),
- threshold: z.array(thresholdSchema).default([]),
- status: z.string().nullable().optional().default(''),
- script: z
-  .object({
-   scriptId: z.string().nullable().default(''),
-   params: z
-    .array(
-     baseSchema.merge(
-      z.object({
-       value: z.string().default('')
-      })
-     )
-    )
-    .default([])
-  })
-  .optional(),
- placeIds: z.array(z.string()).default([]),
- post: omikujiPostSchema.default([])
-});
+    // キー名とIDの整合性を確認し、新しいキーを生成
+    const newKey = OmikenIdValidate(key, item.id);
 
-const omikujiSchema = z.record(z.string(), omikujiValueSchema);
+    // placeIdsの重複除去とplacesとの整合性チェック
+    item.placeIds = [...new Set(item.placeIds.filter((id) => places[id]))];
 
-// placeのZodスキーマ
-const placeSchema = z.record(
- baseSchema.merge(
-  z.object({
-   values: z
-    .array(
-     z.object({
-      weight: z.number().int().nonnegative().default(1),
-      value: z.string()
-     })
-    )
-    .default([])
-  })
- )
-);
+    // scriptの検証(scriptのidと異なっていたら警告を出す)
 
-// typesのZodスキーマ
-const TypesType = z.enum(['comment', 'timer', 'meta', 'waitingList', 'setList', 'reactions', 'unused']);
+    // thresholdの検証
+    item.threshold = OmikenThresholdValidate(item.threshold);
 
-// typesフィールドのZodスキーマ
-const typesSchema = z.record(TypesType, z.array(z.string()));
+    // botKeyにCharasのidが入っていない場合、sweetalert2でポップアップを出す
 
-// スキーマをまとめる
-const schemas = {
- types: typesSchema,
- rules: rulesSchema,
- omikujis: omikujiSchema,
- places: placeSchema
-} as const;
+    // Zodスキーマによる検証と結果の格納
+    acc[newKey] = omikujiSchema.parse(item);
+    return acc;
+   },
+   {} as Record<string, OmikujiType>
+  );
+ } catch (error) {
+  console.error('Omikujis validation error:', error);
+  throw error instanceof Error ? error : new Error(String(error));
+ }
+};
+
+
+// ---
+
+// キーがidと異なっていたら、idを変更するバリデーション
+const OmikenIdValidate = (key: string, id: string): string =>
+ id !== key ? (console.warn(`Warning: Key "${key}" does not match id "${id}".`), id) : key;
+
+
+// threshold バリデーションを行う関数
+const OmikenThresholdValidate = (thresholds: any[]): ThresholdType[] => {
+ return thresholds.map((threshold) => thresholdSchema.parse(threshold));
+};
 
 // validateData
 export const validateData = <T extends keyof OmikenType>(
  type: T,
  data: unknown,
- additionalContext?: { rules?: Record<string, RulesType> }
+ option?: { rules?: Record<string, RulesType> }
 ): OmikenType[T] => {
  try {
-  const schema = schemas[type];
+  const schema = OmikenSchema.shape[type];
 
-  if (type === 'types' && additionalContext?.rules) {
+  if (type === 'types' && option?.rules) {
    const parsedData = schema.parse(data) as Record<TypesType, string[]>;
-   return validateTypes(parsedData, additionalContext.rules) as OmikenType[T];
+   return validateTypes(parsedData, option.rules) as OmikenType[T];
   }
   const parsed = schema.parse(data);
   return parsed as OmikenType[T];
@@ -203,10 +123,10 @@ export const validateData = <T extends keyof OmikenType>(
 
   // エラー時にデフォルト値を返す
   try {
-   if (type === 'types' && additionalContext?.rules) {
+   if (type === 'types' && option?.rules) {
     // types用の特別なデフォルト処理
     const defaultData = {} as Record<TypesType, string[]>;
-    return validateTypes(defaultData, additionalContext.rules) as OmikenType[T];
+    return validateTypes(defaultData, option.rules) as OmikenType[T];
    }
    return validateDefault(type, {});
   } catch (defaultError) {
@@ -220,17 +140,21 @@ export const validateData = <T extends keyof OmikenType>(
 const validateDefault = <T extends keyof OmikenType>(type: T, data: unknown): OmikenType[T] => {
  switch (type) {
   case 'rules':
-   return schemas.rules.safeParse(data).success ? (data as OmikenType[T]) : (schemas.rules.parse({}) as OmikenType[T]);
+   return OmikenSchema.shape.rules.safeParse(data).success
+    ? (data as OmikenType[T])
+    : (OmikenSchema.shape.rules.parse({}) as OmikenType[T]);
   case 'omikujis':
-   return schemas.omikujis.safeParse(data).success
+   return OmikenSchema.shape.omikujis.safeParse(data).success
     ? (data as OmikenType[T])
-    : (schemas.omikujis.parse({}) as OmikenType[T]);
+    : (OmikenSchema.shape.omikujis.parse({}) as OmikenType[T]);
   case 'places':
-   return schemas.places.safeParse(data).success
+   return OmikenSchema.shape.places.safeParse(data).success
     ? (data as OmikenType[T])
-    : (schemas.places.parse({}) as OmikenType[T]);
+    : (OmikenSchema.shape.places.parse({}) as OmikenType[T]);
   case 'types': // typesのケースを追加
-   return schemas.types.safeParse(data).success ? (data as OmikenType[T]) : (schemas.types.parse({}) as OmikenType[T]);
+   return OmikenSchema.shape.types.safeParse(data).success
+    ? (data as OmikenType[T])
+    : (OmikenSchema.shape.types.parse({}) as OmikenType[T]);
   default:
    throw new Error(`Unknown type: ${type}`);
  }

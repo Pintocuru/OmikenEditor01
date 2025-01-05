@@ -1,7 +1,7 @@
 // composables/FunkOmiken.ts
 import { provide, ref } from 'vue';
 import { OmikenType, OmikenEntry, AppEditorType, ListCategory, PresetOmikenType } from '@type';
-import { DataService, defaultAppEditor } from '@/composables/FunkJSON';
+import { AppEditorFetch, defaultAppEditor } from '@/composables/FunkJSON';
 import { FunkOmikenUpdater } from './FunkOmikenUpdater';
 import { FunkOmikenPreset } from './FunkOmikenPreset';
 import { MySwal } from '@/config';
@@ -20,7 +20,7 @@ export function FunkOmiken() {
  // 初期化処理の実行
  async function AppEditorInitialize() {
   try {
-   AppEditor.value = await DataService.fetchInitialData();
+   AppEditor.value = await AppEditorFetch();
    isAppEditorLoading.value = false; // ローディング完了
    // データ読み込み成功の通知
    await MySwal.fire({
@@ -53,11 +53,11 @@ export function FunkOmiken() {
    handleUpdate(newState, type, update);
    handleAddItems(newState, type, addKeys);
    handleDeleteItems(newState, type, delKeys);
+  } else if (reTypes) {
+   handleReTypes(newState, reTypes);
   }
-  if (reTypes) handleReTypes(newState, reTypes);
-
   AppEditor.value.Omiken = newState;
-  console.log('保存フラグが立ったよ', AppEditor.value.Omiken);
+  console.info('おみくじデータが更新されたよ', AppEditor.value.Omiken);
  }
 
  // Presetからの更新

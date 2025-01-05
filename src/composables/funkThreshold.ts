@@ -1,5 +1,6 @@
 // src/composables/FunkThreshold.ts
 
+import { thresholdSchema } from '@/types/OmikenSchemas';
 import {
  AccessCondition,
  ConditionType,
@@ -233,23 +234,5 @@ export function FunkThreshold() {
 
 // Thresholdの初期値を生成する関数
 export function FunkThresholdInitial(condition: ConditionType = 'match') {
- return {
-  conditionType: condition,
-  target: null,
-  coolDown: 3,
-  syoken: SyokenCondition.SYOKEN,
-  access: AccessCondition.MEMBER,
-  gift: GiftCondition.All,
-  match: {
-   target: 'comment',
-   case: 'starts',
-   value: ['おみくじ']
-  },
-  count: {
-   comparison: 'max',
-   unit: 'draws',
-   value1: 0,
-   value2: 1
-  }
- } as ThresholdType;
+ return thresholdSchema.parse({});
 }

@@ -40,7 +40,6 @@ const handleAddItems = <T extends Exclude<ListCategory, 'types'>>(
 
  // 使用例
  addItems.forEach((item: AddKeysCategory[T]) => {
-  console.log(item);
   // idがない場合は新規生成
   const newItem = {
    ...item,
