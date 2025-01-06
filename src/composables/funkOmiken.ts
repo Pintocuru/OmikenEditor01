@@ -1,10 +1,17 @@
 // composables/FunkOmiken.ts
 import { provide, ref } from 'vue';
-import { OmikenType, OmikenEntry, AppEditorType, ListCategory, PresetOmikenType } from '@type';
-import { AppEditorFetch, defaultAppEditor } from '@/composables/FunkJSON';
+import { OmikenType, OmikenEntry, AppEditorType, ListCategory, PresetOmikenType, OmikenSchema } from '@type';
+import { AppEditorFetch } from '@/composables/FunkJSON';
 import { FunkOmikenUpdater } from './FunkOmikenUpdater';
 import { FunkOmikenPreset } from './FunkOmikenPreset';
 import { MySwal } from '@/config';
+
+const defaultAppEditor: AppEditorType = {
+ Presets: {},
+ Charas: {},
+ Scripts: {},
+ Omiken: OmikenSchema.parse({}) as OmikenType
+};
 
 export function FunkOmiken() {
  const AppEditor = ref<AppEditorType>(defaultAppEditor);
@@ -50,9 +57,9 @@ export function FunkOmiken() {
   const newState: OmikenType = JSON.parse(JSON.stringify(AppEditor.value.Omiken));
 
   if (type !== 'types') {
-   handleUpdate(newState, type, update);
-   handleAddItems(newState, type, addKeys);
-   handleDeleteItems(newState, type, delKeys);
+   if (update) handleUpdate(newState, type, update);
+   if (addKeys) handleAddItems(newState, type, addKeys);
+   if (delKeys) handleDeleteItems(newState, type, delKeys);
   } else if (reTypes) {
    handleReTypes(newState, reTypes);
   }
@@ -61,7 +68,7 @@ export function FunkOmiken() {
  }
 
  // Presetからの更新
- const updateOmikenPreset = (preset: PresetOmikenType) => {
+ const updateOmikenPresetData = (preset: PresetOmikenType) => {
   if (!AppEditor.value) return;
   const newState = handlePresetUpdate(AppEditor.value.Omiken, preset);
   AppEditor.value.Omiken = newState;
@@ -72,6 +79,6 @@ export function FunkOmiken() {
   AppEditorInitialize,
   isAppEditorLoading,
   updateOmiken,
-  updateOmikenPreset
+  updateOmikenPresetData
  };
 }

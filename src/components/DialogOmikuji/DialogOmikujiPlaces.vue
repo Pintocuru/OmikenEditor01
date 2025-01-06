@@ -20,9 +20,8 @@
 
 <script setup lang="ts">
 import { computed, inject, Ref } from 'vue';
-import { ListCategory, ListEntry, OmikujiType, OmikenEntry, AppEditorType } from '@type';
+import { ListCategory, ListEntry, OmikujiType, OmikenEntry, AppEditorType, generateUniqueKey } from '@type';
 import { FunkEmits } from '@/composables/FunkEmits';
-import { generateUniqueKey } from '@/composables/FunkOmikenUpdater';
 
 const props = defineProps<{
  currentItem: OmikujiType;
@@ -55,18 +54,12 @@ const addItem = (type: ListCategory) => {
  const id = generateUniqueKey();
  emit('update:Omiken', {
   type,
-  addKeys: [
-   {
-    id,
-    name: 'NewPlace',
-    values: [{ weight: 1, value: '' }]
-   }
-  ]
+  addKeys: [{ id, name: 'NewPlace' }]
  });
  // プレースホルダーを追加
  const newItem = props.currentItem;
  newItem.placeIds.push(id);
- updateOmikenEntry('omikujis', newItem)
+ updateOmikenEntry('omikujis', newItem);
  // エディタを開く
  openEditorItem(type, id);
 };

@@ -168,9 +168,12 @@ export const thresholdArraySchema = z
 
 //---
 
+// ユニークキーの生成
+export const generateUniqueKey = (): string => `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+
 // BaseType:基本となる項目
 export const baseSchema = z.object({
- id: z.string(), // キー名
+ id: z.string().default(generateUniqueKey()).catch(generateUniqueKey()), // キー名
  name: z.string().default('').catch(''), // ルール名
  description: z.string().default('').catch('') // 説明文
 });
@@ -191,10 +194,13 @@ export const ruleSchema = z.object({
  color: z.string().default(ruleDefault.color).catch(ruleDefault.color), // エディターでの識別用カラー
  enableIds: z.array(z.string()).default([]).catch([]), // おみくじリスト
  //発動条件
- threshold: thresholdArraySchema.catch((error) => {
-  console.warn('Invalid rule.threshold:', error);
-  return [];
- }),
+ threshold: z
+  .array(thresholdSchema)
+  .default([ruleDefault.threshold])
+  .catch((error) => {
+   console.warn('Invalid rule.threshold:', error);
+   return [];
+  }),
  // タイマー用設定リスト
  timerConfig: z
   .object({
@@ -254,10 +260,13 @@ export const omikujiSchema = z.object({
  rank: z.number().int().nonnegative().default(0).catch(0), // 優先度
  weight: z.number().int().nonnegative().default(1).catch(1),
  // 発動条件
- threshold: thresholdArraySchema.catch((error) => {
-  console.warn('Invalid omikuji.threshold:', error);
-  return [];
- }),
+ threshold: z
+  .array(thresholdSchema)
+  .default([])
+  .catch((error) => {
+   console.warn('Invalid omikuji.threshold:', error);
+   return [];
+  }),
  status: z.string().optional().catch(undefined), // ユーザーに対するステータスの付与
  script: z
   .object({
@@ -297,7 +306,7 @@ export const placeSchema = z.object({
   .default([{ weight: 1, value: '' }])
   .catch((error) => {
    console.warn('Invalid place.values:', error);
-   return [];
+   return [{ weight: 1, value: '' }];
   })
 });
 //---
@@ -314,7 +323,7 @@ export const TypesTypeSchema = z.enum([
 ]);
 
 // typesフィールドのZodスキーマ
-const typesSchema = z.record(TypesTypeSchema, z.array(z.string())).default({
+export const typesSchema = z.record(TypesTypeSchema, z.array(z.string())).default({
  comment: [],
  timer: [],
  meta: [],

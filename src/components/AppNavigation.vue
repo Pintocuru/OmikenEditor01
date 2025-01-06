@@ -52,7 +52,7 @@ const emit = defineEmits<{
 }>();
 
 // コンポーザブル:FunkEmits
-const { openList, updateOmiken, openEditor, updateOmikenPreset } = FunkEmits(emit);
+const { openList,    } = FunkEmits(emit);
 
 interface Section {
  title: string;

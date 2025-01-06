@@ -31,7 +31,7 @@ const emit = defineEmits<{
 }>();
 
 // コンポーザブル:FunkEmits
-const { openList, updateOmiken, openEditor, updateOmikenPreset } = FunkEmits(emit);
+const { openList, updateOmiken, updateOmikenPreset } = FunkEmits(emit);
 
 // 子コンポーネントの指定
 const currentListComponent = computed(() => {

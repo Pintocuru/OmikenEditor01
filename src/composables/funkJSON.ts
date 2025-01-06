@@ -47,26 +47,6 @@ export function funkJSON() {
  };
 }
 
-export const defaultAppEditor: AppEditorType = {
- Presets: {},
- Charas: {},
- Scripts: {},
- Omiken: {
-  types: {
-   comment: [],
-   timer: [],
-   meta: [],
-   waitingList: [],
-   setList: [],
-   reactions: [],
-   unused: []
-  },
-  rules: {},
-  omikujis: {},
-  places: {}
- }
-};
-
 // APIクライアント
 export class ApiClient {
  private static readonly baseUrl = `http://localhost:11180/api/plugins/${configs.PLUGIN_UID}`;

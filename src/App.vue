@@ -28,7 +28,7 @@
       :AppEditor="AppEditor"
       :categoryActive="naviCategory"
       @update:Omiken="updateOmiken"
-      @update:OmikenPreset="updateOmikenPreset"
+      @update:OmikenPreset="updateOmikenPresetData"
       @update:category="naviCategory = $event"
       @open-editor="openEditor"
      />
@@ -56,7 +56,7 @@ import { onMounted } from 'vue';
 const { uiDark, naviCategory, listEntry, openEditor } = FunkUI();
 
 // AppEditorのコンポーザブル
-const { AppEditor, AppEditorInitialize, isAppEditorLoading, updateOmiken, updateOmikenPreset } = FunkOmiken();
+const { AppEditor, AppEditorInitialize, isAppEditorLoading, updateOmiken, updateOmikenPresetData } = FunkOmiken();
 
 // APIから取得
 onMounted(async () => await AppEditorInitialize());

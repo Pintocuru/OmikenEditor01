@@ -1,109 +1,70 @@
 // composables/FunkOmikenUpdater.ts
 import { OmikenType, ListCategory, TypesType, OmikenEntry, AddKeysCategory } from '@type';
-import { validateData } from '@/composables/FunkValidate';
-
- // ユニークキーの生成
-export const generateUniqueKey = (): string => `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+import { OmikenEntryValidate } from '@/composables/FunkValidate';
 
 export function FunkOmikenUpdater() {
-
  // 更新処理
- const handleUpdate = (state: OmikenType, type: ListCategory, update?: Record<string, any>) => {
-  if (update) {
-   const validatedUpdate = validateData(type, update);
-   Object.assign(state[type], validatedUpdate);
-  }
+ const handleUpdate = <T extends Exclude<ListCategory, 'types'>>(
+  state: OmikenType,
+  type: T,
+  update: Record<string, any>
+ ) => {
+  Object.assign(state[type], update);
  };
 
  // 追加処理
-const handleAddItems = <T extends Exclude<ListCategory, 'types'>>(
- state: OmikenType,
- type: T,
- addKeys?: OmikenEntry<T>['addKeys']
-) => {
- // 型ガードを追加
- const hasId = (item: AddKeysCategory[T]): item is AddKeysCategory[T] & { id: string } => {
-  return 'id' in item && typeof item.id === 'string';
- };
+ const handleAddItems = <T extends Exclude<ListCategory, 'types'>>(
+  state: OmikenType,
+  type: T,
+  addKeys: OmikenEntry<T>['addKeys']
+ ) => {
+  // addKeys が配列でない場合、配列に変換する
+  const addItems: AddKeysCategory[T][] = Array.isArray(addKeys)
+   ? addKeys
+   : addKeys
+     ? [addKeys as AddKeysCategory[T]]
+     : [];
 
- // addKeys が配列でない場合、配列に変換する
- const addItems: AddKeysCategory[T][] = Array.isArray(addKeys)
-  ? addKeys
-  : addKeys
-    ? [addKeys as AddKeysCategory[T]]
-    : [];
+  addItems.forEach((item: AddKeysCategory[T]) => {
+   // optionId がある場合は取り出す
+   const optionId = 'optionId' in item ? item.optionId : undefined;
+   // 足りないデータを付与してstateに追加
+   const newItem = OmikenEntryValidate(type, item);
+   Object.assign(state[type], { [newItem.id]: newItem });
 
- // 型ガードの定義
- const hasOptionId = (item: AddKeysCategory[T]): item is AddKeysCategory[T] & { optionId: string } => {
-  return 'optionId' in item && item.optionId !== undefined;
- };
-
- // 使用例
- addItems.forEach((item: AddKeysCategory[T]) => {
-  // idがない場合は新規生成
-  const newItem = {
-   ...item,
-   id: !('id' in item) ? generateUniqueKey() : item.id
-  } as AddKeysCategory[T] & { id: string };
-
-  const validatedItem = validateData(type, { [newItem.id]: newItem });
-
-  Object.assign(state[type], validatedItem);
-
-  // rulesの場合はtypesにも追加
-  if (type === 'rules') {
-   const optionId = 'optionId' in newItem ? newItem.optionId : null;
-
-   // 一致フラグ
-   let matched = false;
-
-   // optionIdがstringであることを確認
-   if (typeof optionId === 'string') {
-    // `types` の各配列をチェック
-    for (const key in state.types) {
-     const typeKey = key as TypesType; // 明示的に型をアサート
+   // rulesの場合はtypesにも追加
+   if (type === 'rules' && typeof optionId === 'string') {
+    // optionId がある箇所にpush(万が一なければunusedへ)
+    const matched = Object.keys(state.types).some((key) => {
+     const typeKey = key as TypesType;
      if (state.types[typeKey].includes(optionId)) {
-      // newKeyをpush
       state.types[typeKey].push(newItem.id);
-
-      // push後の状態を確認
-      matched = true;
-      break;
+      return true; // 一致した場合、ループを終了
      }
-    }
+     return false;
+    });
+    if (!matched) state.types.unused.push(newItem.id);
    }
 
-   // どこにも一致しなかった場合 `unused` に追加
-   if (!matched) state.types.unused.push(newItem.id);
-
-   // データの検証と更新
-   state.types = validateData('types', state.types, {
-    rules: state.rules
-   });
-  }
-
-  // omikujisの場合はrulesのenableIdsにも追加(optionIdがある場合)
-  if (type === 'omikujis' && hasOptionId(newItem)) {
-   updateRulesEnableIds(state, newItem.optionId, newItem.id);
-  }
- });
-};
-
- // ルールの有効IDを更新
- const updateRulesEnableIds = (state: OmikenType, rulesId: string, newKey: string) => {
-  const updatedRule = validateData('rules', {
-   [rulesId]: {
-    ...state.rules[rulesId],
-    enableIds: [...state.rules[rulesId].enableIds, newKey]
+   // omikujisの場合はrulesのenableIdsにも追加(optionIdがある場合)
+   if (type === 'omikujis' && typeof optionId === 'string') {
+    const updatedRule = {
+     [optionId]: {
+      ...state.rules[optionId],
+      enableIds: [...state.rules[optionId].enableIds, newItem.id]
+     }
+    };
+    Object.assign(state.rules, updatedRule);
    }
   });
-  Object.assign(state.rules, updatedRule);
  };
 
- const handleDeleteItems = (state: OmikenType, type: ListCategory, delKeys?: string | string[]) => {
-  // typesの場合は処理をスキップ
-  if (type === 'types') return;
-
+// 削除処理
+ const handleDeleteItems = <T extends Exclude<ListCategory, 'types'>>(
+  state: OmikenType,
+  type: T,
+  delKeys: string | string[]
+ ) => {
   const delItems = Array.isArray(delKeys) ? delKeys : delKeys ? [delKeys] : [];
 
   delItems.forEach((key) => {
@@ -139,7 +100,6 @@ const handleAddItems = <T extends Exclude<ListCategory, 'types'>>(
  };
 
  return {
-  generateUniqueKey,
   handleUpdate,
   handleAddItems,
   handleDeleteItems,

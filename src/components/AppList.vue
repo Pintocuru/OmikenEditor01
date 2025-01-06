@@ -18,7 +18,7 @@ import ListRules from '@/components/ListRules.vue';
 import ListOmikuji from '@/components/ListOmikuji.vue';
 import ListPlace from '@/components/ListPlace.vue';
 import ListPreset from '@/components/ListPreset/ListPreset.vue';
-import { ListCategory, OmikenEntry, ListEntry, PresetType, CategoryActive, AppEditorType, PresetOmikenType } from '@type';
+import { ListCategory, OmikenEntry, ListEntry, CategoryActive, AppEditorType, PresetOmikenType } from '@type';
 import { FunkEmits } from '@/composables/FunkEmits';
 
 // Props Emits
