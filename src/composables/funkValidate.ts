@@ -6,7 +6,6 @@ import {
  ThresholdType,
  OmikujiType,
  PlaceType,
- AppEditorType,
  ListCategory,
  OmikenTypeMap
 } from '@type';
@@ -15,10 +14,9 @@ import {
  omikujiSchema,
  placeSchema,
  ruleSchema,
- thresholdSchema,
  typesSchema
 } from '@/types/OmikenSchemas';
-import { number, z, ZodError, ZodSchema } from 'zod';
+import { z } from 'zod';
 
 // ---
 
@@ -86,7 +84,7 @@ export const OmikenOmikujisValidate = (
 
     // placeIdsのフィルタリングと重複除去
     item.placeIds = [...new Set(item.placeIds.filter((id) => places[id]))];
-    item.threshold = OmikenThresholdValidate(item.threshold);
+    item.threshold = OmikenThresholdCompact(item.threshold);
 
     acc[validKey] = omikujiSchema.parse(item);
     return acc;
@@ -111,7 +109,7 @@ export const OmikenRulesValidate = (
 
     // enableIdsのフィルタリングと重複除去
     item.enableIds = [...new Set(item.enableIds.filter((id) => omikujis[id]))];
-    item.threshold = OmikenThresholdValidate(item.threshold);
+    item.threshold = OmikenThresholdCompact(item.threshold);
 
     acc[validKey] = ruleSchema.parse(item);
     return acc;
@@ -147,8 +145,39 @@ export const OmikenTypesValidate = (
 const OmikenIdValidate = (key: string, id: string): string =>
  key !== id ? (console.warn(`Warning: Key "${key}" does not match id "${id}".`), id) : key;
 
-const OmikenThresholdValidate = (thresholds: any[]): ThresholdType[] =>
- thresholds.map((threshold) => thresholdSchema.parse(threshold));
+const OmikenThresholdCompact = (thresholds: ThresholdType[]): ThresholdType[] => {
+ return thresholds.map((threshold) => {
+  const result: Partial<ThresholdType> = { conditionType: threshold.conditionType };
+  switch (threshold.conditionType) {
+   case 'target':
+    result.target = null;
+    break;
+   case 'coolDown':
+    result.coolDown = threshold.coolDown;
+    break;
+   case 'syoken':
+    result.syoken = threshold.syoken;
+    break;
+   case 'access':
+    result.access = threshold.access;
+    break;
+   case 'gift':
+    result.gift = threshold.gift;
+    break;
+   case 'count':
+    result.count = threshold.count;
+    break;
+   case 'match':
+    result.match = threshold.match;
+    break;
+   default:
+    console.warn(`Unknown conditionType: ${threshold.conditionType}`);
+    result.conditionType = 'target';
+    result.target = null;
+  }
+  return result as ThresholdType;
+ });
+};
 
 const wrapError = (message: string, error: unknown): Error =>
  error instanceof Error ? error : new Error(`${message} ${error}`);

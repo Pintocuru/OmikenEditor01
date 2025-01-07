@@ -24,6 +24,7 @@
      <div class="list-group d-flex flex-wrap">
       <template v-for="(value, index) in getRandomValues(place.values, 1)" :key="index">
        <span class="mr-2">{{ value }}</span>
+       <span>{{ place.id}}</span>
       </template>
      </div>
     </v-card-text>

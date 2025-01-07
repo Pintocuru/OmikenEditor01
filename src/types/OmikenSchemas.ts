@@ -113,7 +113,7 @@ export const thresholdSchema = z
  .object({
   conditionType: z.enum(['target', 'coolDown', 'syoken', 'access', 'gift', 'count', 'match']).default('match'),
   target: z.literal(null).optional(), // 前回のコメントと今回のコメントが同一人物なら適用
-  coolDown: z.number().default(3).optional().default(thresholdDefault.coolDown), // おみくじ機能が機能してから指定した時間(秒)が経過していない場合に適用
+  coolDown: z.number().optional().default(thresholdDefault.coolDown), // おみくじ機能が機能してから指定した時間(秒)が経過していない場合に適用
   syoken: z.nativeEnum(SyokenCondition).optional().default(thresholdDefault.syoken), // 初見・久しぶり
   access: z.nativeEnum(AccessCondition).optional().default(thresholdDefault.access), // ユーザーの役職
   gift: z.nativeEnum(GiftCondition).optional().default(thresholdDefault.gift), // ギフトの有無と金額判定
@@ -135,45 +135,16 @@ export const thresholdSchema = z
   };
  });
 
-
-// 配列版
-export const thresholdArraySchema = z
- .array(
-  thresholdSchema.transform((data) => {
-   const result = { conditionType: data.conditionType };
-   // conditionTypeに応じて必要なキーのみを残す
-   switch (data.conditionType) {
-    case 'target':
-     return { ...result, target: data.target }; // targetのみ保持
-    case 'coolDown':
-     return { ...result, coolDown: data.coolDown }; // coolDownのみ保持
-    case 'syoken':
-     return { ...result, syoken: data.syoken }; // syokenのみ保持
-    case 'access':
-     return { ...result, access: data.access }; // accessのみ保持
-    case 'gift':
-     return { ...result, gift: data.gift }; // accessのみ保持
-    case 'match':
-     return { ...result, match: data.match }; // matchのみ保持
-    case 'count':
-     return { ...result, count: data.count }; // countのみ保持
-    default:
-     console.warn('Invalid conditionType:', data.conditionType);
-     return undefined;
-   }
-  })
- )
- .default([])
-
-
-//---
-
 // ユニークキーの生成
 export const generateUniqueKey = (): string => `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 
 // BaseType:基本となる項目
 export const baseSchema = z.object({
- id: z.string().default(generateUniqueKey()).catch(generateUniqueKey()), // キー名
+ id: z
+  .string()
+  .default('')
+  .catch('')
+  .transform((val) => (val === '' ? generateUniqueKey() : val)), // キー名
  name: z.string().default('').catch(''), // ルール名
  description: z.string().default('').catch('') // 説明文
 });
