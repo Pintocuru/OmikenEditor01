@@ -1,4 +1,4 @@
-<!-- src/components/ListRulesOmikujiView.vue -->
+<!-- src/components/ListRules/ListRulesOmikujis.vue -->
 <template>
  <draggable
   v-model="currentItem.enableIds"

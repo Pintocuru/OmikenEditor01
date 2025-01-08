@@ -24,7 +24,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, ref, Ref } from 'vue';
 import { AppEditorType, CategoryActive, ListCategory, ListEntry, OmikenEntry, PresetOmikenType } from '@type';
 import { FunkEmits } from '@/composables/FunkEmits';
 import Swal from 'sweetalert2';

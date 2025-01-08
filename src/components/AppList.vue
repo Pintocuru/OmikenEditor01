@@ -14,7 +14,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import ListRules from '@/components/ListRules.vue';
+import ListRules from '@/components/ListRules/ListRules.vue';
 import ListOmikuji from '@/components/ListOmikuji.vue';
 import ListPlace from '@/components/ListPlace.vue';
 import ListPreset from '@/components/ListPreset/ListPreset.vue';

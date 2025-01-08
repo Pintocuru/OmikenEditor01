@@ -65,8 +65,8 @@ const EXAMPLES: ExampleStructure = {
   syoken: {
    [SyokenCondition.SYOKEN]: '初見さん',
    [SyokenCondition.AGAIN]: '久しぶり(7日以上)',
-   [SyokenCondition.HI]: '7日以内の1コメ目',
-   [SyokenCondition.ALL]: 'すべての配信枠1コメ目'
+   [SyokenCondition.HI]: '7日以内',
+   [SyokenCondition.ALL]: 'すべて'
   },
   // ユーザーの役職
   access: {
@@ -166,11 +166,10 @@ export function FunkThreshold() {
   // TODO 現在はtype=commentだけだが、将来拡張予定
   const type = 'comment';
 
-  const handlers: Record<ConditionType, (threshold: any) => string> = {
-   target: () => `前回と今回のコメントが同一人物の場合`,
-   coolDown: (coolDown: number) => `前回のおみくじから${coolDown}秒経過していない場合`,
-   syoken: ({ syoken }: { syoken: SyokenCondition }) =>
-    `${EXAMPLES[type].syoken[syoken || SyokenCondition.SYOKEN]}`,
+  const handlers: Record<ConditionType, (threshold: ThresholdType) => string> = {
+   target: () => `同一アカウントが連投した場合`,
+   coolDown: ({ coolDown }) => `前回のおみくじ系コメントから${coolDown}秒経過していない場合`,
+   syoken: ({ syoken }: { syoken: SyokenCondition }) => `${EXAMPLES[type].syoken[syoken || SyokenCondition.SYOKEN]}`,
    access: ({ access }: { access: AccessCondition }) => EXAMPLES[type].access[access],
    gift: ({ gift }: { gift: GiftCondition }) => getGiftExample(gift),
    count: ({ count }: { count: CountCondition }) => getCountExample(count),

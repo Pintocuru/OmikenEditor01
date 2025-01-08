@@ -1,7 +1,7 @@
 <!-- src/components/DialogPlace/DialogPlace.vue -->
 <template>
  <v-card v-if="currentItem" style="max-height: 80vh; overflow-y: auto">
-  <!-- ツールバーの変更 -->
+  <!-- ツールバー -->
   <v-toolbar color="primary" density="comfortable">
    <v-toolbar-title>
     {{ currentItem.name }}
@@ -14,12 +14,28 @@
   </v-toolbar>
 
   <v-card-text>
+     <!-- アイテムの説明 -->
    <v-sheet v-if="currentItem.description" class="text-subtitle-2">
     {{ currentItem.description }}
    </v-sheet>
+
+   <!-- プレースホルダーの説明 -->
+   <DialogOmikujiPostDescription :currentItem="currentItem" @open-editor="openEditor" />
    <!-- プレースホルダー -->
    <v-card>
     <v-sheet class="d-flex ga-2 justify-end">
+
+  <v-select
+  v-model="currentItem.placeIds"
+  :items="placeItems"
+  label="プレースホルダー"
+  item-title="name"
+  item-value="id"
+  multiple
+  chips
+  clearable
+  @update:modelValue="updateOmikenEntry('places', currentItem)"
+ />
      <!-- テキストエディター -->
      <DialogPlaceTextMode v-if="currentItem" :currentItem="currentItem" @update:Omiken="updateOmiken" />
 
@@ -40,6 +56,7 @@
 import { computed, inject, Ref } from 'vue';
 import { OmikenEntry, ListCategory, ListEntry, AppEditorType } from '@type';
 import PartsArrayAction from '@/components/common/PartsArrayAction.vue';
+import DialogOmikujiPostDescription from '@/components/DialogOmikuji/DialogOmikujiPostDescription.vue';
 import DialogPlaceTextMode from '@/components/DialogPlace/DialogPlaceTextMode.vue';
 import DialogPlaceEditor from '@/components/DialogPlace/DialogPlaceEditor.vue';
 import PartsNameEditor from '@/components/common/PartsNameEditor.vue';
@@ -59,10 +76,20 @@ const AppEditor = inject<Ref<AppEditorType>>('AppEditorKey');
 const places = computed(() => AppEditor?.value.Omiken.places || {});
 
 // コンポーザブル:FunkEmits
-const { updateOmiken,  } = FunkEmits(emit);
+const { updateOmiken, openEditor ,updateOmikenEntry} = FunkEmits(emit);
 
 // props のidから読み込み
 const currentItem = computed(() => (props.entry?.key && places ? places.value[props.entry.key as string] : null));
+
+// placeItems の実装を修正
+const placeItems = computed(() => {
+ if (!places.value) return [];
+ return Object.entries(places.value).map(([id, place]) => ({
+  id: place.id,
+  name: place.name
+ }));
+});
+
 
 // 値の追加
 const addValue = () => {

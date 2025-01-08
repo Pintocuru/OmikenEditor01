@@ -45,16 +45,18 @@
      </v-list-item>
     </v-list>
 
-    <div v-if="availablePlaceholders.length === 0">
-  <span 
+    <div v-if="availablePlaceholders.length === 0 && isListType(currentItem, 'omikujis')">
+     <span
       @click="$emit('update:modelValue', 'places')"
       class="clickable-tag text-primary font-weight-medium pa-1 rounded mx-1"
-    >【プレース】</span>
-    <span 
+      >【プレース】</span
+     >
+     <span
       @click="$emit('update:modelValue', 'scripts')"
       class="clickable-tag text-primary font-weight-medium pa-1 rounded mx-1"
-    >【スクリプト】</span>
-    から選ぶと、プレースホルダーを使用できるようになります。
+      >【スクリプト】</span
+     >
+     から選ぶと、プレースホルダーを使用できるようになります。
     </div>
    </v-card>
   </v-col>
@@ -63,12 +65,13 @@
 
 <script setup lang="ts">
 import { inject, Ref, computed } from 'vue';
-import { ListCategory, ListEntry, OmikujiType, OmikenEntry, AppEditorType, PlaceValueType } from '@type';
+import { ListCategory, ListEntry, OmikujiType, OmikenEntry, AppEditorType, PlaceValueType, PlaceType } from '@type';
 import { FunkEmits } from '@/composables/FunkEmits';
+import { FunkTypes } from '@/composables/FunkTypes';
 
 const props = defineProps<{
- currentItem: OmikujiType;
- modelValue: 'places' | 'post' | 'threshold' | 'status' | 'scripts';
+ currentItem: OmikujiType | PlaceType;
+ modelValue?: 'places' | 'post' | 'threshold' | 'status' | 'scripts';
 }>();
 
 const emit = defineEmits<{
@@ -79,10 +82,11 @@ const emit = defineEmits<{
 
 // inject
 const AppEditor = inject<Ref<AppEditorType>>('AppEditorKey');
-const places = AppEditor?.value.Omiken.places;
+const places = computed(() => AppEditor?.value.Omiken.places ?? {});
 const Scripts = AppEditor?.value.Scripts;
 
 // コンポーザブル:FunkEmits
+const { isListType } = FunkTypes();
 const { openEditorItem } = FunkEmits(emit);
 
 // 基本のプレースホルダーのみを返すcomputed
@@ -102,22 +106,24 @@ const availablePlaceholders = computed(() => {
  const placeholders = [];
 
  // スクリプトのプレースホルダー
- if (props.currentItem.script?.scriptId && Scripts?.[props.currentItem.script.scriptId]) {
-  placeholders.push(
-   ...Scripts[props.currentItem.script.scriptId].placeholders.map((p) => ({
-    id: p.id,
-    value: p.value,
-    description: p.description,
-    isEditable: false, // スクリプトは編集不可
-    key: '' // スクリプトにはキーは不要
-   }))
-  );
+ if (isListType(props.currentItem, 'omikujis')) {
+  if (props.currentItem.script?.scriptId && Scripts?.[props.currentItem.script.scriptId]) {
+   placeholders.push(
+    ...Scripts[props.currentItem.script.scriptId].placeholders.map((p) => ({
+     id: p.id,
+     value: p.value,
+     description: p.description,
+     isEditable: false, // スクリプトは編集不可
+     key: '' // スクリプトにはキーは不要
+    }))
+   );
+  }
  }
 
  // カスタムプレースホルダー
- if (places && props.currentItem.placeIds) {
+ if (places.value && props.currentItem.placeIds) {
   props.currentItem.placeIds.forEach((id) => {
-   const place = places[id];
+   const place = places.value[id];
    if (place) {
     placeholders.push({
      id: place.name,
@@ -156,21 +162,21 @@ const weightedRandom = (values: PlaceValueType[]): string => {
 }
 
 .clickable-tag {
-  cursor: pointer;
-  transition: all 0.2s ease;
-  user-select: none;
-  background-color: rgba(25, 118, 210, 0.05);
+ cursor: pointer;
+ transition: all 0.2s ease;
+ user-select: none;
+ background-color: rgba(25, 118, 210, 0.05);
 }
 
 .clickable-tag:hover {
-  background-color: rgba(25, 118, 210, 0.1);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+ background-color: rgba(25, 118, 210, 0.1);
+ transform: translateY(-1px);
+ box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .clickable-tag:active {
-  transform: translateY(0px);
-  background-color: rgba(25, 118, 210, 0.15);
-  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+ transform: translateY(0px);
+ background-color: rgba(25, 118, 210, 0.15);
+ box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 </style>

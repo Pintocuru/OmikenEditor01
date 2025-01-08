@@ -1,9 +1,7 @@
-<!-- src/components/ListRulesOmikujiSetting.vue -->
+<!-- src/components/ListRules/ListRulesSetting.vue -->
 <template>
  <v-sheet class="d-flex ga-2 justify-end">
-  <v-expand-transition>
    <v-select
-    v-if="modelValue.showEnabledIds"
     v-model="currentItem.enableIds"
     :items="omikujiLists"
     label="有効にするおみくじ"
@@ -13,7 +11,6 @@
     item-value="id"
     @update:model-value="updateRulesEnabledIds($event, currentItem.id)"
    />
-  </v-expand-transition>
    <v-tooltip v-for="btn in toolButtons" :key="btn.key" :text="btn.tooltip" location="top">
     <template #activator="{ props }">
      <v-btn
@@ -59,12 +56,6 @@ const currentItem = computed({
 });
 
 const toolButtons = [
- {
-  key: 'showEnabledIds',
-  tooltip: '有効リストを表示',
-  icon: 'mdi-format-list-checks',
-  onClick: () => toggleState('showEnabledIds')
- },
  {
   key: 'showWeightEditor',
   tooltip: '出現割合を編集する',

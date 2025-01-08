@@ -1,4 +1,4 @@
-<!-- src/components/ListRules.vue -->
+<!-- src/components/ListRules/ListRules.vue -->
 <template>
  <div v-for="(rule, index) in rules" :key="rule.id" class="mb-2">
   <!-- ヘッダー部分 -->
@@ -64,8 +64,8 @@ import { computed, ref } from 'vue';
 import { OmikenEntry, ListCategory, ListEntry, CategoryActive, TypesType, AppEditorType } from '@type';
 import PartsArrayAction from '@/components/common/PartsArrayAction.vue';
 import DialogTypes from '@/components/DialogTypes.vue';
-import ListRulesOmikujiSetting from '@/components/ListRulesOmikujiSetting.vue';
-import ListRulesOmikujiView from '@/components/ListRulesOmikujiView.vue';
+import ListRulesOmikujiSetting from '@/components/ListRules/ListRulesSetting.vue';
+import ListRulesOmikujiView from '@/components/ListRules/ListRulesOmikujis.vue';
 import ThresholdMain from '@/components/DialogThreshold/DialogThreshold.vue';
 import PartsNameEditor from '@/components/common/PartsNameEditor.vue';
 import PartsToolbarColor from '@/components/common/PartsToolbarColor.vue';

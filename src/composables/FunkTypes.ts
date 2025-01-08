@@ -1,7 +1,5 @@
 // src/composables/FunkTypes.ts
-
-import { computed, inject, Ref } from 'vue';
-import { AppEditorType, ListCategory, OmikenType, OmikenTypeMap, OmikujiType, PlaceType, RulesType, TypesType } from '@type';
+import {  ListCategory,  OmikenTypeMap, OmikujiType, PlaceType, RulesType, TypesType } from '@type';
 
 // タイプの説明マップ
 type TypeDescription = {

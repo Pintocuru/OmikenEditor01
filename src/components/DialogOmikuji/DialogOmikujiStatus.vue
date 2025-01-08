@@ -1,6 +1,6 @@
 <!-- src/components/DialogOmikuji/DialogOmikujiStatus.vue -->
 <template>
- ユーザーに {{ currentItem.status }} の内部ステータスを付与します
+ ユーザーに {{ currentItem.status }} の内部ステータスを設定・変更します
  <v-text-field
   v-model="currentItem.status"
   label="ステータス"
