@@ -1,6 +1,6 @@
 <!-- src/components/ListRules/ListRules.vue -->
 <template>
- <div v-for="(rule, index) in rules" :key="rule.id" class="mb-2">
+ <div v-for="(rule, index) in currentItems" :key="rule.id" class="mb-2">
   <!-- ヘッダー部分 -->
   <v-card elevation="0" class="w-100" @click="togglePanel(rule.id)" :class="{ 'cursor-pointer': true }">
    <v-toolbar :color="rule?.color">
@@ -32,18 +32,43 @@
   <!-- 展開部分 -->
   <v-expand-transition>
    <div v-show="uiState.expandedPanels.includes(rule.id)">
-    <!-- Threshold -->
-    <ThresholdMain :item="rule" mode="rules" type="comment" @update:Omiken="updateOmiken" />
+  <!-- タブ -->
+  <v-tabs v-model="tab" align-tabs="center" stacked>
+   <v-tab v-for="tabItem in tabs" :key="tabItem.value" :value="tabItem.value">
+     <v-icon :icon="tabItem.icon"></v-icon>
+    {{ tabItem.label }}
+   </v-tab>
+  </v-tabs>
 
-    <!-- 追加ボタン等 -->
-    <ListRulesOmikujiSetting :rulesEntry="rule" v-model="uiState" @update:Omiken="updateOmiken" />
+    <v-tabs-window v-model="tab">
+     <v-tabs-window-item  value="threshold">
+      <!-- Threshold -->
+      <ThresholdMain :item="rule" mode="rules" type="comment" @update:Omiken="updateOmiken" />
+     </v-tabs-window-item>
+     <v-tabs-window-item  value="list">
+      <!-- 有効リスト -->
+      <v-select
+       v-model="rule.enableIds"
+       :items="omikujiLists"
+       label="有効にするおみくじ"
+       chips
+       multiple
+       item-title="name"
+       item-value="id"
+       @update:model-value="updateOmikenEntry('rules', { ...rule, enableIds: $event })"
+      />
+     </v-tabs-window-item>
+      <!-- 出現割合 -->
+     <v-tabs-window-item  value="percent"></v-tabs-window-item>
+    </v-tabs-window>
+
     <v-card-text>
      <v-row>
       <!-- enableIds順におみくじを並べる -->
       <ListRulesOmikujiView
        :rule="rule"
        :omikujis="AppEditor.Omiken.omikujis"
-       :uiState="uiState"
+       :showWeightEdit="showWeightEdit"
        @open-editor="openEditor"
        @update:Omiken="updateOmiken"
       />
@@ -61,7 +86,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { OmikenEntry, ListCategory, ListEntry, CategoryActive, TypesType, AppEditorType } from '@type';
+import { OmikenEntry, ListCategory, ListEntry, CategoryActive, AppEditorType, RulesType } from '@type';
 import PartsArrayAction from '@/components/common/PartsArrayAction.vue';
 import DialogTypes from '@/components/DialogTypes.vue';
 import ListRulesOmikujiSetting from '@/components/ListRules/ListRulesSetting.vue';
@@ -70,6 +95,7 @@ import ThresholdMain from '@/components/DialogThreshold/DialogThreshold.vue';
 import PartsNameEditor from '@/components/common/PartsNameEditor.vue';
 import PartsToolbarColor from '@/components/common/PartsToolbarColor.vue';
 import { FunkEmits } from '@/composables/FunkEmits';
+import { FunkRules } from '@/composables/FunkRules';
 
 const props = defineProps<{
  AppEditor: AppEditorType;
@@ -83,6 +109,7 @@ const emit = defineEmits<{
 
 // コンポーザブル:FunkEmits
 const { updateOmiken, openEditor, updateOmikenEntry } = FunkEmits(emit);
+const { omikujiLists } = FunkRules();
 
 // UIの各種ref
 const uiState = ref({
@@ -91,31 +118,32 @@ const uiState = ref({
  showWeightEditor: false
 });
 
-const rules = computed(() => {
-  // 全てのtypes配列を連結して、ルールIDの順序配列を作成
-  const orderedRuleIds = Object.values(props.AppEditor.Omiken.types).flat();
-  
-  // rulesオブジェクトのエントリーを配列に変換
-  const rulesEntries = Object.entries(props.AppEditor.Omiken.rules);
-  
-  // orderedRuleIdsの順序に基づいて並び替え
-  const sortedEntries = rulesEntries.sort((a, b) => {
-    const indexA = orderedRuleIds.indexOf(a[0]);
-    const indexB = orderedRuleIds.indexOf(b[0]);
-    return indexA - indexB;
-  });
+// タブ
+const tab = ref<'threshold' | 'list' | 'percent'>('threshold'); // タブの状態管理
+const tabs = [
+ { value: 'threshold', icon: 'mdi-tune', label: '条件設定' },
+ { value: 'list', icon: 'mdi-format-list-checks', label: '有効リスト' },
+ { value: 'percent', icon: 'mdi-percent', label: '出現割合' }
+ // { value: 'scripts', icon: 'mdi-script-text', label: 'スクリプト' }
+];
 
-  return Object.fromEntries(sortedEntries);
+const showWeightEdit = computed(() =>{
+return tab.value === 'percent'}
+)
+
+// 全てのtypes配列を連結し、並び替えを行う
+const currentItems = computed(() => {
+ const { types, rules } = props.AppEditor.Omiken;
+ const ids = Object.values(types).flat();
+ return Object.fromEntries(Object.entries(rules).sort((a, b) => ids.indexOf(a[0]) - ids.indexOf(b[0])));
 });
 
 // パネルの開閉を切り替える関数
 const togglePanel = (ruleId: string) => {
- const index = uiState.value.expandedPanels.indexOf(ruleId);
- if (index === -1) {
-  uiState.value.expandedPanels.push(ruleId);
- } else {
-  uiState.value.expandedPanels.splice(index, 1);
- }
+ const { expandedPanels } = uiState.value;
+ expandedPanels.includes(ruleId)
+  ? expandedPanels.splice(expandedPanels.indexOf(ruleId), 1)
+  : expandedPanels.push(ruleId);
 };
 
 // アイテムを追加

@@ -1,10 +1,10 @@
 // src/composables/funkUI.ts
 import { Ref, ref } from 'vue';
-import type { CategoryActive, ListCategory, ListEntry, ListEntryCollect } from '@type';
+import { CategoryActive, ListCategory, ListEntry, ListEntryCollect } from '@type';
+import { MySwal } from '@/config';
 
 export function FunkUI() {
  // UI
- const uiDark = ref('dark'); // ダークモード
  const uiDrawer = ref(null); // ナビゲーションドロワーの表示/非表示
 
  // ナビゲーション用:選択したカテゴリ
@@ -45,7 +45,6 @@ export function FunkUI() {
  };
 
  return {
-  uiDark,
   uiDrawer,
   naviCategory,
   listEntry,
@@ -64,4 +63,17 @@ export function funkList(emit: any) {
  };
 
  return { openEditor };
+}
+
+// Sweetalert2を使用したトースト的な通知
+export function showToast(message: string, type: 'success' | 'error' | 'warning' | 'info' = 'info') {
+ MySwal.fire({
+  toast: true,
+  position: 'top-end',
+  showConfirmButton: false,
+  timer: 3000,
+  timerProgressBar: true,
+  icon: type,
+  title: message
+ });
 }

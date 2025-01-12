@@ -1,6 +1,6 @@
 // src/types/preset.ts
 import { BaseType, OmikenType, OneCommePostType } from './Omiken';
-import { visitDataType, GameType } from './plugin';
+import { GameType } from './plugin';
 import { Comment } from '@onecomme.com/onesdk/types/Comment';
 
 // presetデータ
@@ -41,17 +41,16 @@ export interface CharaType extends PresetType {
 // ---
 
 export interface ScriptsType extends PresetType {
- func: (visit: visitDataType, game: GameType, comment?: Comment, params?: ScriptParam[]) => ScriptsReturnType;
+ func: ScriptsParamType;
  scriptParams: ScriptParam[];
  placeholders: ScriptParam[];
 }
 
 // Script全体の型定義
 export type ScriptsParamType = (
- visit: visitDataType,
  game: GameType,
  comment?: Comment,
- params?: { [id: string]: string | number | boolean }
+ params?: { [id: string]: string }
 ) => ScriptsReturnType;
 
 // Scriptの返り値
@@ -59,7 +58,6 @@ export interface ScriptsReturnType {
  postArray?: OneCommePostType[];
  placeholder: { [id: string]: string | number };
  game: GameType;
- visitData: visitDataType;
 }
 
 // gameのパラメータ設定用

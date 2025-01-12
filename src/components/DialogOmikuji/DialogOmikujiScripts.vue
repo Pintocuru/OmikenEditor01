@@ -137,9 +137,16 @@ watch(
      case 'number':
       value = Number(existingParams[param.id]);
       break;
-     case 'boolean':
-      value = existingParams[param.id] === 'true';
-      break;
+case 'boolean':
+  if (typeof existingParams[param.id] === 'boolean') {
+    value = existingParams[param.id];
+  } else if (typeof existingParams[param.id] === 'string') {
+    // @ts-ignore
+    value = existingParams[param.id].toLowerCase() === 'true';
+  } else {
+    value = Boolean(existingParams[param.id]);
+  }
+  break;
      default:
       value = existingParams[param.id];
     }
@@ -164,13 +171,37 @@ watch(
 );
 
 // 更新ハンドラの追加
-const updateScriptParam = (paramId: string, value: string | number | boolean| null) => {
+const updateScriptParam = (paramId: string, value: string | number | boolean | null) => {
  if (!props.currentItem.script) return;
  if (value === null) return;
 
+ // 選択されているスクリプトのパラメータ定義を取得
+ const paramDef = selectedScript.value?.scriptParams?.find(p => p.id === paramId);
+ if (!paramDef) return;
+
+ // 文字列から適切な型に変換
+ let convertedValue: string | number | boolean;
+ switch (paramDef.type) {
+   case 'number':
+     convertedValue = Number(value);
+     break;
+case 'boolean':
+  // より厳密な真偽値の変換
+  if (typeof value === 'boolean') {
+    convertedValue = value;
+  } else if (typeof value === 'string') {
+    convertedValue = value.toLowerCase() === 'true';
+  } else {
+    convertedValue = Boolean(value);
+  }
+  break;
+   default:
+     convertedValue = String(value);
+ }
+
  props.currentItem.script.params = {
   ...props.currentItem.script.params,
-  [paramId]: value
+  [paramId]: convertedValue
  };
  updateOmikenEntry('omikujis', props.currentItem);
 };

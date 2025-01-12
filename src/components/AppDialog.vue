@@ -1,43 +1,47 @@
 <!-- src/components/AppDialog.vue -->
 <template>
  <v-dialog
-  v-for="(entry, key) in listEntry"
-  :key="key"
+  v-for="(entry, category) in listEntry"
+  :key="category"
   :model-value="entry.isOpen"
-  @update:model-value="(value) => updateDialog(key, value)"
-  @click:outside="() => updateDialog(key,false)"
+  @update:model-value="(value) => updateDialog(category, value)"
+  @click:outside="() => updateDialog(category, false)"
   max-width="800px"
  >
   <v-card>
-   <component
-    :is="getEditComponent(key, entry.mode)"
-    :entry="entry"
-    @update:Omiken="updateOmiken"
-    @open-editor="openEditor"
-   />
+   <v-fab-transition>
+    <div v-if="getEditComponent" :key="generateUniqueKey(category, entry.key)">
+     <component
+      :is="getEditComponent(category, entry.mode)"
+      :entry="entry"
+      @update:Omiken="updateOmiken"
+      @open-editor="openEditor"
+     />
+    </div>
+   </v-fab-transition>
    <v-card-actions>
     <v-tooltip
-     v-if="getSiblingItems(key, entry.key as string).length > 1"
-     :text="getSiblingName(key, entry.key as string, 'prev')"
+     v-if="getSiblingItems(category, entry.key as string).length > 1"
+     :text="getSiblingName(category, entry.key as string, 'prev')"
      location="top"
     >
      <template v-slot:activator="{ props }">
-      <v-btn color="grey" v-bind="props" @click="navigateToItem(key, entry.key as string, 'prev')">
+      <v-btn color="grey" v-bind="props" @click="navigateToItem(category, entry.key as string, 'prev')">
        <v-icon start>mdi-chevron-left</v-icon>
        前へ
       </v-btn>
      </template>
     </v-tooltip>
     <v-spacer></v-spacer>
-    <v-btn color="blue darken-1" @click="() => updateDialog(key,false)">閉じる</v-btn>
+    <v-btn color="blue darken-1" @click="() => updateDialog(category, false)">閉じる</v-btn>
     <v-spacer></v-spacer>
     <v-tooltip
-     v-if="getSiblingItems(key, entry.key as string).length > 1"
-     :text="getSiblingName(key, entry.key as string, 'next')"
+     v-if="getSiblingItems(category, entry.key as string).length > 1"
+     :text="getSiblingName(category, entry.key as string, 'next')"
      location="top"
     >
      <template v-slot:activator="{ props }">
-      <v-btn color="grey" v-bind="props" @click="navigateToItem(key, entry.key as string, 'next')">
+      <v-btn color="grey" v-bind="props" @click="navigateToItem(category, entry.key as string, 'next')">
        次へ
        <v-icon start>mdi-chevron-right</v-icon>
       </v-btn>
@@ -121,6 +125,14 @@ const navigateToItem = (category: ListCategory, currentKey: string, direction: '
    mode: props.listEntry[category].mode
   });
  }
+};
+
+const generateUniqueKey = (category: ListCategory, key: string | string[] | null) => {
+ // `category` と `key` を基にユニークなキーを生成
+ if (Array.isArray(key)) {
+  return `${category}-${key.join('-')}`;
+ }
+ return `${category}-${key || 'default'}`;
 };
 
 // ダイアログの状態更新

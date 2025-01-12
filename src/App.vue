@@ -1,6 +1,6 @@
 <!-- src/App.vue -->
 <template>
- <v-app :theme="uiDark">
+ <v-app theme="dark">
   <!-- ローディング中の表示 -->
   <template v-if="isAppEditorLoading">
    <v-container class="text-center">
@@ -16,7 +16,7 @@
    </v-container>
   </template>
   <template v-else>
-   <AppHeader v-model:uiDark="uiDark" @update:uiDark="uiDark = $event" />
+   <AppHeader     :Omiken="AppEditor.Omiken" />
    <AppNavigation
     v-model:naviCategory="naviCategory"
     :Omiken="AppEditor.Omiken"
@@ -53,7 +53,7 @@ import { FunkOmiken } from '@/composables/FunkOmiken';
 import { FunkUI } from '@/composables/FunkUI';
 import { onMounted } from 'vue';
 
-const { uiDark, naviCategory, listEntry, openEditor } = FunkUI();
+const {  naviCategory, listEntry, openEditor } = FunkUI();
 
 // AppEditorのコンポーザブル
 const { AppEditor, AppEditorInitialize, isAppEditorLoading, updateOmiken, updateOmikenPresetData } = FunkOmiken();

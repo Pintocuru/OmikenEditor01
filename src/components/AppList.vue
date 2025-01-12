@@ -1,15 +1,19 @@
 <!-- src/components/AppList.vue -->
 <template>
  <!-- 各種リストコンポーネントの条件付きレンダリング -->
- <component
-  :is="currentListComponent"
-  :AppEditor="AppEditor"
-  :categoryActive="categoryActive"
-  @update:Omiken="updateOmiken"
-  @update:OmikenPreset="updateOmikenPreset"
-  @update:category="openList"
-  @open-editor="openEditor"
- />
+ <v-scroll-x-transition mode="out-in">
+  <div v-if="currentListComponent" :key="getComponentKey">
+   <component
+    :is="currentListComponent"
+    :AppEditor="AppEditor"
+    :categoryActive="categoryActive"
+    @update:Omiken="updateOmiken"
+    @update:OmikenPreset="updateOmikenPreset"
+    @update:category="openList"
+    @open-editor="openEditor"
+   />
+  </div>
+ </v-scroll-x-transition>
 </template>
 
 <script setup lang="ts">
@@ -30,7 +34,7 @@ const props = defineProps<{
 const emit = defineEmits<{
  (e: 'update:Omiken', payload: OmikenEntry<ListCategory>): void;
  (e: 'update:OmikenPreset', preset: PresetOmikenType): void;
-  (e: 'update:category', value: CategoryActive): void;
+ (e: 'update:category', value: CategoryActive): void;
  (e: 'open-editor', editorItem: ListEntry<ListCategory>): void;
 }>();
 
@@ -48,5 +52,10 @@ const currentListComponent = computed(() => {
  } as const;
 
  return componentMap[props.categoryActive.main];
+});
+
+// コンポーネントのkeyを生成するcomputed
+const getComponentKey = computed(() => {
+ return props.categoryActive.main + '-component';
 });
 </script>

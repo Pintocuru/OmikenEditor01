@@ -1,6 +1,6 @@
 <!-- src/components/DialogPlace/DialogPlace.vue -->
 <template>
- <v-card v-if="currentItem" style="max-height: 80vh; overflow-y: auto">
+ <v-card v-if="currentItem" style="height: 80vh; overflow-y: auto">
   <!-- ツールバー -->
   <v-toolbar color="primary" density="comfortable">
    <v-toolbar-title>

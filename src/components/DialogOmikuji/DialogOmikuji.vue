@@ -1,6 +1,6 @@
 <!-- src/components/DialogOmikuji/DialogOmikuji.vue -->
 <template>
- <v-card v-if="currentItem" style="max-height: 80vh; overflow-y: auto">
+ <v-card v-if="currentItem" style="height: 80vh; overflow-y: auto">
   <!-- ツールバーの変更 -->
   <v-toolbar :color="themeColor" density="comfortable">
    <v-toolbar-title>
@@ -80,12 +80,12 @@ const { updateOmiken, openEditor } = FunkEmits(emit);
 const { getPostTypeColor } = FunkOmikuji();
 
 // タブ
-const tab = ref<'post' | 'threshold' | 'status' | 'places' | 'scripts'>('post'); // タブの状態管理
+const tab = ref<'post' | 'status' | 'places' | 'threshold' | 'scripts'>('post'); // タブの状態管理
 const tabs = [
  { value: 'post', icon: 'mdi-message', label: 'メッセージ' },
- { value: 'threshold', icon: 'mdi-tune', label: '条件設定' },
  { value: 'status', icon: 'mdi-chart-bar', label: 'ステータス' },
  { value: 'places', icon: 'mdi-swap-horizontal', label: 'プレース' },
+ { value: 'threshold', icon: 'mdi-tune', label: '条件設定' },
  { value: 'scripts', icon: 'mdi-script-text', label: 'スクリプト' }
 ];
 

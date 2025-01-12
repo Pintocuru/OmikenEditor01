@@ -1,34 +1,20 @@
 <!-- src/components/AppHeader.vue -->
 <template>
-  <v-app-bar app>
-    <v-app-bar-title>おみくじメーカー</v-app-bar-title>
-    <template v-slot:append>
-      <!-- ダークモード切り替えボタン -->
-      <v-btn @click="toggleTheme">
-        {{ uiDark === "dark" ? "Light Mode" : "Dark Mode" }}
-      </v-btn>
-    </template>
-  </v-app-bar>
+ <v-app-bar app>
+  <v-app-bar-title>おみくじBOTメーカー</v-app-bar-title>
+  <template v-slot:append>
+   <v-btn @click="saveOmiken(props.Omiken);">ボタン</v-btn>
+  </template>
+ </v-app-bar>
 </template>
 
 <script setup lang="ts">
+import { saveOmiken } from '@/composables/FunkJSON';
+import { OmikenType } from '@/types/Omiken';
 
-const props = defineProps<{
-  uiDark: string;
-}>();
+const props = defineProps<{ Omiken: OmikenType }>();
 
 const emit = defineEmits<{
-  (e: "update:uiDark", value: string): void;
+ (e: 'update:uiDark', value: string): void;
 }>();
-
-// テーマ切り替え関数
-const toggleTheme = () =>
-  emit("update:uiDark", props.uiDark === "dark" ? "light" : "dark");
-
-/*
-    <template v-slot:prepend>
-       <v-app-bar-nav-icon />
-    </template>
-*/
-
 </script>
