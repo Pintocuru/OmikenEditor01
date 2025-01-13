@@ -56,6 +56,7 @@ const currentListComponent = computed(() => {
 
 // コンポーネントのkeyを生成するcomputed
 const getComponentKey = computed(() => {
- return props.categoryActive.main + '-component';
+  const sub = props.categoryActive.sub || 'default';
+  return `${props.categoryActive.main}-${sub}-component`;
 });
 </script>

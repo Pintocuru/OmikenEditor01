@@ -1,89 +1,104 @@
-<!-- src/components/ListPreset/ListPresetScripts.vue -->
 <template>
- <v-row>
-  <v-col v-for="preset in Presets" :key="preset.id" cols="12" sm="6" md="4">
-   <v-card class="preset-card h-100" elevation="3">
-    <v-img :src="preset.banner" height="200" cover class="align-end">
-     <v-card-title class="preset-title text-white">{{ preset.name }}</v-card-title>
-    </v-img>
+ <v-container>
+  <!-- タグフィルター -->
+  <v-chip-group v-model="selectedTags" column multiple class="mb-4">
+   <v-chip
+    v-for="tag in availableTags"
+    :key="tag"
+    :value="tag"
+    filter
+    variant="outlined"
+    :color="selectedTags.includes(tag) ? 'primary' : undefined"
+   >
+    {{ tag }}
+   </v-chip>
+  </v-chip-group>
 
-    <v-card-text>
-     <div class="d-flex align-center mb-2">
-      <v-chip color="primary" size="small" class="mr-2"> おみくじプリセット </v-chip>
-     </div>
-     <p class="preset-description mb-3">{{ preset.description }}</p>
-    </v-card-text>
+  <!-- スクリプトリスト -->
+  <v-row>
+   <v-col v-for="script in filteredScripts" :key="script.id" cols="12" sm="6" md="4">
+    <v-card elevation="2" class="h-100">
+     <v-card-item>
+      <div class="d-flex align-center mb-2">
+       <v-chip color="primary" size="small" class="mr-2"> v{{ script.version }} </v-chip>
+       <span class="text-subtitle-1 font-weight-bold">{{ script.name }}</span>
+      </div>
+     </v-card-item>
 
-    <v-card-actions>
-     <v-spacer></v-spacer>
-     <v-btn color="primary" variant="outlined" @click="presetSelect(preset)"> 適用する </v-btn>
-    </v-card-actions>
-   </v-card>
-  </v-col>
- </v-row>
+     <v-card-text>
+      <p class="mb-3">{{ script.description }}</p>
+
+      <!-- Script情報 -->
+      <div v-if="script.author" class="d-flex align-center mb-2">
+       <v-icon size="small" class="mr-2">mdi-account</v-icon>
+       <span class="text-caption">{{ script.author }}</span>
+       <a :url = "script.url"><v-icon size="small" class="mr-2">mdi-link</v-icon></a>
+      </div>
+
+      <!-- タグ -->
+      <div class="d-flex flex-wrap gap-1">
+       <v-chip v-for="(tag, index) in script.tags" :key="index" size="x-small" variant="outlined" class="mr-1 mb-1">
+        {{ tag }}
+       </v-chip>
+      </div>
+     </v-card-text>
+
+     <v-card-actions>
+      <v-spacer />
+      <v-btn
+       v-if="script.url"
+       variant="text"
+       density="comfortable"
+       :href="script.url"
+       target="_blank"
+       prepend-icon="mdi-open-in-new"
+      >
+       詳細
+      </v-btn>
+      <v-btn color="primary" variant="tonal" @click="handleScriptSelect(script)"> 選択 </v-btn>
+     </v-card-actions>
+    </v-card>
+   </v-col>
+  </v-row>
+ </v-container>
 </template>
 
 <script setup lang="ts">
-import { computed, inject, ref, Ref } from 'vue';
-import { AppEditorType, ListCategory, OmikenEntry, PresetOmikenType, PresetType } from '@type';
-import Swal from 'sweetalert2';
-import { MySwal } from '@/config';
+import { computed, ref } from 'vue';
+import type { ScriptsType } from '@type';
 
-// props/emits
-const props = defineProps<{
- AppEditor: AppEditorType;
-}>();
+interface Props {
+ AppEditor: {
+  Scripts: Record<string, ScriptsType>;
+ };
+}
 
+const props = defineProps<Props>();
 const emit = defineEmits<{
- (e: 'update:Omiken', payload: OmikenEntry<ListCategory>): void;
- (e: 'update:OmikenPreset', preset: PresetType): void;
+ (e: 'select-script', script: ScriptsType): void;
 }>();
 
-const Presets = props.AppEditor.Presets;
+// タグ関連
+const selectedTags = ref<string[]>([]);
 
-const presetSelect = async (preset: PresetOmikenType) => {
- try {
-  const result = await Swal.fire({
-   title: preset.name,
-   text: '適用方法を選択してください',
-   html: `
-    <div class="mb-4">${preset.description}</div>
-    <div class="text-sm text-gray-600">
-      上書き：既存のデータを削除して新しいデータを設定します<br>
-      追加：既存のデータに新しいデータを追加します
-    </div>
-  `,
-   imageUrl: preset.banner,
-   imageWidth: 400,
-   imageAlt: `${preset.name} banner`,
-   showCancelButton: true,
-   confirmButtonText: '上書き',
-   cancelButtonText: 'キャンセル',
-   showDenyButton: true,
-   denyButtonText: '追加',
-   denyButtonColor: '#3085d6',
-   confirmButtonColor: '#d33',
-   cancelButtonColor: '#6e7881'
-  });
+const availableTags = computed(() => {
+ const tags = Object.values(props.AppEditor.Scripts).flatMap((script) => script.tags || []);
+ return [...new Set(tags)];
+});
 
-  if (result.isConfirmed || result.isDenied) {
-   const isOverwrite = result.isConfirmed ;
-   emit('update:OmikenPreset', { ...preset, isOverwrite });
+// スクリプトのフィルタリング
+const filteredScripts = computed(() => {
+ const scripts = Object.values(props.AppEditor.Scripts);
 
-   await MySwal.fire({
-    icon: 'success',
-    title: '適用完了',
-    text: `${preset.name}を${isOverwrite ? '上書き' : '追加'}で適用しました`,
-    timer: 2000,
-    showConfirmButton: false
-   });
-  }
- } catch (error) {
-  await MySwal.fire({
-   icon: 'error',
-   title: 'エラー',
-   text: '設定の適用に失敗しました'
-  });
+ if (!selectedTags.value.length) {
+  return scripts;
  }
+
+ return scripts.filter((script) => selectedTags.value.some((tag) => script.tags.includes(tag)));
+});
+
+// スクリプト選択時の処理
+const handleScriptSelect = (script: ScriptsType) => {
+ emit('select-script', script);
 };
 </script>

@@ -19,7 +19,7 @@ export type CategorySub = {
  rules: never;
  omikujis: never;
  places: never;
- presets: 'Omiken' | 'Charas' | 'Scripts';
+ presets: 'Presets' | 'Charas' | 'Scripts';
 };
 export type CategoryActive<T extends CategoryMain = CategoryMain> = {
  main: T; // 現在選択されているメインカテゴリー

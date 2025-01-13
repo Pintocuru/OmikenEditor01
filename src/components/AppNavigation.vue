@@ -98,7 +98,7 @@ const presetSections = computed<NavigationItem[]>(() => [
   title: 'おみくじデータ',
   icon: 'mdi-database', // データベースアイコン
   itemCount: Object.keys(props.AppEditor.Presets || {}).length,
-  category: { main: 'presets', sub: 'Omiken' }
+  category: { main: 'presets', sub: 'Presets' }
  },
  {
   title: 'キャラクター',

@@ -3,7 +3,7 @@
  <!-- Omikuji List View -->
  <v-row dense>
   <v-col v-for="omikuji in omikujisNameSort" :key="omikuji.id" cols="12" sm="6" md="4" lg="3">
-   <v-card variant="tonal">
+   <v-card variant="tonal"  hover>
     <!-- タイトルバーと操作ボタン -->
     <v-toolbar density="compact" :color="getPostTypeColor(omikuji.post, true)">
      <v-toolbar-title @click="openEditorItem('omikujis', omikuji.id)">

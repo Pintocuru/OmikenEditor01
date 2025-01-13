@@ -28,6 +28,7 @@ declare module 'vue' {
     ListPlace: typeof import('./src/components/ListPlace.vue')['default']
     ListPreset: typeof import('./src/components/ListPreset/ListPreset.vue')['default']
     ListPresetCharas: typeof import('./src/components/ListPreset/ListPresetCharas.vue')['default']
+    ListPresetContent: typeof import('./src/components/ListPreset/ListPresetContent.vue')['default']
     ListPresetOmiken: typeof import('./src/components/ListPreset/ListPresetOmiken.vue')['default']
     ListPresetScripts: typeof import('./src/components/ListPreset/ListPresetScripts.vue')['default']
     ListRules: typeof import('./src/components/ListRules/ListRules.vue')['default']
