@@ -85,7 +85,8 @@ export function FunkOmikuji() {
  // キャラクターの画像を取得する関数
  const getCharaImage = (post: OneCommePostType): string => {
   if (!post.botKey || !post.iconKey || !Chara || !Chara[post.botKey]) return '';
-  return `/img/${Chara[post.botKey].image[post.iconKey]}`;
+    const basePath = process.env.NODE_ENV === 'development' ? './Charas' : './Charas';
+    return `${basePath}/${Chara[post.botKey].image[post.iconKey]}`;
  };
 
  //---

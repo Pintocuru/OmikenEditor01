@@ -1,7 +1,7 @@
 // src/types/plugin.ts
 
 import { OmikenType, OmikujiType, RulesType, TypesType } from './Omiken';
-import { CharaType, ScriptsParamType, ScriptsType } from './preset';
+import { CharaType, ScriptParam, ScriptsParamType, ScriptsType } from './preset';
 import { Service } from '@onecomme.com/onesdk/types/Service';
 import { BaseResponse } from '@onecomme.com/onesdk/types/BaseResponse';
 import { Comment } from '@onecomme.com/onesdk/types/Comment';
@@ -36,7 +36,7 @@ export interface StoreApiType extends StoreType {
 export interface StoreAllType extends StoreMainType {
  Presets: Record<string, OmikenType>;
  filterCommentProcess(comment: Comment, userData: UserNameData): void;
- timerSelector: any;
+ timerSelector: any; // プラグイン専用の型なのでany
 }
 
 // プラグインのデータを更新するreturn用の型
@@ -58,25 +58,31 @@ export interface VisitType {
  lastPluginTime: number; // 前回コメントした配信枠のactiveTime
 }
 
-// draws基礎
-interface DrawsBase {
- draws: number; // 該当するおみくじを行った配信枠での回数
- totalDraws: number; // 該当するおみくじを行った総回数
+interface DrawsType {
+ draws: number; // 配信枠での、おみくじ回数
+ totalDraws: number; // おみくじの総回数
 }
 
 // おみくじデータ
-export interface GameType extends DrawsBase {
- ruleId: string; // rulesのID
- [key: string]: unknown; // scriptで自由に使えるObject
- userStats: {
-  [userId: string]: UserStatsType;
- };
+export interface GameType extends DrawsType {
+ ruleId: string; // rulesのID(key)
+ settings: ScriptParam[]; // scriptParamsで設定したisEverのデータが入る
+ userStats: Record<string, UserStatsType>;
+ currentUserIds: string[]; // ユーザー履歴
+ [key: string]: any; // scriptで自由に使えるObject
 }
 
-// ユーザーデータ(個別)
-export interface UserStatsType extends DrawsBase {
+// ユーザーデータ
+export interface UserStatsType extends DrawsType {
  userId: string;
- [key: string]: number | string | boolean | undefined;
+ name?: string; // 名前
+ wins?: number; // 配信枠での、おみくじ勝利数
+ totalWins?: number; // おみくじの総勝利数
+ points?: number; // 配信枠での、おみくじポイント数
+ totalPoints?: number; // おみくじの総ポイント数
+ status?: string; // おみくじのステータス
+ items?: Record<string, string>; // おみくじで得たアイテム
+ lastPlayed?: string; // 最終プレイ日時
 }
 
 // ---
@@ -91,7 +97,7 @@ export interface TimeConfigType {
  pluginTime: number; // プラグインを起動した時刻
  lc: number; // プラグインを起動してからカウントしたコメント数
  lastTime: number; // 最後におみくじ機能が実行された時刻
- lastUserId: string; // 最後におみくじを行ったuserId
+ lastUserId: string; // TODO 廃止(Gamesが担う) 最後におみくじを行ったuserId
 }
 
 // ---

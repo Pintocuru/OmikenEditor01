@@ -243,7 +243,7 @@ export const omikujiSchema = z.object({
  script: z
   .object({
    scriptId: z.string(), // 使用する外部スクリプトのid
-   params: z.record(z.string(), z.string()) // 外部スクリプトに渡す引数(Scriptから取得)
+   params: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])) // 外部スクリプトに渡す引数(Scriptから取得)
   })
   .optional()
   .catch((error) => {

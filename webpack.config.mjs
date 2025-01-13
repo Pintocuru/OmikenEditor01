@@ -1,6 +1,7 @@
 // webpack.config.mjs
 import { fileURLToPath, URL } from 'url';
 import { VueLoaderPlugin } from 'vue-loader';
+import { VuetifyPlugin } from 'webpack-plugin-vuetify';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 import TerserPlugin from 'terser-webpack-plugin';
@@ -11,7 +12,7 @@ export default {
  entry: './main.ts', // エントリーポイント
  context: fileURLToPath(new URL('./src', import.meta.url)), // 対象フォルダ
  output: {
-  filename: '[name].js', // 出力ファイル名
+  filename: 'Modules/editor[name].js', // 出力ファイル名
   path: fileURLToPath(new URL('./dist', import.meta.url)), // 出力ディレクトリ
   clean: true // 出力ディレクトリをクリーンアップ
  },
@@ -74,10 +75,12 @@ export default {
  plugins: [
   // Vue用プラグイン
   new VueLoaderPlugin(),
+  // Vuetify用プラグイン
+  new VuetifyPlugin(),
   // HTMLプラグイン(小さいのでminifyは不要)
   new HtmlWebpackPlugin({
    template: './index.ejs',
-   filename: 'index.html',
+   filename: 'editor.html',
    inject: 'body'
   }),
   // 軽量化するプラグインらしい
@@ -111,7 +114,7 @@ export default {
    new TerserPlugin({
     terserOptions: {
      compress: {
-      drop_console: true, // console.log等を削除
+      drop_console: false, // console.log等を削除
       pure_funcs: ['console.log'] // 特定の関数呼び出しを削除
      },
      mangle: true, // 変数名を短縮

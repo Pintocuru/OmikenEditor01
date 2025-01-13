@@ -26,12 +26,13 @@ export const MySwal = Swal.mixin({
       .swal2-backdrop {
         z-index: 9999 !important;
       }
+      .swal2-confirm, .swal2-cancel, .swal2-deny, .swal2-input{
+        color: white !important; 
+      }
     `;
   document.head.appendChild(style);
-
-  // 既存の設定も維持
-  const container = Swal.getContainer();
-  if (container) container.style.zIndex = '10000';
-  popup.style.zIndex = '10000';
- }
+ },
+ //confirmButtonColor: '#F44336', // 第1ボタン:Material Red 500
+ //denyButtonColor: '#2196F3', // 第2ボタン:Material Blue 500
+ cancelButtonColor: '#9E9E9E' // キャンセル:Material Gray 500
 });

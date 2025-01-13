@@ -7,7 +7,9 @@ import { Comment } from '@onecomme.com/onesdk/types/Comment';
 export interface PresetType extends BaseType {
  version: string; // バージョン番号
  author?: string; // 開発者名
+ tags: string[]; // 内容を表すタグ
  url?: string; // サポートページのURL
+ icon?: string; // 紹介用アイコン
  banner?: string; // 紹介用画像
  path?: string; // データのパス(Presetsをルートとする)
 }
@@ -50,7 +52,7 @@ export interface ScriptsType extends PresetType {
 export type ScriptsParamType = (
  game: GameType,
  comment?: Comment,
- params?: { [id: string]: string }
+ params?: { [id: string]: string | number | boolean }
 ) => ScriptsReturnType;
 
 // Scriptの返り値
@@ -62,6 +64,8 @@ export interface ScriptsReturnType {
 
 // gameのパラメータ設定用
 export interface ScriptParam extends BaseType {
+ // TODO isEverは、ちゃんとrulesでScriptを設定できるまでの暫定機能
+ isEver?: boolean; // 一度設定すると、JSONをいじらない限り同じ値になる
  type?: 'string' | 'number' | 'boolean'; // valueのタイプ(デフォルトはstring)
  value: string | number | boolean; // 入る値
 }

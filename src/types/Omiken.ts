@@ -2,7 +2,6 @@
 
 import {
  baseSchema,
- OmikenSchema,
  TypesTypeSchema,
  OneCommePostSchema,
  thresholdSchema,

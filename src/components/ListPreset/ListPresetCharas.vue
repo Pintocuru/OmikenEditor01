@@ -1,166 +1,192 @@
 <!-- src/components/ListPreset/ListPresetCharas.vue -->
 <template>
- <div class="preset-selector pa-4">
-  <v-tabs v-model="activeTab">
-   <v-tab value="preset">プリセット</v-tab>
-   <v-tab value="chara">キャラクター</v-tab>
-  </v-tabs>
+ <v-container>
+  <!-- タグフィルター部分 -->
+  <div class="mb-4">
+   <v-chip-group v-model="selectedTags" column multiple>
+    <v-chip
+     v-for="tag in uniqueTags"
+     :key="tag"
+     :value="tag"
+     filter
+     variant="outlined"
+     :color="selectedTags.includes(tag) ? 'primary' : undefined"
+    >
+     {{ tag }}
+    </v-chip>
+   </v-chip-group>
+  </div>
 
-  <v-window v-model="activeTab">
-   <!-- プリセットタブ -->
-   <v-window-item value="preset">
-    <v-row>
-     <v-col v-for="preset in presetList" :key="preset.id" cols="12" sm="6" md="4">
-      <v-card class="preset-card h-100" elevation="3" :loading="isLoading">
-       <v-img :src="preset.banner" height="200" cover class="align-end">
-        <v-card-title class="preset-title text-white">{{ preset.name }}</v-card-title>
-       </v-img>
+  <!-- キャラクターリスト -->
+  <v-row>
+   <v-col v-for="(preset, key) in filteredPresets" :key="key" cols="12" sm="6" md="4">
+    <v-card class="preset-card h-100" elevation="3" hover @click="showDetails(preset)">
+     <v-img
+      :src="getPresetsImage(preset.banner)"
+      height="200"
+      cover
+      class="align-end"
+      gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)"
+     >
+      <v-card-title class="text-white text-h6 font-weight-bold">
+       {{ preset.name }}
+      </v-card-title>
+     </v-img>
 
-       <v-card-text>
-        <div class="d-flex align-center mb-2">
-         <v-chip :color="preset.type === 'Omiken' ? 'primary' : 'success'" size="small" class="mr-2">
-          {{ getTypeLabel(preset.type) }}
-         </v-chip>
+     <v-card-text>
+      <div class="d-flex align-center mb-2">
+       <v-chip color="primary" size="small" class="mr-2"> キャラクター </v-chip>
+       <v-chip v-if="preset.version" color="secondary" size="small"> v{{ preset.version }} </v-chip>
+      </div>
+      <p class="preset-description mb-3">{{ preset.description }}</p>
+
+      <div class="d-flex flex-wrap mt-2">
+       <v-chip
+        v-for="(tag, index) in preset.tags"
+        :key="index"
+        color="secondary"
+        size="small"
+        variant="outlined"
+        class="mr-1 mb-1"
+       >
+        {{ tag }}
+       </v-chip>
+      </div>
+     </v-card-text>
+    </v-card>
+   </v-col>
+  </v-row>
+
+  <!-- 詳細ダイアログ -->
+  <v-dialog v-model="dialogVisible" max-width="600">
+   <v-card v-if="selectedPreset">
+    <v-img
+     :src="getPresetsImage(selectedPreset.banner)"
+     height="200"
+     cover
+     gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)"
+    >
+     <v-card-title class="text-white">
+      {{ selectedPreset.name }}
+     </v-card-title>
+    </v-img>
+
+    <v-card-text class="pt-4">
+     <div class="d-flex flex-column gap-4">
+      <!-- 基本情報 -->
+      <div>
+       <h3 class="text-h6 mb-2">基本情報</h3>
+       <div class="ml-3">
+        <p><strong>作者:</strong> {{ selectedPreset.author || '未設定' }}</p>
+        <p><strong>バージョン:</strong> {{ selectedPreset.version }}</p>
+        <p><strong>説明:</strong> {{ selectedPreset.description }}</p>
+       </div>
+      </div>
+
+      <!-- カラー設定 -->
+      <div v-if="selectedPreset.color">
+       <h3 class="text-h6 mb-2">カラー設定</h3>
+       <v-sheet class="pa-3 rounded" :style="selectedPreset.color">
+        <div class="d-flex align-center justify-space-between">
+         <span>表示サンプル</span>
+         <span class="text-right">{{ selectedPreset.nickname || selectedPreset.name }}</span>
         </div>
-        <p class="preset-description mb-3">{{ preset.description }}</p>
-       </v-card-text>
+       </v-sheet>
+      </div>
 
-       <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn color="primary" variant="outlined" @click="handlePresetSelect(preset)" :disabled="isLoading">
-         適用する
-        </v-btn>
-       </v-card-actions>
-      </v-card>
-     </v-col>
-    </v-row>
-   </v-window-item>
+      <!-- タグ一覧 -->
+      <div>
+       <h3 class="text-h6 mb-2">タグ</h3>
+       <div class="d-flex flex-wrap gap-2">
+        <v-chip v-for="tag in selectedPreset.tags" :key="tag" size="small" color="secondary" variant="outlined">
+         {{ tag }}
+        </v-chip>
+       </div>
+      </div>
+     </div>
+    </v-card-text>
 
-   <!-- キャラクタータブ -->
-   <v-window-item value="chara">
-    <v-row>
-     <v-col v-for="[id, chara] in Object.entries(charaList)" :key="id" cols="12" sm="6" md="4">
-      <v-card class="h-100" elevation="3">
-       <v-img :src="chara.item.image.Default" height="200" cover class="align-end">
-        <v-card-title class="text-white">{{ chara.name }}</v-card-title>
-       </v-img>
-       <v-card-text>
-        <div class="mb-2">
-         <v-chip v-if="chara.item.frameId" color="info" size="small" class="mr-2">
-          Frame ID: {{ chara.item.frameId }}
-         </v-chip>
-        </div>
-        <div class="d-flex align-center gap-2">
-         <div
-          class="px-2 rounded"
-          :style="{
-           backgroundColor: chara.item.color['--lcv-background-color']
-          }"
-         >
-          <span :style="{ color: chara.item.color['--lcv-name-color'] }">名前</span>
-          <span :style="{ color: chara.item.color['--lcv-text-color'] }">テキスト</span>
-         </div>
-        </div>
-       </v-card-text>
-      </v-card>
-     </v-col>
-    </v-row>
-   </v-window-item>
-  </v-window>
-
-  <v-overlay v-model="isLoading" class="align-center justify-center">
-   <v-progress-circular indeterminate size="64"></v-progress-circular>
-  </v-overlay>
- </div>
+    <v-card-actions>
+     <v-spacer />
+     <v-btn color="grey" variant="text" @click="dialogVisible = false"> 閉じる </v-btn>
+    </v-card-actions>
+   </v-card>
+  </v-dialog>
+ </v-container>
 </template>
 
 <script setup lang="ts">
-import { computed, inject, ref, Ref } from 'vue';
-import { AppEditorType, ListCategory, OmikenEntry, PresetOmikenEditType, fetchJSONType } from '@type';
-import Swal from 'sweetalert2';
-import { MySwal } from '@/config';
+import {
+ AppEditorType,
+ CategoryActive,
+ CharaType,
+ ListCategory,
+ ListEntry,
+ OmikenEntry,
+ PresetOmikenType
+} from '@type';
+import { FunkEmits } from '@/composables/FunkEmits';
+import { FunkPresets } from '@/composables/FunkPresets';
+import { computed, ref } from 'vue';
 
 // props/emits
-
-const emit = defineEmits<{
- (e: 'update:Omiken', payload: OmikenEntry<ListCategory>): void;
- (e: 'update:OmikenPreset', preset: PresetOmikenEditType): void;
+const props = defineProps<{
+ AppEditor: AppEditorType;
 }>();
 
-// これはなに?
-const isLoading = ref(false);
+const emit = defineEmits<{
+ (e: 'open-editor', editorItem: ListEntry<ListCategory>): void;
+ (e: 'update:Omiken', payload: OmikenEntry<ListCategory>): void;
+ (e: 'update:category', value: CategoryActive): void;
+}>();
 
-// キャラクターデータのインジェクト
-const AppEditor = inject<Ref<AppEditorType>>('AppEditorKey');
+// コンポーザブル
+const { openList } = FunkEmits(emit);
+const {} = FunkPresets();
 
-// タブの制御
-const activeTab = ref('preset');
-// データの整形
-const presetList = computed(() => {
- const presets = AppEditor?.value.Preset;
- if (!presets) return [];
- return Object.entries(presets).map(([id, data]) => {
-  const { id: _, ...rest } = data;
-  return {
-   id,
-   ...rest
-  };
- }) as Array<{ id: string } & PresetOmikenEditType>;
+// データソース
+const Charas = props.AppEditor.Charas;
+
+// ステート
+const selectedTags = ref<string[]>([]);
+const dialogVisible = ref(false);
+const selectedPreset = ref<CharaType | null>(null);
+
+// 算出プロパティ
+const uniqueTags = computed(() => {
+ const tags = Object.values(Charas || {}).reduce((acc: string[], preset) => {
+  if (preset?.tags) {
+   acc.push(...preset.tags);
+  }
+  return acc;
+ }, []);
+ return [...new Set(tags)];
 });
 
-const charaList = computed(() => AppEditor?.value.Chara || {});
+const filteredPresets = computed(() => {
+ if (!selectedTags.value.length) return Charas;
 
-const handlePresetSelect = async (preset: fetchJSONType & { item: any }) => {
- try {
-  const result = await Swal.fire({
-   title: preset.name,
-   text: '適用方法を選択してください',
-   html: `
-    <div class="mb-4">${preset.description}</div>
-    <div class="text-sm text-gray-600">
-      上書き：既存のデータを削除して新しいデータを設定します<br>
-      追加：既存のデータに新しいデータを追加します
-    </div>
-  `,
-   imageUrl: preset.banner,
-   imageWidth: 400,
-   imageAlt: `${preset.name} banner`,
-   showCancelButton: true,
-   confirmButtonText: '上書き',
-   cancelButtonText: 'キャンセル',
-   showDenyButton: true,
-   denyButtonText: '追加',
-   denyButtonColor: '#3085d6',
-   confirmButtonColor: '#d33',
-   cancelButtonColor: '#6e7881'
-  });
+ return Object.entries(Charas).reduce(
+  (acc, [key, preset]) => {
+   if (preset?.tags && selectedTags.value.some((tag) => preset.tags.includes(tag))) {
+    acc[key] = preset;
+   }
+   return acc;
+  },
+  {} as Record<string, CharaType>
+ );
+});
 
-  if (result.isConfirmed || result.isDenied) {
-   const mode = result.isConfirmed ? 'overwrite' : 'append';
-   emit('update:OmikenPreset', { ...preset, mode, item: preset.item });
-
-   await MySwal.fire({
-    icon: 'success',
-    title: '適用完了',
-    text: `${preset.name}を${mode === 'overwrite' ? '上書き' : '追加'}で適用しました`,
-    timer: 2000,
-    showConfirmButton: false
-   });
-  }
- } catch (error) {
-  await MySwal.fire({
-   icon: 'error',
-   title: 'エラー',
-   text: '設定の適用に失敗しました'
-  });
- }
+// メソッド
+const getPresetsImage = (banner?: string): string => {
+ if (!banner) return '';
+ const basePath = process.env.NODE_ENV === 'development' ? './Presets' : './Presets';
+ return `${basePath}/${banner}`;
 };
 
-const getTypeLabel = (type: fetchJSONType['type']) => {
- const labels = {
-  Omiken: 'おみくじ',
-  Chara: 'キャラクター'
- };
- return labels[type];
+const showDetails = (preset: CharaType) => {
+ selectedPreset.value = preset;
+ dialogVisible.value = true;
 };
+
 </script>

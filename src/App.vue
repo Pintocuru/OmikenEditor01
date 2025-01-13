@@ -16,12 +16,8 @@
    </v-container>
   </template>
   <template v-else>
-   <AppHeader     :Omiken="AppEditor.Omiken" />
-   <AppNavigation
-    v-model:naviCategory="naviCategory"
-    :Omiken="AppEditor.Omiken"
-    @update:category="naviCategory = $event"
-   />
+   <AppHeader :Omiken="AppEditor.Omiken" />
+   <AppNavigation v-model:naviCategory="naviCategory" :AppEditor="AppEditor" @update:category="naviCategory = $event" />
    <v-main>
     <v-container>
      <AppList
@@ -53,7 +49,7 @@ import { FunkOmiken } from '@/composables/FunkOmiken';
 import { FunkUI } from '@/composables/FunkUI';
 import { onMounted } from 'vue';
 
-const {  naviCategory, listEntry, openEditor } = FunkUI();
+const { naviCategory, listEntry, openEditor } = FunkUI();
 
 // AppEditorのコンポーザブル
 const { AppEditor, AppEditorInitialize, isAppEditorLoading, updateOmiken, updateOmikenPresetData } = FunkOmiken();

@@ -16,6 +16,7 @@ declare module 'vue' {
     DialogOmikujiPost: typeof import('./src/components/DialogOmikuji/DialogOmikujiPost.vue')['default']
     DialogOmikujiPostDescription: typeof import('./src/components/DialogOmikuji/DialogOmikujiPostDescription.vue')['default']
     DialogOmikujiScripts: typeof import('./src/components/DialogOmikuji/DialogOmikujiScripts.vue')['default']
+    DialogOmikujiScriptsField: typeof import('./src/components/DialogOmikuji/DialogOmikujiScriptsField.vue')['default']
     DialogOmikujiStatus: typeof import('./src/components/DialogOmikuji/DialogOmikujiStatus.vue')['default']
     DialogOmikujiThreshold: typeof import('./src/components/DialogOmikuji/DialogOmikujiThreshold.vue')['default']
     DialogPlace: typeof import('./src/components/DialogPlace/DialogPlace.vue')['default']
