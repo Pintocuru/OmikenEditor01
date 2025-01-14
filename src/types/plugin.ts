@@ -1,7 +1,7 @@
 // src/types/plugin.ts
 
 import { OmikenType, OmikujiType, RulesType, TypesType } from './Omiken';
-import { CharaType, ScriptParam, ScriptsParamType, ScriptsType } from './preset';
+import { CharaType, ScriptParam,  ScriptsType } from './preset';
 import { Service } from '@onecomme.com/onesdk/types/Service';
 import { BaseResponse } from '@onecomme.com/onesdk/types/BaseResponse';
 import { Comment } from '@onecomme.com/onesdk/types/Comment';

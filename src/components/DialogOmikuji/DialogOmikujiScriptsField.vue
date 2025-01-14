@@ -22,15 +22,16 @@
   @update:model-value="$emit('update:model-value', Number($event))"
  />
    <!-- 真偽値の場合 -->
- <v-switch
+<v-switch
   v-else-if="param.type === 'boolean'"
   :model-value="modelValue"
   :label="param.name"
   :hint="param.description"
   persistent-hint
   dense="compact"
-  @update:model-value="$emit('update:model-value', $event)"
- />
+  @update:model-value="$emit('update:model-value', $event !== null ? $event : false)"
+/>
+
 </template>
 
 <script setup lang="ts">

@@ -3,7 +3,6 @@ import { fileURLToPath, URL } from 'url';
 import { VueLoaderPlugin } from 'vue-loader';
 import { VuetifyPlugin } from 'webpack-plugin-vuetify';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
-import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 import TerserPlugin from 'terser-webpack-plugin';
 import sass from 'sass';
 
@@ -82,11 +81,6 @@ export default {
    template: './index.ejs',
    filename: 'editor.html',
    inject: 'body'
-  }),
-  // 軽量化するプラグインらしい
-  new BundleAnalyzerPlugin({
-   analyzerMode: 'static',
-   openAnalyzer: false
   })
  ],
  optimization: {

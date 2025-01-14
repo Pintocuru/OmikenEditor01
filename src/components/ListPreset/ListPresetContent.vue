@@ -16,7 +16,7 @@
   </v-chip-group>
  </div>
 
- <!-- キャラクターリスト -->
+ <!-- プリセットリスト -->
  <v-row>
   <v-col v-for="(preset, key) in filterPresets" :key="key" cols="12" sm="6" md="4">
    <v-card class="preset-card h-100" elevation="3">
@@ -121,31 +121,49 @@ const uniqueTags = computed(() => {
 
 // タグから絞り込んだリスト
 const filterPresets = computed(() => {
- if (!props.content) return {};
- if (!selectTags.value.length) return props.content;
+  if (!props.content) return {};
+  if (!selectTags.value.length) return props.content;
 
- return Object.entries(props.content).reduce(
-  (acc, [key, preset]) => {
-   if (preset?.tags && selectTags.value.some((tag) => preset.tags.includes(tag))) {
-    acc[key] = preset;
-   }
-   return acc;
-  },
-  {} as AppEditorType[typeof props.type]
- );
+  // 絞り込み処理
+  const filtered = Object.entries(props.content).reduce(
+    (acc, [key, preset]) => {
+      if (preset?.tags && selectTags.value.some((tag) => preset.tags.includes(tag))) {
+        acc[key] = preset;
+      }
+      return acc;
+    },
+    {} as AppEditorType[typeof props.type]
+  );
+
+  // 並べ替え処理
+  return Object.fromEntries(
+    Object.entries(filtered).sort(([, a], [, b]) => {
+      const orderA = a.order !== undefined ? a.order : Number.MAX_SAFE_INTEGER;
+      const orderB = b.order !== undefined ? b.order : Number.MAX_SAFE_INTEGER;
+
+      // orderが同じ場合はid順で比較
+      if (orderA === orderB) {
+        return a.id.localeCompare(b.id);
+      }
+
+      // orderが未定義の場合は下位
+      return orderA - orderB;
+    })
+  );
 });
 
 // 画像パス
 const getPresetsImage = (banner?: string): string => {
  if (!banner) return '';
  const map = {
-  Presets: './Presets',
-  Charas: './Charas',
-  Scripts: './Scripts'
- } as const;
+  Presets: 'Presets',
+  Charas: 'Charas',
+  Scripts: 'Scripts'
+ };
 
+ const home = process.env.NODE_ENV === 'development' ? './' : './';
  const basePath = map[props.type] || '';
- return `${basePath}/${banner}`;
+ return `${home}${basePath}/${banner}`;
 };
 
 const presetSelect = async (preset: AppEditorType['Presets'][string]) => {
