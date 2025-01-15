@@ -3,7 +3,10 @@
  <v-app-bar app>
   <v-app-bar-title>おみくじBOTメーカー</v-app-bar-title>
   <template v-slot:append>
-   <v-btn @click="saveOmiken(props.Omiken);">ボタン</v-btn>
+   <v-btn color="primary" class="ma-3" variant="flat" size="large" @click="saveOmiken(props.Omiken)">
+    <v-icon class="me-2" size="20">mdi-content-save</v-icon>
+    わんコメへ保存
+   </v-btn>
   </template>
  </v-app-bar>
 </template>

@@ -9,10 +9,9 @@
      <v-card-title class="d-flex align-center">
       <v-badge
        class="mr-4"
-       v-if="section.itemCount > 0"
        :content="section.itemCount"
        color="primary"
-       :model-value="true"
+       :model-value="section.itemCount > 0"
        location="bottom end"
       >
        <v-icon :icon="section.icon" size="large" />
@@ -30,10 +29,9 @@
      <v-card-title class="d-flex align-center">
       <v-badge
        class="mr-4"
-       v-if="section.itemCount > 0"
        :content="section.itemCount"
        color="primary"
-       :model-value="true"
+       :model-value="section.itemCount > 0"
        location="bottom end"
       >
        <v-icon :icon="section.icon" size="large" />
@@ -68,7 +66,7 @@ interface NavigationItem {
  title: string;
  icon: string;
  itemCount: number;
-  category: CategoryActive;
+ category: CategoryActive;
 }
 
 const mainSections = computed<NavigationItem[]>(() => [

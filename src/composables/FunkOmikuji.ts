@@ -35,13 +35,16 @@ export function FunkOmikuji() {
  };
 
  // キャラクター一覧の作成
- const botKeyItems = computed(() => {
-  if (!Chara || typeof Chara !== 'object') return [];
-  return Object.entries(Chara).map(([key, value]) => ({
-   text: value.name,
-   value: key
-  }));
- });
+const botKeyItems = computed(() => {
+ if (!Chara || typeof Chara !== 'object') return [];
+ return Object.entries(Chara)
+  .map(([key, chara]) => ({
+   text: chara.name,
+   value: key,
+   order: chara.order ?? Infinity // orderがない場合はInfinityを設定
+  }))
+  .sort((a, b) => a.order - b.order); // orderで昇順にソート
+});
 
  // postからonecommeを探し色を取得する
  const getPostTypeColor = (post: OneCommePostType[], isBotColor?: boolean): string => {

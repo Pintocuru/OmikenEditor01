@@ -122,35 +122,31 @@ const uniqueTags = computed(() => {
 // タグから絞り込んだリスト
 const filterPresets = computed(() => {
   if (!props.content) return {};
-  if (!selectTags.value.length) return props.content;
 
-  // 絞り込み処理
-  const filtered = Object.entries(props.content).reduce(
-    (acc, [key, preset]) => {
-      if (preset?.tags && selectTags.value.some((tag) => preset.tags.includes(tag))) {
-        acc[key] = preset;
-      }
-      return acc;
-    },
-    {} as AppEditorType[typeof props.type]
-  );
+  // フィルタリング処理
+  const filtered = !selectTags.value.length
+    ? props.content
+    : Object.entries(props.content).reduce(
+        (acc, [key, preset]) => {
+          if (preset?.tags && selectTags.value.some((tag) => preset.tags.includes(tag))) {
+            acc[key] = preset;
+          }
+          return acc;
+        },
+        {} as AppEditorType[typeof props.type]
+      );
 
   // 並べ替え処理
   return Object.fromEntries(
     Object.entries(filtered).sort(([, a], [, b]) => {
-      const orderA = a.order !== undefined ? a.order : Number.MAX_SAFE_INTEGER;
-      const orderB = b.order !== undefined ? b.order : Number.MAX_SAFE_INTEGER;
-
-      // orderが同じ場合はid順で比較
-      if (orderA === orderB) {
-        return a.id.localeCompare(b.id);
-      }
-
-      // orderが未定義の場合は下位
+      const orderA = a.order !== undefined ? a.order : Infinity;
+      const orderB = b.order !== undefined ? b.order : Infinity;
       return orderA - orderB;
     })
   );
 });
+
+
 
 // 画像パス
 const getPresetsImage = (banner?: string): string => {
