@@ -1,10 +1,10 @@
 // src/types/plugin.ts
 
 import { OmikenType, OmikujiType, RulesType, TypesType } from './Omiken';
-import { CharaType, ScriptParam,  ScriptsType } from './preset';
+import { CharaType, ScriptParam, ScriptsType } from './preset';
 import { Service } from '@onecomme.com/onesdk/types/Service';
 import { BaseResponse } from '@onecomme.com/onesdk/types/BaseResponse';
-import { Comment } from '@onecomme.com/onesdk/types/Comment';
+import { Colors, Comment } from '@onecomme.com/onesdk/types/Comment';
 import { UserNameData } from '@onecomme.com/onesdk/types/UserData';
 
 // ---------------------------------------------------
@@ -102,43 +102,44 @@ export interface TimeConfigType {
 
 // ---
 
-// わんコメにpostする際の型定義
-export interface postOneCommeRequestType {
- service: Pick<Service, 'id' | 'translate'>;
+// わんコメSend Commentの型定義
+export interface SendCommentType {
+ service: Pick<Service, 'id'>;
  comment: Pick<
   BaseResponse,
-  | 'id' // 一意のID
-  | 'userId' //
+  | 'id' // SendCommentParamsType で使用
+  | 'userId' // ユーザー識別ID
   | 'name' // 表示名
-  | 'nickname' // ユーザーネームの変更、nameを表示させたいが読み上げさせない時に使う
+  | 'nickname' // ユーザーネームの読み上げ変更
   | 'comment' // コメント
   | 'profileImage' // アイコン
   | 'badges' // メンバーやモデレーター等の表示用バッジ
-  | 'liveId' // 【仕様とは異なる】 ジェネレーターに渡す引数(generatorParam)
-  | 'isOwner' // 【仕様とは異なる】 BOTの読み上げを行わない(isSilent)
- >;
+ > & { color?: Colors };
 }
-/*
-プラグインで使えるキー/仕様変更で使えなくなる可能性あり
-service.translate(string[])
-comment.isOwner(boolean)
-comment.isFirstTime(boolean)
-comment.isRepeater(boolean)
 
-・BaseResponse にはないキー
-comment.colors(Colors)
+// わんコメSend Commentでidを利用したパラメータ受け渡しに使う型定義
+export interface SendCommentParamsType {
+ id: string; // 一意のID
+ charaId: string; // キャラID
+ param?: string; // ジェネレーターに渡す引数(omikuji.generatorParam)
+ isSilent?: string; // BOTの読み上げを行わない(omikuji.isSilent)
+ [key: string]: string | undefined;
+}
 
-
-timestamp 変更する理由がない
-hasGift(boolean): ギフトで使用
-commentVisible(boolean): プラグインのfilter.commentでfalseする効果と同じ
-
-効かなかったリスト
-speechText
-originalProfileImage
-meta
-
-*/
+// わんコメSend Test Comment型定義
+export interface SendTestCommentType {
+ platform: string;
+ hasGift: boolean;
+ unit: string;
+ price: number;
+ giftType: string;
+ newComment: boolean;
+ repeater: boolean;
+ subscribe: boolean;
+ speech: boolean;
+ username: string;
+ comment: string;
+}
 
 // ---
 

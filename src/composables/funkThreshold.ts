@@ -66,7 +66,7 @@ const EXAMPLES: ExampleStructure = {
    [SyokenCondition.SYOKEN]: '初見さん',
    [SyokenCondition.AGAIN]: '久しぶり(7日以上)',
    [SyokenCondition.HI]: '7日以内',
-   [SyokenCondition.ALL]: 'すべて'
+   [SyokenCondition.ALL]: '配信枠の1コメ'
   },
   // ユーザーの役職
   access: {

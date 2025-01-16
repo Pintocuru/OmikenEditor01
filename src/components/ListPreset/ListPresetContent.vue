@@ -27,9 +27,10 @@
      class="align-end"
      gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)"
     >
-     <v-card-title class="text-white text-h6 font-weight-bold">
+     <v-card-title class="font-weight-bold">
       {{ preset.name }}
      </v-card-title>
+     <v-card-subtitle class="mb-2" v-if="type === 'Charas'"> 投稿名: {{ preset.displayName }} </v-card-subtitle>
     </v-img>
 
     <!-- プリセット情報 -->
@@ -121,32 +122,30 @@ const uniqueTags = computed(() => {
 
 // タグから絞り込んだリスト
 const filterPresets = computed(() => {
-  if (!props.content) return {};
+ if (!props.content) return {};
 
-  // フィルタリング処理
-  const filtered = !selectTags.value.length
-    ? props.content
-    : Object.entries(props.content).reduce(
-        (acc, [key, preset]) => {
-          if (preset?.tags && selectTags.value.some((tag) => preset.tags.includes(tag))) {
-            acc[key] = preset;
-          }
-          return acc;
-        },
-        {} as AppEditorType[typeof props.type]
-      );
+ // フィルタリング処理
+ const filtered = !selectTags.value.length
+  ? props.content
+  : Object.entries(props.content).reduce(
+     (acc, [key, preset]) => {
+      if (preset?.tags && selectTags.value.some((tag) => preset.tags.includes(tag))) {
+       acc[key] = preset;
+      }
+      return acc;
+     },
+     {} as AppEditorType[typeof props.type]
+    );
 
-  // 並べ替え処理
-  return Object.fromEntries(
-    Object.entries(filtered).sort(([, a], [, b]) => {
-      const orderA = a.order !== undefined ? a.order : Infinity;
-      const orderB = b.order !== undefined ? b.order : Infinity;
-      return orderA - orderB;
-    })
-  );
+ // 並べ替え処理
+ return Object.fromEntries(
+  Object.entries(filtered).sort(([, a], [, b]) => {
+   const orderA = a.order !== undefined ? a.order : Infinity;
+   const orderB = b.order !== undefined ? b.order : Infinity;
+   return orderA - orderB;
+  })
+ );
 });
-
-
 
 // 画像パス
 const getPresetsImage = (banner?: string): string => {
