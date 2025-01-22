@@ -55,7 +55,7 @@
  </v-dialog>
 
  <v-btn icon @click.stop="dialog = true">
-  <v-icon>{{ TYPE_DESCRIPTIONS[findType()].icon }}</v-icon>
+  <v-icon>{{ TYPE_DESCRIPTIONS[findType(rule)].icon }}</v-icon>
   <v-tooltip activator="parent" location="bottom">
    このルールの起動方法を変更したり、発動する順番を入れ替えます。
   </v-tooltip>
@@ -82,7 +82,7 @@ const emit = defineEmits<{
 // コンポーザブル:FunkEmits
 const { openEditorItem } = FunkEmits(emit);
 // コンポーザブル:FunkTypes
-const { TYPE_DESCRIPTIONS } = FunkTypes();
+const { TYPE_DESCRIPTIONS, findType } = FunkTypes();
 
 // ローカルの状態管理
 const dialog = ref(false);
@@ -117,14 +117,6 @@ const draggableRules = computed<Record<TypesType, string[]>>({
  set: (newValue) => {
   localTypes.value = newValue;
  }
-});
-
-// idからtypeを探す関数
-const findType = computed(() => (): TypesType => {
- for (const [type, ids] of Object.entries(props.Omiken.types)) {
-  if (ids.includes(props.rule.id)) return type as TypesType;
- }
- return 'unused'; // 見つからなかった場合のデフォルト値
 });
 
 const saveChanges = () => {
