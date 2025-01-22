@@ -9,6 +9,7 @@
     <PartsNameEditor type="omikujis" :currentItem="currentItem" @update:Omiken="updateOmiken" />
    </v-toolbar-title>
    <template #append>
+    <span class="mr-2">ID : {{ currentItem?.id }}</span>
     <PartsArrayAction editMode="omikujiAddDialog" :entry="currentItem" @update:Omiken="updateOmiken" />
    </template>
   </v-toolbar>

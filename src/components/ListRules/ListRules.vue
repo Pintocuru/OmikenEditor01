@@ -21,6 +21,7 @@
     </v-toolbar-title>
     <template #append>
      <!-- バーガーメニュー -->
+     <span class="mr-2">ID : {{ rule?.id }}</span>
      <PartsArrayAction editMode="rule" :entry="rule" @update:Omiken="updateOmiken" />
     </template>
    </v-toolbar>

@@ -24,7 +24,6 @@
      <div class="list-group d-flex flex-wrap">
       <template v-for="(value, index) in getRandomValues(place.values, 1)" :key="index">
        <span class="mr-2">{{ value }}</span>
-       <span>{{ place.id}}</span>
       </template>
      </div>
     </v-card-text>
@@ -72,7 +71,7 @@ const getRandomValues = (values: PlaceValueType[], count: number) => {
 };
 
 // アイテムを追加
-const addItem = (type:ListCategory) => {
- emit('update:Omiken', { type, addKeys: [{name:'新しいプレースホルダー'}] });
+const addItem = (type: ListCategory) => {
+ emit('update:Omiken', { type, addKeys: [{ name: '新しいプレースホルダー' }] });
 };
 </script>

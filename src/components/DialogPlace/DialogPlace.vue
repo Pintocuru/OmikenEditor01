@@ -9,12 +9,13 @@
     <PartsNameEditor type="places" :currentItem="currentItem" @update:Omiken="updateOmiken" />
    </v-toolbar-title>
    <template #append>
+    <span class="mr-2">ID : {{ currentItem?.id }}</span>
     <PartsArrayAction editMode="placeDialog" :entry="currentItem" @update:Omiken="updateOmiken" />
    </template>
   </v-toolbar>
 
   <v-card-text>
-     <!-- アイテムの説明 -->
+   <!-- アイテムの説明 -->
    <v-sheet v-if="currentItem.description" class="text-subtitle-2">
     {{ currentItem.description }}
    </v-sheet>
@@ -24,18 +25,17 @@
    <!-- プレースホルダー -->
    <v-card>
     <v-sheet class="d-flex ga-2 justify-end">
-
-  <v-select
-  v-model="currentItem.placeIds"
-  :items="placeItems"
-  label="プレースホルダー"
-  item-title="name"
-  item-value="id"
-  multiple
-  chips
-  clearable
-  @update:modelValue="updateOmikenEntry('places', currentItem)"
- />
+     <v-select
+      v-model="currentItem.placeIds"
+      :items="placeItems"
+      label="プレースホルダー"
+      item-title="name"
+      item-value="id"
+      multiple
+      chips
+      clearable
+      @update:modelValue="updateOmikenEntry('places', currentItem)"
+     />
      <!-- テキストエディター -->
      <DialogPlaceTextMode v-if="currentItem" :currentItem="currentItem" @update:Omiken="updateOmiken" />
 
@@ -76,7 +76,7 @@ const AppEditor = inject<Ref<AppEditorType>>('AppEditorKey');
 const places = computed(() => AppEditor?.value.Omiken.places || {});
 
 // コンポーザブル:FunkEmits
-const { updateOmiken, openEditor ,updateOmikenEntry} = FunkEmits(emit);
+const { updateOmiken, openEditor, updateOmikenEntry } = FunkEmits(emit);
 
 // props のidから読み込み
 const currentItem = computed(() => (props.entry?.key && places ? places.value[props.entry.key as string] : null));
@@ -89,7 +89,6 @@ const placeItems = computed(() => {
   name: place.name
  }));
 });
-
 
 // 値の追加
 const addValue = () => {
