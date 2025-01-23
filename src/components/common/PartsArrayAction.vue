@@ -19,7 +19,7 @@
 import { ref, computed, inject, type Ref } from 'vue';
 import { OmikenEntry, OmikujiType, RulesType, AppEditorType, PlaceType, ListCategory } from '@type';
 import { FunkEmits } from '@/composables/FunkEmits';
-import { MySwal } from '@/config';
+import { MySwal } from '@/components/common/partsMySwal';
 
 const props = defineProps<{
  editMode: 'rule' | 'omikujiRemove' | 'omikujiAdd' | 'omikujiAddDialog' | 'place' | 'placeDialog';
@@ -72,7 +72,7 @@ const CATEGORY_ACTIONS: Record<string, (keyof typeof COMMON_ACTIONS)[]> = {
  omikujiAdd: ['edit', 'duplicate', 'add', 'delete'],
  omikujiAddDialog: ['duplicate', 'add', 'delete'],
  place: ['edit', 'duplicate', 'delete'],
- placeDialog: [ 'duplicate', 'delete']
+ placeDialog: ['duplicate', 'delete']
 };
 
 // MENU_CONFIGS を動的に生成
@@ -113,15 +113,15 @@ const handleDuplicate = () => {
  if (type === 'rules') optionId = props.entry ? props.entry.id : undefined;
  if (type === 'omikujis') optionId = props.optionRules ? props.optionRules.id : undefined;
 
-const { id, ...rest } = JSON.parse(JSON.stringify(props.entry));
-const payload: OmikenEntry<ListCategory> = {
+ const { id, ...rest } = JSON.parse(JSON.stringify(props.entry));
+ const payload: OmikenEntry<ListCategory> = {
   type,
   addKeys: {
-    ...rest,
-    name: `${props.entry.name} (コピー)`,
-    optionId
+   ...rest,
+   name: `${props.entry.name} (コピー)`,
+   optionId
   }
-};
+ };
  emit('update:Omiken', payload);
 };
 

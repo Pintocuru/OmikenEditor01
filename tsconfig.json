@@ -17,11 +17,7 @@
       "@type": [
         "src/type.ts"
       ]
-    },
-    "typeRoots": [
-      "node_modules/@types",
-      "src/types"
-    ]
+    }
   },
   // ファイルパス
   "include": [

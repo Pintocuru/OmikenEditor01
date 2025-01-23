@@ -96,8 +96,11 @@ const editingThreshold = ref<ThresholdType>(FunkThresholdInitial());
 watch(
  () => props.item,
  (newVal) => {
-  thresholds.value = [...newVal.threshold];
-  currentIndex.value = 0;
+  // props.item.threshold の長さが現在の thresholds の長さより少ない場合のみ更新
+  if (newVal.threshold.length < thresholds.value.length) {
+   thresholds.value = [...newVal.threshold];
+   currentIndex.value = 0;
+  }
  },
  { deep: true, immediate: true }
 );
@@ -106,16 +109,16 @@ watch(
 const maxArray = computed(() => (props.mode === 'rules' ? 3 : 1));
 const minArray = computed(() => 0);
 const getComponent = computed(() => {
-  const componentMap = {
-    target: ThresholdSimple,
-    coolDown: ThresholdSimple,
-    syoken: ThresholdSimple,
-    access: ThresholdSimple,
-    gift: ThresholdSimple,
-    count: ThresholdCount,
-    match: ThresholdMatch
-  };
-  return componentMap[editingThreshold.value.conditionType];
+ const componentMap = {
+  target: ThresholdSimple,
+  coolDown: ThresholdSimple,
+  syoken: ThresholdSimple,
+  access: ThresholdSimple,
+  gift: ThresholdSimple,
+  count: ThresholdCount,
+  match: ThresholdMatch
+ };
+ return componentMap[editingThreshold.value.conditionType];
 });
 
 // メソッド

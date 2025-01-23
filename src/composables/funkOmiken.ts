@@ -4,7 +4,7 @@ import { OmikenType, OmikenEntry, AppEditorType, ListCategory, PresetOmikenType,
 import { AppEditorFetch } from '@/composables/FunkJSON';
 import { FunkOmikenUpdater } from './FunkOmikenUpdater';
 import { FunkOmikenPreset } from './FunkOmikenPreset';
-import { MySwal } from '@/config';
+import { MySwal } from '@/components/common/partsMySwal';
 
 const defaultAppEditor: AppEditorType = {
  Presets: {},

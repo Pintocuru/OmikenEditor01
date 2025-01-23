@@ -1,38 +1,24 @@
 // src/config.ts
-import Swal from 'sweetalert2';
 
-interface Configs {
- botUserId: string;
- PLUGIN_UID: string;
-}
-
-export const configs: Configs = {
- botUserId: 'FirstCounter',
- PLUGIN_UID: 'OmikenPlugin01'
+// 設定
+export const configs: ConfigProps = {
+ // プラグイン名
+ PLUGIN_UID: import.meta?.env?.VITE_PLUGIN_UID || window.APP_CONFIG?.PLUGIN_UID || 'OmikenPlugin01',
+ // BotのuserId
+ BOT_USER_ID: import.meta?.env?.VITE_BOT_USER_ID || window.APP_CONFIG?.BOT_USER_ID || 'FirstCounter'
 };
 
-// sweetalert2グローバル設定(z-indexを変更)
-export const MySwal = Swal.mixin({
- willOpen: (popup) => {
-  // スタイルシートを動的に追加
-  const style = document.createElement('style');
-  style.textContent = `
-      .swal2-container {
-        z-index: 10000 !important;
-      }
-      .swal2-popup {
-        z-index: 10001 !important;
-      }
-      .swal2-backdrop {
-        z-index: 9999 !important;
-      }
-      .swal2-confirm, .swal2-cancel, .swal2-deny, .swal2-input{
-        color: white !important; 
-      }
-    `;
-  document.head.appendChild(style);
- },
- //confirmButtonColor: '#F44336', // 第1ボタン:Material Red 500
- //denyButtonColor: '#2196F3', // 第2ボタン:Material Blue 500
- cancelButtonColor: '#9E9E9E' // キャンセル:Material Gray 500
-});
+// --------------------------------------------------
+
+// 共通型: 設定プロパティ
+export interface ConfigProps {
+ PLUGIN_UID: string;
+ BOT_USER_ID: string;
+}
+
+// グローバル変数の型定義 (window.APP_CONFIG用)
+declare global {
+ interface Window {
+  APP_CONFIG?: ConfigProps;
+ }
+}

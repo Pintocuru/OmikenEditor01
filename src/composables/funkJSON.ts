@@ -1,6 +1,7 @@
 // src/composables/funkJSON.ts
 import { DataType, Mode, AppEditorType, OmikenType, ParamsType } from '@type';
-import { configs, MySwal } from '@/config';
+import { configs } from '@/config';
+import { MySwal } from '@/components/common/partsMySwal';
 import { OmikenValidate } from '@/composables/FunkValidate';
 import OneSDK from '@onecomme.com/onesdk';
 
@@ -58,8 +59,6 @@ export async function AppEditorFetch(): Promise<AppEditorType> {
   throw error;
  }
 }
-
-
 
 // APIクライアント
 class ApiClient {

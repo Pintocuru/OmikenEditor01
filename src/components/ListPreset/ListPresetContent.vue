@@ -78,7 +78,7 @@ import { AppEditorType, CategoryActive, ListCategory, ListEntry, OmikenEntry, Pr
 import { FunkEmits } from '@/composables/FunkEmits';
 import { FunkPresets } from '@/composables/FunkPresets';
 import { computed, ref } from 'vue';
-import { MySwal } from '@/config';
+import { MySwal } from '@/components/common/partsMySwal';
 
 // props/emits
 type PresetProps<T extends keyof AppEditorType> = {

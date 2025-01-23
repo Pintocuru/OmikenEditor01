@@ -11,7 +11,7 @@ export default {
  entry: './main.ts', // エントリーポイント
  context: fileURLToPath(new URL('./src', import.meta.url)), // 対象フォルダ
  output: {
-  filename: 'Modules/editor[name].js', // 出力ファイル名
+  filename: 'Editor[name].js', // 出力ファイル名
   path: fileURLToPath(new URL('./dist', import.meta.url)), // 出力ディレクトリ
   clean: true // 出力ディレクトリをクリーンアップ
  },

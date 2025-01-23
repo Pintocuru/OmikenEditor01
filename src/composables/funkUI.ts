@@ -1,7 +1,7 @@
 // src/composables/funkUI.ts
 import { Ref, ref } from 'vue';
 import { CategoryActive, ListCategory, ListEntry, ListEntryCollect } from '@type';
-import { MySwal } from '@/config';
+import { MySwal } from '@/components/common/partsMySwal';
 
 export function FunkUI() {
  // UI
