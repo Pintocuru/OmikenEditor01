@@ -11,7 +11,12 @@ export default {
  entry: './main.ts', // エントリーポイント
  context: fileURLToPath(new URL('./src', import.meta.url)), // 対象フォルダ
  output: {
-  filename: 'Editor[name].js', // 出力ファイル名
+  filename: (pathData) => {
+   if (pathData.chunk.name === 'config') {
+    return 'config.js'; // config.js を editor.html と同じフォルダに出力
+   }
+   return 'Editor/[name].js'; // 他のファイルは通常通り出力
+  },
   path: fileURLToPath(new URL('./dist', import.meta.url)), // 出力ディレクトリ
   clean: true // 出力ディレクトリをクリーンアップ
  },
@@ -80,9 +85,14 @@ export default {
   new HtmlWebpackPlugin({
    template: './index.ejs',
    filename: 'editor.html',
-   inject: 'body'
+   inject: 'body',
+   // config.js は自動でバンドルしない
+   scriptLoading: 'blocking'
   })
  ],
+ externals: {
+  './config.js': 'CONFIG' // 外部ファイルとして扱う
+ },
  optimization: {
   minimize: true, // コードを最小化
   usedExports: true, // 使用されていないエクスポートを削除
@@ -90,6 +100,14 @@ export default {
   splitChunks: {
    // チャンクの分割を制御
    cacheGroups: {
+    customConfig: {
+     name: (module, chunks, cacheGroupKey) => {
+      return 'config'; // 出力されるファイル名を 'config.js' に指定
+     },
+     test: /config\.js$/, // ルートフォルダにある config.js をターゲットに
+     chunks: 'all',
+     enforce: true
+    },
     defaultVendors: {
      name: 'vendors', // ベンダーコードを 'vendors.js' に含める
      test: /[\\/]node_modules[\\/]/,
