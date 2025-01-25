@@ -1,5 +1,5 @@
 // webpack.config.mjs
-import { fileURLToPath, URL } from 'url';
+import { fileURLToPath, URL } from 'node:url';
 import { VueLoaderPlugin } from 'vue-loader';
 import { VuetifyPlugin } from 'webpack-plugin-vuetify';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
