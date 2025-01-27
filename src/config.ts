@@ -1,11 +1,15 @@
 // src/config.ts
 
+// 現在のURLからルートディレクトリ名を取得
+const url = new URL(window.location.href);
+const pathParts = url.pathname.split('/');
+const rootDirName = pathParts[pathParts.length - 2];
 // 設定
 export const configs: ConfigProps = {
  // プラグイン名
- PLUGIN_UID: import.meta?.env?.VITE_PLUGIN_UID || window.CONFIG?.PLUGIN_UID || 'OmikenPlugin01',
+ PLUGIN_UID: import.meta?.env?.VITE_PLUGIN_UID || rootDirName || 'OmikenPlugin01',
  // BotのuserId
- BOT_USER_ID: import.meta?.env?.VITE_BOT_USER_ID || window.CONFIG?.BOT_USER_ID || 'FirstCounter'
+ BOT_USER_ID: import.meta?.env?.VITE_BOT_USER_ID || 'FirstCounter'
 };
 
 // --------------------------------------------------
