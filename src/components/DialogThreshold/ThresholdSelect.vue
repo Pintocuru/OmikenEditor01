@@ -7,7 +7,7 @@
    :value="tabItem.value"
    variant="elevated"
    @click="$emit('update:condition', tabItem.value as ConditionType)"
-    :color="tab === tabItem.value ? 'primary' : ''" 
+   :color="tab === tabItem.value ? 'primary' : ''"
   >
    <v-icon :icon="tabItem.icon"></v-icon>
    {{ tabItem.label }}
@@ -16,7 +16,7 @@
 
  <div class="text-body-1 mt-4">
   {{ THRESHOLD_ITEMS[threshold.conditionType].description }}
- </div> 
+ </div>
 </template>
 
 <script setup lang="ts">

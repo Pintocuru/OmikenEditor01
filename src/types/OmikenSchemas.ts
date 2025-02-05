@@ -19,7 +19,6 @@ export enum AccessCondition {
 
 // gift:ギフトのRank
 export enum GiftCondition {
- None = -1, // ギフトなし
  All = 0, // 全て(メンバー加入含む)
  Blue = 1, // 200円未満
  LightBlue = 2, // 200円〜499円
@@ -47,12 +46,10 @@ export const thresholdCountSchema = z.object({
  ]),
  unit: z.enum([
   'draws', // その枠でrulesに該当した回数(個人)
-  'totalDraws', // 過去すべてのrulesに該当した回数(合計)
   'gameDraws', // その配信枠でrulesに該当した回数(合計)
-  'gameTotalDraws', // 過去すべてのrulesに該当した回数(合計)
   'lc', // 配信枠のコメント数(プラグインで独自に付与)
   'tc', // 総数の個人コメ数(userData.tc)
-  'interval' // そのユーザーの前回のコメントからの経過時間(ミリ秒)(userData.interval)
+  'intvlSec' // そのユーザーの前回のコメントからの経過時間(ミリ秒)(userData.interval)
  ]),
  value1: thresholdValueTransform,
  value2: thresholdValueTransform.optional()
@@ -91,7 +88,9 @@ export const thresholdMatchSchema = z.object({
 // thresholdスキーマ
 const thresholdDefault = {
  conditionType: 'match' as const,
- target: null,
+ isNot: false,
+ isAnd: true,
+ target: 2,
  coolDown: 3,
  syoken: SyokenCondition.SYOKEN,
  access: AccessCondition.MEMBER,
@@ -112,7 +111,9 @@ const thresholdDefault = {
 export const thresholdSchema = z
  .object({
   conditionType: z.enum(['target', 'coolDown', 'syoken', 'access', 'gift', 'count', 'match']).default('match'),
-  target: z.literal(null).optional(), // 前回のコメントと今回のコメントが同一人物なら適用
+  isNot: z.boolean().optional().default(thresholdDefault.isNot), // 条件を反転させる
+  isAnd: z.boolean().optional().default(thresholdDefault.isAnd), // 次の条件との関係 (true:AND/false:OR)
+  target: z.number().optional().default(thresholdDefault.target), // 連続投稿が数値以上なら適用
   coolDown: z.number().optional().default(thresholdDefault.coolDown), // おみくじ機能が機能してから指定した時間(秒)が経過していない場合に適用
   syoken: z.nativeEnum(SyokenCondition).optional().default(thresholdDefault.syoken), // 初見・久しぶり
   access: z.nativeEnum(AccessCondition).optional().default(thresholdDefault.access), // ユーザーの役職
@@ -125,7 +126,9 @@ export const thresholdSchema = z
   // デフォルトの値を返す
   return {
    conditionType: 'match',
-   target: null,
+   isNot: thresholdDefault.isNot,
+   isAnd: thresholdDefault.isAnd,
+   target: thresholdDefault.target,
    coolDown: thresholdDefault.coolDown,
    syoken: thresholdDefault.syoken,
    access: thresholdDefault.access,

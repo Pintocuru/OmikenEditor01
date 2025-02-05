@@ -3,7 +3,6 @@
 import Components from 'unplugin-vue-components/vite';
 import Vue from '@vitejs/plugin-vue';
 import Vuetify, { transformAssetUrls } from 'vite-plugin-vuetify';
-import ViteFonts from 'unplugin-fonts/vite';
 
 // Utilities
 import { defineConfig } from 'vite';
@@ -11,22 +10,13 @@ import { fileURLToPath, URL } from 'node:url';
 
 // https://vitejs.dev/config/
 export default defineConfig({
+ root: '.',
  plugins: [
   Vue({
    template: { transformAssetUrls }
   }),
   Vuetify(),
-  Components(),
-  ViteFonts({
-   google: {
-    families: [
-     {
-      name: 'Roboto',
-      styles: 'wght@100;300;400;500;700;900'
-     }
-    ]
-   }
-  })
+  Components()
  ],
  define: { 'process.env': {} },
  resolve: {
@@ -36,14 +26,15 @@ export default defineConfig({
   },
   extensions: ['.ts', '.js', '.json', '.jsx', '.mjs', '.tsx', '.vue'],
   esbuild: {
-   tsconfig: './tsconfig.json' // ここで tsconfig.json を指定
+   tsconfig: './tsconfig.json'
   }
  },
+
  build: {
   minify: false, // ミニファイを無効化
   lib: {
    entry: {
-    test: 'src/main.vue'
+    test: 'src/main.ts'
    },
    formats: ['es', 'cjs', 'umd', 'iife'], // ESモジュールとUMD形式で出力
    fileName: (format, entryName) => `${entryName}.${format}.js`,

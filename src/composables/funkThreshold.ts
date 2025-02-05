@@ -18,13 +18,13 @@ const THRESHOLD_ITEMS = {
   label: '多重投稿',
   value: 'target',
   icon: 'mdi-account-multiple-check',
-  description: '前回と今回のおみくじが同じ人かを判定'
+  description: '同じユーザーの多重投稿を判定'
  },
  coolDown: {
   label: 'クールダウン',
   value: 'coolDown',
   icon: 'mdi-timer-sand',
-  description: '一定の時間(秒)経過していなければ対象'
+  description: '一定の時間(秒)経過しているか判定'
  },
  syoken: {
   label: '初見・久しぶり',
@@ -76,7 +76,6 @@ const EXAMPLES: ExampleStructure = {
   },
   // gift
   gift: {
-   [GiftCondition.None]: 'ギフトではないコメント', // ギフトがない状態
    [GiftCondition.All]: '全てのギフト（メンバー加入含む）', // すべてのギフト（メンバー加入含む）
    [GiftCondition.Blue]: '1円以上', // 200円未満のギフト
    [GiftCondition.LightBlue]: '200円以上', // 200円〜499円のギフト
@@ -182,7 +181,6 @@ export function FunkThreshold() {
  // gift 用説明文
  const getGiftExample = (gift: GiftCondition): string => {
   const giftExamples: Record<GiftCondition, string> = {
-   [GiftCondition.None]: 'ギフトを送っていない場合',
    [GiftCondition.All]: '全てのギフト（メンバー加入含む）',
    [GiftCondition.Blue]: '1円以上のギフト',
    [GiftCondition.LightBlue]: '200円以上のギフト',

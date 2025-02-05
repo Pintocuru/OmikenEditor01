@@ -2,7 +2,16 @@
 <template>
  <div>
   <!-- target条件 -->
-  <v-sheet v-if="threshold.conditionType === 'target'" class="pt-8"> (詳細設定はありません) </v-sheet>
+  <v-sheet v-if="threshold.conditionType === 'target'" class="pt-8">
+   <v-text-field
+    v-model.number="currentItem.target"
+    type="number"
+    min="2"
+    max="10"
+    label="同じユーザーのコメントが連続した回数"
+    @update:modelValue="$emit('update:threshold', currentItem)"
+   />
+  </v-sheet>
 
   <!-- coolDown条件 -->
   <v-sheet v-if="threshold.conditionType === 'coolDown'" class="pt-8">

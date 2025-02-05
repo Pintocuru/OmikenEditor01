@@ -45,6 +45,7 @@ declare module 'vue' {
     PeleListRulesSetting: typeof import('./src/components/ListRules/pele-ListRulesSetting.vue')['default']
     ThresholdCount: typeof import('./src/components/DialogThreshold/ThresholdCount.vue')['default']
     ThresholdMatch: typeof import('./src/components/DialogThreshold/ThresholdMatch.vue')['default']
+    ThresholdRelation: typeof import('./src/components/DialogThreshold/ThresholdRelation.vue')['default']
     ThresholdSelect: typeof import('./src/components/DialogThreshold/ThresholdSelect.vue')['default']
     ThresholdSimple: typeof import('./src/components/DialogThreshold/ThresholdSimple.vue')['default']
   }
